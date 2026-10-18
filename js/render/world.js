@@ -141,7 +141,60 @@
   }
   // 地面痕跡：圓形舊痕直接填圓；segs 為程序化裂地（每個 decal 的段落一次路徑批次描繪）
   // 裂縫先以暗色描繪，glow 存在時再以 additive 細線疊一層（前 40% 生命強烈，之後冷卻熄滅）
+  // 永久戰鬥痕跡（js/fx/scars.js）：畫在地面痕跡之下；餘燼（glow）在 4 秒內冷卻
+  function blob(ctx, s, k) { // 以 pts 為半徑倍率的圓滑不規則塊
+    const n = s.pts.length, P = (i) => { i %= n; const a = s.rot + i / n * U.TAU, rr = s.r * k * s.pts[i]; return [s.x + Math.cos(a) * rr, s.y + Math.sin(a) * rr * 0.85]; };
+    let p0 = P(n - 1), p1 = P(0);
+    ctx.beginPath(); ctx.moveTo((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2);
+    for (let i = 0; i < n; i++) { p0 = P(i); p1 = P(i + 1); ctx.quadraticCurveTo(p0[0], p0[1], (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2); }
+    ctx.closePath();
+  }
+  function drawScars(ctx, w) {
+    const scars = w.fx.scars;
+    if (!scars || !scars.length) return;
+    ctx.save(); ctx.lineCap = 'round';
+    for (const s of scars) {
+      const hot = s.glow && s.age < 4 ? 1 - s.age / 4 : 0;
+      if (s.k === 'blot') {
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.32; blob(ctx, s, 1.3); ctx.fill();
+        ctx.fillStyle = s.c; ctx.globalAlpha = 0.55; blob(ctx, s, 1); ctx.fill();
+        ctx.globalAlpha = 0.4; blob(ctx, s, 0.55); ctx.fill();
+        if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = s.glow; ctx.globalAlpha = hot * 0.5; blob(ctx, s, 0.7); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
+      } else if (s.k === 'pit') {
+        ctx.fillStyle = s.c; ctx.globalAlpha = 0.5; blob(ctx, s, 1); ctx.fill();
+        ctx.strokeStyle = s.c2; ctx.lineWidth = Math.max(2, s.r * 0.14); ctx.globalAlpha = 0.5; blob(ctx, s, 1.08); ctx.stroke();
+        ctx.strokeStyle = s.c; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6; ctx.beginPath();
+        for (const [a, len] of s.cr) { ctx.moveTo(s.x + Math.cos(a) * s.r, s.y + Math.sin(a) * s.r * 0.85); ctx.lineTo(s.x + Math.cos(a) * len, s.y + Math.sin(a) * len * 0.85); }
+        ctx.stroke();
+      } else if (s.k === 'gash') {
+        const ca = Math.cos(s.a), sa = Math.sin(s.a), al = s.al;
+        if (s.arc) { // 弧形劍痕：三層由寬到窄疊出中段較深
+          for (const [f, m, c, a] of [[1, 2.4, s.c2, 0.28], [1, 1.2, s.c, 0.7], [0.6, 1.8, s.c, 0.5]]) {
+            ctx.strokeStyle = c; ctx.globalAlpha = a * al; ctx.lineWidth = s.wd * m;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.len, s.a - s.arc * f / 2, s.a + s.arc * f / 2); ctx.stroke();
+          }
+          if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = s.glow; ctx.globalAlpha = hot * 0.6; ctx.lineWidth = s.wd * 0.7; ctx.beginPath(); ctx.arc(s.x, s.y, s.len, s.a - s.arc / 2, s.a + s.arc / 2); ctx.stroke(); ctx.globalCompositeOperation = 'source-over'; }
+        } else { // 直線劍痕：兩端尖、中段最寬的細長刀口
+          const ex = s.x + ca * s.len, ey = s.y + sa * s.len, mx = (s.x + ex) / 2, my = (s.y + ey) / 2, nx = -sa * s.wd * 2, ny = ca * s.wd * 2;
+          ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.quadraticCurveTo(mx + nx, my + ny, ex, ey); ctx.quadraticCurveTo(mx - nx, my - ny, s.x, s.y);
+          ctx.fillStyle = s.c; ctx.globalAlpha = 0.78 * al; ctx.fill();
+          ctx.strokeStyle = s.c2; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.5 * al; ctx.stroke();
+          if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = s.glow; ctx.globalAlpha = hot * 0.6; ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
+        }
+      } else if (s.k === 'stump') {
+        ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.globalAlpha = 1; ctx.beginPath(); ctx.ellipse(s.x + 3, s.y + 5, s.r * 0.95, s.r * 0.8, 0, 0, U.TAU); ctx.fill();
+        ctx.fillStyle = '#5a3d22'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 0.78, 0, U.TAU); ctx.fill();
+        ctx.fillStyle = '#b8884e'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 0.62, 0, U.TAU); ctx.fill();
+        ctx.strokeStyle = '#8a6238'; ctx.lineWidth = 1.5; for (const f of [0.4, 0.2]) { ctx.beginPath(); ctx.arc(s.x, s.y, s.r * f, 0, U.TAU); ctx.stroke(); }
+      } else if (s.k === 'litter') {
+        ctx.globalAlpha = 0.85;
+        for (const [dx, dy, rot, sz, col] of s.bits) { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(s.x + dx, s.y + dy, sz, sz * 0.55, rot, 0, U.TAU); ctx.fill(); }
+      }
+    }
+    ctx.restore();
+  }
   function drawDecals(ctx, w) {
+    drawScars(ctx, w);
     const decals = w.fx.decals;
     if (!decals || !decals.length) return;
     ctx.save();

@@ -213,7 +213,7 @@
       w.freezeF = 0;
       w.slowmo = 0;
       if (w.fx) {
-        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers', 'chunks'];
+        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers', 'chunks', 'scars'];
         for (const prop of fxProps) {
           if (Array.isArray(w.fx[prop])) w.fx[prop].length = 0;
         }

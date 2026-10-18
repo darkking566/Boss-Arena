@@ -65,5 +65,23 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   ok(w.fx.parts.length === n1, '非沙漠不揚沙塵');
 }
 
+{
+  // 戰鬥痕跡：依特效分類自動留痕、水面不留、有上限、砍樹留樹墩與落葉
+  const w = mk(), kinds = () => w.fx.scars.map((s) => s.k);
+  BD.spawnFx(w, 'slash', 1400, 900, { angle: 0, radius: 100 });
+  ok(kinds().includes('gash'), '斬擊在地上留下劍痕');
+  BD.spawnFx(w, 'slam', 1500, 900, { radius: 100, el: 'fire' });
+  ok(kinds().includes('pit') && kinds().includes('blot'), '火系砸地留下坑洞與焦痕');
+  const n = w.fx.scars.length, p = BD.ARENA.ponds[0];
+  BD.spawnFx(w, 'slam', p.x, p.y, { radius: 100 });
+  ok(w.fx.scars.length === n, '水面不留痕跡');
+  BD.spawnFx(w, 'treecut', 300, 300, { angle: 0, r: 32 });
+  ok(kinds().includes('stump') && kinds().includes('litter'), '砍樹留下樹墩與落葉');
+  for (let i = 0; i < 400; i++) BD.spawnFx(w, 'slam', 1300 + (i % 50), 700, { radius: 60 });
+  ok(w.fx.scars.length <= 260, '痕跡數量有上限');
+  const before = w.fx.scars[0].age; w.fx.update(1);
+  ok(w.fx.scars[0].age === before + 1, '痕跡累計 age（餘燼冷卻用）且不會自行消失');
+}
+
 console.log(failed ? `PROPS TEST FAIL (${failed})` : `PROPS TEST PASS (${passed})`);
 process.exit(failed ? 1 : 0);

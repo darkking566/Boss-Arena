@@ -82,6 +82,7 @@
 - `ARENA.pillars` 是每場由 `BD.resetArena()` 重建的「存活障礙」（AI、投射物、碰撞都讀它）；樹由 `js/engine/props.js` 以固定種子散佈在森林區，池塘 `ARENA.ponds` 在沼澤區。
 - 互動規則在 `props.js`：`hit` / `slashes` / 爆炸命中時依特效分類——**斬擊**把樹砍成兩半、**有擊退的重擊**把樹撞飛成滾木（穿透、傷害敵人）、輕擊只掉血；水中減速並濺水花、水面有倒影；沙漠沿招式方向揚起沙塵。
 - 視覺在 `js/fx/terrain.js`（斷樹、撞飛、水花、沙塵；特效分類「地形」）與 `js/render/world.js`（分區地面 / 池塘 / 樹 / 倒影）。測試：`npm run test:props`。
+- 戰鬥痕跡：`js/fx/scars.js` 的 `BD.leaveScar` 由 `BD.spawnFx` 依特效分類自動呼叫（斬擊 → 劍痕、砸地 → 坑洞＋裂紋、爆炸 / 噴吐 → 依元素的焦痕 / 霜 / 毒漬 / 雷焦、衝刺 → 滑痕、斷樹 → 樹墩與落葉），整場保留（上限 260，最舊先消失）、火系餘燼數秒內冷卻、水面不留痕；新招式只要分類正確就會自動留痕。
 
 ## 檔案結構
 全部是普通 `<script>`（IIFE + 全域 `BD`），依 `index.html` 的順序載入；標記 `data-browser` 的檔案才會碰到 DOM / Canvas。

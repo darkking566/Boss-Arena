@@ -23,6 +23,7 @@
     constructor(w) {
       this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
       this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = []; this.chunks = [];
+      this.scars = []; // 永久戰鬥痕跡（js/fx/scars.js）；不隨 life 消失，只累計 age（餘燼冷卻用）
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
     }
@@ -220,6 +221,7 @@
       const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks];
       for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
       for (const c of this.chunks) { c.x += c.vx * dt; c.y += c.vy * dt; c.spin += c.vr * dt; const k = Math.exp(-3 * dt); c.vx *= k; c.vy *= k; c.vr *= k; }
+      for (const s of this.scars) s.age += dt;
       for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));
       for (let j = 0; j < arrs.length; j++) compact(arrs[j]);
     }
@@ -267,6 +269,7 @@
     // curE 讓原件（斬擊 / 震波 / 光束）取得元素的對比邊緣色（fx.after 延遲產生的部分也會沿用）
     w.fx.curE = E;
     try { def.spawn(w.fx, x, y, o); } finally { w.fx.curE = null; }
+    if (BD.leaveScar) BD.leaveScar(w, P.id, def.category, x, y, o);
     return o;
   };
 })(typeof window !== 'undefined' ? window : globalThis);
