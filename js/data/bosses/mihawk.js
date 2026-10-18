@@ -1,0 +1,92 @@
+'use strict';
+// Boss 資料：鷹眼・德拉庫爾・米霍克（《ONE PIECE》世界第一大劍豪）：一階段只用胸前十字小刀（輕視對手），
+// HP 50% 佩服對手的決心而拔出黑刀「夜」，解鎖飛斬 / 一斬沉艦 / 荒星；大招「世界第一大劍豪」橫貫全場的巨斬
+// 純資料，重用既有動作；考據見 docs/bosses/mihawk.md
+(function (G) {
+  const BD = G.BD, { D, strike, dashStrike } = BD.DataKit;
+  const rect = (len, w) => ({ shape: 'rect', len, w });
+
+  const mihawk = {
+    id: 'mihawk', name: '鷹眼米霍克', title: '世界第一大劍豪', archetype: '輕視對手的劍聖',
+    desc: '王下七武海、世界第一大劍豪。一階段只用胸前的十字小刀，從容撥開所有攻擊；對手撐到半血，他才佩服地拔出黑刀「夜」，揮出能斬開艦隊的飛斬。',
+    color: '#c9a24a', color2: '#16121a', glow: '#e8c860', style: 'mihawk',
+    radius: 24, maxHp: 1750, speed: 245, turn: 8, mass: 0.9, fxEl: 'physical',
+    traits: ['counter'],
+    stamina: { max: 100, regen: 34 }, posture: 115, dodgeCost: 18, dodgeSpeed: 600,
+    ai: { prefRange: [130, 260], aggression: 0.4, dodge: 0.7, precision: 0.92, reaction: 0.17, strafe: 0.6, walk: 0.8,
+      feint: 0.2, delay: 0.3, retreat: 0.1, punish: 0.9, nervous: 0.02, patience: 0.85, read: 0.8, counter: 0.6,
+      // 連段（僅沉重）：小刀連刺接貫胸、鷹眼接小刀、二階段飛斬接一斬沉艦
+      combos: [
+        { id: 'kt', name: '連刺・貫胸', weight: 1.3, steps: [
+          { skill: 'knife' },
+          { skill: 'pierce', cancel: 0.3, branch: [
+            { when: { dist: [0, 260] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'gk', name: '鷹眼・連刺', steps: [
+          { skill: 'glare' },
+          { skill: 'knife', cancel: 0.3, branch: [
+            { when: { rolled: true, dist: [0, 150] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'wf', name: '飛斬・沉艦', phase: 2, weight: 1.2, steps: [
+          { skill: 'wave' },
+          { skill: 'fleet', cancel: 0.35, branch: [
+            { when: { dist: [0, 300] }, do: 'extend' },
+            { do: 'stop' }] }] },
+      ] },
+    phase2: { speedMul: 1.1, dmgMul: 1.3, cdMul: 0.8, line: '你的眼神很有趣……讓我看看，你到底有多少決心。',
+      fxEl: 'physical',
+      note: '佩服對手，拔出黑刀「夜」：所有近戰招式改用大刀，射程更長；解鎖「飛斬」「一斬沉艦」「荒星」；大招更寬更快' },
+    skills: [
+      // 輕鬆接下三刀流後反刺：小刀連刺（二階段換成夜的橫斬）
+      { id: 'knife', name: '小刀連刺', short: '小刀', tags: ['melee', 'fast'], range: [0, 130], cd: 2.4, cost: 12, track: 9, creep: 0.3, recovery: 0.4,
+        actions: [...strike(0.22, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),
+          ...strike(0.42, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),
+          ...strike(0.62, 0.2, rect(120, 40), { dmg: 48, posture: 16, kb: 160, fx: 'thrust' })],
+        actions2: [...strike(0.3, 0.24, { shape: 'cone', r: 180, arc: 110 * D }, { dmg: 60, posture: 22, kb: 180, fx: 'slash' }),
+          ...strike(0.6, 0.24, { shape: 'cone', r: 190, arc: 120 * D }, { dmg: 78, posture: 28, kb: 260, fx: 'slash' })] },
+      // 用刀尖撥開子彈、擋下全部攻擊後反擊（見切特性）
+      { id: 'parry', name: '撥擋', short: '撥擋', tags: ['counter', 'defensive'], range: [0, 320], cd: 6, cost: 10, track: 8, recovery: 0.45,
+        actions: [{ do: 'counter', at: 0, dur: 0.9, dmg: 135, posture: 60, name: '撥擋・反刺', fx: 'parry', slowmo: 0.3 }],
+        actions2: [{ do: 'counter', at: 0, dur: 0.9, dmg: 165, posture: 75, name: '撥擋・反斬', fx: 'parry', slowmo: 0.3 }] },
+      // 小刀貫穿索隆胸口的一刺
+      { id: 'pierce', name: '貫胸一刺', short: '貫胸', tags: ['gap'], range: [90, 330], cd: 5.5, cost: 18, track: 8, recovery: 0.55,
+        actions: dashStrike(0.4, 0.38, 280, 44, 0.12, { dmg: 82, posture: 40, kb: 200, fx: 'thrust' }),
+        actions2: dashStrike(0.36, 0.34, 340, 52, 0.12, { dmg: 100, posture: 48, kb: 260, fx: 'thrust' }) },
+      // 見聞色與銳利視力：遠距離鎖定、釘在原地的精準一斬
+      { id: 'glare', name: '鷹眼鎖定', short: '鷹眼', tags: ['ranged'], range: [220, 760], cd: 7, cost: 16, track: 8, recovery: 0.5,
+        actions: strike(0.85, 0.85, rect(760, 34), { dmg: 78, posture: 24, kb: 160, fx: 'thrust' }),
+        actions2: strike(0.75, 0.75, rect(860, 46), { dmg: 96, posture: 30, kb: 220, fx: 'cross' }) },
+      // 二階段：夜揮出會飛的斬擊（貫穿型）
+      { id: 'wave', name: '飛斬', short: '飛斬', phase: 2, tags: ['ranged'], range: [200, 900], cd: 6, cost: 22, track: 7, recovery: 0.6,
+        actions: [{ do: 'tele', at: 0, dur: 0.55, ...rect(900, 56), follow: true },
+          { do: 'proj', at: 0.55, n: 1, speed: 1050, r: 40, dmg: 92, posture: 34, kb: 260, life: 1.0, pierce: true, kind: 'airslash' }],
+        actions2: [{ do: 'tele', at: 0, dur: 0.5, ...rect(900, 56), follow: true },
+          { do: 'proj', at: 0.5, n: 1, speed: 1100, r: 40, dmg: 92, posture: 34, kb: 260, life: 1.0, pierce: true, kind: 'airslash' }] },
+      // 二階段：單人毀掉整支艦隊的大範圍橫掃
+      { id: 'fleet', name: '一斬沉艦', short: '沉艦', phase: 2, tags: ['melee', 'zone'], range: [0, 260], cd: 8, cost: 28, track: 6, recovery: 0.75,
+        actions: strike(0.7, 0.7, { shape: 'cone', r: 300, arc: 200 * D }, { dmg: 140, posture: 60, kb: 450, fx: 'cleave' }),
+        actions2: strike(0.7, 0.7, { shape: 'cone', r: 300, arc: 200 * D }, { dmg: 140, posture: 60, kb: 450, fx: 'cleave' }) },
+      // 二階段（衍生名稱）：高高躍起，垂直落下刺穿
+      { id: 'star', name: '黑刀・荒星', short: '荒星', phase: 2, tags: ['gap'], range: [150, 620], cd: 9, cost: 24, track: 6, recovery: 0.7,
+        actions: [{ do: 'hide', at: 0.2, fx: 'leap' },
+          { do: 'tele', at: 0.2, dur: 0.9, shape: 'circle', r: 120, anchor: 'target', setMark: 'S', follow: true, lockBefore: 0.3 },
+          { do: 'land', at: 1.1, mark: 'S' },
+          { do: 'hit', at: 1.1, shape: 'circle', r: 120, anchor: 'mark', mark: 'S', dmg: 150, posture: 60, kb: 380, fx: 'slam' }],
+        actions2: [{ do: 'hide', at: 0.2, fx: 'leap' },
+          { do: 'tele', at: 0.2, dur: 0.9, shape: 'circle', r: 120, anchor: 'target', setMark: 'S', follow: true, lockBefore: 0.3 },
+          { do: 'land', at: 1.1, mark: 'S' },
+          { do: 'hit', at: 1.1, shape: 'circle', r: 120, anchor: 'mark', mark: 'S', dmg: 150, posture: 60, kb: 380, fx: 'slam' }] },
+    ],
+    // 頂上戰爭向白鬍子陣營放出的遠距離巨斬，連冰山都斬開；改編為橫貫全場的粗斬線加四道交叉斬
+    ultimate: { id: 'ult', name: '世界第一大劍豪', ult: true, range: [0, 1000], track: 0, recovery: 0.9,
+      actions: [...strike(1.0, 1.0, rect(1100, 100), { dmg: 170, posture: 70, kb: 400, fx: 'cross' }),
+        { do: 'slashes', at: 1.4, n: 3, interval: 0.28, tele: 0.55, len: 480, w: 44, dmg: 50, posture: 16, fx: { id: 'threadcut', el: 'physical' },
+          final: { tele: 0.65, len: 560, w: 66, dmg: 110, posture: 50, fx: { id: 'threadcut', el: 'physical', scale: 1.5 } } }],
+      actions2: [...strike(0.9, 0.9, rect(1500, 150), { dmg: 230, posture: 90, kb: 500, fx: 'cross' }),
+        { do: 'slashes', at: 1.3, n: 4, interval: 0.24, tele: 0.5, len: 560, w: 48, dmg: 60, posture: 18, fx: { id: 'threadcut', el: 'physical' },
+          final: { tele: 0.6, len: 640, w: 74, dmg: 140, posture: 60, fx: { id: 'threadcut', el: 'physical', scale: 1.6 } } }],
+      desc: '拔出的夜揮出橫貫全場的巨斬，斬線所到之處一切都被切開；隨後四道交叉斬線收尾' },
+  };
+
+  BD.registerBoss(mihawk);
+})(typeof window !== 'undefined' ? window : globalThis);

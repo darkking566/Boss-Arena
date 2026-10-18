@@ -5,7 +5,7 @@
 
 ## 工作方式
 - **寫程式一律遵守 ponytail（full 等級）**：以最小而完整的改動解決任務。工作階段開始時若技能可用，先以 `/ponytail` 載入。
-- **分工**：主代理（Opus）負責規劃、拆步驟、審查；範圍明確的實作步驟交給 `coder` 子代理（Haiku，`.claude/agents/coder.md`）。
+- **分工**：主代理（Sonnet）負責規劃、拆步驟、審查；範圍明確的實作步驟交給 `coder` 子代理（Haiku，`.claude/agents/coder.md`）。
   需要畫面美感判斷或架構決策的工作、以及很小的改動，由主代理直接做。
 - **審查**：coder 完成後，主代理自己看 diff 並重跑測試，確認後才 commit。
 

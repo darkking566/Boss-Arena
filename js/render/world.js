@@ -601,6 +601,12 @@
         ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, R * 0.2, 0, U.TAU); ctx.fill();
         if (big) { ctx.strokeStyle = 'rgba(255,75,92,0.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R * 0.42, 0, U.TAU); ctx.stroke(); }
+      } else if (p.kind === 'airslash') {
+        // 米霍克的飛斬：月牙形斬擊（弧口朝飛行方向），深紅外暈加亮白刃緣，後方拖一道殘光
+        ctx.strokeStyle = 'rgba(168,35,46,0.4)'; ctx.lineWidth = p.r * 0.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-p.r * 0.2, 0); ctx.lineTo(-p.r * 3, 0); ctx.stroke();
+        ctx.strokeStyle = 'rgba(168,35,46,0.65)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(-p.r * 0.9, 0, p.r * 1.3, -1.15, 1.15); ctx.stroke();
+        ctx.strokeStyle = '#f4f0f8'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(-p.r * 0.9, 0, p.r * 1.3, -1.05, 1.05); ctx.stroke();
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
           g.shadowColor = '#ff7a1a'; g.shadowBlur = 18; g.lineCap = 'round';

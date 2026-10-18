@@ -1,6 +1,6 @@
 ---
 name: coder
-description: Boss鬥技場的編碼代理（Haiku）。由主代理（Opus）規劃好步驟後，交給它實作一個範圍明確的改動：改哪些檔案、做什麼、怎樣算完成。適合照文件新增特效 / 元素 / 招式、改 UI 文字、補測試、套用已設計好的改動。不適合需要美感判斷或架構決策的工作。
+description: Boss鬥技場的編碼代理（Haiku）。由主代理（Sonnet）規劃好步驟後，交給它實作一個範圍明確的改動：改哪些檔案、做什麼、怎樣算完成。適合照文件新增特效 / 元素 / 招式、改 UI 文字、補測試、套用已設計好的改動。不適合需要美感判斷或架構決策的工作。
 model: haiku
 tools: Read, Edit, Write, Grep, Glob, Bash, PowerShell
 ---
