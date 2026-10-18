@@ -591,13 +591,16 @@
         ctx.fillStyle = '#a0413e'; ctx.beginPath(); ctx.arc(-7, 0, 2.5, 0, U.TAU); ctx.fill();
       } else if (p.kind === 'shuriken') {
         // 劫的諸刃：旋轉的四刃手裏劍，後方拖一道紅色殘光
-        ctx.strokeStyle = 'rgba(224,30,55,0.45)'; ctx.lineWidth = p.r * 0.9; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(-p.r * 0.6, 0); ctx.lineTo(-p.r * 3.2, 0); ctx.stroke();
-        ctx.rotate(t * 24);
-        ctx.fillStyle = '#d4d8e2'; ctx.strokeStyle = '#e01e37'; ctx.lineWidth = 1.2; ctx.beginPath();
-        for (let i = 0; i < 4; i++) { const an = i * Math.PI / 2; ctx.lineTo(Math.cos(an) * p.r * 1.3, Math.sin(an) * p.r * 1.3); ctx.lineTo(Math.cos(an + 0.78) * p.r * 0.35, Math.sin(an + 0.78) * p.r * 0.35); }
+        // R：刃尖半徑；風魔手裏劍（r > 30）刃尖相對較短，並多一圈紅色外環
+        const R = p.r * (p.r > 30 ? 1.45 : 1.9), big = p.r > 30;
+        ctx.strokeStyle = 'rgba(224,30,55,0.45)'; ctx.lineWidth = R * 0.7; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-R * 0.5, 0); ctx.lineTo(-R * 2.6, 0); ctx.stroke();
+        ctx.rotate(p.back ? -t * 22 : t * 22);
+        ctx.fillStyle = '#d4d8e2'; ctx.strokeStyle = '#e01e37'; ctx.lineWidth = big ? 2.5 : 1.6; ctx.beginPath();
+        for (let i = 0; i < 4; i++) { const an = i * Math.PI / 2; ctx.lineTo(Math.cos(an) * R, Math.sin(an) * R); ctx.lineTo(Math.cos(an + 0.78) * R * 0.28, Math.sin(an + 0.78) * R * 0.28); }
         ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, p.r * 0.22, 0, U.TAU); ctx.fill();
+        ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, R * 0.2, 0, U.TAU); ctx.fill();
+        if (big) { ctx.strokeStyle = 'rgba(255,75,92,0.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R * 0.42, 0, U.TAU); ctx.stroke(); }
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
           g.shadowColor = '#ff7a1a'; g.shadowBlur = 18; g.lineCap = 'round';

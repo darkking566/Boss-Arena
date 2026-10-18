@@ -1,17 +1,39 @@
 'use strict';
 // Boss 資料：劫（《英雄聯盟》影流之主）：影分身（W）讓諸刃（Q）、鬼斬（E）同步施放，可與影子換位；被動「影忍法・滅魂劫」（Contempt for the Weak）；大招「禁奧義！瞬獄影殺陣」
+// 新增招式：風魔手裏劍（迴旋巨型手裏劍，proj.ret）、千影亂舞（shadowstep 連續瞬步斬）
 // 影子機制在 js/engine/actions/shadow.js；考據見 docs/bosses/zed.md
 (function (G) {
   const BD = G.BD, { D, strike } = BD.DataKit;
+  const cone = { shape: 'cone', r: 112, arc: 115 * D };
 
   // 諸刃：本體一發（tele + proj）+ 每個影子各一發（shadowshuriken）；原作第二發以後命中同一目標只剩 60%，影子那發直接以 60% 傷害表示
   function shuriken(at, tele, dmg, shadowDmg) {
-    const p = { speed: 900, r: 11, posture: 16, life: 0.85, pierce: true, kind: 'shuriken' };
+    const p = { speed: 900, r: 17, posture: 16, life: 0.85, pierce: true, kind: 'shuriken' };
     return [
-      { do: 'tele', at: at - tele, dur: tele, shape: 'rect', len: 760, w: 28, follow: true },
+      { do: 'tele', at: at - tele, dur: tele, shape: 'rect', len: 760, w: 42, follow: true },
       Object.assign({ do: 'proj', at, n: 1, dmg }, p),
-      Object.assign({ do: 'shadowshuriken', at: at - tele, dur: tele, len: 760, w: 28, dmg: shadowDmg }, p),
+      Object.assign({ do: 'shadowshuriken', at: at - tele, dur: tele, len: 760, w: 42, dmg: shadowDmg }, p),
     ];
+  }
+  // 風魔手裏劍：巨型手裏劍飛出 ret 秒後折返飛回本體，去程與回程各命中一次
+  function windmill(tele, dmg, speed, ret) {
+    return [
+      { do: 'tele', at: 0.05, dur: tele, shape: 'rect', len: speed * ret, w: 96, follow: true },
+      { do: 'proj', at: 0.05 + tele, n: 1, dmg, speed, r: 44, posture: 26, kb: 140, life: ret * 2 + 1, pierce: true, kind: 'shuriken', ret },
+    ];
+  }
+  // 千影亂舞：依序瞬步到目標周圍各方位，每到一處就是一記快斬，最後在正面落下大迴旋
+  function dance(offs, tick, dmg, finalDmg) {
+    const out = [];
+    offs.forEach((off, i) => {
+      const at = 0.1 + tick * i;
+      out.push({ do: 'shadowstep', at, off, dist: 75 },
+        ...strike(at + 0.2, 0.12, cone, { dmg, posture: 14, kb: 100, fx: 'slash', contempt: true }));
+    });
+    const at = 0.1 + tick * offs.length;
+    out.push({ do: 'shadowstep', at, off: 0, dist: 95 },
+      ...strike(at + 0.42, 0.34, { shape: 'circle', r: 160 }, { dmg: finalDmg, posture: 30, kb: 260, fx: 'whirl' }));
+    return out;
   }
   // 鬼斬：本體與每個影子同時以自身為中心迴旋一斬；影子命中附帶緩速
   function slash(at, tele, r, dmg) {
@@ -20,13 +42,12 @@
       { do: 'shadowslash', at: at - tele, dur: tele, r, dmg, posture: 22, kb: 160, status: { id: 'slow', dur: 1.5 } },
     ];
   }
-  const cone = { shape: 'cone', r: 112, arc: 115 * D };
 
   const zed = {
     id: 'zed', name: '劫', title: '影流之主', archetype: '影分身刺客',
     desc: '影流教派之主。奪走均衡教派禁忌的影之匣後，以影子作為第二具身體：影子會同步擲出諸刃、揮出鬼斬，也能與本體瞬間換位；禁奧義「瞬獄影殺陣」在三秒後引爆期間累積的傷害。',
     color: '#e01e37', color2: '#15161c', glow: '#ff6b7d', style: 'zed',
-    radius: 24, maxHp: 1950, speed: 245, turn: 9, mass: 0.85, fxEl: 'umbra',
+    radius: 24, maxHp: 2150, speed: 245, turn: 9, mass: 0.85, fxEl: 'umbra',
     traits: ['contempt'], // 影忍法・滅魂劫（js/engine/actions/shadow.js）
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [110, 320], aggression: 0.68, dodge: 0.6, precision: 0.85, reaction: 0.18, strafe: 0.85, walk: 0.55,
@@ -88,6 +109,14 @@
       { id: 'shadow_retreat', name: '影遁', short: '影遁', tags: ['escape'], range: [0, 200], cd: 11, cost: 15, recovery: 0.35,
         actions: [{ do: 'shadow', at: 0.1, to: 'away', dist: 340, life: 4 }, ...slash(0.36, 0.24, 135, 60), { do: 'swap', at: 0.55 },
           ...shuriken(0.95, 0.3, 60, 36)] },
+      // 改編：巨型風魔手裏劍（劫的招牌武器）——飛出後折返，去程與回程都會命中
+      { id: 'windmill', name: '影奧義！風魔手裏劍', short: '風魔', tags: ['ranged'], range: [160, 600], cd: 9, cost: 24, track: 8, recovery: 0.7,
+        actions: windmill(0.7, 66, 640, 0.8),
+        actions2: windmill(0.6, 72, 720, 0.85) },
+      // 改編：連續瞬步到目標四周，每到一處就是一記快斬，最後落下大迴旋（殘影相接的華麗連段）
+      { id: 'shadow_dance', name: '影奧義！千影亂舞', short: '亂舞', tags: ['gap', 'melee'], range: [100, 420], cd: 12, cost: 30, track: 6, recovery: 0.7,
+        actions: dance([2.2, -2.2, Math.PI, 1.0], 0.36, 42, 95),
+        actions2: dance([2.2, -2.2, Math.PI, 1.0, -1.0], 0.32, 45, 105) },
       // 改編：W 影與 R 影把目標夾在三角形中央——三把諸刃交會，再換位到影子身邊鬼斬
       { id: 'shadow_triangle', name: '影奧義！三角殺陣', short: '三角', phase: 2, tags: ['ranged', 'gap'], range: [160, 520], cd: 10, cost: 28, track: 6, recovery: 0.6,
         actions: [{ do: 'shadow', at: 0.12, to: 'flank', n: 2, dist: 230, life: 4.5 },

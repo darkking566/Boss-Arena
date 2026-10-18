@@ -46,6 +46,15 @@
     BD.spawnFx(w, 'shadowswap', ox, oy, { src: b, toX: b.x, toY: b.y });
   }, { active: true });
 
+  // 瞬步：閃現到目標周圍的某個方位（off：相對「目標看向本體」方向的弧度，0 = 本體目前所在側）並面向目標，留下一道殘影
+  BD.defineAction('shadowstep', (w, b, inst, a, tgt) => {
+    const ang = U.angTo(tgt, b) + a.off, d = a.dist + b.enemy.r;
+    const [x, y] = K.clampPt(tgt.x + Math.cos(ang) * d, tgt.y + Math.sin(ang) * d, b.r + 10);
+    b.trail.push({ x: b.x, y: b.y, face: b.face, life: 0.45 });
+    BD.spawnFx(w, 'shadowswap', b.x, b.y, { src: b, toX: x, toY: y });
+    b.x = x; b.y = y; w.confine(b); b.face = U.angTo(b, tgt);
+  }, { active: true });
+
   // 每個影子朝目標「目前位置」預警 dur 秒後擲出諸刃（本體那一發照常用 tele + proj 寫在資料裡）；施放被打斷則不擲出
   BD.defineAction('shadowshuriken', (w, b, inst, a, tgt) => {
     const px = tgt.x, py = tgt.y;
