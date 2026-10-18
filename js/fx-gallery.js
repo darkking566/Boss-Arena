@@ -181,12 +181,13 @@
       ctx.drawImage(floorTile, 0, 0);
       R.draw.decals(ctx, cell.world);
       R.draw.ghosts(ctx, cell.world, t);
+      R.draw.fx(ctx, cell.world, 'ground');
       if (dummy && !(cell.cat === '位移' && dummy.x >= cell.target.x)) {
         ctx.save(); ctx.globalAlpha = 0.5;
         R.drawBossBody(ctx, dummy, t);
         ctx.restore();
       }
-      R.draw.fx(ctx, cell.world);
+      R.draw.fx(ctx, cell.world, 'air');
     } catch (e) { report(e, cell.id, 'draw'); }
     // 格子範圍內的畫面閃光
     if (fx.flashA > 0.01) {

@@ -643,7 +643,8 @@
       const r = s.r0 + (s.r1 - s.r0) * (1 - Math.pow(1 - p, 3)); // easeOutCubic
       // 淡色內部圓盤（衝擊後的餘波）＋ 同色外環（隨擴張變細）
       if (r > 1) {
-        ctx.globalAlpha = k * 0.16; ctx.fillStyle = s.color;
+        // 內部填色壓低（0.16 → 0.08）：大範圍砸地時不再把整片戰場與 Boss 染成同一色
+        ctx.globalAlpha = k * 0.08; ctx.fillStyle = s.color;
         ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, U.TAU); ctx.fill();
         ctx.globalAlpha = k * 0.55; ctx.strokeStyle = s.color; ctx.lineWidth = s.width * (0.35 + 0.65 * k);
         ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, U.TAU); ctx.stroke();
@@ -747,11 +748,15 @@
       if (on) ctx.globalCompositeOperation = 'source-over';
     }
   }
-  function drawGlows(ctx, fx) {
+  // 大光暈（半徑 ≥ GROUND_GLOW_R）屬於地面層，畫在 Boss 底下，避免大招的閃光把角色洗成一片白；
+  // 小光暈（命中閃點、蓄力光等）仍畫在最上層。ground：true 只畫大光暈、false 只畫小光暈、undefined 全畫
+  const GROUND_GLOW_R = 70;
+  function drawGlows(ctx, fx, ground) {
     ctx.globalCompositeOperation = 'lighter';
     for (const g of fx.glows) {
       const k = g.life / g.max;
       if (k <= 0) continue;
+      if (ground != null && (g.r >= GROUND_GLOW_R) !== ground) continue;
       let x = g.x, y = g.y;
       if (g.follow) {
         const f = g.follow;
@@ -786,11 +791,26 @@
     }
     ctx.restore();
   }
-  function drawFx(ctx, w) {
+  // 特效分兩層：layer 'ground'（震波、光環、大光暈：貼地，畫在 Boss 底下）與 'air'（其餘：畫在 Boss 上面）；
+  // 省略 layer 時兩層依序全畫（特效圖鑑等沒有 Boss 夾在中間的場合）
+  function drawFx(ctx, w, layer) {
     const fx = w.fx;
+    if (!layer) { drawFx(ctx, w, 'ground'); drawFx(ctx, w, 'air'); return; }
     ctx.save(); ctx.lineCap = 'butt';
-    // 由下而上：震波 → 光柱 → 光環 → 斬擊 → 光束 → 拖影 → 粒子 → 光暈（最上層 additive）
-    drawShocks(ctx, fx);
+    if (layer === 'ground') {
+      // 由下而上：震波 → 光環 → 大光暈
+      drawShocks(ctx, fx);
+      for (const r of fx.rings) {
+        const k = 1 - r.life / r.max;
+        ctx.strokeStyle = hexA(r.color, (1 - k) * 0.9); ctx.lineWidth = r.width * (1 - k * 0.6);
+        ctx.beginPath(); ctx.arc(r.x, r.y, Math.max(0.1, U.lerp(r.r0, r.r1, Math.sqrt(k))), 0, U.TAU); ctx.stroke();
+      }
+      drawGlows(ctx, fx, true);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
+      ctx.restore();
+      return;
+    }
+    // 空中層由下而上：光柱 → 斬擊 → 光束 → 拖影 → 粒子 → 小光暈（最上層 additive）
     for (const p of fx.pillars) {
       const k = p.life / p.max;
       // 光柱：以 k=1 快取（所有色停 alpha 都隨 k 線性縮放），繪製時縮放半徑並套用 globalAlpha = k
@@ -804,11 +824,6 @@
         g.fillStyle = gr; g.beginPath(); g.arc(0, 0, p.r, 0, U.TAU); g.fill();
       });
       ctx.restore();
-    }
-    for (const r of fx.rings) {
-      const k = 1 - r.life / r.max;
-      ctx.strokeStyle = hexA(r.color, (1 - k) * 0.9); ctx.lineWidth = r.width * (1 - k * 0.6);
-      ctx.beginPath(); ctx.arc(r.x, r.y, Math.max(0.1, U.lerp(r.r0, r.r1, Math.sqrt(k))), 0, U.TAU); ctx.stroke();
     }
     drawSlashes(ctx, fx);
     for (const b of fx.beams) {
@@ -830,7 +845,7 @@
     }
     drawStreams(ctx, fx);
     drawParts(ctx, fx.parts);
-    drawGlows(ctx, fx);
+    drawGlows(ctx, fx, false);
     // 收尾：狀態歸零（globalAlpha 1、source-over、lineCap butt）
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'butt';
     ctx.restore();

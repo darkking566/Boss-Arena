@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "boss-duel", "runtimeExecutable": "node", "runtimeArgs": ["test/serve.js", "8080"], "port": 8080 }
+  ]
+}

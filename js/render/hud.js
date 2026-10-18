@@ -157,6 +157,8 @@
     const jx = frz ? (BD.vrng() - 0.5) * 3 : 0, jy = frz ? (BD.vrng() - 0.5) * 3 : 0;
     // 殘影（衝刺 / 疾奔）畫在 Boss 之前，讓本體清楚壓在殘影上
     drawGhosts(ctx, w, t);
+    // 貼地特效（震波、光環、大光暈）畫在 Boss 底下，Boss 本體在大招中仍看得清楚
+    drawFx(ctx, w, 'ground');
     const order = w.bosses.slice().sort((a, b) => a.y - b.y);
     for (const b of order) {
       if (!frz) { drawBoss(ctx, b, t); continue; }
@@ -164,7 +166,7 @@
     }
     drawProjectiles(ctx, w, t);
     drawLobs(ctx, w, t);
-    drawFx(ctx, w);
+    drawFx(ctx, w, 'air');
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
     drawTexts(ctx, w);
