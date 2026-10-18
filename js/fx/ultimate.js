@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜大招（ultcast / domain / nightfall / threadcut / finale）：大招蓄勢、領域爆發、夜幕、懸斬與擊倒終結
+// 特效庫｜大招（ultcast / domain / nightfall / threadcut / skyrend / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、color 覆寫、radius 半徑、k 綜合倍率、src 施放者（可為 null）、pts 預先算好的點陣
 (function (G) {
@@ -78,6 +78,36 @@
         }
         fx.flash(E.core, 0.18);
         fx.shake(Math.min(10, 3 * k));
+      });
+    },
+  });
+
+  BD.defineEffect('skyrend', {
+    name: '天喰', category: '大招',
+    desc: '撕裂戰場的終極巨劈：沿整條直線劈出巨大的元素刃光與白熱芯、全屏一閃，地面沿線裂開發光、兩側噴出火花與碎石；0.25 秒後整條裂口再噴出元素煙霧與二次刃光。適合長直線大招、斬斷戰場的巨刃。',
+    params: { len: 600, width: 120 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, len = o.len || 600, w = o.width || 120, ang = o.angle || 0;
+      const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len;
+      fx.beam(x, y, tx, ty, w * 0.9, E.glow, 0.5, E.core);
+      fx.beam(x, y, tx, ty, w * 0.25, '#ffffff', 0.4, E.core);
+      fx.flash(E.glow, 0.4);
+      fx.shake(Math.min(24, 14 * Math.min(k, 1.6)), ang + Math.PI / 2);
+      const n = Math.max(3, Math.round(len / 90));
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n, px = x + (tx - x) * t, py = y + (ty - y) * t;
+        fx.crack(px, py, w * 0.55, E.decal, 9, E.crack, 3);
+        fx.sparkle(px, py, E.core, 3, 380, ang + (i % 2 ? 1 : -1) * Math.PI / 2, 0.5);
+        if (i % 2) fx.debris(px, py, E.debris || E.particle, 2, 260, 4, w * 0.2);
+      }
+      fx.after(0.25, () => {
+        for (let i = 0; i < n; i++) {
+          const t = (i + 0.5) / n, px = x + (tx - x) * t, py = y + (ty - y) * t;
+          fx.smoke(px, py, E.smoke, 3, w * 0.3);
+          fx.motes(px, py, E, 3, w * 0.3, 160);
+        }
+        fx.beam(x, y, tx, ty, w * 0.5, E.glow, 0.3, E.core);
+        fx.shake(8, ang + Math.PI / 2);
       });
     },
   });

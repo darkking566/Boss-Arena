@@ -12,7 +12,7 @@
 - **資料只宣告 `id` 與元素**：
   在 Boss 資料檔（`js/data/bosses/<id>.js`）中，招式僅以字串宣告特效（如 `fx: 'slam'`）與元素（如 `fxEl: 'fire'`），具體的粒子物理、光暈擴張、地面裂縫與色彩取樣皆由引擎與特效庫負責處理。
 - **「先挑現有特效 + 元素，找不到再新增」設計流程**：
-  特效庫目前內建 **49 種招式特效 × 9 種元素主題 = 441 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
+  特效庫目前內建 **54 種招式特效 × 9 種元素主題 = 486 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
   設計新 Boss 招式時，請先打開特效圖鑑挑選現有特效與元素；只有在現有原型確實無法滿足表現需求時，才擴充特效庫。
 
 ---
@@ -40,7 +40,7 @@
 python3 test/fx_gallery_test.py
 ```
 
-以無頭 Chromium 走訪整頁，驗證 49 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
+以無頭 Chromium 走訪整頁，驗證 54 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
 
 ---
 
@@ -162,7 +162,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 
 ---
 
-## 5. 特效一覽表（49 種特效）
+## 5. 特效一覽表（54 種特效）
 
 依 10 大分類（`BD.EFFECT_CATEGORIES`）整理，包含適合招式與當前所有 Boss 資料及引擎內建呼叫點：
 
@@ -193,6 +193,8 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `leap` | 躍起 | 起跳衝擊、地面震波向外推開、碎石塵土彈起 | movement.js `hide` 動作指定、熔岩巨像「末日隕落」起跳、深淵監視者「躍空下劈」起跳 |
 | | `burrow` | 鑽地 | 鑽入或鑽出泥土、碎塊大量翻飛、地表裂坑 | movement.js `hide` 動作指定、腐沼母巢「鑽地突襲」起手 |
 | | `dash` | 衝刺 | 高速突進、起步光環＋連續殘影與拖影線＋元素尾跡 | movement.js `dash` 與 `circle` 動作預設、熔岩巨像「熔岩衝撞」 |
+| | `hoofcharge` | 鐵騎衝鋒 | 戰馬衝鋒沿路左右交替的蹄印、揚塵與火星，終點塵浪 | 呂布大招「天喰・赤兔奔騰」的衝鋒 |
+| | `warsteed` | 戰騎奔至 | 換階段暗紅暗幕下，蹄印與揚塵從身後遠處一路奔近，時間到時塵浪與震波炸開 | 呂布 `phase2.transFx`（赤兔登場） |
 | **投射物** | `projhit` | 投射物命中 | 飛刀、火球、毒彈等命中目標的小型爆點火花 | projectile.js 命中目標、kit.js `hitFx` 未指定 fx 時預設、小兵受傷 |
 | | `projwall` | 碰撞碎散 | 撞上牆面或柱子的碎散方形火花與碎塊 | projectile.js 碰牆、boss.js Boss 衝撞競技場牆壁 |
 | | `swarmtrail` | 蟲群尾跡 | 蟲群飛行留下的細碎微光火花與毒泡 | projectile.js `swarm` 飛行中 |
@@ -205,8 +207,10 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `stance` | 架式 | 光環由外向內收束成細環、中心微光 | combat.js `counter` 動作（見切架式） |
 | | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功（預設） |
 | | `mikiri` | 見切・一閃 | 看穿瞬間場地轉暗、光環收束；delay 秒後背後一記巨大白弧斬 | 影刃武士「見切」成功（counter 動作的 fx） |
+| | `pojun` | 破軍 | 重兵器彈反：暗紅暗幕、震波與光環收束；delay 秒後沿面向劈出粗大刃光 | 呂布「鎚頂」彈反成功（counter 動作的 fx） |
 | | `summon` | 召喚 | 召喚物現身的小光圈擴張、微粒聚攏與閃光 | minion.js `spawnMinion` 召喚物現身 |
 | | `roar` | 咆哮 | 階段轉換全場巨大震波、強烈震動與全屏閃光 | world.js 階段轉換、深淵監視者復活咆哮 |
+| | `bloodroar` | 血吼 | 暗紅暗幕約一秒、震波與白環擴散、火花與餘燼噴湧 | 呂布「斷腿不退」 |
 | | `awaken` | 覺醒 | 進入第二階段全屏元素閃光、身上光暈與環繞微粒 | boss.js `checkPhaseTransition` 二階段變身 |
 | | `shadowrise` | 影起 | 換階段暗幕籠罩、暗影吸向施放者，life 秒後炸成四道交錯弧斬 | 影刃武士 `phase2.transFx` |
 | | `eclipse` | 月蝕 | 換階段深藍暗幕、頭上月光與收攏光環，life 秒後月光炸成雙層震波與冰晶符文 | 霜月魔女 `phase2.transFx` |
@@ -215,6 +219,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `domain` | 領域爆發 | 領域展開、結界覆蓋、全屏核心色閃光與強震、點陣爆散 | 霜月魔女大招「絕對零度」 |
 | | `nightfall` | 夜幕 | 化煙遁入黑暗，場地暗幕籠罩 life 秒，只剩角色與預警發亮 | 影刃武士大招「百鬼夜斬」隱身 |
 | | `threadcut` | 懸斬 | 刀痕懸在空中，hold 秒後才裂開；多道同時到期就一齊裂開 | 影刃武士大招「百鬼夜斬」的斬線（slashes 的 fx） |
+| | `skyrend` | 天喰 | 沿整條直線劈出巨大刃光、地面沿線裂開發光，0.25 秒後裂口噴出煙霧與二次刃光 | 呂布「天喰・未完成」與大招「天喰」 |
 | | `finale` | 終結 | Boss 被擊倒終結演出、全屏白光、強震、海量火花碎塊 | world.js `onBossDeath` 擊殺結算演出 |
 
 ---

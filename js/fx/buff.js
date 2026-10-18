@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / mikiri / summon / roar / awaken / shadowrise / eclipse / posturebreak）：蓄力、架式、見切、見切一閃、召喚、咆哮、覺醒、影起、月蝕與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / posturebreak）：蓄力、架式、見切、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -70,6 +70,30 @@
     },
   });
 
+  BD.defineEffect('pojun', {
+    name: '破軍', category: '增益',
+    desc: '重兵器彈反成功：場地瞬間染上暗紅、元素色震波與白色光環收束、全屏一閃；delay 秒後反擊的長兵器沿施放者面向劈出一道粗大刃光，刀尖爆出火花並強烈震動。適合長戟、巨槌等重兵器的格擋反擊。',
+    params: { delay: 0.2 },
+    spawn(fx, x, y, o) {
+      const E = o.E, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(0.5, 0.5, '#1a0004');
+      fx.flash(E.glow, 0.3);
+      fx.shock(x, y, r, r * 5, 0.45, E.glow, 10, E.core);
+      fx.ring(x, y, r * 3, r + 4, 0.18, '#ffffff', 4);
+      fx.sparkle(x, y, E.core, 14, 320);
+      fx.shake(8);
+      fx.after(o.delay, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y, a = src && src.face != null ? src.face : o.angle || 0;
+        const tx = sx + Math.cos(a) * r * 6, ty = sy + Math.sin(a) * r * 6;
+        fx.beam(sx, sy, tx, ty, 30, E.glow, 0.35, E.core);
+        fx.beam(sx, sy, tx, ty, 8, '#ffffff', 0.3, E.core);
+        fx.flashAt(tx, ty, 40, E.core, 0.16);
+        fx.sparkle(tx, ty, E.core, 18, 400, a, 0.9);
+        fx.shake(14, a);
+      });
+    },
+  });
+
   BD.defineEffect('summon', {
     name: '召喚', category: '增益',
     desc: '召喚物現身的短暫陣法：光圈由小擴張、元素微粒聚攏。適合小兵召喚、圖騰降臨。',
@@ -95,6 +119,23 @@
       fx.sparkle(x, y, E.core, 40, 500);
       fx.motes(x, y, E, 30, 60, 220);
       fx.glow(x, y, 160 * Math.min(1.5, k), E.glow, 0.7, 0.6, 0.6, o.src || null);
+    },
+  });
+
+  BD.defineEffect('bloodroar', {
+    name: '血吼', category: '增益',
+    desc: '浴血不退的怒吼：場地染上暗紅暗幕約一秒、元素色震波與白色光環擴散、全屏閃光，施放者周圍火花與餘燼噴湧並留下光暈。適合狂怒、背水一戰、開啟護盾。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(1.0, 0.5, '#1a0004');
+      fx.shock(x, y, r, r * 7, 0.6, E.glow, 10 * Math.min(1.5, k), E.core);
+      fx.ring(x, y, r, r * 5, 0.5, '#ffffff', 4);
+      fx.flash(E.glow, 0.35);
+      fx.sparkle(x, y, E.core, 30, 420);
+      fx.embers(x, y, E.core, 24, r, 80);
+      fx.glow(x, y, r * 2.5, E.glow, 0.8, 0.6, 0.4, src);
+      fx.shake(Math.min(16, 10 * Math.min(k, 1.5)));
     },
   });
 
