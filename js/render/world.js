@@ -659,6 +659,44 @@
       ctx.globalCompositeOperation = 'source-over';
     }
   }
+  // 新月形刀光路徑：沿弧 a0 → a1（a1 為前緣），厚度兩端收尖、最厚處偏向前緣；
+  // bias 把外緣往外推（刀光外側飽滿、內側較平），W 為最大厚度
+  const CRESCENT_N = 18;
+  function crescentPath(ctx, x, y, rad, a0, a1, W, bias) {
+    ctx.beginPath();
+    for (let i = 0; i <= CRESCENT_N; i++) {
+      const u = i / CRESCENT_N, a = a0 + (a1 - a0) * u;
+      const th = W * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.7)), 0.85);
+      const r = rad + th * (0.5 + bias);
+      const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    for (let i = CRESCENT_N; i >= 0; i--) {
+      const u = i / CRESCENT_N, a = a0 + (a1 - a0) * u;
+      const th = W * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.7)), 0.85);
+      const r = rad - th * (0.5 - bias);
+      ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+    }
+    ctx.closePath();
+  }
+  // 一道新月刀光：外光主體 → 殘影（往回轉、更淡更薄）→ additive 元素核心 → 白熱刃芯
+  function drawCrescent(ctx, s, k, a0, a1, rad, trailOff) {
+    const W = s.width * (0.55 + 0.75 * k);
+    if (s.trail > 0) {
+      for (let i = s.trail; i >= 1; i--) {
+        const f = 1 - i / (s.trail + 1), off = s.arc * trailOff * i;
+        ctx.fillStyle = hexA(s.color, k * 0.28 * f);
+        crescentPath(ctx, s.x, s.y, rad + i * 3, a0 - off, a1 - off, W * 0.7 * f, 0.15); ctx.fill();
+      }
+    }
+    ctx.fillStyle = hexA(s.color, Math.min(1, k * 1.1));
+    crescentPath(ctx, s.x, s.y, rad, a0, a1, W, 0.15); ctx.fill();
+    ctx.globalCompositeOperation = 'lighter';
+    if (s.core) { ctx.fillStyle = hexA(s.core, k * 0.85); crescentPath(ctx, s.x, s.y, rad, a0, a1, W * 0.55, 0.3); ctx.fill(); }
+    ctx.fillStyle = `rgba(255,255,255,${k * 0.7})`;
+    crescentPath(ctx, s.x, s.y, rad, a0, a1, Math.max(1.5, W * 0.22), 0.45); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
   function drawSlashes(ctx, fx) {
     for (const s of fx.slashes) {
       const k = s.life / s.max;
@@ -667,56 +705,21 @@
         // 沉重：緩慢掃出的弧形斬擊——可見弧長在前 45% 生命內由起點長到全弧，前緣加亮
         const p = U.clamp(1 - k, 0, 1);
         const grow = p < 0.45 ? 1 - Math.pow(1 - p / 0.45, 2) : 1;
-        const a0 = s.ang - s.arc / 2, a1 = a0 + s.arc * grow;
-        ctx.lineCap = 'round';
-        // 殘影弧：沿掃擊方向往回微轉、更細更淡（大開大合的速度感）
-        if (s.trail > 0) {
-          for (let i = s.trail; i >= 1; i--) {
-            const off = s.arc * 0.16 * i, rr = rad + i * 4;
-            ctx.strokeStyle = hexA(s.color, k * 0.22 * (1 - i / (s.trail + 1)));
-            ctx.lineWidth = Math.max(1, s.width * k * 0.5 * (1 - i / (s.trail + 1)));
-            const t0 = a0 - off;
-            ctx.beginPath(); ctx.arc(s.x, s.y, rr, t0, a1 - off); ctx.stroke();
-          }
-        }
-        // 主弧（兩層不同寬度 = 便宜端點收尖）
-        ctx.strokeStyle = hexA(s.color, k); ctx.lineWidth = s.width * k;
-        ctx.beginPath(); ctx.arc(s.x, s.y, rad, a0, a1); ctx.stroke();
-        ctx.strokeStyle = `rgba(255,255,255,${k * 0.8})`; ctx.lineWidth = Math.max(1, s.width * k * 0.3);
-        ctx.beginPath(); ctx.arc(s.x, s.y, rad, a0, a1); ctx.stroke();
-        if (s.core) {
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.strokeStyle = hexA(s.core, k * 0.9); ctx.lineWidth = Math.max(1.5, s.width * k * 0.45);
-          ctx.beginPath(); ctx.arc(s.x, s.y, rad, a0, a1); ctx.stroke();
-          ctx.globalCompositeOperation = 'source-over';
-        }
+        const a0 = s.ang - s.arc / 2, a1 = a0 + s.arc * Math.max(0.05, grow);
+        drawCrescent(ctx, s, k, a0, a1, rad, 0.16);
         if (grow < 1) {
-          ctx.strokeStyle = `rgba(255,245,225,${k})`; ctx.lineWidth = Math.max(2, s.width * k * 0.9);
-          ctx.beginPath(); ctx.arc(s.x, s.y, rad, a1 - 0.12, a1); ctx.stroke();
+          // 掃出中的前緣亮點
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.fillStyle = hexA(s.core || '#fff5e1', k * 0.7);
+          ctx.beginPath(); ctx.arc(s.x + Math.cos(a1) * rad, s.y + Math.sin(a1) * rad, Math.max(2, s.width * 0.28), 0, U.TAU); ctx.fill();
+          ctx.globalCompositeOperation = 'source-over';
         }
         continue;
       }
+      // 輕快：整道刀光一次出現，尾端隨生命往前收
       const sweep = (1 - k) * 0.6;
-      const startA = s.ang - s.arc / 2 + sweep * s.arc * 0.2, endA = s.ang + s.arc / 2;
-      ctx.lineCap = 'round';
-      if (s.trail > 0) {
-        for (let i = s.trail; i >= 1; i--) {
-          const off = s.arc * 0.14 * i;
-          ctx.strokeStyle = hexA(s.color, k * 0.25 * (1 - i / (s.trail + 1)));
-          ctx.lineWidth = Math.max(1, s.width * k * 0.55 * (1 - i / (s.trail + 1)));
-          ctx.beginPath(); ctx.arc(s.x, s.y, rad + i * 3, startA - off, endA - off); ctx.stroke();
-        }
-      }
-      ctx.strokeStyle = hexA(s.color, k); ctx.lineWidth = s.width * k;
-      ctx.beginPath(); ctx.arc(s.x, s.y, rad, startA, endA); ctx.stroke();
-      ctx.strokeStyle = `rgba(255,255,255,${k * 0.8})`; ctx.lineWidth = Math.max(1, s.width * k * 0.3);
-      ctx.beginPath(); ctx.arc(s.x, s.y, rad, startA, endA); ctx.stroke();
-      if (s.core) {
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.strokeStyle = hexA(s.core, k * 0.9); ctx.lineWidth = Math.max(1.5, s.width * k * 0.4);
-        ctx.beginPath(); ctx.arc(s.x, s.y, rad, startA, endA); ctx.stroke();
-        ctx.globalCompositeOperation = 'source-over';
-      }
+      const a0 = s.ang - s.arc / 2 + sweep * s.arc * 0.35, a1 = s.ang + s.arc / 2;
+      drawCrescent(ctx, s, k, a0, a1, rad, 0.14);
     }
   }
   function drawStreakGeo(ctx, st) {
