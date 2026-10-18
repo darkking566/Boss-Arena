@@ -38,30 +38,44 @@
   function drawFloor(g) {
     const A = BD.ARENA;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    // 草地
-    const grad = g.createRadialGradient(A.w / 2, A.h / 2, 50, A.w / 2, A.h / 2, A.w * 0.65);
-    grad.addColorStop(0, '#52703c'); grad.addColorStop(1, '#223520');
-    g.fillStyle = grad; g.fillRect(0, 0, A.w, A.h);
-    // 深淺不一的草色斑塊
-    for (let i = 0; i < 260; i++) {
-      g.fillStyle = rnd() < 0.5 ? 'rgba(20,40,15,0.07)' : 'rgba(150,190,90,0.06)';
-      g.beginPath(); g.ellipse(rnd() * A.w, rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
-    }
-    // 中央踏出來的泥土空地（Boss 開打的位置）
-    const dirt = g.createRadialGradient(A.w / 2, A.h / 2, 40, A.w / 2, A.h / 2, 330);
-    dirt.addColorStop(0, 'rgba(118,96,62,0.55)'); dirt.addColorStop(1, 'rgba(118,96,62,0)');
-    g.fillStyle = dirt; g.save(); g.translate(A.w / 2, A.h / 2); g.scale(1, 0.62); g.beginPath(); g.arc(0, 0, 330, 0, U.TAU); g.fill(); g.restore();
-    // 草叢短筆觸
+    // 生態區底色：橫向漸層，交界處各留 120px 的柔和過渡
+    const GROUND = { forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], swamp: ['#3d4a30', '#2a3626'] };
+    const lg = g.createLinearGradient(0, 0, A.w, 0);
+    A.biomes.forEach((b, i) => {
+      const c = GROUND[b.id][0], pad = 120;
+      lg.addColorStop(i ? (b.x0 + pad) / A.w : 0, c); lg.addColorStop(i < A.biomes.length - 1 ? (b.x1 - pad) / A.w : 1, c);
+    });
+    g.fillStyle = lg; g.fillRect(0, 0, A.w, A.h);
     g.lineWidth = 1.5; g.lineCap = 'round';
-    for (let i = 0; i < 900; i++) {
-      const x = rnd() * A.w, y = rnd() * A.h, h = 4 + rnd() * 7;
-      g.strokeStyle = rnd() < 0.5 ? 'rgba(160,205,100,0.35)' : 'rgba(25,55,20,0.45)';
-      g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
+    for (const b of A.biomes) {
+      const x0 = b.x0 + 70, x1 = b.x1 - 70, area = (x1 - x0) * A.h / 1.23e6, X = () => x0 + rnd() * (x1 - x0), dark = GROUND[b.id][1];
+      for (let i = 0, n = Math.round(260 * area); i < n; i++) {
+        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : 'rgba(150,190,90,0.5)';
+        g.globalAlpha = 0.14; g.beginPath(); g.ellipse(X(), rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
+      }
+      g.globalAlpha = 1;
+      for (let i = 0, n = Math.round((b.id === 'desert' ? 300 : 900) * area); i < n; i++) {
+        const x = X(), y = rnd() * A.h;
+        if (b.id === 'desert') { // 沙丘風紋：緩弧
+          g.strokeStyle = rnd() < 0.5 ? 'rgba(120,90,50,0.22)' : 'rgba(255,240,200,0.3)';
+          g.beginPath(); g.arc(x, y, 30 + rnd() * 60, 3.4, 5.4); g.stroke();
+        } else { // 草叢 / 沼澤雜草
+          g.strokeStyle = rnd() < 0.5 ? (b.id === 'swamp' ? 'rgba(120,150,70,0.35)' : 'rgba(160,205,100,0.35)') : 'rgba(25,55,20,0.45)';
+          const h = 4 + rnd() * 7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
+        }
+      }
+      if (b.id === 'swamp') for (let i = 0, n = Math.round(60 * area); i < n; i++) { // 泥濘斑
+        g.fillStyle = 'rgba(40,30,18,0.28)'; g.beginPath(); g.ellipse(X(), rnd() * A.h, 20 + rnd() * 50, 12 + rnd() * 26, rnd() * 3, 0, U.TAU); g.fill();
+      }
     }
+    g.lineCap = 'butt';
     // 沼澤：泥岸 → 水面 → 睡蓮葉
     for (const p of A.ponds) {
       g.fillStyle = '#3a3220'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 16, p.ry + 12, 0, 0, U.TAU); g.fill();
       g.fillStyle = 'rgba(25,45,20,0.55)'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 7, p.ry + 5, 0, 0, U.TAU); g.fill();
+      g.strokeStyle = 'rgba(110,140,60,0.8)'; g.lineWidth = 2; g.beginPath();
+      for (let i = 0; i < 46; i++) { const an = rnd() * U.TAU, rx = p.x + Math.cos(an) * (p.rx + 18 + rnd() * 10), ry = p.y + Math.sin(an) * (p.ry + 14 + rnd() * 8), h = 10 + rnd() * 12; g.moveTo(rx, ry); g.lineTo(rx + (rnd() - 0.5) * 6, ry - h); }
+      g.stroke();
       const wg = g.createRadialGradient(p.x - p.rx * 0.2, p.y - p.ry * 0.3, 8, p.x, p.y, p.rx);
       wg.addColorStop(0, '#3f7b80'); wg.addColorStop(1, '#1c4247');
       g.fillStyle = wg; g.beginPath(); g.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, U.TAU); g.fill();
@@ -111,7 +125,7 @@
   function drawArena(ctx, w, t) {
     const A = BD.ARENA;
     if (R.cache.enabled) {
-      const s = R.renderScale(ctx), L = getArenaLayer(s);
+      const s = Math.min(1.25, R.renderScale(ctx)), L = getArenaLayer(s); // 大地圖：靜態層倍率上限 1.25，避免離屏畫布過大
       R.drawSprite(ctx, { canvas: L.canvas, scale: s }, -34 - 1 / s, -34 - 1 / s);
     } else {
       // 快取關閉：照舊即時繪製（地面用 1x 快取畫布）

@@ -19,7 +19,7 @@
 
   function drawPanel(ctx, ctl, boss, w, t, side) {
     const A = BD.ARENA, col = boss.def.color || R.TEAM[boss.team];
-    const PW = 560, x = side === 0 ? 24 : A.w - 24 - PW, y = 16;
+    const PW = 560, x = R.cam.x + (side === 0 ? 24 : R.VW - 24 - PW), y = R.cam.y + 16;
     const lines = [];
     const mode = ctl.mode ? MODE_ZH[ctl.mode] || ctl.mode : '—';
     let mline = `模式 ${mode}`;

@@ -46,7 +46,7 @@
     if (key === lastLayout) return;
     lastLayout = key;
     panel.style.left = (r.left - ar.left + R.OX * s) + 'px';
-    panel.style.top = (r.top - ar.top + (R.OY + BD.ARENA.h - 136) * s) + 'px';
+    panel.style.top = (r.top - ar.top + (R.OY + R.VH - 136) * s) + 'px';
     panel.style.transform = `scale(${s})`;
   }
 
@@ -231,10 +231,10 @@
       if (!w || !w.training || e.button !== 0 || w.training.mode === 'player') return;
       const r = canvas.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const x = (e.clientX - r.left) / r.width * R.W - R.OX;
-      const y = (e.clientY - r.top) / r.height * R.H - R.OY;
+      const x = (e.clientX - r.left) / r.width * R.W - R.OX + R.cam.x;
+      const y = (e.clientY - r.top) / r.height * R.H - R.OY + R.cam.y;
       const A = BD.ARENA;
-      if (x < 0 || y < 0 || x > A.w || y > A.h) return;
+      if (x < 0 || y < 0 || x > A.w || y > A.h || x - R.cam.x > R.VW || y - R.cam.y > R.VH) return;
       w.training.setHome(x, y);
     });
     return api;

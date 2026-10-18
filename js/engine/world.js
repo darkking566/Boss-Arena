@@ -8,10 +8,12 @@
     for (const s of [].concat(list)) BD.applyStatus(u, s.id, { dur: s.dur, stacks: s.stacks, value: s.value, source: src && (src.isBoss ? src : src.owner) || null }, w);
   }
   const ARENA = BD.ARENA = {
-    w: 1500, h: 820,
-    // 場景：森林 + 沼澤。trees 為樹位（點對稱）；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
-    trees: [[390, 250], [1110, 250], [390, 570], [1110, 570], [250, 120], [1250, 700], [1250, 120], [250, 700], [700, 90], [800, 730]],
-    ponds: [{ x: 560, y: 650, rx: 150, ry: 65 }, { x: 940, y: 170, rx: 150, ry: 65 }],
+    w: 3000, h: 1800,
+    // 場景由西到東：森林 / 沙漠 / 沼澤（x0~x1 為各生態區範圍；Boss 出生在中央沙漠）
+    biomes: [{ id: 'forest', x0: 0, x1: 1100 }, { id: 'desert', x0: 1100, x1: 1900 }, { id: 'swamp', x0: 1900, x1: 3000 }],
+    ponds: [{ x: 2300, y: 380, rx: 230, ry: 100 }, { x: 2680, y: 860, rx: 250, ry: 110 }, { x: 2300, y: 1300, rx: 230, ry: 100 }, { x: 2700, y: 1600, rx: 190, ry: 80 }],
+    // trees 由 props.js 在森林區散佈；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
+    trees: [],
     pillars: [],
   };
 
@@ -42,7 +44,7 @@
       this.stats = BD.minionStats(); // 召喚物種類提供的統計欄位（例如紅眼監視者）
       this.hitstop = 0; this.freezeF = 0; this.slowmo = 0; this.acc = 0; this.speed = 1; this.paused = false; this.nextId = 1;
       this.fx = new BD.FX(this);
-      this.bosses = [new Boss(this, BD.applyPace(defA, this.paceId), 0, 260, ARENA.h / 2), new Boss(this, BD.applyPace(defB, this.paceId), 1, ARENA.w - 260, ARENA.h / 2)];
+      this.bosses = [new Boss(this, BD.applyPace(defA, this.paceId), 0, ARENA.w / 2 - 350, ARENA.h / 2), new Boss(this, BD.applyPace(defB, this.paceId), 1, ARENA.w / 2 + 350, ARENA.h / 2)];
       this.bosses.forEach((b, i) => {
         b.controller = (opts.player === i && BD.PlayerController) ? new BD.PlayerController(b, this, opts.input) : new BD.AIController(b, this);
       });

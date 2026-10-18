@@ -98,33 +98,32 @@
   }
   function drawBanners(ctx, w) {
     const b = w.banners[w.banners.length - 1];
-    const A = BD.ARENA;
     if (w.intro > 0) {
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, A.h / 2 - 60, A.w, 120);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, R.VH / 2 - 60, R.VW, 120);
       ctx.font = `bold 56px ${FONT}`; ctx.fillStyle = '#fff';
-      ctx.fillText(`${w.bosses[0].name}  對  ${w.bosses[1].name}`, A.w / 2, A.h / 2 - 8);
-      ctx.font = `20px ${FONT}`; ctx.fillStyle = '#ccc'; ctx.fillText('準備…', A.w / 2, A.h / 2 + 38);
+      ctx.fillText(`${w.bosses[0].name}  對  ${w.bosses[1].name}`, R.VW / 2, R.VH / 2 - 8);
+      ctx.font = `20px ${FONT}`; ctx.fillStyle = '#ccc'; ctx.fillText('準備…', R.VW / 2, R.VH / 2 + 38);
     }
     if (!b) return;
     const k = b.life / b.max, a = Math.min(1, k * 4, (1 - k) * 8);
     ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const y = A.h * 0.2;
+    const y = R.VH * 0.2;
     // 橫幅面板漸層參數固定，以 R.grad 備忘
-    const g = R.grad(ctx, 'banner:' + A.w, (c) => {
-      const lg = c.createLinearGradient(0, 0, A.w, 0); lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(0.5, 'rgba(0,0,0,0.7)'); lg.addColorStop(1, 'rgba(0,0,0,0)'); return lg;
+    const g = R.grad(ctx, 'banner:' + R.VW, (c) => {
+      const lg = c.createLinearGradient(0, 0, R.VW, 0); lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(0.5, 'rgba(0,0,0,0.7)'); lg.addColorStop(1, 'rgba(0,0,0,0)'); return lg;
     });
-    ctx.fillStyle = g; ctx.fillRect(0, y - 50, A.w, b.sub ? 110 : 90);
+    ctx.fillStyle = g; ctx.fillRect(0, y - 50, R.VW, b.sub ? 110 : 90);
     ctx.font = `bold ${Math.round(50 + (1 - Math.min(1, (1 - k) * 6)) * 20)}px ${FONT}`;
-    ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.strokeText(b.text, A.w / 2, y);
-    ctx.fillStyle = b.color; ctx.fillText(b.text, A.w / 2, y);
-    if (b.sub) { ctx.font = `22px ${FONT}`; ctx.fillStyle = '#eee'; ctx.fillText(b.sub, A.w / 2, y + 42); }
+    ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.strokeText(b.text, R.VW / 2, y);
+    ctx.fillStyle = b.color; ctx.fillText(b.text, R.VW / 2, y);
+    if (b.sub) { ctx.font = `22px ${FONT}`; ctx.fillStyle = '#eee'; ctx.fillText(b.sub, R.VW / 2, y + 42); }
     ctx.globalAlpha = 1;
   }
   function drawLog(ctx, w, view) {
     if (!view.showLog) return;
-    const A = BD.ARENA, n = 7, items = w.logs.slice(-n);
-    const x = 12, y0 = A.h - 12 - n * 20 - (w.training ? 150 : 0);
+    const n = 7, items = w.logs.slice(-n);
+    const x = 12, y0 = R.VH - 12 - n * 20 - (w.training ? 150 : 0);
     ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(x - 6, y0 - 22, 470, n * 20 + 26);
     ctx.font = `bold 13px ${FONT}`; ctx.fillStyle = '#aaa'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.fillText('戰鬥紀錄（L 切換）', x, y0 - 6);
@@ -139,6 +138,14 @@
   }
 
   const shakeOut = { x: 0, y: 0 };
+  // 鏡頭：平滑跟著雙方 Boss 的中點，夾在競技場內；換場（新 World）時直接定位。純繪圖狀態，滑鼠世界座標由 input.js 讀 R.cam
+  function followCamera(w, t) {
+    const A = BD.ARENA, c = R.cam, [a, b] = w.bosses;
+    const tx = U.clamp((a.x + b.x) / 2 - R.VW / 2, 0, A.w - R.VW), ty = U.clamp((a.y + b.y) / 2 - R.VH / 2, 0, A.h - R.VH);
+    if (c.w !== w) { c.w = w; c.x = tx; c.y = ty; } else { const k = Math.min(1, Math.max(0, t - c.t) * 5); c.x += (tx - c.x) * k; c.y += (ty - c.y) * k; }
+    c.t = t;
+    return c;
+  }
   R.render = function (ctx, w, view) {
     const t = performance.now() / 1000;
     if (R.cacheBeginFrame) R.cacheBeginFrame();
@@ -147,6 +154,10 @@
     const sh = w.fx.shakeOffset(shakeOut);
     ctx.save();
     ctx.translate(R.OX + sh.x, R.OY + sh.y);
+    // 世界繪圖：裁切在競技場視窗（含邊框 34px）內，並套用鏡頭位移
+    const cam = followCamera(w, t);
+    ctx.save(); ctx.beginPath(); ctx.rect(-34, -34, R.VW + 68, R.VH + 68); ctx.clip();
+    ctx.translate(-cam.x, -cam.y);
     drawArena(ctx, w, t);
     drawReflections(ctx, w, t);
     drawZones(ctx, w, t);
@@ -173,12 +184,13 @@
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
     drawTexts(ctx, w);
-    drawBanners(ctx, w);
-    drawLog(ctx, w, view);
     if (view.player != null) {
       const m = view.mouse; ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(m.x, m.y, 10, 0, U.TAU); ctx.moveTo(m.x - 15, m.y); ctx.lineTo(m.x + 15, m.y); ctx.moveTo(m.x, m.y - 15); ctx.lineTo(m.x, m.y + 15); ctx.stroke();
     }
+    ctx.restore();
+    drawBanners(ctx, w);
+    drawLog(ctx, w, view);
     ctx.restore();
     if (w.fx.flashA > 0) { ctx.globalAlpha = w.fx.flashA * 0.6; ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
     drawHUD(ctx, w, view, t);

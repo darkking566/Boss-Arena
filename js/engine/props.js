@@ -6,6 +6,17 @@
   const A = () => BD.ARENA;
   const TREE_R = 32, TREE_HP = 60, LOG_SPEED = 720, WATER_SLOW = 0.78;
 
+  // 森林區散佈樹位：固定種子、固定順序（與 w.rng 無關），樹距至少 150
+  (function scatterTrees(a) {
+    const f = a.biomes.find((b) => b.id === 'forest');
+    let s = 20240601; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+    for (let tries = 0; tries < 4000 && a.trees.length < 30; tries++) {
+      const x = 70 + rnd() * (f.x1 - 140), y = 70 + rnd() * (a.h - 140);
+      if (a.trees.every((t) => Math.hypot(t[0] - x, t[1] - y) > 150)) a.trees.push([Math.round(x), Math.round(y)]);
+    }
+  })(A());
+  BD.biomeAt = (x) => A().biomes.find((b) => x < b.x1) || A().biomes[A().biomes.length - 1];
+
   // 每場戰鬥開始（與訓練場重置）時依 ARENA.trees 重建存活的樹；pillars 其他程式（AI、投射物、碰撞）照舊讀取
   BD.resetArena = function () {
     A().pillars = A().trees.map((t, i) => ({ x: t[0], y: t[1], r: TREE_R, hp: TREE_HP, max: TREE_HP, tree: true, v: i % 3 }));
@@ -45,21 +56,25 @@
       if (cls === 'smash') launchTree(w, src, t, radial, dmg);
       else hurtTree(w, t, cls === 'cut' ? dmg * 2 : dmg * 0.5, cls === 'cut' && shape.ang != null && (shape.kind === 'rect' || shape.kind === 'cone') ? shape.ang : radial);
     }
-    const c = BD.K.shapeCenter(shape);
-    if (pondAt(c.x, c.y)) BD.spawnFx(w, 'splash', c.x, c.y, { scale: U.clamp(dmg / 70, 0.7, 2.2), angle: shape.ang, dir: shape.kind === 'rect' || shape.kind === 'cone' });
+    const c = BD.K.shapeCenter(shape), line = shape.kind === 'rect' || shape.kind === 'cone', k = U.clamp(dmg / 70, 0.7, 2.2);
+    if (pondAt(c.x, c.y)) BD.spawnFx(w, 'splash', c.x, c.y, { scale: k, angle: shape.ang, dir: line });
+    // 沙漠：沿招式方向揚起沙塵；長條斬擊沿刃長在三處揚塵，其餘（砸地、爆炸）在中心向四周
+    const pts = shape.kind === 'rect' ? [0.2, 0.5, 0.8].map((f) => ({ x: shape.x + Math.cos(shape.ang) * shape.len * f, y: shape.y + Math.sin(shape.ang) * shape.len * f })) : [c];
+    for (const q of pts) if (BD.biomeAt(q.x).id === 'desert') BD.spawnFx(w, 'sanddust', q.x, q.y, { scale: k * (pts.length > 1 ? 0.7 : 1), angle: shape.ang, dir: line });
   };
   // 投射物撞樹：掉血（滾木撞樹力道大）；呼叫端已讓投射物消失
   BD.projHitsTree = function (w, p, t) {
     hurtTree(w, t, p.kind === 'log' ? TREE_HP : p.dmg * 0.5, Math.atan2(p.vy, p.vx));
   };
 
-  // 角色在水中移動時，腳邊持續濺起漣漪（純視覺）
+  // 角色在水中 / 沙漠中移動時，腳邊持續濺起漣漪 / 揚起沙塵（純視覺）
   BD.updateTerrain = function (w, dt) {
     for (const b of w.bosses) {
       b.wetT = (b.wetT || 0) - dt;
-      if (b.wetT > 0 || b.state === 'dead' || Math.hypot(b.vx + b.kbx, b.vy + b.kby) < 60 || !pondAt(b.x, b.y)) continue;
-      b.wetT = 0.16;
-      BD.spawnFx(w, 'splash', b.x, b.y + b.r * 0.4, { scale: 0.5 });
+      const sp = Math.hypot(b.vx + b.kbx, b.vy + b.kby);
+      if (b.wetT > 0 || b.state === 'dead' || sp < 60) continue;
+      if (pondAt(b.x, b.y)) { b.wetT = 0.16; BD.spawnFx(w, 'splash', b.x, b.y + b.r * 0.4, { scale: 0.5 }); }
+      else if (sp > 150 && BD.biomeAt(b.x).id === 'desert') { b.wetT = 0.14; BD.spawnFx(w, 'sanddust', b.x, b.y + b.r * 0.4, { scale: 0.45, angle: Math.atan2(-b.vy, -b.vx), dir: true }); }
     }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

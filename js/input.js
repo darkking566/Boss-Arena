@@ -4,7 +4,7 @@
   const BD = G.BD, U = BD.U;
   class Input {
     constructor(canvas) {
-      this.keys = new Set(); this.mouse = { x: 700, y: 400 }; this.buffer = []; this.canvas = canvas;
+      this.keys = new Set(); this.mouse = { sx: 700, sy: 400, get x() { return this.sx + BD.Render.cam.x; }, get y() { return this.sy + BD.Render.cam.y; } }; this.buffer = []; this.canvas = canvas;
       this.onKey = null;
       window.addEventListener('keydown', (e) => {
         const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
@@ -21,8 +21,8 @@
     }
     moveTo(e) {
       const r = this.canvas.getBoundingClientRect(), R = BD.Render;
-      this.mouse.x = (e.clientX - r.left) / r.width * R.W - R.OX;
-      this.mouse.y = (e.clientY - r.top) / r.height * R.H - R.OY;
+      this.mouse.sx = (e.clientX - r.left) / r.width * R.W - R.OX;
+      this.mouse.sy = (e.clientY - r.top) / r.height * R.H - R.OY;
     }
     press(k) { this.buffer.push({ k, t: performance.now() }); }
     take(winMs) { const now = performance.now(), win = winMs || 280; this.buffer = this.buffer.filter((b) => now - b.t < win); return this.buffer; }

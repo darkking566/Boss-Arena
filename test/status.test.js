@@ -569,7 +569,7 @@ function heavyWorld(seed) {
   const w = new BD.World(BD.bossById.magmus, BD.bossById.ronin, { seed: 1, intro: 0, pace: 'heavy' });
   const b = w.bosses[0], e = w.bosses[1];
   w.time = 3;
-  b.x = 70; b.y = 410;
+  b.x = 70; b.y = 410; BD.ARENA.pillars = []; // 貼牆的情境：清掉樹，只剩牆壁限制
   const shape = { kind: 'circle', x: b.x, y: b.y, r: 90 };
   const thRef = { id: 9001, team: 1, owner: e, soft: false, shape, t: 0, hitIn: 0.9, a: null };
   w.telegraphs.push(thRef);

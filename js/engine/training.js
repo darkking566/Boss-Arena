@@ -24,7 +24,7 @@
       const topts = typeof opts === 'object' && opts ? opts : {};
       this.freeCast = topts.freeCast !== undefined ? !!topts.freeCast : true;
       this.kbMode = topts.kbMode || 'return';
-      this.bossHome = { x: 420, y: BD.ARENA.h / 2 };
+      this.bossHome = { x: BD.ARENA.w / 2 - 260, y: BD.ARENA.h / 2 };
       this.home = { x: this.bossHome.x + (TRAINING_RANGES[topts.range || 'mid'] || 520), y: this.bossHome.y };
       this.range = topts.range || 'mid';
       this.queue = [];

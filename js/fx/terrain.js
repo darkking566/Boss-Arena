@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜地形（treecut / treesmash / treehit / splash）：樹被斬成兩半、被撞飛、被擊中，以及水面濺起水花與漣漪
+// 特效庫｜地形（treecut / treesmash / treehit / splash / sanddust）：樹被斬成兩半、被撞飛、被擊中，水面濺起水花與漣漪，沙地揚起沙塵
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：angle 招式方向（斬擊為刃向、撞擊為衝擊方向）、r 樹幹半徑、scale 倍率、dir 水花是否沿 angle 噴射
 (function (G) {
@@ -58,6 +58,20 @@
       fx.ring(x, y, 1, 20 * k, 0.4, '#ffffff', 1.5);
       fx.debris(x, y, '#e4f6fa', Math.round(8 * k) + 2, 120 + 90 * k, 2.6, 6 * k);
       if (o.dir) fx.sparkle(x, y, '#e4f6fa', Math.round(8 * k), 320, o.angle, 0.9);
+    },
+  });
+
+  BD.defineEffect('sanddust', {
+    name: '沙塵', category: '地形',
+    desc: '沙地被招式擊中 / 被踩踏時揚起：dir 為真時沿 angle 噴出一道沙塵與沙粒，否則向四周擴散；scale 越大沙塵越多越遠。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const k = o.scale, n = Math.round(7 * k) + 2;
+      for (let i = 0; i < n; i++) {
+        const a = o.dir ? o.angle + (V() - 0.5) * 0.9 : V() * Math.PI * 2, s = (90 + V() * 200) * Math.sqrt(k);
+        fx.part(BD.PK.SOFT, x, y, Math.cos(a) * s, Math.sin(a) * s, 0.6 + V() * 0.5, 'rgba(214,190,140,0.6)', 8 + V() * 10 * k, 2.2);
+      }
+      fx.debris(x, y, '#d8be86', Math.round(5 * k) + 2, 160 * Math.sqrt(k), 2.4, 8 * k);
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

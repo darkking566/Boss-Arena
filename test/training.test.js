@@ -44,8 +44,9 @@ for (const pace of ['light', 'heavy']) {
 
     ok(!BD.bosses.some((b) => b.id === 'dummy'), `${id} [${pace}]: dummy 不在 BD.bosses 清單中`);
     ok(!!tr, `${id} [${pace}]: w.training 存在`);
-    close(boss.x, 420, 1, `${id} [${pace}]: boss x 位置約 420`);
-    close(dummy.x, 940, 1, `${id} [${pace}]: dummy x 位置約 940`);
+    const cx = BD.ARENA.w / 2;
+    close(boss.x, cx - 260, 1, `${id} [${pace}]: boss x 位置約場中央左 260`);
+    close(dummy.x, cx + 260, 1, `${id} [${pace}]: dummy x 位置約場中央右 260`);
 
     const skillList = [...boss.skills, boss.ultimate];
 
