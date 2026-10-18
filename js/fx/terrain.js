@@ -1,9 +1,9 @@
 'use strict';
-// 特效庫｜地形（treecut / treesmash / treehit / splash / sanddust）：樹被斬成兩半、被撞飛、被擊中，水面濺起水花與漣漪，沙地揚起沙塵
+// 特效庫｜地形（treecut / treesmash / treehit / splash / sanddust / snowburst / wheatburst）：樹被斬成兩半、被撞飛、被擊中，水面濺起水花與漣漪，沙地揚起沙塵、雪地炸開雪霧、麥田被削飛成漫天麥稈
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：angle 招式方向（斬擊為刃向、撞擊為衝擊方向）、r 樹幹半徑、scale 倍率、dir 水花是否沿 angle 噴射
 (function (G) {
-  const BD = G.BD, V = BD.vrng;
+  const BD = G.BD, V = BD.vrng, TAU = Math.PI * 2;
   const LEAF = ['#5f9e3c', '#3f7a2c', '#8bc34a'];
   const leaves = (fx, x, y, n, speed, spread) => { for (const c of LEAF) fx.debris(x, y, c, Math.ceil(n / 3), speed, 4.5, spread); };
 
@@ -66,12 +66,61 @@
     desc: '沙地被招式擊中 / 被踩踏時揚起：dir 為真時沿 angle 噴出一道沙塵與沙粒，否則向四周擴散；scale 越大沙塵越多越遠。',
     params: {},
     spawn(fx, x, y, o) {
-      const k = o.scale, n = Math.round(7 * k) + 2;
-      for (let i = 0; i < n; i++) {
-        const a = o.dir ? o.angle + (V() - 0.5) * 0.9 : V() * Math.PI * 2, s = (90 + V() * 200) * Math.sqrt(k);
-        fx.part(BD.PK.SOFT, x, y, Math.cos(a) * s, Math.sin(a) * s, 0.6 + V() * 0.5, 'rgba(214,190,140,0.6)', 8 + V() * 10 * k, 2.2);
+      const k = o.scale, sk = Math.sqrt(k);
+      for (let i = 0, n = Math.round(12 * k) + 8; i < n; i++) { // 大塵團：2~5 秒慢慢擴散、向上飄散
+        const a = o.dir ? o.angle + (V() - 0.5) * 0.9 : V() * TAU, s = (60 + V() * 240) * sk;
+        fx.puff(x + (V() - 0.5) * 24, y + (V() - 0.5) * 24, Math.cos(a) * s, Math.sin(a) * s - 25, 16 + V() * 10, 70 + V() * 80 * sk, 2.4 + V() * 2.2, 'sand', 0.5);
       }
-      fx.debris(x, y, '#d8be86', Math.round(5 * k) + 2, 160 * Math.sqrt(k), 2.4, 8 * k);
+      for (let i = 0, n = Math.round(14 * k) + 6; i < n; i++) { // 沙粒拋物線飛濺
+        const a = o.dir ? o.angle + (V() - 0.5) * 1.3 : V() * TAU, s = (120 + V() * 300) * sk;
+        fx.stalk(x, y, Math.cos(a) * s, Math.sin(a) * s, 140 + V() * 280 * sk, 0, 0, 3, 4, V() < 0.5 ? '#d8be86' : '#b89a5e', 0.9 + V() * 0.9);
+      }
+      fx.debris(x, y, '#d8be86', Math.round(5 * k) + 2, 160 * sk, 2.4, 8 * k);
+    },
+  });
+
+  BD.defineEffect('snowburst', {
+    name: '雪沫飛揚', category: '地形',
+    desc: '雪地被招式擊中 / 被踩踏時炸開：大片雪霧翻滾 2~4 秒、雪塊拋物線飛濺、冰晶閃光；dir 為真時沿 angle 噴出一道雪浪，否則向四周炸開。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const k = o.scale, sk = Math.sqrt(k);
+      for (let i = 0, n = Math.round(9 * k) + 5; i < n; i++) {
+        const a = o.dir ? o.angle + (V() - 0.5) * 1.1 : V() * TAU, s = (80 + V() * 260) * sk;
+        fx.puff(x + (V() - 0.5) * 20, y + (V() - 0.5) * 20, Math.cos(a) * s, Math.sin(a) * s - 25, 22 + V() * 14, 70 + V() * 70 * sk, 2.2 + V() * 1.8, 'snow', 0.6);
+      }
+      for (let i = 0, n = Math.round(10 * k) + 4; i < n; i++) {
+        const a = o.dir ? o.angle + (V() - 0.5) * 1.2 : V() * TAU, s = (200 + V() * 420) * sk;
+        fx.stalk(x, y, Math.cos(a) * s, Math.sin(a) * s, (260 + V() * 480) * sk, 0, 0, 4 + V() * 5, 6 + V() * 5, V() < 0.5 ? '#ffffff' : '#d3e3f3', 1.2 + V() * 1.1);
+      }
+      fx.sparkle(x, y, '#bfe6ff', Math.round(6 * k), 360, o.dir ? o.angle : null, o.dir ? 1 : null);
+    },
+  });
+
+  const WHEAT_COL = ['#e3b94a', '#d1a233', '#f1cf6e', '#b98a24'];
+  BD.defineEffect('wheatburst', {
+    name: '麥浪炸裂', category: '地形',
+    desc: '麥田被摧毀：cells（格號清單）裡的麥叢被連根削飛成漫天麥稈與麥粒，金色麥屑翻滾，風圈讓周圍麥浪向外倒伏。mode 為 cut（沿刃的兩側削飛）、blast（以中心炸開）或 trample（腳下踩倒，規模小）。',
+    params: { cells: [], mode: 'cut' },
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, trample = o.mode === 'trample', blast = o.mode === 'blast', per = trample ? 2 : blast ? 7 : 5;
+      for (const idx of o.cells) {
+        fx.field[idx] = 1;
+        const cx = BD.WHEAT.cx(idx), cy = BD.WHEAT.cy(idx), rad = Math.atan2(cy - y, cx - x);
+        for (let j = 0; j < per; j++) {
+          const side = V() < 0.5 ? -1 : 1;
+          const dir = trample ? a + Math.PI + (V() - 0.5) * 2 : blast || o.dirless ? rad + (V() - 0.5) * 0.8 : a + side * Math.PI / 2 + (V() - 0.5) * 0.6;
+          const s = trample ? 60 + V() * 90 : 300 + V() * 450 + (blast ? 150 : 0), vz = trample ? 150 + V() * 150 : 300 + V() * (blast ? 480 : 340);
+          const fwd = blast || trample ? 0 : 120;
+          fx.stalk(cx, cy, Math.cos(dir) * s + Math.cos(a) * fwd, Math.sin(dir) * s + Math.sin(a) * fwd, vz, V() * TAU, (V() < 0.5 ? -1 : 1) * (8 + V() * 14), 24 + V() * 22, 2.2, WHEAT_COL[(V() * 4) | 0], 1.1 + V());
+        }
+        if (!trample) {
+          for (let j = 0; j < 2; j++) fx.stalk(cx, cy, Math.cos(rad) * (200 + V() * 500), Math.sin(rad) * (200 + V() * 500), 300 + V() * 500, 0, 0, 3, 3.5, '#f6dc7a', 1 + V());
+          if (V() < 0.35) fx.stalk(cx, cy, Math.cos(rad) * (150 + V() * 300), Math.sin(rad) * (150 + V() * 300), 350 + V() * 350, V() * TAU, (V() - 0.5) * 12, 48 + V() * 14, 6, '#d9aa38', 1.4 + V());
+          if (V() < 0.5) fx.puff(cx, cy, Math.cos(rad) * 70, Math.sin(rad) * 70 - 20, 14, 46 + V() * 30, 1.6 + V() * 1.2, 'wheat', 0.42);
+        }
+      }
+      if (!trample) { fx.gust(x, y, o.radius || 150); fx.shake(Math.min(10, 2 + o.cells.length * 0.08)); }
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

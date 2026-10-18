@@ -17,15 +17,15 @@
     holy: { c: '#f2e6b0', c2: '#d9c47a', glow: '#ffe27a' },
     arcane: { c: '#3a1e5a', c2: '#5f3d88', glow: '#c77dff' },
   };
-  const SAND = { c: '#6d5632', c2: '#e3d3a0' };
+  const GROUND = { desert: { c: '#6d5632', c2: '#e3d3a0' }, snow: { c: '#8aa3bf', c2: '#ffffff' }, wheat: { c: '#4a3618', c2: '#caa24c' } };
   const LEAF = ['#5f9e3c', '#3f7a2c', '#8bc34a', '#9b6b3c'];
   const jag = (n, lo) => Array.from({ length: n }, () => lo + V() * (1 - lo));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   BD.leaveScar = function (w, id, cat, x, y, o) {
     const fx = w.fx; if (!fx.scars || BD.pondAt(x, y)) return;
-    const sand = BD.biomeAt(x).id === 'desert', D = sand ? SAND : PAL.physical;
-    const P = o.el === 'physical' && sand ? SAND : PAL[o.el] || PAL.physical;
+    const ground = GROUND[BD.biomeAt(x).id], D = ground || PAL.physical; // 沙 / 雪 / 麥田的「泥土色」
+    const P = o.el === 'physical' && ground ? ground : PAL[o.el] || PAL.physical;
     const a = o.angle || 0, r = o.radius, k = o.k;
     const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
     const gash = (gx, gy, ga, len, wd, arc, al) => add({ k: 'gash', x: gx, y: gy, a: ga, len, wd, arc, al: al || 1, c: P.c, c2: P.c2, glow: P.glow });

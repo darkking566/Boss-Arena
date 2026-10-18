@@ -6,7 +6,7 @@
 // 高層特效（斬擊、砸地…）定義在 js/fx/，以 BD.spawnFx(w, 'slam', x, y, opts) 產生；本檔只提供「原件」。
 (function (G) {
   const BD = G.BD, U = BD.U, V = BD.vrng;
-  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, GHOST_CAP = 40;
+  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, GHOST_CAP = 40, PUFF_CAP = 260, STALK_CAP = 1100, PRINT_CAP = 500;
   // 粒子種類（kind）：繪圖端依此分批
   const PK = BD.PK = { SQ: 0, SOFT: 1, DEBRIS: 2, EMBER: 3, SHARD: 4, BUBBLE: 5, WISP: 6, SPARK: 7, MOTE: 8 };
   function newPart() { return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, color: '', size: 0, drag: 0, soft: false, kind: 0, z: 0, vz: 0, g: 0, ay: 0, ph: 0 }; }
@@ -24,6 +24,8 @@
       this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
       this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = []; this.chunks = [];
       this.scars = []; // 永久戰鬥痕跡（js/fx/scars.js）；不隨 life 消失，只累計 age（餘燼冷卻用）
+      this.puffs = []; this.stalks = []; this.prints = []; this.gusts = [];
+      this.field = {}; // 麥田被摧毀的格子（格號 → 1）
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
     }
@@ -153,6 +155,14 @@
     pillar(x, y, r, color, life) { this.pillars.push({ x, y, r, color, life: life || 0.5, max: life || 0.5 }); }
     // 斷樹的一半：a0 為切線（刃）方向，side（±1）決定留哪一側，spin 為之後累積的旋轉；繪圖端畫半棵樹並漸隱
     chunk(x, y, vx, vy, a0, vr, side, r, v, life) { this.chunks.push({ x, y, vx, vy, a0, spin: 0, vr, side, r, v, life: life || 1.1, max: life || 1.1 }); }
+    // 大型柔軟塵團（沙塵 / 雪沫 / 麥屑）：半徑由 r0 擴到 r1、緩慢飄散；tint 為繪圖端的預烘焙色票（'sand' | 'snow' | 'wheat'）
+    puff(x, y, vx, vy, r0, r1, life, tint, al) { this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al }); if (this.puffs.length > PUFF_CAP) this.puffs.shift(); }
+    // 飛濺的長條 / 團塊（麥稈、麥粒、雪塊）：帶高度 z 的拋物線，落地後滑行並漸隱；len 為長度、w 為線寬
+    stalk(x, y, vx, vy, vz, rot, vr, len, w, col, life) { if (this.stalks.length >= STALK_CAP) return; this.stalks.push({ x, y, z: 4, vx, vy, vz, rot, vr, len, w, col, life, max: life }); }
+    // 腳印：kind 'snow'（深雪、留很久）/ 'desert'（淺、很快被風吹平）
+    print(x, y, a, r, kind) { const life = kind === 'snow' ? 40 : 9; this.prints.push({ x, y, a, r, kind, life, max: life }); if (this.prints.length > PRINT_CAP) this.prints.shift(); }
+    // 衝擊風圈：麥浪沿圈擴散（繪圖端用來讓麥叢向外傾倒）
+    gust(x, y, r) { this.gusts.push({ x, y, r, life: 0.9, max: 0.9 }); if (this.gusts.length > 10) this.gusts.shift(); }
     text(x, y, text, color, size) { this.texts.push({ x: x + (V() - 0.5) * 16, y, text, color, size: size || 16, life: 1.0, max: 1.0, vy: -50 }); }
     damage(b, dmg, color) {
       const big = dmg >= 100;
@@ -218,8 +228,14 @@
         const k = Math.exp(-p.drag * dt); p.vx *= k; p.vy *= k;
       }
       compact(parts, (p) => { if (pool.length < POOL_CAP) { p.color = ''; pool.push(p); } });
-      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks];
+      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks, this.puffs, this.stalks, this.prints, this.gusts];
       for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
+      const pk = Math.exp(-1.1 * dt);
+      for (const p of this.puffs) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= pk; p.vy *= pk; }
+      for (const s of this.stalks) {
+        s.x += s.vx * dt; s.y += s.vy * dt; s.rot += s.vr * dt;
+        if (s.z > 0) { s.vz -= 1100 * dt; s.z += s.vz * dt; if (s.z <= 0) { s.z = 0; s.vr = 0; s.vx *= 0.35; s.vy *= 0.35; } } else { const k = Math.exp(-6 * dt); s.vx *= k; s.vy *= k; }
+      }
       for (const c of this.chunks) { c.x += c.vx * dt; c.y += c.vy * dt; c.spin += c.vr * dt; const k = Math.exp(-3 * dt); c.vx *= k; c.vy *= k; c.vr *= k; }
       for (const s of this.scars) s.age += dt;
       for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));

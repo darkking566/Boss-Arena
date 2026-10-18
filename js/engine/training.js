@@ -213,10 +213,11 @@
       w.freezeF = 0;
       w.slowmo = 0;
       if (w.fx) {
-        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers', 'chunks', 'scars'];
+        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers', 'chunks', 'scars', 'puffs', 'stalks', 'prints', 'gusts'];
         for (const prop of fxProps) {
           if (Array.isArray(w.fx[prop])) w.fx[prop].length = 0;
         }
+        w.fx.field = {};
         if (w.fx.shakeV != null) w.fx.shakeV = 0;
       }
       this.resetUnit(this.boss, this.bossHome, 0);

@@ -41,7 +41,7 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
 {
   const w = mk();
   ok(BD.ARENA.pillars.length === N, '新的一場重置回完整樹木');
-  ok(w.bosses[0].x > 1000 && w.bosses[1].x < 2000 && BD.biomeAt(w.bosses[0].x).id === 'desert', 'Boss 出生在中央沙漠');
+  ok(w.bosses[0].x > 1700 && w.bosses[1].x < 2500 && BD.biomeAt(w.bosses[0].x).id === 'desert', 'Boss 出生在中央沙漠');
   const p = BD.ARENA.ponds[0], b = w.bosses[0];
   b.x = p.x; b.y = p.y;
   const inW = b.speed(); b.x = 10; b.y = 10;
@@ -61,8 +61,39 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   BD.hitProps(w, a, { kind: 'circle', x: cx, y: 900, r: 60 }, { dmg: 80, kb: 300, fx: 'slam' });
   ok(w.fx.parts.length > n0, '沙漠命中揚起沙塵');
   const n1 = w.fx.parts.length;
-  BD.hitProps(w, a, { kind: 'circle', x: 50, y: 900, r: 60 }, { dmg: 80, kb: 100 });
-  ok(w.fx.parts.length === n1, '非沙漠不揚沙塵');
+  BD.ARENA.pillars = [];
+  BD.hitProps(w, a, { kind: 'circle', x: 1000, y: 900, r: 60 }, { dmg: 80, kb: 100 });
+  ok(w.fx.parts.length === n1 && w.fx.puffs.length > 0 && w.fx.puffs.every((p) => p.tint === 'sand'), '非沙漠不揚沙塵');
+  ok(w.fx.puffs.every((p) => p.max >= 2.4), '沙塵團存在 2.4 秒以上');
+}
+
+{
+  // 雪地：減速、踩出腳印、招式炸開雪霧；麥田：被削飛 / 炸開 / 踩倒，已摧毀的格子不重複
+  const w = mk(), a = w.bosses[0], b = w.bosses[1];
+  a.x = 400; a.y = 900;
+  const inSnow = a.speed(); a.x = 2000;
+  ok(inSnow < a.speed() && BD.biomeAt(400).id === 'snow', '雪地移動速度較慢');
+  a.x = 400; a.vx = 200; a.vy = 0; a.kbx = 0; a.kby = 0;
+  for (let i = 0; i < 100; i++) { BD.updateTerrain(w, 1 / 60); a.x += 200 / 60; }
+  ok(w.fx.prints.length >= 2 && w.fx.prints[0].kind === 'snow', '雪地行走留下腳印');
+  const n0 = w.fx.puffs.length;
+  BD.hitProps(w, a, { kind: 'circle', x: 600, y: 900, r: 80 }, { dmg: 90, kb: 300, fx: 'slam' });
+  ok(w.fx.puffs.length > n0 && w.fx.puffs.some((p) => p.tint === 'snow'), '雪地命中炸開雪霧');
+
+  const cut = (shape, p) => BD.hitProps(w, a, shape, Object.assign({ dmg: 60, kb: 100, fx: 'slash' }, p));
+  cut({ kind: 'rect', x: 2700, y: 900, ang: 0, len: 300, w: 80 });
+  const cutN = Object.keys(w.fx.field).length, st = w.fx.stalks.length;
+  ok(cutN >= 8 && st > cutN * 4 && w.fx.gusts.length === 1, `斬擊削飛麥叢（${cutN} 格、${st} 根麥稈）`);
+  cut({ kind: 'rect', x: 2700, y: 900, ang: 0, len: 300, w: 80 });
+  ok(Object.keys(w.fx.field).length === cutN && w.fx.stalks.length === st, '已摧毀的麥叢不重複');
+  cut({ kind: 'circle', x: 3000, y: 500, r: 120 }, { kb: 400, fx: 'slam' });
+  ok(Object.keys(w.fx.field).length > cutN + 10, '重擊炸開一整片麥叢');
+  b.x = 3100; b.y = 1300; b.vx = 150; b.vy = 0; b.kbx = 0; b.kby = 0;
+  const f0 = Object.keys(w.fx.field).length;
+  BD.updateTerrain(w, 1 / 60);
+  ok(Object.keys(w.fx.field).length > f0, '走過麥田踩倒腳下的麥子');
+  w.fx.stalks.length = 0; for (let i = 0; i < 60; i++) w.fx.update(1 / 60);
+  ok(w.fx.field && w.fx.gusts.length === 0, '風圈會消散');
 }
 
 {

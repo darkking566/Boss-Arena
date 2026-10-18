@@ -4,15 +4,20 @@
 (function (G) {
   const BD = G.BD, U = BD.U;
   const A = () => BD.ARENA;
-  const TREE_R = 32, TREE_HP = 60, LOG_SPEED = 720, WATER_SLOW = 0.78;
+  const TREE_R = 32, TREE_HP = 60, LOG_SPEED = 720, WATER_SLOW = 0.78, SNOW_SLOW = 0.9;
+  // 麥田格網：每格 40px 一叢麥；被招式 / 踩踏摧毀的格子記在 fx.field（純視覺狀態，不影響戰鬥）
+  const CELL = 40, cols = Math.ceil(A().w / CELL), wheatB = A().biomes.find((b) => b.id === 'wheat');
+  const WHEAT = BD.WHEAT = { cell: CELL, cols, idx: (x, y) => Math.floor(y / CELL) * cols + Math.floor(x / CELL), cx: (i) => (i % cols + 0.5) * CELL, cy: (i) => (Math.floor(i / cols) + 0.5) * CELL,
+    x0: wheatB.x0 + CELL, x1: wheatB.x1 - CELL, y0: CELL, y1: A().h - CELL };
+  const inWheat = (x, y) => x >= WHEAT.x0 && x < WHEAT.x1 && y >= WHEAT.y0 && y < WHEAT.y1;
 
   // 森林區散佈樹位：固定種子、固定順序（與 w.rng 無關），樹距至少 150
   (function scatterTrees(a) {
     const f = a.biomes.find((b) => b.id === 'forest');
     let s = 20240601; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
     for (let tries = 0; tries < 4000 && a.trees.length < 30; tries++) {
-      const x = 70 + rnd() * (f.x1 - 140), y = 70 + rnd() * (a.h - 140);
-      if (a.trees.every((t) => Math.hypot(t[0] - x, t[1] - y) > 150)) a.trees.push([Math.round(x), Math.round(y)]);
+      const x = f.x0 + 70 + rnd() * (f.x1 - f.x0 - 140), y = 70 + rnd() * (a.h - 140);
+      if (a.trees.every((t) => Math.hypot(t[0] - x, t[1] - y) > 130)) a.trees.push([Math.round(x), Math.round(y)]);
     }
   })(A());
   BD.biomeAt = (x) => A().biomes.find((b) => x < b.x1) || A().biomes[A().biomes.length - 1];
@@ -25,7 +30,7 @@
 
   const pondAt = (x, y) => A().ponds.find((p) => ((x - p.x) / p.rx) ** 2 + ((y - p.y) / p.ry) ** 2 < 1) || null;
   BD.pondAt = pondAt;
-  BD.terrainSpeedMul = (u) => (pondAt(u.x, u.y) ? WATER_SLOW : 1);
+  BD.terrainSpeedMul = (u) => (pondAt(u.x, u.y) ? WATER_SLOW : BD.biomeAt(u.x).id === 'snow' ? SNOW_SLOW : 1);
 
   // 招式的特效分類決定怎麼動場景：斬擊 → 砍（樹受傷害加倍）、其餘有擊退的重擊 → 撞飛、輕擊 → 只掉血
   function classify(p) {
@@ -60,8 +65,18 @@
     if (pondAt(c.x, c.y)) BD.spawnFx(w, 'splash', c.x, c.y, { scale: k, angle: shape.ang, dir: line });
     // 沙漠：沿招式方向揚起沙塵；長條斬擊沿刃長在三處揚塵，其餘（砸地、爆炸）在中心向四周
     const pts = shape.kind === 'rect' ? [0.2, 0.5, 0.8].map((f) => ({ x: shape.x + Math.cos(shape.ang) * shape.len * f, y: shape.y + Math.sin(shape.ang) * shape.len * f })) : [c];
-    for (const q of pts) if (BD.biomeAt(q.x).id === 'desert') BD.spawnFx(w, 'sanddust', q.x, q.y, { scale: k * (pts.length > 1 ? 0.7 : 1), angle: shape.ang, dir: line });
+    for (const q of pts) { const fxId = DUST[BD.biomeAt(q.x).id]; if (fxId) BD.spawnFx(w, fxId, q.x, q.y, { scale: k * (pts.length > 1 ? 0.7 : 1), angle: shape.ang, dir: line }); }
+    // 麥田：被命中的麥叢整片摧毀（斬擊 → 兩側削飛、重擊 → 炸開、輕擊 → 削掉）
+    const reach = shape.kind === 'rect' ? shape.len / 2 + shape.w : shape.r || 150, cells = [], field = w.fx.field;
+    for (let y = Math.max(WHEAT.y0, c.y - reach); y < Math.min(WHEAT.y1, c.y + reach); y += CELL) {
+      for (let x = Math.max(WHEAT.x0, c.x - reach); x < Math.min(WHEAT.x1, c.x + reach); x += CELL) {
+        const i = WHEAT.idx(x, y);
+        if (!field[i] && U.hitShape(shape, { x: WHEAT.cx(i), y: WHEAT.cy(i), r: CELL * 0.5 })) cells.push(i);
+      }
+    }
+    if (cells.length) BD.spawnFx(w, 'wheatburst', c.x, c.y, { cells, mode: cls === 'smash' ? 'blast' : 'cut', angle: shape.ang, dirless: shape.ang == null, radius: reach, dmg });
   };
+  const DUST = { desert: 'sanddust', snow: 'snowburst' };
   // 投射物撞樹：掉血（滾木撞樹力道大）；呼叫端已讓投射物消失
   BD.projHitsTree = function (w, p, t) {
     hurtTree(w, t, p.kind === 'log' ? TREE_HP : p.dmg * 0.5, Math.atan2(p.vy, p.vx));
@@ -71,10 +86,28 @@
   BD.updateTerrain = function (w, dt) {
     for (const b of w.bosses) {
       b.wetT = (b.wetT || 0) - dt;
-      const sp = Math.hypot(b.vx + b.kbx, b.vy + b.kby);
-      if (b.wetT > 0 || b.state === 'dead' || sp < 60) continue;
+      const sp = Math.hypot(b.vx + b.kbx, b.vy + b.kby), bio = BD.biomeAt(b.x).id;
+      if (b.state === 'dead' || sp < 40) continue;
+      const ang = Math.atan2(b.vy + b.kby, b.vx + b.kbx);
+      if (bio === 'snow' || bio === 'desert') { // 腳印：每走一個步幅左右交替留下一個
+        b.stepD = (b.stepD || 0) + sp * dt;
+        if (b.stepD >= U.clamp(b.r * 1.5, 30, 80)) {
+          b.stepD = 0; b.stepSide = -(b.stepSide || 1);
+          w.fx.print(b.x - Math.sin(ang) * b.stepSide * b.r * 0.35, b.y + Math.cos(ang) * b.stepSide * b.r * 0.35, ang, b.r, bio);
+          if (bio === 'snow') BD.spawnFx(w, 'snowburst', b.x, b.y + b.r * 0.4, { scale: 0.3, angle: ang + Math.PI, dir: true });
+        }
+      }
+      if (bio === 'wheat' && sp > 60) { // 踩倒腳下的麥子
+        const cells = [], rr = b.r * 0.7 + CELL * 0.5;
+        for (let y = b.y - rr; y <= b.y + rr; y += CELL) for (let x = b.x - rr; x <= b.x + rr; x += CELL) {
+          const i = WHEAT.idx(x, y);
+          if (inWheat(x, y) && !w.fx.field[i] && Math.hypot(WHEAT.cx(i) - b.x, WHEAT.cy(i) - b.y) < rr && cells.indexOf(i) < 0) cells.push(i);
+        }
+        if (cells.length) BD.spawnFx(w, 'wheatburst', b.x, b.y, { cells, mode: 'trample', angle: ang, radius: rr });
+      }
+      if (b.wetT > 0 || sp < 60) continue;
       if (pondAt(b.x, b.y)) { b.wetT = 0.16; BD.spawnFx(w, 'splash', b.x, b.y + b.r * 0.4, { scale: 0.5 }); }
-      else if (sp > 150 && BD.biomeAt(b.x).id === 'desert') { b.wetT = 0.14; BD.spawnFx(w, 'sanddust', b.x, b.y + b.r * 0.4, { scale: 0.45, angle: Math.atan2(-b.vy, -b.vx), dir: true }); }
+      else if (sp > 150 && DUST[bio]) { b.wetT = 0.14; BD.spawnFx(w, DUST[bio], b.x, b.y + b.r * 0.4, { scale: 0.45, angle: Math.atan2(-b.vy, -b.vx), dir: true }); }
     }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

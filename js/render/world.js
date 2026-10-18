@@ -39,7 +39,7 @@
     const A = BD.ARENA;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     // 生態區底色：橫向漸層，交界處各留 120px 的柔和過渡
-    const GROUND = { forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], swamp: ['#3d4a30', '#2a3626'] };
+    const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], swamp: ['#3d4a30', '#2a3626'] };
     const lg = g.createLinearGradient(0, 0, A.w, 0);
     A.biomes.forEach((b, i) => {
       const c = GROUND[b.id][0], pad = 120;
@@ -50,15 +50,22 @@
     for (const b of A.biomes) {
       const x0 = b.x0 + 70, x1 = b.x1 - 70, area = (x1 - x0) * A.h / 1.23e6, X = () => x0 + rnd() * (x1 - x0), dark = GROUND[b.id][1];
       for (let i = 0, n = Math.round(260 * area); i < n; i++) {
-        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : 'rgba(150,190,90,0.5)';
+        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : 'rgba(150,190,90,0.5)';
         g.globalAlpha = 0.14; g.beginPath(); g.ellipse(X(), rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
       }
       g.globalAlpha = 1;
-      for (let i = 0, n = Math.round((b.id === 'desert' ? 300 : 900) * area); i < n; i++) {
+      for (let i = 0, n = Math.round((b.id === 'desert' || b.id === 'snow' ? 300 : b.id === 'wheat' ? 2400 : 900) * area); i < n; i++) {
         const x = X(), y = rnd() * A.h;
         if (b.id === 'desert') { // 沙丘風紋：緩弧
           g.strokeStyle = rnd() < 0.5 ? 'rgba(120,90,50,0.22)' : 'rgba(255,240,200,0.3)';
           g.beginPath(); g.arc(x, y, 30 + rnd() * 60, 3.4, 5.4); g.stroke();
+        } else if (b.id === 'snow') { // 雪丘：藍色陰影弧 + 白色高光弧，偶有冰晶閃點
+          g.strokeStyle = rnd() < 0.6 ? 'rgba(120,150,190,0.3)' : 'rgba(255,255,255,0.7)'; g.lineWidth = 2;
+          g.beginPath(); g.arc(x, y, 25 + rnd() * 55, 3.4, 5.2); g.stroke(); g.lineWidth = 1.5;
+          if (rnd() < 0.15) { g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillRect(x, y, 2, 2); }
+        } else if (b.id === 'wheat') { // 麥茬：被割後的短稈（麥叢被摧毀後露出的地面）
+          g.strokeStyle = rnd() < 0.5 ? 'rgba(214,176,84,0.7)' : 'rgba(110,80,30,0.6)';
+          const h = 5 + rnd() * 7, an = -1.2 - rnd() * 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * h, y + Math.sin(an) * h); g.stroke();
         } else { // 草叢 / 沼澤雜草
           g.strokeStyle = rnd() < 0.5 ? (b.id === 'swamp' ? 'rgba(120,150,70,0.35)' : 'rgba(160,205,100,0.35)') : 'rgba(25,55,20,0.45)';
           const h = 4 + rnd() * 7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
@@ -125,7 +132,7 @@
   function drawArena(ctx, w, t) {
     const A = BD.ARENA;
     if (R.cache.enabled) {
-      const s = Math.min(1.25, R.renderScale(ctx)), L = getArenaLayer(s); // 大地圖：靜態層倍率上限 1.25，避免離屏畫布過大
+      const s = Math.min(1.1, R.renderScale(ctx)), L = getArenaLayer(s); // 大地圖：靜態層倍率上限 1.1（4200×1800 → 約 9M 像素），避免離屏畫布過大
       R.drawSprite(ctx, { canvas: L.canvas, scale: s }, -34 - 1 / s, -34 - 1 / s);
     } else {
       // 快取關閉：照舊即時繪製（地面用 1x 快取畫布）
@@ -193,8 +200,83 @@
     }
     ctx.restore();
   }
+  // 腳印：一個橢圓前掌 + 一個橢圓後跟；雪地是凹陷（藍陰影 + 白高光），沙地是淺淺的暗痕；後半生命淡出
+  function foot(ctx) { ctx.beginPath(); ctx.ellipse(3, 0, 7, 6, 0, 0, U.TAU); ctx.ellipse(-8, 0, 5, 4, 0, 0, U.TAU); ctx.fill(); }
+  function drawPrints(ctx, w) {
+    const prints = w.fx.prints;
+    if (!prints || !prints.length) return;
+    for (const p of prints) {
+      const al = Math.min(1, p.life / p.max * 2.2), s = U.clamp(p.r / 24, 0.7, 2.6) * 1.3;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.scale(s, s);
+      if (p.kind === 'snow') { ctx.globalAlpha = al * 0.9; ctx.fillStyle = '#ffffff'; ctx.translate(1.6, 1.6); foot(ctx); ctx.translate(-1.6, -1.6); ctx.globalAlpha = al * 0.8; ctx.fillStyle = '#5b7399'; foot(ctx); }
+      else { ctx.globalAlpha = al * 0.3; ctx.fillStyle = '#6e5530'; foot(ctx); }
+      ctx.restore();
+    }
+  }
+  // 塵團 / 雪霧 / 麥屑：預烘焙的徑向漸層色票，隨時間擴張並淡出
+  const PUFF = { sand: [226, 203, 152], snow: [240, 247, 255], wheat: [240, 205, 110] };
+  function drawPuffs(ctx, fx) {
+    for (const p of fx.puffs) {
+      const age = 1 - p.life / p.max, r = U.lerp(p.r0, p.r1, Math.sqrt(age)), a = p.al * Math.min(1, age * 8) * Math.pow(1 - age, 1.3);
+      if (a < 0.01) continue;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.scale(r / 64, r / 64);
+      R.blit(ctx, 'puff:' + p.tint, 128, 128, 64, 64, (g) => {
+        const c = PUFF[p.tint].join(','), gr = g.createRadialGradient(0, 0, 0, 0, 0, 64);
+        gr.addColorStop(0, `rgba(${c},1)`); gr.addColorStop(0.55, `rgba(${c},0.55)`); gr.addColorStop(1, `rgba(${c},0)`);
+        g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 64, 0, U.TAU); g.fill();
+      });
+      ctx.restore();
+    }
+  }
+  // 飛濺的麥稈 / 麥粒 / 沙粒 / 雪塊：以高度 z 抬離地面；落地後貼地滑行並漸隱
+  function drawStalks(ctx, fx) {
+    ctx.lineCap = 'round';
+    for (const s of fx.stalks) {
+      const dx = Math.cos(s.rot) * s.len / 2, dy = Math.sin(s.rot) * s.len / 2, y = s.y - s.z;
+      ctx.globalAlpha = Math.min(1, s.life / s.max * 2.2); ctx.strokeStyle = s.col; ctx.lineWidth = s.w;
+      ctx.beginPath(); ctx.moveTo(s.x - dx, y - dy); ctx.lineTo(s.x + dx, y + dy); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  // 麥田：每 40px 一叢高聳的金黃麥穗（烘焙精靈 + 隨風擺盪）；被摧毀的格子（fx.field）不再繪製，露出麥茬地面。
+  // 只畫鏡頭範圍內的格子；衝擊風圈（fx.gusts）經過時麥叢向外倒伏
+  function drawWheatSprite(ctx, v) {
+    R.blit(ctx, 'wheat:' + v, 84, 118, 42, 100, (g) => {
+      let seed = 5 + v * 131; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      g.fillStyle = 'rgba(50,35,5,0.35)'; g.beginPath(); g.ellipse(2, 4, 28, 9, 0, 0, U.TAU); g.fill();
+      const cols = ['#c9962a', '#dcae3c', '#efc95a', '#f6dc7c'], list = [];
+      for (let i = 0; i < 28; i++) list.push({ bx: (rnd() - 0.5) * 44, by: (rnd() - 0.5) * 16, h: 46 + rnd() * 32, lean: (rnd() - 0.5) * 14, c: cols[(rnd() * 4) | 0], c2: cols[(rnd() * 4) | 0] });
+      list.sort((a, b) => a.by - b.by);
+      g.lineCap = 'round';
+      for (const s of list) {
+        g.strokeStyle = s.c; g.lineWidth = 2; g.beginPath(); g.moveTo(s.bx, s.by); g.quadraticCurveTo(s.bx + s.lean * 0.3, s.by - s.h * 0.5, s.bx + s.lean, s.by - s.h); g.stroke();
+        g.fillStyle = s.c2; g.beginPath(); g.ellipse(s.bx + s.lean, s.by - s.h - 6, 3.4, 9.5, s.lean * 0.03, 0, U.TAU); g.fill();
+        g.strokeStyle = '#f9e9a0'; g.lineWidth = 1; g.beginPath(); g.moveTo(s.bx + s.lean, s.by - s.h - 13); g.lineTo(s.bx + s.lean + 2, s.by - s.h - 22); g.moveTo(s.bx + s.lean - 2, s.by - s.h - 12); g.lineTo(s.bx + s.lean - 4, s.by - s.h - 20); g.stroke();
+      }
+    });
+  }
+  function drawWheat(ctx, w, t) {
+    const W = BD.WHEAT, cam = R.cam;
+    if (cam.w !== w) return; // 鏡頭不屬於此世界（特效圖鑑）時不畫
+    const field = w.fx.field, gusts = w.fx.gusts, cell = W.cell;
+    const c0 = Math.max(Math.floor(W.x0 / cell), Math.floor((cam.x - 50) / cell)), c1 = Math.min(Math.floor((W.x1 - 1) / cell), Math.floor((cam.x + R.VW + 50) / cell));
+    const r0 = Math.max(1, Math.floor((cam.y - 30) / cell)), r1 = Math.min(Math.floor((W.y1 - 1) / cell), Math.floor((cam.y + R.VH + 110) / cell));
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        const i = r * W.cols + c; if (field[i]) continue;
+        const h = Math.imul(i, 2654435761) >>> 0, px = (c + 0.5) * cell + ((h & 15) - 7.5) * 0.9, py = (r + 0.5) * cell + (((h >> 4) & 15) - 7.5) * 0.9 + 14;
+        let sway = Math.sin(t * 1.7 + ((h >> 10) & 1023) / 163 + px * 0.006) * 3.2;
+        for (const g of gusts) {
+          const d = Math.hypot(px - g.x, py - g.y) || 1, age = 1 - g.life / g.max, f = Math.max(0, 1 - Math.abs(d - g.r * 1.2 * age) / 90) * (1 - age);
+          if (f > 0) sway += (px - g.x) / d * 26 * f;
+        }
+        ctx.save(); ctx.translate(px, py); ctx.transform(1, 0, -sway / 90, 1, 0, 0); drawWheatSprite(ctx, (h >> 8) & 3); ctx.restore();
+      }
+    }
+  }
   function drawDecals(ctx, w) {
     drawScars(ctx, w);
+    drawPrints(ctx, w);
     const decals = w.fx.decals;
     if (!decals || !decals.length) return;
     ctx.save();
@@ -1036,6 +1118,8 @@
       }
     }
     drawStreams(ctx, fx);
+    drawPuffs(ctx, fx);
+    drawStalks(ctx, fx);
     drawParts(ctx, fx.parts);
     drawGlows(ctx, fx, false);
     // 收尾：狀態歸零（globalAlpha 1、source-over、lineCap butt）
@@ -1169,6 +1253,6 @@
     ctx.globalAlpha = 1;
   }
 
-  Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections,
+  Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections, wheat: drawWheat,
     minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, veil: drawVeil, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, star });
 })(typeof window !== 'undefined' ? window : globalThis);
