@@ -37,6 +37,23 @@
     return s;
   };
 
+  // 招式節奏（造型擺姿勢用；回傳重用物件，不每幀配置）：trig 為會「出手」的動作種類 { hit: 1, … }
+  //   wind 0→1 朝下一個出手動作蓄力；snap 1→0 剛出手的收勢；a 目前對應的動作；i 第幾個出手動作；n 已出手數
+  const PACE = { wind: 0, snap: 0, a: null, i: 0, n: 0 };
+  R.skillPace = function (inst, trig) {
+    const P = PACE;
+    P.wind = 0; P.snap = 0; P.a = null; P.i = 0; P.n = 0;
+    const t = inst.t; let prev = 0, last = null;
+    for (const a of inst.v.actions) {
+      if (!trig[a.do]) continue;
+      if (a.at > t) { P.wind = U.clamp((t - prev) / Math.max(0.05, a.at - prev), 0, 1); P.a = a; P.i = P.n; break; }
+      prev = a.at; last = a; P.n++;
+    }
+    if (last && t - prev < 0.25 && (!P.a || P.wind < 0.3)) { P.snap = 1 - (t - prev) / 0.25; P.a = last; P.i = P.n - 1; }
+    if (!P.a && last) { P.a = last; P.i = P.n - 1; }
+    return P;
+  };
+
   // o: {x,y,face,r,def,phase,state,t,...} ；可用於遊戲與選角肖像
   R.drawBossBody = function (ctx, o, t) {
     const def = o.def, r = o.r, st = o.state, style = R.bossStyle(def.style);

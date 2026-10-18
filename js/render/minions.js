@@ -45,7 +45,7 @@
   });
   R.defineMinionStyle('clone', (ctx, m, t) => {
     ctx.globalAlpha = 0.45 + 0.15 * Math.sin(t * 10);
-    R.drawBossBody(ctx, { x: m.x, y: m.y, face: m.face, r: m.r, def: m.owner.def, phase: 1, state: 'idle' }, t);
+    R.drawBossBody(ctx, { x: m.x, y: m.y, face: m.face, r: m.r, def: m.owner.def, phase: m.owner.phase, state: 'idle' }, t);
   }, { absolute: true });
 
   // ── 深淵監視者：同伴與紅眼監視者沿用 Boss 造型，加上迷你血條 ──

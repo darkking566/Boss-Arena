@@ -34,7 +34,7 @@
           { skill: 'icicle', cancel: 0.2, branch: [{ when: { dist: [120, 700] }, do: 'extend' }, { do: 'stop' }] },
           { skill: 'lance', cancel: 0.3, branch: [{ when: { dist: [200, 950] }, do: 'extend' }, { do: 'stop' }] }] },
       ] },
-    phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.75, line: '月蝕降臨，凍結你的靈魂。', aura: 'frost', fxEl: 'arcane',
+    phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.75, line: '月蝕降臨，凍結你的靈魂。', aura: 'frost', fxEl: 'arcane', transFx: { id: 'eclipse', el: 'arcane' },
       note: '冰錐變三向追蹤、地雷 5 顆、哨兵 2 座，解鎖「鏡像分身」，大招安全區縮小並追加冰刺' },
     skills: [
       { id: 'icicle', name: '冰錐連射', short: '冰錐', tags: ['ranged', 'fast'], range: [120, 700], cd: 2.4, cost: 14, track: 6, recovery: 0.35,

@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / mikiri / summon / roar / awaken / shadowrise / posturebreak）：蓄力、架式、見切、見切一閃、召喚、咆哮、覺醒、影起與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / mikiri / summon / roar / awaken / shadowrise / eclipse / posturebreak）：蓄力、架式、見切、見切一閃、召喚、咆哮、覺醒、影起、月蝕與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -130,6 +130,33 @@
         fx.shock(sx, sy, r, 260, 0.6, E.glow, 8, E.core);
         fx.smoke(sx, sy, E.smoke, 16, 50);
         fx.motes(sx, sy, E, 20, 40, 200);
+      });
+    },
+  });
+
+  BD.defineEffect('eclipse', {
+    name: '月蝕', category: '增益',
+    desc: '換階段的月蝕：場地沉入深藍暗幕，施放者頭上浮現一輪月光、外緣光環緩緩收攏，元素光點被吸向中心；life 秒後月光炸開成全屏元素閃光、雙層震波與四散的冰晶與符文。適合法師系角色的二階段覺醒（phase2.transFx）。',
+    params: { life: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life;
+      fx.veil(life + 0.8, 0.6, '#050818');
+      fx.glow(x, y, r * 3.2, '#e0f7ff', life, 0.45, -0.3, src);
+      fx.ring(x, y, r * 4, r * 2.4, life, '#e0f7ff', 3);
+      fx.ring(x, y, r * 4.4, r * 2.6, life, E.glow, 2);
+      fx.charge(x, y, r * 4, E.glow, life, src, 26);
+      fx.after(life, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y;
+        fx.flash(E.glow, 0.5);
+        fx.shock(sx, sy, r, r * 9, 0.7, E.glow, 10 * Math.min(1.5, k), E.core);
+        fx.shock(sx, sy, r, r * 6, 0.5, '#e0f7ff', 6, '#ffffff');
+        for (let i = 0; i < 16; i++) {
+          const a = i / 16 * Math.PI * 2;
+          fx.sparkle(sx + Math.cos(a) * r, sy + Math.sin(a) * r, i % 2 ? '#e0f7ff' : E.core, 2, 420, a, 0.3);
+        }
+        fx.motes(sx, sy, E, 24, r * 2, 180);
+        fx.glow(sx, sy, r * 3, E.glow, 1.0, 0.6, 0.4, src);
+        fx.shake(Math.min(16, 10 * Math.min(k, 1.5)));
       });
     },
   });

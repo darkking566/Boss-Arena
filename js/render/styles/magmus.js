@@ -4,23 +4,9 @@
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA;
 
-  // 會「出手」的動作：姿勢依下一個出手動作蓄力、出手後收勢
+  // 會「出手」的動作：姿勢依下一個出手動作蓄力、出手後收勢（R.skillPace）
   const SIDES = [-1, 1];
   const TRIG = { hit: 1, dash: 1, lob: 1, zone: 1, erupt: 1, hide: 1 };
-  // 招式節奏（重用物件，不每幀配置）：wind 0→1 朝下一個出手動作蓄力；snap 1→0 剛出手的收勢；a 目前對應的動作；i 第幾個出手動作；n 已出手數
-  const P = { wind: 0, snap: 0, a: null, i: 0, n: 0 };
-  function pace(inst) {
-    P.wind = 0; P.snap = 0; P.a = null; P.i = 0; P.n = 0;
-    const t = inst.t; let prev = 0, last = null;
-    for (const a of inst.v.actions) {
-      if (!TRIG[a.do]) continue;
-      if (a.at > t) { P.wind = U.clamp((t - prev) / Math.max(0.05, a.at - prev), 0, 1); P.a = a; P.i = P.n; break; }
-      prev = a.at; last = a; P.n++;
-    }
-    if (last && t - prev < 0.25 && (!P.a || P.wind < 0.3)) { P.snap = 1 - (t - prev) / 0.25; P.a = last; P.i = P.n - 1; }
-    if (!P.a && last) { P.a = last; P.i = P.n - 1; }
-    return P;
-  }
   function poseOf(id, a) {
     if (id === 'breath') return 'breath';
     if (!a) return null;
@@ -72,7 +58,7 @@
       let mode = null, wd = 0, sn = 0, side = 1, lean = 0;
       let heat = p2 ? 1 : 0.55 + 0.2 * Math.sin(t * 4);
       if (inst) {
-        const p = pace(inst);
+        const p = R.skillPace(inst, TRIG);
         wd = p.snap > 0 ? 0 : p.wind; sn = p.snap; side = p.i % 2 ? 1 : -1;
         mode = poseOf(inst.skill.id, p.a);
         if (mode === 'breath') heat = Math.max(heat, p.n > 0 ? 1 : wd);
