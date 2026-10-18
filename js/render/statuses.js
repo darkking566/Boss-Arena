@@ -29,6 +29,7 @@
   R.defineStatusIcon('counter', { glyph: '見', color: '#ffffff' });
   R.defineStatusIcon('slow', { glyph: '緩', color: '#9fdcff' });
   R.defineStatusIcon('root', { glyph: '縛', color: '#e0e0e0' });
+  R.defineStatusIcon('stun', { glyph: '暈', color: '#ffe27a' });
   R.defineStatusIcon('frozen', { glyph: '凍', color: '#bfefff' });
   R.defineStatusIcon('stagger', { glyph: '崩', color: '#ffcc33' });
   R.defineStatusIcon('overtime', { glyph: '狂', color: '#ff3355' });

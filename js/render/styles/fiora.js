@@ -80,15 +80,48 @@
     });
   }
 
-  // 破綻標記：對手身上決鬥之舞的命中方位（金色脈動菱形）
-  function vital(ctx, b, t) {
-    const e = b.enemy, v = b._vital, w = b.world;
-    if (!e || !v || !w || b.state === 'dead' || e.state === 'dead' || w.time - v.t0 > 6) return;
-    const x = e.x + Math.cos(v.ang) * (e.r + 14), y = e.y + Math.sin(v.ang) * (e.r + 14), s = 7 + Math.sin(t * 8) * 1.5;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(v.ang + Math.PI / 4);
-    ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hexA(GOLD, 0.35); ctx.fillRect(-s * 1.5, -s * 1.5, s * 3, s * 3);
-    ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hexA('#fff6cf', 0.95); ctx.lineWidth = 2; ctx.strokeRect(-s, -s, s * 2, s * 2);
+  // 單個破綻：金色菱形加兩側弧形翼片與光暈（朝向對手外側），脈動
+  function mark(ctx, e, ang, t, k) {
+    const d = e.r + 22, x = e.x + Math.cos(ang) * d, y = e.y + Math.sin(ang) * d, p = 1 + Math.sin(t * 7) * 0.12;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 34 * k * p);
+    g.addColorStop(0, hexA('#fff1b0', 0.85)); g.addColorStop(1, hexA(GOLD, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 34 * k * p, 0, U.TAU); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = hexA('#fff6cf', 0.95); ctx.fillStyle = hexA(GOLD, 0.9); ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-4 * k, s * 8 * k); ctx.quadraticCurveTo(-18 * k * p, s * 18 * k * p, -4 * k, s * 30 * k * p); ctx.stroke(); }
+    const s2 = 13 * k * p;
+    ctx.rotate(Math.PI / 4); ctx.fillRect(-s2 / 2, -s2 / 2, s2, s2); ctx.strokeRect(-s2 / 2, -s2 / 2, s2, s2);
     ctx.restore();
+  }
+
+  // 破綻：平時一個；終極挑戰期間四個（已擊破的熄滅），並在對手外圍畫一圈金環連起它們；回復領域畫在地上
+  function vital(ctx, b, t) {
+    const e = b.enemy, w = b.world;
+    if (!w) return;
+    if (b._heal) for (const z of b._heal) {
+      const left = z.until - w.time; if (left <= 0) continue;
+      const a = Math.min(1, (w.time - z.t0) / 0.3, left / 0.5);
+      ctx.save(); ctx.globalAlpha *= a;
+      const g = ctx.createRadialGradient(z.x, z.y, z.r * 0.1, z.x, z.y, z.r);
+      g.addColorStop(0, 'rgba(160,240,110,0.32)'); g.addColorStop(0.85, 'rgba(90,200,90,0.2)'); g.addColorStop(1, 'rgba(120,230,160,0.45)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, U.TAU); ctx.fill();
+      ctx.strokeStyle = hexA('#b8f5d8', 0.8); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, U.TAU); ctx.stroke();
+      ctx.strokeStyle = hexA('#2f7a3a', 0.45); ctx.lineWidth = 2; ctx.translate(z.x, z.y); ctx.rotate(t * 0.4);
+      for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(z.r * 0.2, 0); ctx.quadraticCurveTo(z.r * 0.6, z.r * 0.25, z.r * 0.9, 0); ctx.stroke(); }
+      ctx.restore();
+    }
+    if (!e || b.state === 'dead' || e.state === 'dead') return;
+    const u = b._ult, v = b._vital;
+    if (u && w.time < u.until && v) {
+      ctx.save(); ctx.strokeStyle = hexA(GOLD, 0.55); ctx.lineWidth = 2; ctx.setLineDash([8, 8]); ctx.lineDashOffset = -t * 40;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.r + 22, 0, U.TAU); ctx.stroke(); ctx.restore();
+      for (let i = 0; i < 4; i++) if (!u.hit[i]) mark(ctx, e, v.ang + i * Math.PI / 2, t, 1.2);
+    } else if (v && w.time - v.t0 <= 6) {
+      ctx.save(); ctx.strokeStyle = hexA(GOLD, 0.35); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.r + 22, 0, U.TAU); ctx.stroke(); ctx.restore();
+      mark(ctx, e, v.ang, t, 1);
+    }
   }
 
   R.defineBossStyle('fiora', { body, under: vital });

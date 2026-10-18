@@ -47,6 +47,15 @@
     },
   });
 
+  // 暈眩（菲歐拉招架反擊命中）：同凍結，無法行動
+  BD.defineStatus('stun', {
+    name: '暈眩', tags: ['cc'], bindState: 'stun', visual: 'stun',
+    onApply: function (u, st, opts, w) {
+      if (opts.dur && u.setState) u.setState('stun', opts.dur); // 召喚物沒有 setState
+      if (w && w.fx) w.fx.text(u.x, u.y - u.r - 30, '暈眩！', '#ffe27a', 20);
+    },
+  });
+
   BD.defineStatus('stagger', {
     name: '硬直', tags: ['cc'], bindState: 'stagger',
     modifiers: { dmgTakenMul: 1.3 },

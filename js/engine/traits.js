@@ -15,7 +15,7 @@
     if (!b._riposte) {
       b._riposte = BD.prepSkill({ id: 'riposte', name: p.name || '見切・反斬', track: 20, recovery: 0.35,
         actions: [{ do: 'blink', at: 0.06, to: 'behind', dist: 60 },
-          { do: 'hit', at: 0.2, shape: 'cone', r: 140, arc: 2.4, dmg: p.dmg, posture: p.posture, kb: 380, fx: 'slash', unblockable: true }] });
+          { do: 'hit', at: 0.2, shape: 'cone', r: 140, arc: 2.4, dmg: p.dmg, posture: p.posture, kb: 380, fx: 'slash', unblockable: true, status: p.status }] });
     }
     b.cancelSkill(); b.state = 'idle';
     b.startSkill(b._riposte, { force: true });

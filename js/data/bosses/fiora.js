@@ -8,7 +8,7 @@
 
   const fiora = {
     id: 'fiora', name: '菲歐拉', title: '無雙劍姬', archetype: '決鬥劍士',
-    desc: '德瑪西亞勞倫特家的無雙劍姬。以刺劍追逐對手防禦的破綻：從破綻方位刺中會追加真實傷害並回復體力；招架能擋下進攻並立刻反刺；終極挑戰讓四個破綻同時暴露。',
+    desc: '德瑪西亞勞倫特家的無雙劍姬。以刺劍追逐對手防禦的破綻：從破綻方位刺中會追加真實傷害並回復體力；招架成功擋下進攻後的反刺命中會使對手暈眩；終極挑戰讓四個破綻同時暴露。',
     color: '#d4a94a', color2: '#f4f1ee', glow: '#e0527a', style: 'fiora',
     radius: 22, maxHp: 1350, speed: 265, turn: 10, mass: 0.8, fxEl: 'holy',
     traits: ['duelist', 'counter'],
@@ -51,9 +51,9 @@
           ...strike(1.38, 0.18, thrust(170, 55), { dmg: 66, posture: 18, kb: 180, fx: 'thrust', vital: true })] },
       // 原作 W：招架擋下下一次攻擊並立刻反刺（成功時由 counter 特性反擊，沒被攻擊則收劍刺出）
       { id: 'parry_w', name: '招架', short: '招架', tags: ['counter', 'defensive'], range: [0, 220], cd: 6.5, cost: 12, track: 8, recovery: 0.45,
-        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 140, posture: 70, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3 },
+        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 140, posture: 70, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3, status: { id: 'stun', dur: 1.3 } },
           ...strike(0.9, 0.22, thrust(190, 55), { dmg: 70, posture: 24, kb: 220, fx: 'thrust', vital: true })],
-        actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3 },
+        actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3, status: { id: 'stun', dur: 1.6 } },
           ...strike(0.9, 0.2, thrust(200, 55), { dmg: 78, posture: 26, kb: 240, fx: 'thrust', vital: true })] },
       // 原作 E：連續兩擊，第一擊緩速、第二擊強力（原作必定暴擊）
       { id: 'bladework', name: '劍術', short: '劍術', tags: ['melee', 'fast'], range: [0, 160], cd: 3.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4,
@@ -81,11 +81,11 @@
     ],
     // 原作 R：鎖定敵方英雄並暴露四個破綻，每擊破一個就造成最大生命比例真實傷害；改編為從四個方位連續刺中
     ultimate: { id: 'ult', name: '終極挑戰', ult: true, range: [0, 600], track: 0, recovery: 0.6,
-      actions: [0, 1, 2, 3].flatMap((i) => [{ do: 'vitalstep', at: 0.15 + 0.5 * i, dist: 100, off: i * Math.PI / 2 },
-        ...strike(0.15 + 0.5 * i + 0.22, 0.18, thrust(180, 55), { dmg: 52, posture: 16, kb: 140, fx: 'thrust', vital: 'all' })]),
-      actions2: [0, 1, 2, 3].flatMap((i) => [{ do: 'vitalstep', at: 0.12 + 0.42 * i, dist: 100, off: i * Math.PI / 2 },
-        ...strike(0.12 + 0.42 * i + 0.2, 0.16, thrust(190, 55), { dmg: 58, posture: 18, kb: 160, fx: 'thrust', vital: 'all' })]),
-      desc: '鎖定對手，四個破綻同時暴露：連續閃到四個方位刺出，每一擊都吃到決鬥之舞（追加最大生命比例真實傷害並回復自身）。' },
+      actions: [{ do: 'vitalmark', at: 0, dur: 2.6 }, ...[0, 1, 2, 3].flatMap((i) => [{ do: 'vitalstep', at: 0.15 + 0.5 * i, dist: 100, off: i * Math.PI / 2 },
+        ...strike(0.15 + 0.5 * i + 0.22, 0.18, thrust(180, 55), { dmg: 52, posture: 16, kb: 140, fx: 'thrust', vital: 'all' })])],
+      actions2: [{ do: 'vitalmark', at: 0, dur: 2.2 }, ...[0, 1, 2, 3].flatMap((i) => [{ do: 'vitalstep', at: 0.12 + 0.42 * i, dist: 100, off: i * Math.PI / 2 },
+        ...strike(0.12 + 0.42 * i + 0.2, 0.16, thrust(190, 55), { dmg: 58, posture: 18, kb: 160, fx: 'thrust', vital: 'all' })])],
+      desc: '鎖定對手，四個破綻同時暴露：連續閃到四個方位刺出，每一擊都吃到決鬥之舞（追加最大生命比例真實傷害並回復自身）；四個破綻全部擊破時，在對手腳下產生巨大的回復領域，菲歐拉站在其中持續回血。' },
   };
 
   BD.registerBoss(fiora);
