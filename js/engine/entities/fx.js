@@ -24,7 +24,7 @@
       this.w = w; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
       this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.timers = [];
       this.pool = [];
-      this.shakeV = 0; this.flashA = 0; this.flashC = '#fff';
+      this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
     }
     // 從池中取一個粒子（無則新建）
     takePart() { return this.pool.length ? this.pool.pop() : newPart(); }
@@ -170,7 +170,26 @@
       this.decals.push({ x, y, r, color: color || 'rgba(0,0,0,0.55)', life: life || 9, max: life || 9, segs, glow: glow || null });
       if (this.decals.length > DECAL_CAP) this.decals.shift();
     }
-    shake(v) { this.shakeV = Math.min(26, Math.max(this.shakeV, v) + v * 0.15); }
+    // 畫面震動：dir（弧度，可省略）為受擊方向——有方向時畫面沿該方向來回擺動，比四面亂抖更扎實
+    shake(v, dir) {
+      if (dir != null && v >= this.shakeV * 0.6) this.shakeDir = dir;
+      this.shakeV = Math.min(26, Math.max(this.shakeV, v) + v * 0.15);
+    }
+    // 本幀的震動位移（繪圖端使用；out 物件重用，不配置）：
+    // 有方向 → 沿方向的衰減擺動 + 少量垂直抖動；無方向 → 兩個頻率的正弦疊加少量雜訊（比純亂數平滑、不刺眼）
+    shakeOffset(out) {
+      const sh = this.shakeV * (this.shakeScale == null ? 1 : this.shakeScale), t = this.shakeT || 0;
+      if (sh <= 0.05) { out.x = 0; out.y = 0; return out; }
+      if (this.shakeDir != null) {
+        const c = Math.cos(this.shakeDir), s = Math.sin(this.shakeDir);
+        const m = Math.sin(t * 52) * sh * 0.55, p = (V() - 0.5) * sh * 0.25;
+        out.x = c * m - s * p; out.y = s * m + c * p;
+      } else {
+        out.x = (Math.sin(t * 47) * 0.32 + (V() - 0.5) * 0.36) * sh;
+        out.y = (Math.sin(t * 59 + 1.3) * 0.32 + (V() - 0.5) * 0.36) * sh;
+      }
+      return out;
+    }
     flash(c, a) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
     // 特效內部的延遲（依模擬時間；不使用 w.later，因此不影響世界排程）
     after(t, fn) { this.timers.push({ t, fn }); }
@@ -197,7 +216,11 @@
       for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));
       for (let j = 0; j < arrs.length; j++) compact(arrs[j]);
     }
-    realUpdate(dt) { this.shakeV *= Math.exp(-7 * dt); if (this.shakeV < 0.05) this.shakeV = 0; this.flashA = Math.max(0, this.flashA - dt * 1.6); }
+    realUpdate(dt) {
+      this.shakeT = (this.shakeT || 0) + dt;
+      this.shakeV *= Math.exp(-7 * dt); if (this.shakeV < 0.05) { this.shakeV = 0; this.shakeDir = null; }
+      this.flashA = Math.max(0, this.flashA - dt * 1.6);
+    }
   }
   BD.FX = FX;
   BD.FX_CAPS = { PART_CAP, DECAL_CAP, GLOW_CAP, STREAK_CAP, GHOST_CAP };

@@ -138,14 +138,15 @@
     });
   }
 
+  const shakeOut = { x: 0, y: 0 };
   R.render = function (ctx, w, view) {
     const t = performance.now() / 1000;
     if (R.cacheBeginFrame) R.cacheBeginFrame();
     ctx.save();
     ctx.fillStyle = '#08070b'; ctx.fillRect(0, 0, R.W, R.H);
-    const sh = w.fx.shakeV;
+    const sh = w.fx.shakeOffset(shakeOut);
     ctx.save();
-    ctx.translate(R.OX + (BD.vrng() - 0.5) * sh, R.OY + (BD.vrng() - 0.5) * sh);
+    ctx.translate(R.OX + sh.x, R.OY + sh.y);
     drawArena(ctx, w, t);
     drawZones(ctx, w, t);
     drawTraps(ctx, w, t);

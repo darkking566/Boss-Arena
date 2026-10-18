@@ -9,6 +9,7 @@
   const CAT_SPAWN = { '斬擊': 'caster', '突刺': 'caster', '位移': 'caster', '投射物': 'caster' };
   const PERIOD = 1.8, PERIOD_ULT = 2.6;
   const CW = 480, CH = 336;
+  const shakeOut = { x: 0, y: 0 };
 
   const els = {
     grid: document.getElementById('gGrid'), legend: document.getElementById('gLegend'),
@@ -175,8 +176,7 @@
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.save();
     try {
-      const sh = fx.shakeV || 0;
-      if (sh > 0.05) ctx.translate((BD.vrng() - 0.5) * sh, (BD.vrng() - 0.5) * sh);
+      if (fx.shakeV > 0.05) { const sh = fx.shakeOffset(shakeOut); ctx.translate(sh.x, sh.y); }
       ctx.translate(-cell.aim, 0);
       ctx.drawImage(floorTile, 0, 0);
       R.draw.decals(ctx, cell.world);

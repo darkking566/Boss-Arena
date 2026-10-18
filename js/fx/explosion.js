@@ -53,17 +53,25 @@
       let ang = o.angle;
       if (ang == null && o.src && victim) ang = Math.atan2(victim.y - o.src.y, victim.x - o.src.x);
       fx.flashAt(x, y, vr * 0.9 * Math.sqrt(Math.min(2, k)), E.core, 0.14);
+      // 有攻擊方向時，火花大多順著打擊方向從受擊者身後噴出（看得出從哪邊被打），只留少量四散
+      const sparkCol = big ? '#fff2a8' : '#ffd7a0';
+      const nSpark = o.heavyHit ? (big ? 28 : 10) : (big ? 18 : 8), spd = o.heavyHit ? (big ? 460 : 260) : (big ? 380 : 240);
+      if (ang != null) {
+        const bx = x + Math.cos(ang) * vr * 0.4, by = y + Math.sin(ang) * vr * 0.4;
+        fx.sparkle(bx, by, sparkCol, Math.round(nSpark * 0.75), spd * 1.15, ang, big ? 1.1 : 0.85);
+        fx.sparks(x, y, sparkCol, Math.round(nSpark * 0.3), spd * 0.6);
+      } else {
+        fx.sparks(x, y, sparkCol, nSpark, spd);
+      }
       if (o.heavyHit) {
-        fx.sparks(x, y, big ? '#fff2a8' : '#ffd7a0', big ? 28 : 10, big ? 460 : 260);
-        fx.shake(Math.min(24, 3 + dmg / 12));
+        fx.shake(Math.min(24, 3 + dmg / 12), ang);
         if (big) {
           fx.flash('#fff', 0.12);
           fx.decal(x, y, vr * 1.3, E.decal, 6);
           fx.smoke(x, y, E.smoke, 8, vr);
         }
       } else {
-        fx.sparks(x, y, big ? '#fff2a8' : '#ffd7a0', big ? 18 : 8, big ? 380 : 240);
-        fx.shake(Math.min(14, 2 + dmg / 22));
+        fx.shake(Math.min(14, 2 + dmg / 22), ang);
       }
       if (ang != null) fx.sparkle(x, y, E.core, Math.round(6 * k), 300, ang, 0.9);
       fx.motes(x, y, E, Math.round((big ? 6 : 3) * k), vr * 0.3, 120);

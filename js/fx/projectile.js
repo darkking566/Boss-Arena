@@ -11,7 +11,9 @@
     params: {},
     spawn(fx, x, y, o) {
       const E = o.E, k = o.k;
-      fx.sparkle(x, y, E.core, Math.round(8 * k), 200);
+      // 知道打擊方向（施放者朝向或投射物飛行方向）時，火花往前方錐形噴出；否則四散
+      const dir = o.dirHit || o.src ? o.angle : null;
+      fx.sparkle(x, y, E.core, Math.round(8 * k), 200, dir, dir == null ? null : 1.8);
       fx.flashAt(x, y, 12 + 4 * k, E.core, 0.1);
       fx.motes(x, y, E, Math.round(4 * k), 10, 90);
     },
