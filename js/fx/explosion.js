@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜爆炸（explode / burst / impact）：落點爆炸、小型爆散與 Boss 受擊爆點
+// 特效庫｜爆炸（explode / burst / shellburst / impact）：落點爆炸、小型爆散、外殼爆裂與 Boss 受擊爆點
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、radius 半徑、k 綜合倍率、heavy 沉重節奏、src / victim（僅 impact）
 (function (G) {
@@ -42,6 +42,37 @@
   });
 
   // Boss 受擊爆點：數值對應舊 world.js damageBoss 的視覺（heavyHit / light 兩個分支）
+  BD.defineEffect('shellburst', {
+    name: '外殼爆裂', category: '爆炸',
+    desc: '巨型岩殼從內部炸開：life 秒內裂縫不斷噴出火花與煙、內部熱光逐漸膨脹；時間到時岩塊大量四散彈跳、熔岩震波擴散、地面留下發光裂痕與滿天餘燼。適合熔岩 / 岩石系巨型 Boss 的二階段覺醒（phase2.transFx）。',
+    params: { life: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : o.radius || 60, life = o.life;
+      fx.charge(x, y, r * 2.2, E.glow, life, src, 18);
+      // 蓄勢：裂縫隨機噴出火花與煙（位置取當下施放者，跟著抖動）
+      for (let t = 0; t < life; t += 0.1) {
+        fx.after(t, () => {
+          const a = BD.vrng() * Math.PI * 2, d = r * (0.4 + BD.vrng() * 0.5);
+          const px = (src ? src.x : x) + Math.cos(a) * d, py = (src ? src.y : y) + Math.sin(a) * d;
+          fx.sparkle(px, py, E.core, 4, 220, a, 0.8);
+          fx.smoke(px, py, E.smoke, 1, 8);
+        });
+      }
+      fx.after(life, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y;
+        fx.flash(E.glow, 0.45);
+        fx.debris(sx, sy, E.debris || E.particle, 22, 460, 8, r * 0.7);
+        fx.debris(sx, sy, '#2a1a12', 10, 360, 11, r * 0.5);
+        fx.shock(sx, sy, r * 0.8, r * 5, 0.7, E.glow, 12 * Math.min(1.5, k), E.core);
+        fx.crack(sx, sy, r * 2.6, E.decal, 10, E.crack, 9);
+        fx.embers(sx, sy, E.core, 40, r, 90);
+        fx.sparkle(sx, sy, E.core, 36, 520);
+        fx.glow(sx, sy, r * 2.4, E.glow, 0.9, 0.7, 0.5, src);
+        fx.shake(Math.min(24, 16 * Math.min(k, 1.5)));
+      });
+    },
+  });
+
   BD.defineEffect('impact', {
     name: '命中爆點', category: '爆炸',
     desc: 'Boss 被命中的瞬間爆點：依輕重噴出不同量的火花並震動畫面，重擊時追加全屏閃白、地面痕跡與煙塵。純視覺的受擊回饋。',
