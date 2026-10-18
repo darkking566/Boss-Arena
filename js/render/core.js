@@ -22,6 +22,7 @@
   // R.defineBossStyle(name, body) 或 R.defineBossStyle(name, { body, hidden, transition })
   //   body(ctx, o, t, k)：已平移到 Boss 位置並旋轉到面向；k = { def, r, st, act, swing }
   //   hidden(ctx, b, t)：Boss 隱身時的額外表現（選用）
+  //   under(ctx, b, t)：畫在 Boss 底下的額外物件，隱身時照畫（選用；例如劫的影子）
   //   transition(ctx, b, t)：階段轉換中的自訂畫法；回傳 true 表示已畫完、略過一般身體（選用）
   const styles = R.bossStyles = {};
   R.defineBossStyle = function (name, spec) {

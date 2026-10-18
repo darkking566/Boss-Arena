@@ -37,6 +37,7 @@
   R.defineStatusIcon('bleed', { glyph: '血', color: '#ff3344' });
   R.defineStatusIcon('shield', { glyph: '盾', color: '#7fc8ff' });
   R.defineStatusIcon('vulnerable', { glyph: '易', color: '#c07aff' });
+  R.defineStatusIcon('deathmark', { glyph: '印', color: '#ff3048' });
   R.defineStatusIcon('enrage', { glyph: '怒', color: '#ff5040' });
   R.defineStatusIcon('knockdown', { glyph: '倒', color: '#ffb070' });
   R.defineStatusIcon('kdGuard', { glyph: '起', color: '#ffe0b0' });

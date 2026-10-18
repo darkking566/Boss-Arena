@@ -351,6 +351,7 @@
 
   function drawBoss(ctx, b, t) {
     const style = R.bossStyle(b.def.style);
+    if (style.under) style.under(ctx, b, t); // 例如劫的影子：隱身時也要畫
     if (BD.hasStatus(b, 'hidden')) {
       if (style.hidden) style.hidden(ctx, b, t);
       return;
@@ -476,6 +477,21 @@
           ctx.beginPath(); ctx.arc(b.x, b.y, r + 12, 0, U.TAU); ctx.stroke();
           break;
         }
+        case 'deathmark': {
+          // 瞬獄影殺陣：目標身上的紅色印記，越接近引爆轉得越快、收得越緊、越亮
+          const k = 1 - U.clamp(st.rem / 3, 0, 1), rr = r + 22 - k * 10, a = 0.45 + 0.4 * k + 0.15 * Math.sin(t * (8 + k * 20));
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(t * (1.5 + k * 6));
+          ctx.strokeStyle = `rgba(224,30,55,${a})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke();
+          ctx.fillStyle = `rgba(224,30,55,${a * 0.9})`;
+          for (let i = 0; i < 3; i++) {
+            const an = i * U.TAU / 3;
+            ctx.beginPath(); ctx.moveTo(Math.cos(an) * (rr + 9), Math.sin(an) * (rr + 9));
+            ctx.lineTo(Math.cos(an + 0.35) * (rr - 4), Math.sin(an + 0.35) * (rr - 4)); ctx.lineTo(Math.cos(an - 0.12) * (rr - 2), Math.sin(an - 0.12) * (rr - 2)); ctx.closePath(); ctx.fill();
+          }
+          ctx.restore();
+          break;
+        }
         case 'burn': {
           ctx.strokeStyle = 'rgba(255,138,42,0.85)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
           for (let i = 0; i < 3; i++) {
@@ -573,6 +589,15 @@
         ctx.fillStyle = '#ccd'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(0, 3); ctx.lineTo(-6, 0); ctx.lineTo(0, -3); ctx.closePath(); ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-22, 0); ctx.stroke();
         ctx.fillStyle = '#a0413e'; ctx.beginPath(); ctx.arc(-7, 0, 2.5, 0, U.TAU); ctx.fill();
+      } else if (p.kind === 'shuriken') {
+        // 劫的諸刃：旋轉的四刃手裏劍，後方拖一道紅色殘光
+        ctx.strokeStyle = 'rgba(224,30,55,0.45)'; ctx.lineWidth = p.r * 0.9; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-p.r * 0.6, 0); ctx.lineTo(-p.r * 3.2, 0); ctx.stroke();
+        ctx.rotate(t * 24);
+        ctx.fillStyle = '#d4d8e2'; ctx.strokeStyle = '#e01e37'; ctx.lineWidth = 1.2; ctx.beginPath();
+        for (let i = 0; i < 4; i++) { const an = i * Math.PI / 2; ctx.lineTo(Math.cos(an) * p.r * 1.3, Math.sin(an) * p.r * 1.3); ctx.lineTo(Math.cos(an + 0.78) * p.r * 0.35, Math.sin(an + 0.78) * p.r * 0.35); }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, p.r * 0.22, 0, U.TAU); ctx.fill();
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
           g.shadowColor = '#ff7a1a'; g.shadowBlur = 18; g.lineCap = 'round';

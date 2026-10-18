@@ -62,6 +62,41 @@
     },
   });
 
+  BD.defineEffect('livingshadow', {
+    name: '影分身', category: '位移',
+    desc: '從本體剝離出一道影子疾射而出：沿路拖出漆黑的身形殘跡與一道元素色細線，終點煙霧聚攏、光環內縮、亮點一閃。適合分身、影子投射（搭配 shadow 動作）。',
+    params: { len: 260 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, r = o.src && o.src.r ? o.src.r : 22;
+      const tx = o.toX == null ? x + (o.len || 260) : o.toX, ty = o.toY == null ? y : o.toY;
+      fx.streak(x, y, tx, ty, r * 1.1, '#000000', 0.4, false);
+      fx.streak(x, y, tx, ty, 3 * Math.min(1.5, k), E.glow, 0.28, true);
+      fx.smoke(x, y, E.smoke, 4, 14);
+      fx.smoke(tx, ty, E.smoke, 10, r);
+      fx.ring(tx, ty, r * 2.6, r * 0.6, 0.32, E.glow, 3 * Math.min(1.5, k));
+      fx.flashAt(tx, ty, r, E.core, 0.1);
+      fx.motes(tx, ty, E, Math.round(8 * k), r, 90);
+    },
+  });
+
+  BD.defineEffect('shadowswap', {
+    name: '影換位', category: '位移',
+    desc: '與影子瞬間交換位置：兩端同時炸開黑煙與內縮光環，一黑一亮兩道拖影交錯，終點一閃。適合換位、替身術（搭配 swap 動作）。',
+    params: { len: 260 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, r = o.src && o.src.r ? o.src.r : 22;
+      const tx = o.toX == null ? x + (o.len || 260) : o.toX, ty = o.toY == null ? y : o.toY;
+      fx.streak(tx, ty, x, y, r * 0.9, '#000000', 0.3, false);
+      fx.streak(x, y, tx, ty, r * 0.5, E.glow, 0.22, true);
+      for (const [px, py] of [[x, y], [tx, ty]]) {
+        fx.smoke(px, py, E.smoke, 8, r * 0.8);
+        fx.ring(px, py, r * 2.2, r * 0.4, 0.28, E.glow, 3 * Math.min(1.5, k));
+      }
+      fx.flashAt(tx, ty, r * 1.1, E.core, 0.12);
+      fx.sparkle(tx, ty, E.glow, Math.round(8 * k), 240);
+    },
+  });
+
   BD.defineEffect('hoofcharge', {
     name: '鐵騎衝鋒', category: '位移',
     desc: '戰馬衝鋒：沿路左右交替留下蹄印與揚塵、蹄下迸出元素火星與餘燼，衝刺結束時揚起一圈塵浪。適合騎兵衝鋒、戰馬踐踏（搭配 dash 動作）。',

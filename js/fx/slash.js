@@ -45,6 +45,22 @@
     },
   });
 
+  BD.defineEffect('contempt', {
+    name: '蔑視斬', category: '斬擊',
+    desc: '對虛弱目標的追加一擊：目標身上交叉劃過兩道短促的元素色斬痕，中心一點血紅閃光與向外噴的火花。適合處決、弱點追擊、斬殺被動。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, a = o.angle || 0, L = 46 * Math.min(1.4, k);
+      for (const s of [-1, 1]) {
+        const an = a + s * Math.PI / 4;
+        fx.beam(x - Math.cos(an) * L, y - Math.sin(an) * L, x + Math.cos(an) * L, y + Math.sin(an) * L, 8, E.glow, 0.24, E.core);
+      }
+      fx.flashAt(x, y, 26, E.core, 0.12);
+      fx.sparkle(x, y, E.glow, Math.round(10 * k), 300, a, 1.4);
+      fx.shake(Math.min(8, 3 * k));
+    },
+  });
+
   BD.defineEffect('whirl', {
     name: '迴旋斬', category: '斬擊',
     desc: '原地 360° 迴旋：兩段半圓弧刃接連掃出，外圈震波擴散、四周火花沿切線飛射。適合旋轉掃擊、清場。',

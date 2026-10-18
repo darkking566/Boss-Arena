@@ -5,6 +5,28 @@
 (function (G) {
   const BD = G.BD;
 
+  BD.defineEffect('deathmark', {
+    name: '死亡印記引爆', category: '爆炸',
+    desc: '印記到期、積蓄的傷害一口氣引爆：全場暗了一瞬，三道元素色斬線交錯貫穿目標，黑色碎片與元素火花炸散，震波擴張，地面留下裂痕。適合延遲引爆、死亡印記、積蓄傷害爆發。',
+    params: { radius: 110 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, r = o.radius || 110, a0 = BD.vrng() * Math.PI;
+      fx.veil(0.35, 0.35, '#000000');
+      fx.glow(x, y, r * 0.9, E.glow, 0.35, 0.8, 0.5);
+      for (let i = 0; i < 3; i++) {
+        const a = a0 + i * Math.PI / 3, dx = Math.cos(a) * r * 1.3, dy = Math.sin(a) * r * 1.3;
+        fx.beam(x - dx, y - dy, x + dx, y + dy, 14 * Math.min(1.4, k), E.glow, 0.32, E.core);
+      }
+      fx.shock(x, y, 10, r * 1.4, 0.45, E.glow, 10 * Math.min(1.5, k), E.core);
+      fx.debris(x, y, E.rim, Math.round(12 * k), 320, 3 + k, 12);
+      fx.sparkle(x, y, E.core, Math.round(20 * k), 420);
+      fx.motes(x, y, E, Math.round(14 * k), r * 0.5, 200);
+      fx.crack(x, y, r * 0.7, E.decal, 5, E.crack, 6);
+      fx.flashAt(x, y, r * 0.6, E.core, 0.16);
+      fx.shake(Math.min(14, 8 * k));
+    },
+  });
+
   BD.defineEffect('explode', {
     name: '爆炸', category: '爆炸',
     desc: '投射物或隕石落地的爆炸：強光、光暈、急速擴張的震波、四散火花與彈跳碎石，地面留下焦痕。適合火球、砲彈、落雷。',

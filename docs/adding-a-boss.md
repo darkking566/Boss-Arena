@@ -35,7 +35,8 @@
 
 時間軸 `actions` 的每一項是 `{ do: '<動作>', at: 秒, … }`。可用動作（`js/engine/actions/`）：
 `tele` 預警、`hit` 判定、`dash` 衝刺、`proj` 投射物、`lob` 拋射、`rain` 隕石雨、`zone` 區域、`trap` 陷阱、`erupt` 噴發柱、
-`summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線。
+`summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線、
+`shadow` 放出影子 / `swap` 與影子換位 / `shadowshuriken`、`shadowslash` 影子同步投射與迴旋斬（劫，`js/engine/actions/shadow.js`；影子存在 `b.shadows`，造型以 `under(ctx, b, t)` 畫出）。
 `strike(at, tele, shape, hit)` = 預警 + 判定；`dashStrike(...)` = 預警 + 衝刺。
 純演出的動作欄位（不影響戰鬥、行為指紋不變）：`blink` 可加 `fx`（閃現特效，預設 `blink`）；`counter` 可加 `fx`（見切成功特效，預設 `parry`）與 `slowmo`（見切成功的慢動作秒數）；`slashes` 與其 `final` 可加 `fx`（例如 `threadcut`：刀痕懸著，等到最後一擊一齊裂開）。
 
@@ -61,6 +62,7 @@
   R.defineBossStyle('golemking', {
     body(ctx, o, t, { def, r, st, act, swing }) { /* 已平移到 Boss 位置並旋轉到面向；畫身體 */ },
     hidden(ctx, b, t) { /* 選用：隱身（鑽地/躍起）時的畫面 */ },
+    under(ctx, b, t) { /* 選用：畫在 Boss 底下、隱身時照畫的額外物件（世界座標；例如劫的影子） */ },
     transition(ctx, b, t) { /* 選用：階段轉換的自訂畫法，回傳 true 代表已畫完 */ return false; },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

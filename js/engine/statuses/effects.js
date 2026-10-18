@@ -87,6 +87,20 @@
     modifiers: { dmgTakenMul: 1.25 },
   });
 
+  // ── 瞬獄影殺陣（劫的大招印記）：到期時引爆 value + 印記期間所受傷害 × 45%（施放者二階段 60%）；被提前移除（死亡等）不引爆 ──
+  // shortcut: 以印記期間的生命差近似「劫造成的傷害」，1v1 幾乎都是劫打的；若有第三方傷害來源再改為記錄傷害來源
+  BD.defineStatus('deathmark', {
+    name: '瞬獄影殺陣', tags: ['debuff'], stacking: 'refresh', defaultDur: 3, visual: 'deathmark',
+    onApply: function (u, st, opts, w, isNew) { if (isNew) st.data = { hp0: u.hp }; },
+    onRemove: function (u, st, w, reason) {
+      const src = st.source;
+      if (reason !== 'expire' || !w || !src || u.state === 'dead') return;
+      const taken = Math.max(0, st.data.hp0 - u.hp), pct = src.phase === 2 ? 0.6 : 0.45;
+      w.damageUnit(src, u, { dmg: st.value + taken * pct / (src.dmgMul || 1), posture: 30, unblockable: true, undodgeable: true, noPerfect: true });
+      BD.spawnFx(w, 'deathmark', u.x, u.y, { src, dmg: st.value + taken * pct });
+    },
+  });
+
   BD.defineStatus('enrage', {
     name: '狂暴', tags: ['buff'], stacking: 'refresh', defaultDur: 8,
     modifiers: { dmgDealtMul: 1.3, speedMul: 1.2 },
