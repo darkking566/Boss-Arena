@@ -77,6 +77,11 @@
 - 版面依 `BD.EFFECT_CATEGORIES` 分組排序，並列出元素圖例（核心 / 外光 / 粒子色與額外粒子行為）。
 - 設計新 Boss 招式時，先找現有特效 + 元素組合，找不到再依 `docs/effects.md` 新增。
 
+## 場景（森林 + 沼澤）
+- 競技場是戶外場景：`BD.ARENA.trees`（樹位）與 `ponds`（沼澤水池）定義在 `js/engine/world.js`；`ARENA.pillars` 是每場由 `BD.resetArena()` 重建的「存活障礙」（AI、投射物、碰撞都讀它）。
+- 互動規則在 `js/engine/props.js`：`hit` / `slashes` / 爆炸命中時依特效分類——**斬擊**把樹砍成兩半、**有擊退的重擊**把樹撞飛成滾木（穿透、傷害敵人）、輕擊只掉血；水中減速、移動與命中水面會濺水花。
+- 視覺在 `js/fx/terrain.js`（斷樹、撞飛、水花；新分類「地形」）與 `js/render/world.js`（草地 / 池塘 / 樹 / 水面倒影）。測試：`npm run test:props`。
+
 ## 檔案結構
 全部是普通 `<script>`（IIFE + 全域 `BD`），依 `index.html` 的順序載入；標記 `data-browser` 的檔案才會碰到 DOM / Canvas。
 - `js/core/` — `util.js` 數學、亂數、形狀判定；`registry.js` 註冊表（`registerBoss`、`defineAction`、`defineMinion`、`defineTrait`）

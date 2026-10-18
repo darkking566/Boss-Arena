@@ -34,7 +34,9 @@
         if (p.x < -p.r || p.y < -p.r || p.x > A().w + p.r || p.y > A().h + p.r) p.alive = false;
       } else {
         if (p.x < 0 || p.y < 0 || p.x > A().w || p.y > A().h) p.alive = false;
-        for (const pl of A().pillars) if (Math.hypot(p.x - pl.x, p.y - pl.y) < pl.r + p.r) p.alive = false;
+        for (const pl of A().pillars) {
+          if (Math.hypot(p.x - pl.x, p.y - pl.y) < pl.r + p.r) { p.alive = false; if (pl.tree) BD.projHitsTree(w, p, pl); break; }
+        }
         if (!p.alive) BD.spawnFx(w, 'projwall', p.x, p.y, { el: BD.kindElement(p.kind, BD.fxElementOf(p.owner)) });
       }
       if (p.life <= 0) p.alive = false;

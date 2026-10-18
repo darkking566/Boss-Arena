@@ -9,7 +9,10 @@
   }
   const ARENA = BD.ARENA = {
     w: 1500, h: 820,
-    pillars: [{ x: 390, y: 250, r: 38 }, { x: 1110, y: 250, r: 38 }, { x: 390, y: 570, r: 38 }, { x: 1110, y: 570, r: 38 }],
+    // 場景：森林 + 沼澤。trees 為樹位（點對稱）；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
+    trees: [[390, 250], [1110, 250], [390, 570], [1110, 570], [250, 120], [1250, 700], [1250, 120], [250, 700], [700, 90], [800, 730]],
+    ponds: [{ x: 560, y: 650, rx: 150, ry: 65 }, { x: 940, y: 170, rx: 150, ry: 65 }],
+    pillars: [],
   };
 
   // 每幀更新所有實體（順序固定：預警 → 投射物 → 拋射物 → 區域 → 陷阱 → 召喚物）
@@ -20,6 +23,7 @@
     BD.updateZones(w, dt);
     BD.updateTraps(w, dt);
     BD.updateMinions(w, dt);
+    BD.updateTerrain(w, dt);
   };
 
   // ─────────────────────────── World ───────────────────────────
@@ -28,6 +32,7 @@
       opts = opts || {};
       this.seed = opts.seed != null ? opts.seed : (Math.random() * 1e9) | 0;
       this.rng = U.makeRng(this.seed);
+      BD.resetArena();
       // 節奏預設：未指定時為 light（原始定義、行為不變）；pace 僅供之後的機制讀取
       this.paceId = opts.pace || 'light'; this.pace = BD.paceConfig(this.paceId, null);
       this.time = 0; this.intro = opts.intro != null ? opts.intro : 1.8; this.over = false; this.winner = null; this.endT = 0;

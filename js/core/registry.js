@@ -99,7 +99,7 @@
   // BD.defineEffect(id, { name, category, desc, params, spawn(fx, x, y, o) })
   //   category：EFFECT_CATEGORIES 之一；params：預設參數（會被呼叫端 opts 覆寫）
   //   spawn 只能呼叫 fx 原件（js/engine/entities/fx.js），亂數只能用 BD.vrng（不可用 w.rng，否則行為指紋會改變）
-  BD.EFFECT_CATEGORIES = ['斬擊', '突刺', '砸地', '震波', '爆炸', '位移', '投射物', '區域', '增益', '大招'];
+  BD.EFFECT_CATEGORIES = ['斬擊', '突刺', '砸地', '震波', '爆炸', '位移', '投射物', '區域', '增益', '大招', '地形'];
   const effects = BD.effects = {};
   BD.defineEffect = function (id, spec) {
     if (effects[id]) throw new Error(`defineEffect：特效「${id}」重複定義`);

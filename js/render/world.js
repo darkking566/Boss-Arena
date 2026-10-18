@@ -37,24 +37,39 @@
   // 地面：直接畫進指定 context（會以繪製倍率畫入靜態層，DPR 2 也清晰）；rnd 固定種子、順序固定
   function drawFloor(g) {
     const A = BD.ARENA;
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    // 草地
     const grad = g.createRadialGradient(A.w / 2, A.h / 2, 50, A.w / 2, A.h / 2, A.w * 0.65);
-    grad.addColorStop(0, '#3a3440'); grad.addColorStop(1, '#17141c');
+    grad.addColorStop(0, '#52703c'); grad.addColorStop(1, '#223520');
     g.fillStyle = grad; g.fillRect(0, 0, A.w, A.h);
-    // 石磚
-    const T = 75; let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    for (let y = 0; y < A.h; y += T) for (let x = 0; x < A.w; x += T) {
-      const off = (Math.floor(y / T) % 2) * T / 2;
-      g.fillStyle = `rgba(255,255,255,${0.015 + rnd() * 0.03})`;
-      g.fillRect(x + off - T / 2 + 2, y + 2, T - 4, T - 4);
-      if (rnd() < 0.15) { g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 1.5; g.beginPath(); const sx = x + off - T / 2 + rnd() * T, sy = y + rnd() * T; g.moveTo(sx, sy); g.lineTo(sx + (rnd() - 0.5) * 40, sy + (rnd() - 0.5) * 40); g.lineTo(sx + (rnd() - 0.5) * 60, sy + (rnd() - 0.5) * 60); g.stroke(); }
+    // 深淺不一的草色斑塊
+    for (let i = 0; i < 260; i++) {
+      g.fillStyle = rnd() < 0.5 ? 'rgba(20,40,15,0.07)' : 'rgba(150,190,90,0.06)';
+      g.beginPath(); g.ellipse(rnd() * A.w, rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
     }
-    // 中央紋章
-    g.strokeStyle = 'rgba(255,220,160,0.07)'; g.lineWidth = 6;
-    g.beginPath(); g.arc(A.w / 2, A.h / 2, 210, 0, U.TAU); g.stroke();
-    g.lineWidth = 2; g.beginPath(); g.arc(A.w / 2, A.h / 2, 160, 0, U.TAU); g.stroke();
-    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(A.w / 2 + Math.cos(a) * 160, A.h / 2 + Math.sin(a) * 160); g.lineTo(A.w / 2 + Math.cos(a) * 210, A.h / 2 + Math.sin(a) * 210); g.stroke(); }
-    g.fillStyle = 'rgba(255,220,160,0.06)'; g.font = `bold 64px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('鬥', A.w / 2, A.h / 2);
+    // 中央踏出來的泥土空地（Boss 開打的位置）
+    const dirt = g.createRadialGradient(A.w / 2, A.h / 2, 40, A.w / 2, A.h / 2, 330);
+    dirt.addColorStop(0, 'rgba(118,96,62,0.55)'); dirt.addColorStop(1, 'rgba(118,96,62,0)');
+    g.fillStyle = dirt; g.save(); g.translate(A.w / 2, A.h / 2); g.scale(1, 0.62); g.beginPath(); g.arc(0, 0, 330, 0, U.TAU); g.fill(); g.restore();
+    // 草叢短筆觸
+    g.lineWidth = 1.5; g.lineCap = 'round';
+    for (let i = 0; i < 900; i++) {
+      const x = rnd() * A.w, y = rnd() * A.h, h = 4 + rnd() * 7;
+      g.strokeStyle = rnd() < 0.5 ? 'rgba(160,205,100,0.35)' : 'rgba(25,55,20,0.45)';
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
+    }
+    // 沼澤：泥岸 → 水面 → 睡蓮葉
+    for (const p of A.ponds) {
+      g.fillStyle = '#3a3220'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 16, p.ry + 12, 0, 0, U.TAU); g.fill();
+      g.fillStyle = 'rgba(25,45,20,0.55)'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 7, p.ry + 5, 0, 0, U.TAU); g.fill();
+      const wg = g.createRadialGradient(p.x - p.rx * 0.2, p.y - p.ry * 0.3, 8, p.x, p.y, p.rx);
+      wg.addColorStop(0, '#3f7b80'); wg.addColorStop(1, '#1c4247');
+      g.fillStyle = wg; g.beginPath(); g.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, U.TAU); g.fill();
+      for (let i = 0; i < 5; i++) {
+        const a = rnd() * U.TAU, d = 0.35 + rnd() * 0.5, lx = p.x + Math.cos(a) * p.rx * d, ly = p.y + Math.sin(a) * p.ry * d;
+        g.fillStyle = 'rgba(80,130,60,0.9)'; g.beginPath(); g.ellipse(lx, ly, 9 + rnd() * 5, 6 + rnd() * 3, rnd() * 3, 0, U.TAU); g.fill();
+      }
+    }
     // 暗角
     const v = g.createRadialGradient(A.w / 2, A.h / 2, A.h * 0.4, A.w / 2, A.h / 2, A.w * 0.62);
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)');
@@ -76,10 +91,10 @@
   let arenaLayer = null;
   function drawArenaStatic(g) {
     const A = BD.ARENA;
-    g.fillStyle = '#0c0a10'; g.fillRect(-34, -34, A.w + 68, A.h + 68);
-    g.fillStyle = '#2a2430'; g.fillRect(-26, -26, A.w + 52, A.h + 52);
+    g.fillStyle = '#0a110a'; g.fillRect(-34, -34, A.w + 68, A.h + 68);
+    g.fillStyle = '#1b2a17'; g.fillRect(-26, -26, A.w + 52, A.h + 52);
     drawFloor(g);
-    g.strokeStyle = '#6b5a48'; g.lineWidth = 4; g.strokeRect(-2, -2, A.w + 4, A.h + 4);
+    g.strokeStyle = '#5a4a30'; g.lineWidth = 4; g.strokeRect(-2, -2, A.w + 4, A.h + 4);
     g.strokeStyle = 'rgba(255,200,120,0.15)'; g.lineWidth = 1; g.strokeRect(-14, -14, A.w + 28, A.h + 28);
   }
   function getArenaLayer(scale) {
@@ -100,24 +115,13 @@
       R.drawSprite(ctx, { canvas: L.canvas, scale: s }, -34 - 1 / s, -34 - 1 / s);
     } else {
       // 快取關閉：照舊即時繪製（地面用 1x 快取畫布）
-      ctx.fillStyle = '#0c0a10'; ctx.fillRect(-34, -34, A.w + 68, A.h + 68);
-      ctx.fillStyle = '#2a2430'; ctx.fillRect(-26, -26, A.w + 52, A.h + 52);
+      ctx.fillStyle = '#0a110a'; ctx.fillRect(-34, -34, A.w + 68, A.h + 68);
+      ctx.fillStyle = '#1b2a17'; ctx.fillRect(-26, -26, A.w + 52, A.h + 52);
       const f = floor(); if (f) ctx.drawImage(f, 0, 0); else { ctx.fillStyle = '#25202a'; ctx.fillRect(0, 0, A.w, A.h); }
-      ctx.strokeStyle = '#6b5a48'; ctx.lineWidth = 4; ctx.strokeRect(-2, -2, A.w + 4, A.h + 4);
+      ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 4; ctx.strokeRect(-2, -2, A.w + 4, A.h + 4);
       ctx.strokeStyle = 'rgba(255,200,120,0.15)'; ctx.lineWidth = 1; ctx.strokeRect(-14, -14, A.w + 28, A.h + 28);
     }
-    // 牆上火炬：光暈精靈固定半徑 90，以 scale(fl,fl) 重現閃爍
-    for (const [x, y] of [[0, 0], [A.w, 0], [0, A.h], [A.w, A.h], [A.w / 2, 0], [A.w / 2, A.h]]) {
-      const fl = 0.75 + Math.sin(t * 9 + x) * 0.15 + Math.sin(t * 23 + y) * 0.1;
-      ctx.save(); ctx.translate(x, y); ctx.scale(fl, fl);
-      R.blit(ctx, 'torch', 180, 180, 90, 90, (g) => {
-        const gr = g.createRadialGradient(0, 0, 2, 0, 0, 90);
-        gr.addColorStop(0, 'rgba(255,190,90,0.35)'); gr.addColorStop(1, 'rgba(255,120,40,0)');
-        g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 90, 0, U.TAU); g.fill();
-      });
-      ctx.restore();
-      ctx.fillStyle = '#ffcf7a'; ctx.beginPath(); ctx.arc(x, y, 5 * fl, 0, U.TAU); ctx.fill();
-    }
+    drawWater(ctx, t);
     // 地面痕跡（圓形污痕 / 程序化裂地）
     drawDecals(ctx, w);
   }
@@ -189,19 +193,71 @@
     ctx.lineWidth = Math.max(0.8, (lv === 0 ? w0 * 0.85 : lv === 1 ? w0 * 0.45 : w0 * 0.22) * mul);
     ctx.stroke();
   }
+  // 樹（俯視）：陰影 + 疊色樹冠；碰撞只看樹幹半徑 r，樹冠純裝飾。每個半徑 / 變體烘焙一張精靈
+  const CROWN = 1.9;
+  function drawTreeSprite(ctx, r, v) {
+    const cr = r * CROWN, S = cr * 2 + 40;
+    R.blit(ctx, 'tree:' + r + ':' + v, S, S, S / 2, S / 2, (g) => {
+      let seed = 11 + v * 97; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      g.fillStyle = 'rgba(0,0,0,0.32)'; g.beginPath(); g.ellipse(10, 14, cr * 0.98, cr * 0.9, 0, 0, U.TAU); g.fill();
+      g.fillStyle = '#6b4a2a'; g.beginPath(); g.arc(0, 0, r * 0.5, 0, U.TAU); g.fill();
+      const tones = ['#1f4a22', '#2c6a2c', '#3f8a38', '#62a844'];
+      for (let layer = 0; layer < tones.length; layer++) {
+        g.fillStyle = tones[layer];
+        const n = 7 - layer, rad = cr * (0.62 - layer * 0.09), dist = cr * (0.42 - layer * 0.08);
+        for (let i = 0; i < n; i++) {
+          const a = i / n * U.TAU + rnd() * 0.6, d = dist * (0.7 + rnd() * 0.5);
+          g.beginPath(); g.arc(Math.cos(a) * d - layer * 2, Math.sin(a) * d - layer * 2.5, rad * (0.85 + rnd() * 0.3), 0, U.TAU); g.fill();
+        }
+      }
+      g.fillStyle = 'rgba(200,235,140,0.35)';
+      for (let i = 0; i < 14; i++) { const a = rnd() * U.TAU, d = rnd() * cr * 0.6; g.beginPath(); g.arc(Math.cos(a) * d - 4, Math.sin(a) * d - 6, 2 + rnd() * 2.5, 0, U.TAU); g.fill(); }
+    });
+  }
   function drawPillars(ctx) {
-    // 石柱完全靜態：每個半徑快取一張精靈，於 p.x,p.y 以區域座標繪製
     for (const p of BD.ARENA.pillars) {
       ctx.save(); ctx.translate(p.x, p.y);
-      const r = p.r;
-      R.blit(ctx, 'pillar:' + r, r * 2 + 20, r * 2 + 20, r + 10, r + 10, (g) => {
-        g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.ellipse(8, 10, r + 4, r, 0, 0, U.TAU); g.fill();
-        const grad = g.createRadialGradient(-r * 0.3, -r * 0.3, 4, 0, 0, r);
-        grad.addColorStop(0, '#8a7d70'); grad.addColorStop(1, '#3a332e');
-        g.fillStyle = grad; g.beginPath(); g.arc(0, 0, r, 0, U.TAU); g.fill();
-        g.strokeStyle = '#1a1612'; g.lineWidth = 3; g.stroke();
-        g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, r * 0.62, 0, U.TAU); g.stroke();
-      });
+      drawTreeSprite(ctx, p.r, p.v);
+      ctx.restore();
+    }
+  }
+  // 池面動態：幾圈緩慢擴散的漣漪（只與時間有關，不影響戰鬥）
+  function drawWater(ctx, t) {
+    ctx.save(); ctx.lineWidth = 1.5;
+    BD.ARENA.ponds.forEach((p, pi) => {
+      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, U.TAU); ctx.save(); ctx.clip();
+      for (let i = 0; i < 6; i++) {
+        const k = (t * 0.18 + i / 6) % 1, cx = p.x + Math.sin(i * 2.1 + pi) * p.rx * 0.55, cy = p.y + Math.cos(i * 1.7 + pi * 3) * p.ry * 0.5;
+        ctx.strokeStyle = `rgba(210,235,240,${(1 - k) * 0.28})`;
+        ctx.beginPath(); ctx.ellipse(cx, cy, 6 + k * 46, 3 + k * 22, 0, 0, U.TAU); ctx.stroke();
+      }
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  // 水面倒影：把站在池邊 / 池中的 Boss 上下翻轉畫在腳下、半透明、輕微晃動，再蓋一層水色
+  function drawReflections(ctx, w, t) {
+    for (const p of BD.ARENA.ponds) {
+      const list = w.bosses.filter((b) => b.state !== 'dead' && Math.abs(b.x - p.x) < p.rx + b.r * 2 && Math.abs(b.y - p.y) < p.ry + b.r * 3);
+      if (!list.length) continue;
+      ctx.save(); ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, U.TAU); ctx.clip();
+      for (const b of list) {
+        ctx.save(); ctx.globalAlpha = 0.45; ctx.translate(Math.sin(t * 3 + b.x * 0.02) * 2.5, b.y * 2 + b.r * 1.6); ctx.scale(1, -1);
+        R.drawBossBody(ctx, b, t); ctx.restore();
+      }
+      ctx.fillStyle = 'rgba(40,95,105,0.22)'; ctx.fillRect(p.x - p.rx, p.y - p.ry, p.rx * 2, p.ry * 2);
+      ctx.restore();
+    }
+  }
+  // 斷樹的兩半：沿刃線切開，各自旋轉飛開並漸隱
+  function drawChunks(ctx, fx) {
+    for (const c of fx.chunks) {
+      const cr = c.r * CROWN + 8;
+      ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.spin); ctx.globalAlpha = Math.min(1, c.life / c.max * 1.6);
+      ctx.save(); ctx.rotate(c.a0); ctx.beginPath(); ctx.rect(-cr, c.side > 0 ? 0 : -cr, cr * 2, cr); ctx.clip(); ctx.rotate(-c.a0);
+      drawTreeSprite(ctx, c.r, c.v);
+      ctx.restore();
+      ctx.rotate(c.a0); ctx.strokeStyle = '#c89a62'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-c.r * 0.5, 0); ctx.lineTo(c.r * 0.5, 0); ctx.stroke();
       ctx.restore();
     }
   }
@@ -620,6 +676,8 @@
           g.strokeStyle = 'rgba(255,120,30,0.8)'; g.lineWidth = 10; g.beginPath(); g.arc(-p.r * 0.6, 0, p.r, -1.1, 1.1); g.stroke();
           g.strokeStyle = '#ffe0a0'; g.lineWidth = 3; g.beginPath(); g.arc(-p.r * 0.6, 0, p.r, -0.9, 0.9); g.stroke();
         });
+      } else if (p.kind === 'log') {
+        ctx.rotate(-a + t * 9); drawTreeSprite(ctx, p.r, 0);
       } else if (p.kind === 'swarm') {
         ctx.rotate(-a);
         R.blit(ctx, 'proj:swarm:' + p.r, p.r * 2 + 4, p.r * 2 + 4, p.r + 2, p.r + 2, (g) => {
@@ -860,6 +918,7 @@
     if (!layer) { drawFx(ctx, w, 'ground'); drawFx(ctx, w, 'air'); return; }
     ctx.save(); ctx.lineCap = 'butt';
     if (layer === 'ground') {
+      drawChunks(ctx, fx);
       // 由下而上：震波 → 光環 → 大光暈
       drawShocks(ctx, fx);
       for (const r of fx.rings) {
@@ -1043,6 +1102,6 @@
     ctx.globalAlpha = 1;
   }
 
-  Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars,
+  Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections,
     minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, veil: drawVeil, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, star });
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -99,7 +99,7 @@
   // 平移特效與殘影（讓鏡頭跟著衝刺單位移動）
   function shiftFx(fx, dx) {
     if (!dx) return;
-    const arrs = [fx.parts, fx.rings, fx.slashes, fx.beams, fx.texts, fx.decals, fx.pillars, fx.glows, fx.shocks, fx.streaks, fx.ghosts];
+    const arrs = [fx.parts, fx.rings, fx.slashes, fx.beams, fx.texts, fx.decals, fx.pillars, fx.glows, fx.shocks, fx.streaks, fx.ghosts, fx.chunks];
     for (const arr of arrs) for (const o of arr) o.x += dx;
     for (const g of fx.glows) if (g.follow && g.follow.x != null) g.follow.x += dx;
   }

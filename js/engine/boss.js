@@ -59,7 +59,7 @@
       if (this.controller && this.controller.aimOverride) return this.controller.aimOverride; // 沉重：讀習慣預判落點
       return this.enemy;
     }
-    speed() { return BD.scaleMod(this, 'speedMul', this.def.speed * this.speedMul); }
+    speed() { return BD.scaleMod(this, 'speedMul', this.def.speed * this.speedMul) * BD.terrainSpeedMul(this); }
     canAct() { return this.state === 'idle' && this.world.intro <= 0 && !this.world.over && BD.getMod(this, 'canAct'); }
     skillReady(s) {
       if (s.ult) return this.ult >= 100;

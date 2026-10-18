@@ -6,6 +6,7 @@
   function explodeAt(w, src, x, y, a) {
     const s = { kind: 'circle', x, y, r: a.r };
     w.applyArea(src, s, { dmg: a.dmg, posture: a.posture, kb: a.kb, slow: a.slow, root: a.root, status: a.status });
+    BD.hitProps(w, src, s, a);
     BD.spawnFx(w, 'explode', x, y, { src: src, el: BD.kindElement(a.kind, BD.fxElementOf(src)), radius: a.r, dmg: a.dmg });
     if (a.zone) BD.makeZone(w, src.owner || src, x, y, a.zone);
   }

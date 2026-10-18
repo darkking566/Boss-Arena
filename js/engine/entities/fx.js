@@ -22,7 +22,7 @@
   class FX {
     constructor(w) {
       this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
-      this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = [];
+      this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = []; this.chunks = [];
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
     }
@@ -150,6 +150,8 @@
       this.ghosts.push({ x: u.x, y: u.y, face: u.face, r: u.r, def: u.def, phase: u.phase, life: life || 0.35, max: life || 0.35, color: color || null });
     }
     pillar(x, y, r, color, life) { this.pillars.push({ x, y, r, color, life: life || 0.5, max: life || 0.5 }); }
+    // 斷樹的一半：a0 為切線（刃）方向，side（±1）決定留哪一側，spin 為之後累積的旋轉；繪圖端畫半棵樹並漸隱
+    chunk(x, y, vx, vy, a0, vr, side, r, v, life) { this.chunks.push({ x, y, vx, vy, a0, spin: 0, vr, side, r, v, life: life || 1.1, max: life || 1.1 }); }
     text(x, y, text, color, size) { this.texts.push({ x: x + (V() - 0.5) * 16, y, text, color, size: size || 16, life: 1.0, max: 1.0, vy: -50 }); }
     damage(b, dmg, color) {
       const big = dmg >= 100;
@@ -215,8 +217,9 @@
         const k = Math.exp(-p.drag * dt); p.vx *= k; p.vy *= k;
       }
       compact(parts, (p) => { if (pool.length < POOL_CAP) { p.color = ''; pool.push(p); } });
-      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils];
+      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks];
       for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
+      for (const c of this.chunks) { c.x += c.vx * dt; c.y += c.vy * dt; c.spin += c.vr * dt; const k = Math.exp(-3 * dt); c.vx *= k; c.vy *= k; c.vr *= k; }
       for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));
       for (let j = 0; j < arrs.length; j++) compact(arrs[j]);
     }

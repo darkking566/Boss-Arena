@@ -35,6 +35,7 @@
   BD.defineAction('hit', (w, b, inst, a) => {
     const s = K.resolveShape(w, b, inst, a);
     w.applyArea(b, s, a);
+    BD.hitProps(w, b, s, a);
     K.hitFx(w, b, s, a.fx, { el: a.fxEl, dmg: a.dmg });
     if (a.zone) { const c = K.shapeCenter(s); BD.makeZone(w, b, c.x, c.y, a.zone); }
     BD.traitHook(b, 'onHit', w, b, s, a);
@@ -61,6 +62,7 @@
           K.addTele(w, b, null, s, p.tele, { detached: true, color: b.def.color });
           w.later(p.tele, () => {
             w.applyArea(b, s, { dmg: p.dmg, posture: p.posture, kb: 200, from: s });
+            BD.hitProps(w, b, s, { dmg: p.dmg, kb: 200, fx: p.fx || 'cross' });
             K.hitFx(w, b, s, p.fx || 'cross', p.fx ? { dmg: p.dmg, hold: endT - delay - p.tele } : { color: '#fff', dmg: p.dmg });
             if (!p.fx) w.fx.shake(5);
           });

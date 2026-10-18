@@ -198,6 +198,7 @@
 
     reset() {
       const w = this.w;
+      BD.resetArena();
       w.telegraphs = [];
       w.projectiles = [];
       w.zones = [];
@@ -212,7 +213,7 @@
       w.freezeF = 0;
       w.slowmo = 0;
       if (w.fx) {
-        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers'];
+        const fxProps = ['parts', 'rings', 'slashes', 'beams', 'texts', 'decals', 'pillars', 'glows', 'shocks', 'streaks', 'ghosts', 'veils', 'timers', 'chunks'];
         for (const prop of fxProps) {
           if (Array.isArray(w.fx[prop])) w.fx[prop].length = 0;
         }
