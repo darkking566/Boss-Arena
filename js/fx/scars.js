@@ -29,11 +29,20 @@
     const a = o.angle || 0, r = o.radius, k = o.k;
     const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
     const gash = (gx, gy, ga, len, wd, arc, al) => add({ k: 'gash', x: gx, y: gy, a: ga, len, wd, arc, al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
-    const blot = (bx, by, br) => add({ k: 'blot', x: bx, y: by, r: br, rot: V() * TAU, pts: jag(12, 0.6), c: P.c, c2: P.c2, glow: P.glow });
+    const blot = (bx, by, br, al) => add({ k: 'blot', x: bx, y: by, r: br, rot: V() * TAU, pts: jag(12, 0.6), al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
+    const surf = (kind, sr) => add({ k: kind, x, y, r: sr, rot: V() * TAU, pts: jag(12, 0.65), cr: Array.from({ length: 6 + ((V() * 3) | 0) }, () => [V() * TAU, sr * (0.4 + V() * 0.7)]) });
     const pit = (px, py, pr) => add({ k: 'pit', x: px, y: py, r: pr, rot: V() * TAU, pts: jag(10, 0.8), c: D.c, c2: D.c2,
       cr: Array.from({ length: 5 + ((V() * 3) | 0) }, () => [V() * TAU, pr * (1.2 + V() * 0.7)]) });
     const litter = (n, spread) => add({ k: 'litter', x, y, bits: Array.from({ length: n }, () => [(V() - 0.5) * 2 * spread, (V() - 0.5) * 2 * spread, V() * TAU, 2 + V() * 2.5, LEAF[(V() * LEAF.length) | 0]]) });
 
+    if (BD.biomeAt(x).id === 'lake') { // 湖面：只有 lakesplash 會留下水面上的痕跡
+      if (id !== 'lakesplash') return;
+      const el = o.el;
+      if (el === 'fire' && (o.dmg >= 100 || o.zoneR || k >= 1.6)) surf('rock', clamp(o.zoneR || 60 * k, 36, 150)); // 熔岩遇水凝固成岩石
+      else if (el === 'ice') surf('ice', clamp(55 * k, 40, 130)); // 水面凍結
+      else if (el === 'poison' || el === 'blood' || el === 'shadow' || el === 'umbra') blot(x, y, clamp(70 * k, 40, 160), 0.6); // 毒 / 血 / 暗影在水中暈開
+      return;
+    }
     if (cat === '斬擊') {
       if (id === 'contempt') for (const s of [-1, 1]) gash(x, y, a + s * Math.PI / 4 + Math.PI, 40, 3, 0, 0.9);
       else if (id === 'whirl') gash(x, y, a, r * 0.95, 3 + k, TAU * 0.92);

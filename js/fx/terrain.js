@@ -97,6 +97,60 @@
     },
   });
 
+  const WATER_COL = ['#e8fbff', '#bfe6f2', '#8ccbe0'];
+  const rnd = (n) => (V() * n) | 0;
+  // 湖面：所有招式都濺起大片水花；依招式元素與水面起反應（蒸發 / 凍結 / 導電 / 暈染 / 聖光…）
+  // 持久的痕跡（岩石、冰面、油汙般的毒血暈）由 js/fx/scars.js 在同一次 spawnFx 後留下
+  BD.defineEffect('lakesplash', {
+    name: '湖面水花', category: '地形',
+    desc: '淺水湖面被招式擊中：三圈外擴漣漪、沖天水柱與漫天水珠、水霧團；火焰蒸發成大片水氣、冰霜凍結水面、雷電沿水面竄出電弧、毒 / 血 / 暗影在水中暈開、聖光盪出金色光圈、秘法泛起紫色漣漪。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const k = o.scale, sk = Math.sqrt(k), el = o.el, E = o.E;
+      fx.ring(x, y, 6, 60 * k, 0.7, '#e4f8fb', 3.5); fx.ring(x, y, 4, 115 * k, 1.0, '#bfe6ee', 2.4); fx.ring(x, y, 2, 180 * k, 1.3, '#a9dbe6', 1.6);
+      for (let i = 0, n = Math.round(4 * k) + 3; i < n; i++) {
+        const a = V() * TAU, s = 30 + V() * 90 * sk;
+        fx.puff(x + (V() - 0.5) * 30, y + (V() - 0.5) * 30, Math.cos(a) * s, Math.sin(a) * s, 18, 60 + V() * 40 * k, 0.9 + V() * 0.7, 'water', 0.55);
+      }
+      for (let i = 0, n = Math.round(30 * k) + 16; i < n; i++) { // 漫天水珠
+        const a = o.dir ? o.angle + (V() - 0.5) * 1.3 : V() * TAU, s = (160 + V() * 380) * sk;
+        fx.stalk(x, y, Math.cos(a) * s, Math.sin(a) * s, (340 + V() * 520) * sk, 0, 0, 3 + V() * 3, 3 + V() * 3, WATER_COL[rnd(3)], 1 + V() * 0.8);
+      }
+      for (let i = 0, n = Math.round(6 * k) + 2; i < n; i++) fx.stalk(x + (V() - 0.5) * 20, y + (V() - 0.5) * 12, (V() - 0.5) * 50, (V() - 0.5) * 30, (700 + V() * 350) * sk, 0, 0, 5, 8, '#ffffff', 1.2); // 水柱
+      if (o.dir) fx.sparkle(x, y, '#e8fbff', Math.round(8 * k), 380, o.angle, 0.9);
+      const mist = (tint, n, al, life) => { for (let i = 0; i < n; i++) fx.puff(x + (V() - 0.5) * 40, y + (V() - 0.5) * 40, (V() - 0.5) * 80, -(20 + V() * 60), 24, 90 + 60 * k, life + V() * 1.5, tint, al); };
+      if (el === 'fire') { // 蒸發：大片白色水氣向上翻騰、冒泡、餘燼嘶嘶
+        mist('steam', Math.round(6 * k) + 4, 0.5, 2.2);
+        fx.sparkle(x, y, '#ffb347', Math.round(8 * k), 300);
+        for (let i = 0, n = Math.round(8 * k); i < n; i++) fx.part(BD.PK.BUBBLE, x + (V() - 0.5) * 50, y + (V() - 0.5) * 30, (V() - 0.5) * 40, -V() * 40, 0.8 + V() * 0.6, 'rgba(255,255,255,0.75)', 3 + V() * 3, 1);
+        if (o.zoneR || k >= 1.5) fx.shake(6);
+      } else if (el === 'ice') { // 凍結：冰晶迸射、寒霧、白色凍結圈
+        mist('snow', Math.round(4 * k) + 2, 0.4, 1.8);
+        fx.ring(x, y, 10, 150 * k, 0.9, '#ffffff', 3);
+        fx.sparkle(x, y, '#e6fbff', Math.round(12 * k), 340); fx.debris(x, y, '#cfefff', Math.round(10 * k), 280, 4, 14);
+      } else if (el === 'lightning') { // 導電：電弧沿水面向四周竄走
+        const R = 170 * k, bolt = (n) => { for (let b = 0; b < n; b++) { let a = V() * TAU, px = x, py = y; for (let s = 0, m = 3 + rnd(2); s < m; s++) { a += (V() - 0.5) * 1.1; const len = R / 3 * (0.7 + V() * 0.6), nx = px + Math.cos(a) * len, ny = py + Math.sin(a) * len; fx.beam(px, py, nx, ny, 3 + V() * 2, '#a8dcff', 0.28 + V() * 0.12, '#ffffff'); px = nx; py = ny; } } };
+        bolt(6 + Math.round(2 * k)); fx.after(0.12, () => bolt(4));
+        fx.ring(x, y, 6, R, 0.5, '#a8dcff', 3); fx.sparkle(x, y, '#ffffff', Math.round(14 * k), 460); fx.flashAt(x, y, R * 0.5, '#cfe9ff', 0.14);
+      } else if (el === 'poison') {
+        mist('toxic', Math.round(6 * k) + 3, 0.5, 2.5);
+        for (let i = 0, n = Math.round(10 * k); i < n; i++) fx.part(BD.PK.BUBBLE, x + (V() - 0.5) * 60, y + (V() - 0.5) * 40, (V() - 0.5) * 30, -V() * 30, 1 + V(), '#b6ff5c', 3 + V() * 4, 1);
+      } else if (el === 'blood') {
+        mist('blood', Math.round(6 * k) + 3, 0.55, 2.5);
+        for (let i = 0, n = Math.round(10 * k); i < n; i++) { const a = V() * TAU, s = (120 + V() * 300) * sk; fx.stalk(x, y, Math.cos(a) * s, Math.sin(a) * s, (300 + V() * 400) * sk, 0, 0, 4, 5, '#9a0a1c', 1.2); }
+      } else if (el === 'shadow' || el === 'umbra') {
+        mist('ink', Math.round(6 * k) + 3, 0.55, 2.8);
+        fx.motes(x, y, E, Math.round(8 * k), 40, 70);
+      } else if (el === 'holy') {
+        fx.ring(x, y, 8, 140 * k, 0.9, '#ffe27a', 3); fx.ring(x, y, 4, 220 * k, 1.3, '#fff1b0', 2);
+        fx.glow(x, y, 110 * k, '#ffe27a', 0.9, 0.7, 0.6); fx.sparkle(x, y, '#fff1b0', Math.round(14 * k), 300); fx.motes(x, y, E, Math.round(8 * k), 40, 90);
+      } else if (el === 'arcane') {
+        fx.ring(x, y, 8, 150 * k, 0.9, '#c77dff', 3); fx.ring(x, y, 4, 230 * k, 1.3, '#e0b8ff', 2);
+        fx.motes(x, y, E, Math.round(10 * k), 50, 90); fx.sparkle(x, y, '#e0b8ff', Math.round(10 * k), 300);
+      }
+    },
+  });
+
   const WHEAT_COL = ['#e3b94a', '#d1a233', '#f1cf6e', '#b98a24'];
   BD.defineEffect('wheatburst', {
     name: '麥浪炸裂', category: '地形',

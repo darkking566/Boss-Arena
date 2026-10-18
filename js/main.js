@@ -7,7 +7,7 @@
   const input = new BD.Input(canvas);
   const view = { showLog: true, player: null, mouse: input.mouse };
   const ids0 = BD.bosses.map((b) => b.id);
-  const state = { screen: 'select', world: null, pick: [ids0.includes('magmus') ? 'magmus' : ids0[0], ids0.includes('ronin') ? 'ronin' : ids0[1] || ids0[0]], pace: BD.DEFAULT_PACE, last: null, errors: [], page: [0, 0], mode: 'duel' };
+  const state = { screen: 'select', world: null, pick: [ids0.includes('magmus') ? 'magmus' : ids0[0], ids0.includes('ronin') ? 'ronin' : ids0[1] || ids0[0]], pace: BD.DEFAULT_PACE, map: BD.DEFAULT_MAP, last: null, errors: [], page: [0, 0], mode: 'duel' };
   G.__BD = state; // 測試掛勾
 
   // ── 畫布縮放 ──
@@ -89,6 +89,27 @@
     });
     showDetail(0, state.pick[0]);
   }
+  // ── 地圖（選角畫面）：每個地形是一張獨立地圖，卡片完全由 BD.MAPS 產生；選擇存在 localStorage ──
+  function setMap(id) {
+    if (!BD.mapById[id]) return;
+    state.map = id;
+    try { localStorage.setItem('bd.map', id); } catch (e) { /* file:// 下可能不可用 */ }
+    document.querySelectorAll('#mapPick .mapcard').forEach((c) => c.classList.toggle('sel', c.dataset.id === id));
+    $('#mapPick .mapdesc').textContent = `${BD.mapById[id].icon} ${BD.mapById[id].name}：${BD.mapById[id].desc}`;
+  }
+  (function buildMaps() {
+    const box = $('#mapPick');
+    box.innerHTML = '<h2>地圖</h2><div class="mapcards"></div><div class="mapdesc"></div>';
+    for (const m of BD.MAPS) {
+      const c = document.createElement('div'); c.className = 'mapcard'; c.dataset.id = m.id;
+      c.style.background = `linear-gradient(135deg, ${m.colors[0]}, ${m.colors[1]})`;
+      c.innerHTML = `<span class="ic">${m.icon}</span><span class="nm">${m.name}</span>`;
+      c.addEventListener('click', () => setMap(m.id));
+      box.querySelector('.mapcards').appendChild(c);
+    }
+    let saved = null; try { saved = localStorage.getItem('bd.map'); } catch (e) { /* ignore */ }
+    setMap(BD.mapById[saved] ? saved : BD.DEFAULT_MAP);
+  })();
   $('#btnRandom').addEventListener('click', () => {
     const ids = BD.bosses.map((b) => b.id);
     state.pick[0] = ids[Math.floor(Math.random() * ids.length)];
@@ -98,11 +119,11 @@
   });
   $('#btnStart').addEventListener('click', () => {
     if (state.mode === 'train') {
-      startTraining(state.pick[0], { mode: $('#optTrainMode').value, range: $('#optTrainRange').value, pace: state.pace });
+      startTraining(state.pick[0], { mode: $('#optTrainMode').value, range: $('#optTrainRange').value, pace: state.pace, map: state.map });
       return;
     }
     start(state.pick[0], state.pick[1], {
-      player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE,
+      player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map,
     });
   });
 
@@ -170,10 +191,10 @@
   }
 
   function start(a, b, opts) {
-    opts = Object.assign({ player: null, speed: 1, pace: BD.DEFAULT_PACE }, opts || {});
+    opts = Object.assign({ player: null, speed: 1, pace: BD.DEFAULT_PACE, map: state.map }, opts || {});
     if (!opts.pace) opts.pace = BD.DEFAULT_PACE;
     state.last = { a, b, opts };
-    const w = new BD.World(BD.bossById[a], BD.bossById[b], { player: opts.player, input, seed: opts.seed, pace: opts.pace });
+    const w = new BD.World(BD.bossById[a], BD.bossById[b], { player: opts.player, input, seed: opts.seed, pace: opts.pace, map: opts.map });
     w.speed = opts.player != null ? 1 : opts.speed;
     state.world = w; state.resultShown = false;
     view.player = opts.player;
@@ -184,9 +205,9 @@
 
   // 訓練場世界：Boss 對訓練假人（不計勝負、不會結束）
   function startTraining(a, opts) {
-    opts = Object.assign({ mode: 'manual', range: 'mid', pace: state.pace, seed: null, freeCast: true }, opts || {});
+    opts = Object.assign({ mode: 'manual', range: 'mid', pace: state.pace, map: state.map, seed: null, freeCast: true }, opts || {});
     const w = new BD.World(BD.bossById[a], BD.bossById.dummy, {
-      input, seed: opts.seed, pace: opts.pace || state.pace,
+      input, seed: opts.seed, pace: opts.pace || state.pace, map: opts.map,
       training: { mode: opts.mode || 'manual', range: opts.range || 'mid', freeCast: opts.freeCast !== false },
     });
     w.speed = 1;

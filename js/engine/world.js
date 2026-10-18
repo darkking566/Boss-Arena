@@ -8,11 +8,11 @@
     for (const s of [].concat(list)) BD.applyStatus(u, s.id, { dur: s.dur, stacks: s.stacks, value: s.value, source: src && (src.isBoss ? src : src.owner) || null }, w);
   }
   const ARENA = BD.ARENA = {
-    w: 4200, h: 1800,
-    // 場景由西到東：雪地 / 森林 / 沙漠 / 麥田 / 沼澤（x0~x1 為各生態區範圍；Boss 出生在中央沙漠）
-    biomes: [{ id: 'snow', x0: 0, x1: 900 }, { id: 'forest', x0: 900, x1: 1700 }, { id: 'desert', x0: 1700, x1: 2500 }, { id: 'wheat', x0: 2500, x1: 3300 }, { id: 'swamp', x0: 3300, x1: 4200 }],
-    ponds: [{ x: 3500, y: 380, rx: 230, ry: 100 }, { x: 3880, y: 860, rx: 250, ry: 110 }, { x: 3500, y: 1300, rx: 230, ry: 100 }, { x: 3900, y: 1600, rx: 190, ry: 80 }],
-    // trees 由 props.js 在森林區散佈；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
+    // 內容由 js/engine/maps.js 的 BD.setMap(id) 依所選地圖就地改寫（每個 World 建構時呼叫）；這裡只是預設空殼
+    w: 3000, h: 1800, map: 'desert',
+    biomes: [{ id: 'desert', x0: 0, x1: 3000 }],
+    ponds: [],
+    // trees 由 maps.js 散佈；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
     trees: [],
     pillars: [],
   };
@@ -34,7 +34,7 @@
       opts = opts || {};
       this.seed = opts.seed != null ? opts.seed : (Math.random() * 1e9) | 0;
       this.rng = U.makeRng(this.seed);
-      BD.resetArena();
+      BD.setMap(opts.map); // 依選擇的地圖改寫 BD.ARENA 並重建障礙
       // 節奏預設：未指定時為 light（原始定義、行為不變）；pace 僅供之後的機制讀取
       this.paceId = opts.pace || 'light'; this.pace = BD.paceConfig(this.paceId, null);
       this.time = 0; this.intro = opts.intro != null ? opts.intro : 1.8; this.over = false; this.winner = null; this.endT = 0;

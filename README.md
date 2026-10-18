@@ -77,12 +77,13 @@
 - 版面依 `BD.EFFECT_CATEGORIES` 分組排序，並列出元素圖例（核心 / 外光 / 粒子色與額外粒子行為）。
 - 設計新 Boss 招式時，先找現有特效 + 元素組合，找不到再依 `docs/effects.md` 新增。
 
-## 場景（雪地 / 森林 / 沙漠 / 麥田 / 沼澤，鏡頭跟隨）
-- 競技場 4200×1800，由西到東分成雪地、森林、沙漠、麥田、沼澤五個生態區（`BD.ARENA.biomes`，定義在 `js/engine/world.js`），Boss 出生在中央沙漠。畫面只顯示 1500×820 的視窗（`R.VW/R.VH`），鏡頭 `R.cam`（`js/render/hud.js` 的 `followCamera`）平滑跟著雙方 Boss 的中點；滑鼠瞄準座標 = 視窗座標 + `R.cam`。
-- `ARENA.pillars` 是每場由 `BD.resetArena()` 重建的「存活障礙」（AI、投射物、碰撞都讀它）；樹由 `js/engine/props.js` 以固定種子散佈在森林區，池塘 `ARENA.ponds` 在沼澤區。
-- 互動規則在 `props.js`：`hit` / `slashes` / 爆炸命中時依特效分類——**斬擊**把樹砍成兩半、**有擊退的重擊**把樹撞飛成滾木（穿透、傷害敵人）、輕擊只掉血；水中減速並濺水花、水面有倒影；沙漠沿招式方向揚起大片沙塵（存在 2~5 秒）；雪地略微減速、行走留下腳印（約 40 秒才消失）、招式炸開雪霧與雪塊；麥田（每 40px 一叢，被摧毀的格子記在 `fx.field`，純視覺）被斬擊兩側削飛、被重擊炸開、被踩倒，漫天麥稈 / 麥粒落地後漸隱，風圈讓周圍麥浪外倒。
-- 視覺在 `js/fx/terrain.js`（斷樹、撞飛、水花、沙塵 `sanddust`、雪沫 `snowburst`、麥浪 `wheatburst`；特效分類「地形」，原件 `puff` / `stalk` / `print` / `gust` 在 `js/engine/entities/fx.js`）與 `js/render/world.js`（分區地面 / 池塘 / 樹 / 倒影）。測試：`npm run test:props`。
-- 戰鬥痕跡：`js/fx/scars.js` 的 `BD.leaveScar` 由 `BD.spawnFx` 依特效分類自動呼叫（斬擊 → 劍痕、砸地 → 坑洞＋裂紋、爆炸 / 噴吐 → 依元素的焦痕 / 霜 / 毒漬 / 雷焦、衝刺 → 滑痕、斷樹 → 樹墩與落葉），整場保留（上限 260，最舊先消失）、火系餘燼數秒內冷卻、水面不留痕；新招式只要分類正確就會自動留痕。
+## 地圖（沙漠 / 森林 / 沼澤 / 麥田 / 雪地 / 淺水湖泊，鏡頭跟隨）
+- 每個地形是一張獨立的 3000×1800 地圖（單一生態區）。選角畫面的「地圖」列選擇（記在 localStorage），`BD.World` 以 `opts.map` 建構；`BD.MAPS` 與 `BD.setMap(id)` 在 `js/engine/maps.js`，會就地改寫 `BD.ARENA`（biomes / ponds / trees / pillars）。預設地圖是沙漠（無障礙，測試與模擬也用它）；新增地圖 = 在 `BD.MAPS` 加一筆並補上繪圖。
+- 畫面只顯示 1500×820 的視窗（`R.VW/R.VH`），鏡頭 `R.cam`（`js/render/hud.js` 的 `followCamera`）平滑跟著雙方 Boss 的中點；滑鼠瞄準座標 = 視窗座標 + `R.cam`。
+- `ARENA.pillars` 是每場重建的「存活障礙」（AI、投射物、碰撞都讀它）；森林的樹由 `maps.js` 以固定種子散佈（避開出生點），沼澤的水池在 `ARENA.ponds`。
+- 互動規則在 `js/engine/props.js`：`hit` / `slashes` / 爆炸命中時依特效分類——**森林**：斬擊把樹砍成兩半、有擊退的重擊把樹撞成滾木（穿透、傷害敵人）、輕擊只掉血；**沼澤**：水中減速、濺水花、有倒影；**沙漠**：大片沙塵（存在 2~5 秒）、淺腳印；**雪地**：略減速、腳印（約 40 秒）、雪霧與雪塊；**麥田**（每 40px 一叢，被摧毀的格子記在 `fx.field`，純視覺）：斬擊兩側削飛、重擊炸開、被踩倒，漫天麥稈麥粒、風圈讓麥浪外倒；**淺水湖泊**：整張圖是水面（略減速、涉水與站立都盪漣漪）、角色映出自己的倒影，所有攻擊濺起大片水花，並依元素起反應（`lakesplash`）：火 → 水蒸氣（重型火焰把熔岩凝固成岩石）、冰 → 凍結水面（約 14 秒後融化）、雷 → 電弧沿水面竄走、毒 / 血 / 暗影 → 在水中暈開、聖光 / 秘法 → 光圈漣漪。
+- 視覺在 `js/fx/terrain.js`（特效分類「地形」：`treecut` `treesmash` `splash` `sanddust` `snowburst` `wheatburst` `lakesplash`；原件 `puff` / `stalk` / `print` / `gust` 在 `js/engine/entities/fx.js`）與 `js/render/world.js`（各地形地面 / 池塘 / 樹 / 麥叢 / 倒影 / 岩石與冰面）。測試：`npm run test:props`。
+- 戰鬥痕跡：`js/fx/scars.js` 的 `BD.leaveScar` 由 `BD.spawnFx` 依特效分類自動呼叫（斬擊 → 劍痕、砸地 → 坑洞＋裂紋、爆炸 / 噴吐 → 依元素的焦痕 / 霜 / 毒漬 / 雷焦、衝刺 → 滑痕、斷樹 → 樹墩與落葉；沙 / 雪 / 麥田換成對應的地面色；湖面只留岩石、冰與暈染），整場保留（上限 260，最舊先消失）、火系餘燼數秒內冷卻、水池水面不留痕；新招式只要分類正確就會自動留痕。
 
 ## 檔案結構
 全部是普通 `<script>`（IIFE + 全域 `BD`），依 `index.html` 的順序載入；標記 `data-browser` 的檔案才會碰到 DOM / Canvas。

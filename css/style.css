@@ -29,6 +29,17 @@ h1 span { color: #fff; margin-left: 6px; }
 .card .nm { font-size: 19px; font-weight: bold; }
 .card .tt { font-size: 13px; color: #aaa; }
 .card .ar { font-size: 12px; margin-top: 4px; display: inline-block; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+/* ── 地圖選擇 ── */
+.maps { margin: 12px auto 0; text-align: center; }
+.maps h2 { margin: 0 0 6px; font-size: 18px; color: #ffd27a; }
+.mapcards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.mapcard { width: 138px; padding: 10px 6px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; transition: transform .12s, border-color .12s, filter .12s; filter: brightness(0.7) saturate(0.8); }
+.mapcard:hover { transform: translateY(-2px); filter: brightness(0.9); }
+.mapcard.sel { border-color: #ffd27a; filter: none; box-shadow: 0 0 14px rgba(255,210,122,0.5); }
+.mapcard .ic { font-size: 28px; line-height: 1.1; }
+.mapcard .nm { font-size: 16px; font-weight: bold; }
+.mapdesc { margin-top: 6px; color: #ffb070; font-size: 13px; min-height: 20px; }
 .detail { margin: 14px auto 6px; text-align: left; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 12px 16px; min-height: 150px;
   display: grid; grid-template-columns: 1fr 1fr; gap: 18px; font-size: 14px; line-height: 1.55; }
 .detail h3 { margin: 0 0 4px; font-size: 18px; }
