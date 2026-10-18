@@ -9,7 +9,8 @@
     const cs = BD.getStatus(b, 'counter'), p = (cs && cs.data) || { dmg: 150, posture: 60 };
     b.stats.counters++;
     w.fx.text(b.x, b.y - b.r - 30, p.name ? '彈反！' : '見切！', '#ffffff', 26);
-    BD.spawnFx(w, 'parry', b.x, b.y, { src: b }); w.hitstop = 0.12;
+    BD.spawnFx(w, p.fx || 'parry', b.x, b.y, { src: b }); w.hitstop = 0.12;
+    if (p.slowmo) w.slowmo = Math.max(w.slowmo, p.slowmo); // 純演出：慢動作只影響實際播放速度
     w.log(b, (p.name ? '彈反成功，' : '見切成功，') + '看穿了 ' + attacker.name + ' 的攻擊！', true);
     if (!b._riposte) {
       b._riposte = BD.prepSkill({ id: 'riposte', name: p.name || '見切・反斬', track: 20, recovery: 0.35,

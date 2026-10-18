@@ -3,7 +3,7 @@
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA, TEAM = R.TEAM, FONT = R.FONT;
   const { arena: drawArena, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars,
-    minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts } = R.draw;
+    minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, veil: drawVeil } = R.draw;
   // ─────────────────────── HUD ───────────────────────
   function bar(ctx, x, y, w, h, frac, color, bg, rtl, trail) {
     ctx.fillStyle = bg || 'rgba(0,0,0,0.6)'; ctx.fillRect(x, y, w, h);
@@ -150,6 +150,7 @@
     drawArena(ctx, w, t);
     drawZones(ctx, w, t);
     drawTraps(ctx, w, t);
+    drawVeil(ctx, w, 0, 0, BD.ARENA.w, BD.ARENA.h);
     if (!R.hideTele) drawTelegraphs(ctx, w, t);
     drawPillars(ctx);
     drawMinions(ctx, w, t);

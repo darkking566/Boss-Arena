@@ -430,6 +430,7 @@ function checkFxAction(a, where) {
 for (const def of bosses) {
   const W = `boss ${def.id}`;
   if (def.fxEl != null && !elementIds.has(def.fxEl)) err(W, `fxEl「${def.fxEl}」未在 BD.elements 註冊`);
+  if (def.phase2 && def.phase2.transFx != null && !effectIds.has((BD.parseFx(def.phase2.transFx) || {}).id)) err(W, 'phase2.transFx 未註冊的特效 id');
   if (def.phase2 && def.phase2.fxEl != null && !elementIds.has(def.phase2.fxEl)) err(W, `phase2.fxEl「${def.phase2.fxEl}」未在 BD.elements 註冊`);
   for (const s of def.skills || []) {
     (s.actions || []).forEach((a, i) => checkFxAction(a, `${W} skill ${s.id}.actions[${i}]`));

@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜大招（ultcast / domain / finale）：大招蓄勢、領域爆發與擊倒終結
+// 特效庫｜大招（ultcast / domain / nightfall / threadcut / finale）：大招蓄勢、領域爆發、夜幕、懸斬與擊倒終結
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、color 覆寫、radius 半徑、k 綜合倍率、src 施放者（可為 null）、pts 預先算好的點陣
 (function (G) {
@@ -42,6 +42,43 @@
       fx.ring(x, y, r, r + 40, 0.6, E.glow, 6 * Math.min(1.4, k));
       fx.shock(x, y, 10, r * 1.6, 0.8, E.glow, 6, E.core);
       fx.glow(x, y, r * 0.9, E.glow, 0.8, 0.4, 0.5);
+    },
+  });
+
+  BD.defineEffect('nightfall', {
+    name: '夜幕', category: '大招',
+    desc: '遁入黑暗：身影化為大團暗影散去，整個場地被暗幕籠罩 life 秒，只剩角色與預警線在黑暗中發亮。適合潛伏型大招、暗殺、百鬼夜行。',
+    params: { life: 2.5 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k;
+      fx.veil(o.life, 0.72, '#04020a');
+      fx.smoke(x, y, E.smoke, 20, 40 * Math.min(1.5, k));
+      fx.ring(x, y, 70, 4, 0.4, E.glow, 4);
+      fx.motes(x, y, E, Math.round(16 * k), 30, 120);
+    },
+  });
+
+  BD.defineEffect('threadcut', {
+    name: '懸斬', category: '大招',
+    desc: '斬下卻不立即裂開的刀痕：一條細白刀線懸在空中，hold 秒後才猛然裂開成白熱光束、兩側噴出火花並全屏一閃。多道刀痕同時到期就會「一齊裂開」。適合連續斬擊最後一起爆發的大招。',
+    params: { len: 400, width: 40, hold: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, len = o.len || 400, ang = o.angle || 0, hold = Math.max(0, o.hold || 0);
+      const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len;
+      fx.sparkle((x + tx) / 2, (y + ty) / 2, '#ffffff', 4, 160, ang + Math.PI / 2, 0.6);
+      for (let t = 0; t < hold; t += 0.1) fx.after(t, () => fx.beam(x, y, tx, ty, 2.5, '#ffffff', 0.14));
+      fx.after(hold, () => {
+        fx.beam(x, y, tx, ty, (o.width || 40) * 0.7 * Math.min(1.6, k), E.glow, 0.4, E.core);
+        fx.beam(x, y, tx, ty, 6, '#ffffff', 0.3, E.core);
+        const n = Math.max(3, Math.round(len / 50));
+        for (let i = 0; i < n; i++) {
+          const t = (i + 0.5) / n, px = x + (tx - x) * t, py = y + (ty - y) * t;
+          fx.sparkle(px, py, E.core, 1, 300, ang + (i % 2 ? 1 : -1) * Math.PI / 2, 0.5);
+          if (i % 2) fx.motes(px, py, E, 1, 8, 80);
+        }
+        fx.flash(E.core, 0.18);
+        fx.shake(Math.min(10, 3 * k));
+      });
     },
   });
 

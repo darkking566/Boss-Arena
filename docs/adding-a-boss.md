@@ -18,6 +18,7 @@
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,
           feint: 0.1, delay: 0.3, retreat: 0.1, punish: 0.6, nervous: 0.1, patience: 0.3 },
     phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, line: '二階段台詞', aura: 'fire', fxEl: 'fire',
+              transFx: { id: 'shadowrise', el: 'shadow' },  // 選用：換階段開始時播放的特效（life＝咆哮前的秒數；純演出）
               note: '只寫招式變化——「速度 +15%、傷害 +20%、冷卻 −20%」會由倍率自動產生，請勿手寫百分比' },
     skills: [
       // 動作帶 fx 範例：指定 fx: 'slam' 播放砸地特效（元素預設取自 Boss 的 fxEl）
@@ -36,6 +37,7 @@
 `tele` 預警、`hit` 判定、`dash` 衝刺、`proj` 投射物、`lob` 拋射、`rain` 隕石雨、`zone` 區域、`trap` 陷阱、`erupt` 噴發柱、
 `summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線。
 `strike(at, tele, shape, hit)` = 預警 + 判定；`dashStrike(...)` = 預警 + 衝刺。
+純演出的動作欄位（不影響戰鬥、行為指紋不變）：`counter` 可加 `fx`（見切成功特效，預設 `parry`）與 `slowmo`（見切成功的慢動作秒數）；`slashes` 與其 `final` 可加 `fx`（例如 `threadcut`：刀痕懸著，等到最後一擊一齊裂開）。
 
 ### 無法閃避（undodgeable）
 - `undodgeable: true` 可放在 `hit`、`trap`、`proj` 動作上（`dash` / `circle` 的 `hit: {...}` 物件中也可），表示翻滾 / 衝刺的無敵幀（iframe）無效。

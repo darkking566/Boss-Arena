@@ -162,6 +162,7 @@
         for (const m of w.minions) if (m.alive && m.owner === this) { m.alive = false; BD.spawnFx(w, 'vanish', m.x, m.y, { el: 'blood', src: this }); }
         w.log(this, '同伴們化為血霧消散……', true);
       }
+      if (p2.transFx) BD.spawnFx(w, p2.transFx, this.x, this.y, { src: this, life: this.roarAt });
       if (p2.bloodBurst) {
         BD.spawnFx(w, 'burst', this.x, this.y, { el: 'blood', radius: 110, scale: 2, src: this });
       }

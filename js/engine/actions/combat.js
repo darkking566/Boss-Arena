@@ -48,7 +48,9 @@
 
   BD.defineAction('invuln', (w, b, inst, a) => { BD.applyStatus(b, 'invuln', { dur: a.dur }, w); });
 
+  // 斬線可指定 fx（例如 threadcut）：此時傳入 hold＝距離最後一擊的秒數，讓刀痕等到最後一齊裂開
   BD.defineAction('slashes', (w, b, inst, a) => {
+    const endT = a.n * a.interval + 0.1 + a.final.tele;
     const one = (delay, ang, p) => {
       w.later(delay, () => {
         const t = b.enemy;
@@ -57,7 +59,11 @@
         for (const an of angs) {
           const s = { kind: 'rect', x: cx - Math.cos(an) * p.len / 2, y: cy - Math.sin(an) * p.len / 2, ang: an, len: p.len, w: p.w };
           K.addTele(w, b, null, s, p.tele, { detached: true, color: b.def.color });
-          w.later(p.tele, () => { w.applyArea(b, s, { dmg: p.dmg, posture: p.posture, kb: 200, from: s }); K.hitFx(w, b, s, 'cross', { color: '#fff', dmg: p.dmg }); w.fx.shake(5); });
+          w.later(p.tele, () => {
+            w.applyArea(b, s, { dmg: p.dmg, posture: p.posture, kb: 200, from: s });
+            K.hitFx(w, b, s, p.fx || 'cross', p.fx ? { dmg: p.dmg, hold: endT - delay - p.tele } : { color: '#fff', dmg: p.dmg });
+            if (!p.fx) w.fx.shake(5);
+          });
         }
       });
     };

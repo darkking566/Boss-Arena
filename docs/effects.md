@@ -12,7 +12,7 @@
 - **資料只宣告 `id` 與元素**：
   在 Boss 資料檔（`js/data/bosses/<id>.js`）中，招式僅以字串宣告特效（如 `fx: 'slam'`）與元素（如 `fxEl: 'fire'`），具體的粒子物理、光暈擴張、地面裂縫與色彩取樣皆由引擎與特效庫負責處理。
 - **「先挑現有特效 + 元素，找不到再新增」設計流程**：
-  特效庫目前內建 **40 種招式特效 × 9 種元素主題 = 360 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
+  特效庫目前內建 **46 種招式特效 × 9 種元素主題 = 414 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
   設計新 Boss 招式時，請先打開特效圖鑑挑選現有特效與元素；只有在現有原型確實無法滿足表現需求時，才擴充特效庫。
 
 ---
@@ -40,7 +40,7 @@
 python3 test/fx_gallery_test.py
 ```
 
-以無頭 Chromium 走訪整頁，驗證 40 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
+以無頭 Chromium 走訪整頁，驗證 46 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
 
 ---
 
@@ -113,8 +113,8 @@ const myBoss = {
 { do: 'hide', at: 0.3, fx: 'leap' },
 { do: 'hit', at: 1.6, shape: 'circle', r: 294, anchor: 'mark', mark: 'U', dmg: 240, posture: 80, kb: 650, fx: { id: 'bigslam', scale: 1.3 } }
 
-// 範例 3：影刃武士（ronin.js）「居合斬」高速衝刺穿身帶貫穿一閃
-dashStrike(0.42, 0.42, 330, 60, 0.13, { dmg: 95, posture: 40, kb: 250 }, { iframe: true, fx: 'slashline' })
+// 範例 3：影刃武士（ronin.js）「居合斬」高速衝刺，收刀後刀痕才遲一步裂開
+dashStrike(0.42, 0.42, 330, 60, 0.13, { dmg: 95, posture: 40, kb: 250 }, { iframe: true, fx: 'iaido' })
 
 // 範例 4：霜月魔女（witch.js）「冰槍貫穿」指定秘法元素的光束
 strike(1.0, 1.0, { shape: 'rect', len: 950, w: 54, off: 10 }, { dmg: 165, posture: 65, kb: 300, fx: { id: 'beam', el: 'arcane' }, slow: 1 })
@@ -162,7 +162,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 
 ---
 
-## 5. 特效一覽表（40 種特效）
+## 5. 特效一覽表（46 種特效）
 
 依 10 大分類（`BD.EFFECT_CATEGORIES`）整理，包含適合招式與當前所有 Boss 資料及引擎內建呼叫點：
 
@@ -172,8 +172,9 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `cleave` | 重劈 | 巨型 Boss 單發大弧重斬、附帶裂地與碎石 | 特效庫與圖鑑提供 |
 | | `whirl` | 迴旋斬 | 原地 360° 雙段半圓迴旋、清場掃擊 | 特效庫與圖鑑提供 |
 | **突刺** | `thrust` | 突刺 | 細長刃光、長槍穿刺、角撞、單點穿刺 | 腐沼母巢「尖肢突刺」、影刃武士「燕返（二階段）」、深淵監視者「狼血連斬」 |
-| | `cross` | 斬線 | 貫穿畫面的筆直斬線與垂直飛散火花 | combat.js `slashes` 連續斬線動作 |
-| | `slashline` | 居合一閃 | 衝刺穿身殘影、落定後貫穿全線的白熱一閃 | 影刃武士「居合斬」/「千鳥三連閃」、深淵監視者「突進刺擊」 |
+| | `cross` | 斬線 | 貫穿畫面的筆直斬線與垂直飛散火花 | combat.js `slashes` 連續斬線動作（未指定 fx 時） |
+| | `slashline` | 居合一閃 | 衝刺穿身殘影、落定後貫穿全線的白熱一閃 | 深淵監視者「突進刺擊」、呂布「飛將撲」 |
+| | `iaido` | 居合・遲裂 | 衝刺只留殘影、收刀後刀痕懸空，delay 秒後沿線猛然裂開 | 影刃武士「居合斬」/「千鳥三連閃」 |
 | | `beam` | 光束 | 粗大能量光束、雷射、吐息直線、法術砲擊 | 霜月魔女「冰槍貫穿」 |
 | **砸地** | `slam` | 砸地 | 武器或拳頭重擊地面、裂地碎石衝擊 | 熔岩巨像「重錘三連第3擊」/「熔岩衝撞（二階段）」/「地裂震波」、深淵監視者「迴旋翻斬」 |
 | | `bigslam` | 巨力砸地 | 跳砸、大招級毀滅重擊、雙層震波大範圍裂地 | 熔岩巨像「末日隕落」、深淵監視者「躍空下劈」/「狼血連環躍斬」/「薪王焚環」、腐沼母巢「鑽地突襲」 |
@@ -185,7 +186,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `burst` | 爆散 | 小型短促爆散光環、自爆、召喚物死亡、血霧 | minion.js 召喚物死亡預設、腐沼蜘蛛自爆、深淵監視者血祭消散 |
 | | `impact` | 命中爆點 | 被擊中時的受擊爆點回饋、火花與重擊閃白震動 | world.js `damageBoss`（Boss 受擊時的通用回饋） |
 | **位移** | `blink` | 閃現 | 瞬移、起點收縮光環煙霧、終點綻放與拖影 | movement.js `blink` 動作（blinkTo） |
-| | `vanish` | 隱身 | 身影化煙散去、暗影粒子飄散、潛行消失 | movement.js `hide` 動作預設、影刃武士「百鬼夜斬」、深淵監視者同伴消散 |
+| | `vanish` | 隱身 | 身影化煙散去、暗影粒子飄散、潛行消失 | movement.js `hide` 動作預設、深淵監視者同伴消散 |
 | | `appear` | 現身 | 身影從煙霧中浮現、解除隱身、傳送抵達 | movement.js `appear` 動作、Boss 解除 hidden 狀態 |
 | | `leap` | 躍起 | 起跳衝擊、地面震波向外推開、碎石塵土彈起 | movement.js `hide` 動作指定、熔岩巨像「末日隕落」起跳、深淵監視者「躍空下劈」起跳 |
 | | `burrow` | 鑽地 | 鑽入或鑽出泥土、碎塊大量翻飛、地表裂坑 | movement.js `hide` 動作指定、腐沼母巢「鑽地突襲」起手 |
@@ -200,13 +201,17 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `trapburst` | 陷阱觸發 | 陷阱踩中引爆、光環彈開、散射火花與微粒 | zones.js `updateTraps` 陷阱被踩中 |
 | **增益** | `charge` | 蓄力 | 光源由暗漸亮向內收束、吸入光點 | combat.js `tele` 自動蓄力光預設 |
 | | `stance` | 架式 | 光環由外向內收束成細環、中心微光 | combat.js `counter` 動作（見切架式） |
-| | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功 |
+| | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功（預設） |
+| | `mikiri` | 見切・一閃 | 看穿瞬間場地轉暗、光環收束；delay 秒後背後一記巨大白弧斬 | 影刃武士「見切」成功（counter 動作的 fx） |
 | | `summon` | 召喚 | 召喚物現身的小光圈擴張、微粒聚攏與閃光 | minion.js `spawnMinion` 召喚物現身 |
 | | `roar` | 咆哮 | 階段轉換全場巨大震波、強烈震動與全屏閃光 | world.js 階段轉換、深淵監視者復活咆哮 |
 | | `awaken` | 覺醒 | 進入第二階段全屏元素閃光、身上光暈與環繞微粒 | boss.js `checkPhaseTransition` 二階段變身 |
+| | `shadowrise` | 影起 | 換階段暗幕籠罩、暗影吸向施放者，life 秒後炸成四道交錯弧斬 | 影刃武士 `phase2.transFx` |
 | | `posturebreak` | 架勢崩潰 | 架勢被打斷破防瞬間、金色光環彈開、金色火花四濺 | world.js `damageBoss`（Boss 架勢條歸零破防時） |
 | **大招** | `ultcast` | 大招發動 | 施放大招起手詠唱、全屏一閃、巨大蓄力光收束 | boss.js `startSkill` 施放大招起手前置 |
 | | `domain` | 領域爆發 | 領域展開、結界覆蓋、全屏核心色閃光與強震、點陣爆散 | 霜月魔女大招「絕對零度」 |
+| | `nightfall` | 夜幕 | 化煙遁入黑暗，場地暗幕籠罩 life 秒，只剩角色與預警發亮 | 影刃武士大招「百鬼夜斬」隱身 |
+| | `threadcut` | 懸斬 | 刀痕懸在空中，hold 秒後才裂開；多道同時到期就一齊裂開 | 影刃武士大招「百鬼夜斬」的斬線（slashes 的 fx） |
 | | `finale` | 終結 | Boss 被擊倒終結演出、全屏白光、強震、海量火花碎塊 | world.js `onBossDeath` 擊殺結算演出 |
 
 ---
@@ -290,6 +295,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `crack(x, y, r, color, life, glow, branches)` | 程序生成的多分岔碎裂地面裂痕，縫內可透出元素發光色（`glow`） |
 | `shake(v, dir)` | 觸發畫面震動，震度疊加並以指數衰減；給受擊方向 `dir`（弧度）時畫面沿該方向擺動，否則為平滑的雙頻正弦抖動 |
 | `flash(c, a)` | 觸發全螢幕覆蓋閃光與指定不透明度 |
+| `veil(life, a, color)` | 場地暗幕：地面與區域變暗 life 秒（淡入 0.15 秒、最後 0.3 秒淡出），預警、角色與特效仍畫在暗幕之上 |
 | `after(t, fn)` | 特效內部專用的延遲排程（依賴模擬時間，不碰 `w.later`，純視覺無副作用） |
 | `part(kind, x, y, vx, vy, life, color, size, drag)` | 產生單一底層粒子（達上限回傳 `null`） |
 | `budget(n)` | 依目前場上粒子佔比動態計算建議發射粒子量 |

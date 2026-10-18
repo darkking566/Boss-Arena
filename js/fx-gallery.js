@@ -180,6 +180,7 @@
       ctx.translate(-cell.aim, 0);
       ctx.drawImage(floorTile, 0, 0);
       R.draw.decals(ctx, cell.world);
+      R.draw.veil(ctx, cell.world, cell.aim, 0, CW, CH);
       R.draw.ghosts(ctx, cell.world, t);
       R.draw.fx(ctx, cell.world, 'ground');
       if (dummy && !(cell.cat === '位移' && dummy.x >= cell.target.x)) {

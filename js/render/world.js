@@ -790,6 +790,17 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
   }
+  // 場地暗幕（fx.veil）：0.15 秒淡入、最後 0.3 秒淡出；畫在地面與區域之上、預警與角色之下
+  function drawVeil(ctx, w, x, y, wd, h) {
+    const vs = w.fx && w.fx.veils;
+    if (!vs || !vs.length) return;
+    for (const v of vs) {
+      const a = v.a * Math.min(1, (v.max - v.life) / 0.15, v.life / 0.3);
+      if (a <= 0) continue;
+      ctx.globalAlpha = a; ctx.fillStyle = v.color; ctx.fillRect(x, y, wd, h);
+    }
+    ctx.globalAlpha = 1;
+  }
   function drawGhosts(ctx, w, t) {
     const fx = w.fx;
     if (!fx || !fx.ghosts.length) return;
@@ -992,5 +1003,5 @@
   }
 
   Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars,
-    minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, star });
+    minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, veil: drawVeil, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, star });
 })(typeof window !== 'undefined' ? window : globalThis);

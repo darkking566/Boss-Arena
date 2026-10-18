@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / summon / roar / awaken / posturebreak）：蓄力、架式、見切、召喚、咆哮、覺醒與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / mikiri / summon / roar / awaken / shadowrise / posturebreak）：蓄力、架式、見切、見切一閃、召喚、咆哮、覺醒、影起與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -49,6 +49,27 @@
     },
   });
 
+  BD.defineEffect('mikiri', {
+    name: '見切・一閃', category: '增益',
+    desc: '看穿攻擊的瞬間：場地瞬間轉暗、白色光環猛然收束、全屏一閃；delay 秒後施放者閃到對手背後，一道巨大的白色弧斬劃開黑暗、刀尖方向爆出火花。適合見切、居合反擊等「先讀後斬」的反擊技。',
+    params: { delay: 0.2 },
+    spawn(fx, x, y, o) {
+      const E = o.E, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(0.55, 0.6, '#000000');
+      fx.flash('#ffffff', 0.35);
+      fx.ring(x, y, r * 4, r + 2, 0.18, '#ffffff', 4);
+      fx.sparkle(x, y, '#ffffff', 10, 260);
+      fx.shake(6);
+      fx.after(o.delay, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y, a = src && src.face != null ? src.face : o.angle || 0;
+        fx.slash(sx, sy, a, 2.6, r + 105, '#ffffff', 22, 0.35, { core: E.core, trail: 3 });
+        fx.flashAt(sx + Math.cos(a) * 60, sy + Math.sin(a) * 60, 40, '#ffffff', 0.16);
+        fx.sparkle(sx + Math.cos(a) * 60, sy + Math.sin(a) * 60, E.core, 18, 380, a, 1.2);
+        fx.shake(12, a);
+      });
+    },
+  });
+
   BD.defineEffect('summon', {
     name: '召喚', category: '增益',
     desc: '召喚物現身的短暫陣法：光圈由小擴張、元素微粒聚攏。適合小兵召喚、圖騰降臨。',
@@ -91,6 +112,25 @@
         fx.motes(x + Math.cos(a) * d, y + Math.sin(a) * d, E, 1, 8, 70);
       }
       fx.shake(Math.min(14, 8 * Math.min(o.k, 1.5)));
+    },
+  });
+
+  BD.defineEffect('shadowrise', {
+    name: '影起', category: '增益',
+    desc: '換階段的蓄勢：場地被暗幕籠罩、暗影光點從四周被吸向施放者；life 秒後暗影炸開成四道交錯的巨大弧斬、震波與煙霧。適合暗影系角色的二階段覺醒（phase2.transFx）。',
+    params: { life: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life;
+      fx.veil(life + 0.7, 0.55, '#05020c');
+      fx.charge(x, y, r * 5, E.glow, life, src, 28);
+      fx.smoke(x, y, E.smoke, 8, r);
+      fx.after(life, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y;
+        for (let i = 0; i < 4; i++) fx.slash(sx, sy, i * Math.PI / 2 + 0.4, 2.2, r + 70 + i * 12, E.glow, 16, 0.4, { core: E.core, trail: 2 });
+        fx.shock(sx, sy, r, 260, 0.6, E.glow, 8, E.core);
+        fx.smoke(sx, sy, E.smoke, 16, 50);
+        fx.motes(sx, sy, E, 20, 40, 200);
+      });
     },
   });
 

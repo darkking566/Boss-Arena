@@ -1,5 +1,5 @@
 'use strict';
-// 特效系統（純視覺狀態：粒子、光暈、光環 / 震波、斬痕、光束、拖影、殘影、浮動文字、地面痕跡 / 裂痕、畫面震動 / 閃光）
+// 特效系統（純視覺狀態：粒子、光暈、光環 / 震波、斬痕、光束、拖影、殘影、浮動文字、地面痕跡 / 裂痕、場地暗幕、畫面震動 / 閃光）
 // 不觸碰 DOM；Node 模擬照常載入（只累積資料、不繪製），繪圖由 js/render/world.js 讀取。
 // 亂數一律使用視覺亂數 BD.vrng（不可用 w.rng），因此特效不影響戰鬥結果與行為指紋。
 // 粒子使用物件池（free-list）；死亡元素以原地壓縮移除，避免每幀配置新陣列。
@@ -22,7 +22,7 @@
   class FX {
     constructor(w) {
       this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
-      this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.timers = [];
+      this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = [];
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
     }
@@ -192,6 +192,8 @@
       }
       return out;
     }
+    // 場地暗幕：地面與區域變暗、角色 / 預警 / 特效照常明亮（聚光燈感）；淡入淡出由繪圖端處理
+    veil(life, a, color) { this.veils.push({ life, max: life, a, color: color || '#000000' }); }
     flash(c, a) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
     // 特效內部的延遲（依模擬時間；不使用 w.later，因此不影響世界排程）
     after(t, fn) { this.timers.push({ t, fn, e: this.curE }); }
@@ -213,7 +215,7 @@
         const k = Math.exp(-p.drag * dt); p.vx *= k; p.vy *= k;
       }
       compact(parts, (p) => { if (pool.length < POOL_CAP) { p.color = ''; pool.push(p); } });
-      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts];
+      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils];
       for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
       for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));
       for (let j = 0; j < arrs.length; j++) compact(arrs[j]);
