@@ -3,11 +3,11 @@ html, body { margin: 0; height: 100%; background: #050407; color: #eee; overflow
   font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", "Noto Sans TC", "Noto Sans CJK TC", sans-serif; }
 #app { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
 #game { display: block; background: #08070b; cursor: crosshair; }
-.screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+.screen { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; /* 內容比視窗高時 center 會讓上緣被截掉捲不上去，改由子元素 margin:auto 置中 */
   background: radial-gradient(ellipse at center, rgba(40,20,30,0.92), rgba(5,4,8,0.97)); overflow: auto; }
 .screen.hidden { display: none; }
 #result { background: rgba(5,4,8,0.72); }
-.sel-wrap { width: min(1280px, 96vw); padding: 18px 0; text-align: center; }
+.sel-wrap { width: min(1280px, 96vw); padding: 18px 0; margin: auto; text-align: center; }
 h1 { font-size: 54px; margin: 6px 0 0; letter-spacing: 4px; color: #ffd27a; text-shadow: 0 0 24px rgba(255,140,40,0.5); }
 h1 span { color: #fff; margin-left: 6px; }
 .sub { color: #aaa; margin: 6px 0 16px; }
@@ -58,7 +58,7 @@ button.primary:hover { filter: brightness(1.12); }
 .help { color: #888; font-size: 13px; margin-top: 6px; }
 .help a { color: #ffb070; text-decoration: none; border-bottom: 1px dotted rgba(255,176,112,0.6); }
 .help a:hover { color: #ffd27a; }
-.res-wrap { background: rgba(10,8,14,0.92); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 26px 34px; text-align: center; min-width: 640px; }
+.res-wrap { margin: auto; background: rgba(10,8,14,0.92); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 26px 34px; text-align: center; min-width: 640px; }
 .res-title { font-size: 46px; font-weight: bold; }
 .res-sub { color: #aaa; margin: 4px 0 16px; }
 table.stats { margin: 0 auto 12px; border-collapse: collapse; font-size: 16px; }
