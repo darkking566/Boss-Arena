@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boss鬥技場 — 特效圖鑑</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 圖鑑版面 */
+html, body { overflow: auto; height: auto; background: #07060a; }
+body { min-height: 100vh; }
+.g-wrap { max-width: 1480px; margin: 0 auto; padding: 0 18px 40px; }
+.g-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; padding: 18px 0 4px; }
+.g-head h1 { font-size: 30px; margin: 0; letter-spacing: 2px; }
+.g-head .g-count { color: #ffd27a; font-size: 14px; }
+.g-head .g-back { margin-left: auto; color: #9ec8ff; text-decoration: none; font-size: 14px; border: 1px solid rgba(158,200,255,0.35); padding: 4px 12px; border-radius: 6px; }
+.g-head .g-back:hover { background: rgba(74,163,255,0.12); }
+.g-hint { color: #999; font-size: 13px; margin: 0 0 10px; }
+.g-bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center;
+  padding: 10px 14px; margin: 0 -14px 14px; background: rgba(10,8,14,0.94); border-bottom: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(4px); font-size: 14px; color: #ccc; border-radius: 8px; }
+.g-bar label { display: inline-flex; align-items: center; gap: 6px; }
+.g-bar select, .g-bar input[type=text] { background: #1c1a22; color: #eee; border: 1px solid #4a4652; padding: 3px 6px; border-radius: 4px; font: inherit; font-size: 13px; }
+.g-bar input[type=text] { width: 170px; }
+.g-bar input[type=range] { width: 130px; accent-color: #d9772a; }
+.g-bar button { font-size: 14px; padding: 5px 14px; }
+.g-bar .g-val { color: #ffb070; min-width: 34px; display: inline-block; text-align: right; font-variant-numeric: tabular-nums; }
+.g-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 16px; font-size: 12.5px; color: #bbb; }
+.g-el { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; padding: 3px 9px; }
+.g-el .sw { display: inline-flex; gap: 0; }
+.g-el .sw i { width: 10px; height: 10px; display: block; }
+.g-el .sw i:first-child { border-radius: 3px 0 0 3px; }
+.g-el .sw i:last-child { border-radius: 0 3px 3px 0; }
+.g-el b { color: #eee; font-weight: normal; }
+.g-el .ex { color: #888; }
+.g-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.g-cell { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; cursor: pointer;
+  transition: border-color .12s, transform .12s, background .12s; }
+.g-cell:hover { border-color: rgba(255,176,101,0.55); transform: translateY(-2px); background: rgba(255,255,255,0.045); }
+.g-cell canvas { display: block; width: 300px; height: 210px; max-width: 100%; border-radius: 6px; background: #0b0a0e; }
+.g-row { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+.g-row .nm { font-size: 17px; font-weight: bold; color: #f0e6d6; }
+.g-row .id { font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: 12px; color: #8a8f9c; }
+.g-row .tag { margin-left: auto; font-size: 11.5px; padding: 1px 7px; border-radius: 4px; background: rgba(255,176,101,0.14); color: #ffc98a; }
+.g-desc { font-size: 12.5px; color: #a8a8b0; line-height: 1.45; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.g-cat { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; margin: 10px 0 -4px; color: #ffd27a; font-size: 15px; font-weight: bold; }
+.g-cat::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+.g-empty { color: #777; padding: 30px; text-align: center; }
+.g-foot { color: #666; font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="g-wrap">
+  <div class="g-head">
+    <h1>Boss鬥技場 — 特效圖鑑</h1>
+    <span class="g-count" id="gCount"></span>
+    <a class="g-back" href="index.html">← 返回主選單</a>
+  </div>
+  <p class="g-hint">挑選新 Boss 招式的特效：先找現有特效 + 元素，找不到再新增（見 docs/effects.md）</p>
+
+  <div class="g-bar">
+    <label>元素 <select id="gElement"></select></label>
+    <label>倍率 <input type="range" id="gScale" min="0.5" max="2.5" step="0.1" value="1"><span class="g-val" id="gScaleVal">×1.0</span></label>
+    <label>體型 <select id="gSize"><option value="human">人形</option><option value="giant">巨型</option></select></label>
+    <label><input type="checkbox" id="gHeavy"> 沉重節奏</label>
+    <label><input type="checkbox" id="gLoop" checked> 循環播放</label>
+    <button id="gReplay">↻ 全部重播</button>
+    <label>分類 <select id="gCat"></select></label>
+    <label>搜尋 <input type="text" id="gSearch" placeholder="id / 中文名稱"></label>
+  </div>
+
+  <div class="g-legend" id="gLegend"></div>
+  <div class="g-grid" id="gGrid"></div>
+  <div class="g-foot">提示：點擊任一格可立即重播該特效；所有繪圖皆與遊戲內使用相同的特效系統。</div>
+</div>
+
+<!-- 與 index.html 相同順序載入（不含 js/input.js 與 js/main.js），最後加上圖鑑程式 -->
+<script src="js/core/util.js"></script>
+<script src="js/core/registry.js"></script>
+<script src="js/data/kit.js"></script>
+<script src="js/data/pace.js"></script>
+<script src="js/data/bosses/magmus.js"></script>
+<script src="js/data/bosses/witch.js"></script>
+<script src="js/data/bosses/ronin.js"></script>
+<script src="js/data/bosses/brood.js"></script>
+<script src="js/data/bosses/watcher.js"></script>
+<script src="js/data/bosses/lubu.js"></script>
+<script src="js/data/training/dummy.js"></script>
+<script src="js/fx/elements.js"></script>
+<script src="js/fx/slash.js"></script>
+<script src="js/fx/thrust.js"></script>
+<script src="js/fx/impact.js"></script>
+<script src="js/fx/shockwave.js"></script>
+<script src="js/fx/explosion.js"></script>
+<script src="js/fx/movement.js"></script>
+<script src="js/fx/projectile.js"></script>
+<script src="js/fx/zone.js"></script>
+<script src="js/fx/buff.js"></script>
+<script src="js/fx/ultimate.js"></script>
+<script src="js/engine/entities/fx.js"></script>
+<script src="js/engine/kit.js"></script>
+<script src="js/engine/status.js"></script>
+<script src="js/engine/statuses/core.js"></script>
+<script src="js/engine/statuses/effects.js"></script>
+<script src="js/engine/entities/projectile.js"></script>
+<script src="js/engine/entities/minion.js"></script>
+<script src="js/engine/actions/combat.js"></script>
+<script src="js/engine/actions/projectiles.js"></script>
+<script src="js/engine/actions/zones.js"></script>
+<script src="js/engine/actions/movement.js"></script>
+<script src="js/engine/actions/summon.js"></script>
+<script src="js/engine/pace.js"></script>
+<script src="js/engine/traits.js"></script>
+<script src="js/engine/minions/brood.js"></script>
+<script src="js/engine/minions/witch.js"></script>
+<script src="js/engine/minions/watcher.js"></script>
+<script src="js/engine/boss.js"></script>
+<script src="js/engine/world.js"></script>
+<script src="js/engine/opmodel.js"></script>
+<script src="js/engine/combo.js"></script>
+<script src="js/engine/ai.js"></script>
+<script src="js/engine/training.js"></script>
+<script src="js/render/core.js" data-browser></script>
+<script src="js/render/cache.js" data-browser></script>
+<script src="js/render/perf.js" data-browser></script>
+<script src="js/render/styles/magmus.js" data-browser></script>
+<script src="js/render/styles/witch.js" data-browser></script>
+<script src="js/render/styles/ronin.js" data-browser></script>
+<script src="js/render/styles/brood.js" data-browser></script>
+<script src="js/render/styles/watcher.js" data-browser></script>
+<script src="js/render/styles/lubu.js" data-browser></script>
+<script src="js/render/styles/dummy.js" data-browser></script>
+<script src="js/render/minions.js" data-browser></script>
+<script src="js/render/statuses.js" data-browser></script>
+<script src="js/render/world.js" data-browser></script>
+<script src="js/render/ai_debug.js" data-browser></script>
+<script src="js/render/training.js" data-browser></script>
+<script src="js/render/hud.js" data-browser></script>
+<script src="js/fx-gallery.js" data-browser></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boss鬥技場</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="1600" height="1010"></canvas>
+
+  <div id="select" class="screen">
+    <div class="sel-wrap">
+      <h1>Boss<span>鬥技場</span></h1>
+      <p class="sub">俯視角 Boss 對決 —— 選出兩位 Boss，觀看具有魂系 AI 的牠們一決勝負</p>
+      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTrain" class="mode">🎯 訓練場</button></div>
+      <div class="cols">
+        <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div></div>
+        <div class="vs">VS</div>
+        <div class="side" id="sideB"><h2 class="red">紅方</h2><div class="cards"></div></div>
+      </div>
+      <div class="detail" id="detail"></div>
+      <div class="opts train-only" id="trainOpts">
+        <label>操控方式
+          <select id="optTrainMode"><option value="manual" selected>手動施放（面板按鈕）</option><option value="ai">AI 自動</option><option value="player">親自操控（WASD）</option></select>
+        </label>
+        <label>假人距離
+          <select id="optTrainRange"><option value="near">近</option><option value="mid" selected>中</option><option value="far">遠</option></select>
+        </label>
+        <span class="pace-desc">訓練假人站著不動、不會反擊也不會倒下；可在場上切換 AI／手動施放／親自操控、強制二階段、重置。</span>
+      </div>
+      <div class="opts">
+        <label class="chk duel-only"><input type="checkbox" id="optPlayer"> 由我親自操控藍方 Boss（預設為 AI 對 AI 觀戰）</label>
+        <label class="duel-only">觀戰速度
+          <select id="optSpeed"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select>
+        </label>
+        <label class="chk"><input type="checkbox" id="optTele" checked> 顯示攻擊落點預警框</label>
+        <label>戰鬥節奏 <select id="optPace"></select></label>
+        <span id="paceDesc" class="pace-desc"></span>
+      </div>
+      <div class="btns">
+        <button id="btnRandom" class="duel-only">🎲 隨機配對</button>
+        <button id="btnStart" class="primary">⚔ 開始對決</button>
+      </div>
+      <div class="help">
+        <b>觀戰：</b>1/2/3/4 速度 ×1/×2/×3/×0.5　P 暫停　L 戰鬥紀錄　T 預警框開關　Esc 回選單　｜
+        <b>操控模式：</b>WASD 移動、滑鼠瞄準、左鍵/右鍵/Q/E/R/F/C/V/G 技能、X 大招、空白鍵 翻滾（有無敵幀）　｜
+        H 切換戰鬥節奏（選角畫面）　｜ <a href="fx-gallery.html">特效圖鑑</a><br>
+        <b>訓練場：</b>選擇「🎯 訓練場」後挑一位 Boss 對戰訓練假人；底部面板可切換 AI／手動施放／親自操控（F2）、按技能按鈕或 Shift+數字 立即施放（Shift+0 大招）、強制一／二階段、無冷卻／無限體力、假人距離（或點擊場地放置）、↺ 重置（F9）；1/2/3/4/5 速度 ×1/×2/×3/×0.5/×0.25
+      </div>
+    </div>
+  </div>
+
+  <div id="result" class="screen hidden">
+    <div class="res-wrap">
+      <div class="res-title" id="resTitle"></div>
+      <div class="res-sub" id="resSub"></div>
+      <table class="stats" id="resStats"></table>
+      <div class="btns">
+        <button id="btnRematch" class="primary">🔁 重賽（同組合）</button>
+        <button id="btnSwap">⇄ 交換左右再戰</button>
+        <button id="btnMenu">↩ 重新選角</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 依序載入：無建置步驟、可直接以 file:// 開啟。data-browser = 僅瀏覽器（繪圖/輸入/主程式）；其餘檔案不得觸碰 DOM/Canvas，供 Node 模擬直接載入 -->
+<!-- 核心 / 資料（純資料，每位 Boss 一個檔案）-->
+<script src="js/core/util.js"></script>
+<script src="js/core/registry.js"></script>
+<script src="js/data/kit.js"></script>
+<script src="js/data/pace.js"></script>
+<script src="js/data/bosses/magmus.js"></script>
+<script src="js/data/bosses/witch.js"></script>
+<script src="js/data/bosses/ronin.js"></script>
+<script src="js/data/bosses/brood.js"></script>
+<script src="js/data/bosses/watcher.js"></script>
+<script src="js/data/bosses/lubu.js"></script>
+<script src="js/data/training/dummy.js"></script>
+<!-- 特效庫（純視覺、不觸碰 DOM；Boss 資料以 fx / fxEl 引用，見 docs/effects.md）-->
+<script src="js/fx/elements.js"></script>
+<script src="js/fx/slash.js"></script>
+<script src="js/fx/thrust.js"></script>
+<script src="js/fx/impact.js"></script>
+<script src="js/fx/shockwave.js"></script>
+<script src="js/fx/explosion.js"></script>
+<script src="js/fx/movement.js"></script>
+<script src="js/fx/projectile.js"></script>
+<script src="js/fx/zone.js"></script>
+<script src="js/fx/buff.js"></script>
+<script src="js/fx/ultimate.js"></script>
+<!-- 引擎（不觸碰 DOM，Node 模擬直接載入）-->
+<script src="js/engine/entities/fx.js"></script>
+<script src="js/engine/kit.js"></script>
+<script src="js/engine/status.js"></script>
+<script src="js/engine/statuses/core.js"></script>
+<script src="js/engine/statuses/effects.js"></script>
+<script src="js/engine/entities/projectile.js"></script>
+<script src="js/engine/entities/minion.js"></script>
+<script src="js/engine/actions/combat.js"></script>
+<script src="js/engine/actions/projectiles.js"></script>
+<script src="js/engine/actions/zones.js"></script>
+<script src="js/engine/actions/movement.js"></script>
+<script src="js/engine/actions/summon.js"></script>
+<script src="js/engine/pace.js"></script>
+<script src="js/engine/traits.js"></script>
+<script src="js/engine/minions/brood.js"></script>
+<script src="js/engine/minions/witch.js"></script>
+<script src="js/engine/minions/watcher.js"></script>
+<script src="js/engine/boss.js"></script>
+<script src="js/engine/world.js"></script>
+<script src="js/engine/opmodel.js"></script>
+<script src="js/engine/combo.js"></script>
+<script src="js/engine/ai.js"></script>
+<script src="js/engine/training.js"></script>
+<!-- 僅瀏覽器：輸入、繪圖（每位 Boss 一個造型檔）、主程式 -->
+<script src="js/input.js" data-browser></script>
+<script src="js/render/core.js" data-browser></script>
+<script src="js/render/cache.js" data-browser></script>
+<script src="js/render/perf.js" data-browser></script>
+<script src="js/render/styles/magmus.js" data-browser></script>
+<script src="js/render/styles/witch.js" data-browser></script>
+<script src="js/render/styles/ronin.js" data-browser></script>
+<script src="js/render/styles/brood.js" data-browser></script>
+<script src="js/render/styles/watcher.js" data-browser></script>
+<script src="js/render/styles/lubu.js" data-browser></script>
+<script src="js/render/styles/dummy.js" data-browser></script>
+<script src="js/render/minions.js" data-browser></script>
+<script src="js/render/statuses.js" data-browser></script>
+<script src="js/render/world.js" data-browser></script>
+<script src="js/render/ai_debug.js" data-browser></script>
+<script src="js/render/training.js" data-browser></script>
+<script src="js/render/hud.js" data-browser></script>
+<script src="js/training-ui.js" data-browser></script>
+<script src="js/main.js" data-browser></script>
+</body>
+</html>

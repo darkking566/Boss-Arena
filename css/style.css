@@ -1,0 +1,88 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #050407; color: #eee; overflow: hidden;
+  font-family: "Microsoft JhengHei", "微軟正黑體", "PingFang TC", "Noto Sans TC", "Noto Sans CJK TC", sans-serif; }
+#app { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+#game { display: block; background: #08070b; cursor: crosshair; }
+.screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(40,20,30,0.92), rgba(5,4,8,0.97)); overflow: auto; }
+.screen.hidden { display: none; }
+#result { background: rgba(5,4,8,0.72); }
+.sel-wrap { width: min(1280px, 96vw); padding: 18px 0; text-align: center; }
+h1 { font-size: 54px; margin: 6px 0 0; letter-spacing: 4px; color: #ffd27a; text-shadow: 0 0 24px rgba(255,140,40,0.5); }
+h1 span { color: #fff; margin-left: 6px; }
+.sub { color: #aaa; margin: 6px 0 16px; }
+.cols { display: flex; gap: 18px; align-items: stretch; justify-content: center; }
+.side { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; }
+.side h2 { margin: 2px 0 10px; font-size: 22px; }
+.blue { color: #4aa3ff; } .red { color: #ff4a5a; }
+.vs { align-self: center; font-size: 42px; font-weight: bold; color: #fff; text-shadow: 0 0 20px #f60; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.pager { display: flex; gap: 12px; justify-content: center; align-items: center; margin-top: 8px; color: #aaa; }
+.pager.hidden { display: none; }
+.pager button { font-size: 14px; padding: 3px 12px; }
+.card { display: flex; gap: 10px; align-items: center; text-align: left; padding: 8px; border-radius: 8px; cursor: pointer;
+  background: rgba(0,0,0,0.35); border: 2px solid transparent; transition: transform .12s, border-color .12s, background .12s; }
+.card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
+#sideA .card.sel { border-color: #4aa3ff; background: rgba(74,163,255,0.12); }
+#sideB .card.sel { border-color: #ff4a5a; background: rgba(255,74,90,0.12); }
+.card canvas { width: 84px; height: 84px; flex: none; }
+.card .nm { font-size: 19px; font-weight: bold; }
+.card .tt { font-size: 13px; color: #aaa; }
+.card .ar { font-size: 12px; margin-top: 4px; display: inline-block; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+.detail { margin: 14px auto 6px; text-align: left; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 12px 16px; min-height: 150px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; font-size: 14px; line-height: 1.55; }
+.detail h3 { margin: 0 0 4px; font-size: 18px; }
+.detail .d { color: #bbb; margin-bottom: 4px; }
+.detail ul { margin: 2px 0; padding-left: 18px; }
+.detail .ult { color: #ffdd77; }
+.detail .p2 { color: #ff9f80; }
+.opts { display: flex; gap: 28px; justify-content: center; align-items: center; margin: 12px 0; color: #ccc; }
+.opts select { background: #222; color: #eee; border: 1px solid #555; padding: 3px 6px; border-radius: 4px; }
+.pace-desc { font-size: 13px; color: #ffb070; max-width: 340px; text-align: left; }
+.btns { display: flex; gap: 14px; justify-content: center; margin: 10px 0; }
+button { font: inherit; font-size: 18px; padding: 10px 24px; border-radius: 8px; border: 1px solid #555; background: #222; color: #eee; cursor: pointer; }
+button:hover { background: #333; }
+button.primary { background: linear-gradient(#d9772a, #a3441a); border-color: #ffb065; color: #fff; font-weight: bold; }
+button.primary:hover { filter: brightness(1.12); }
+.help { color: #888; font-size: 13px; margin-top: 6px; }
+.help a { color: #ffb070; text-decoration: none; border-bottom: 1px dotted rgba(255,176,112,0.6); }
+.help a:hover { color: #ffd27a; }
+.res-wrap { background: rgba(10,8,14,0.92); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 26px 34px; text-align: center; min-width: 640px; }
+.res-title { font-size: 46px; font-weight: bold; }
+.res-sub { color: #aaa; margin: 4px 0 16px; }
+table.stats { margin: 0 auto 12px; border-collapse: collapse; font-size: 16px; }
+table.stats th, table.stats td { padding: 5px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+table.stats td:first-child { color: #aaa; text-align: left; }
+
+/* ── 模式切換（對戰 / 訓練場）── */
+.modes { display: flex; gap: 10px; justify-content: center; margin: 0 0 14px; }
+.mode { font-size: 16px; padding: 7px 20px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid #555; }
+.mode:hover { background: rgba(255,255,255,0.12); }
+.mode.on { background: linear-gradient(#d9772a, #a3441a); border-color: #ffb065; color: #fff; font-weight: bold; }
+/* 訓練場：隱藏對戰專用選項與紅方，只留單欄 Boss 詳情 */
+.train-only { display: none; }
+#select.training .train-only { display: flex; }
+#select.training #sideB, #select.training .vs, #select.training .duel-only { display: none; }
+#select.training .detail { grid-template-columns: 3fr 2fr; }
+/* ── 訓練場底部面板（設計尺寸 1500×136，以 transform 縮放到畫布）── */
+.tp { position: absolute; left: 0; top: 0; width: 1500px; height: 136px; transform-origin: 0 0; z-index: 5;
+  background: rgba(10,8,14,0.84); border-top: 2px solid #c89a5a; padding: 8px 12px; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #ddd; }
+.tp.hidden { display: none; }
+.tp .tp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.tp .grp-wrap { display: flex; align-items: center; gap: 4px; }
+.tp .grp { color: #999; font-size: 12px; margin-right: 2px; }
+.tp .hint { color: #888; font-size: 12px; }
+.tp button { font-size: 14px; padding: 4px 8px; border-radius: 6px; background: #1d1a24; border: 1px solid #555; color: #ddd; cursor: pointer; }
+.tp button:hover { background: #2a2534; }
+.tp button.on { background: #c8742a; border-color: #ffb065; color: #fff; }
+.tp .tp-skills { gap: 6px; }
+.tp .tp-skills button { font-size: 15px; padding: 6px 12px; position: relative; }
+.tp .tp-skills button b { color: #ffd27a; margin-right: 2px; }
+.tp .tp-skills button.active { border-color: #ffe08a; box-shadow: 0 0 10px rgba(255,210,110,0.75); background: #3a2a14; }
+.tp .tp-skills button.locked { opacity: 0.55; }
+.tp .tp-skills button.cd { background: #14111a; }
+.tp .tp-skills button.cd::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.45); border-radius: 6px; pointer-events: none; }
+.tp .tp-skills button .cdt { font-size: 11px; color: #ffb070; margin-left: 5px; }
+.tp .tg { display: inline-block; margin-left: 5px; padding: 0 5px; border-radius: 4px; font-size: 11px; line-height: 16px;
+  background: rgba(255,160,90,0.18); color: #ffb98a; vertical-align: middle; }

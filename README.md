@@ -1,0 +1,107 @@
+# Boss鬥技場
+
+俯視角 2D Boss 對決遊戲（純 HTML5 Canvas + 原生 JavaScript，無建置步驟、無外部相依）。
+直接雙擊 `index.html` 即可在瀏覽器中遊玩（file:// 可用）。
+
+## 玩法
+- 選角畫面為藍方、紅方各選一位 Boss，按「開始對決」。預設為 AI 對 AI 觀戰。
+- 勾選「由我親自操控藍方 Boss」可親自上陣。
+
+## Boss 一覽
+- 熔岩巨像（狂暴重戰士）、霜月魔女（風箏型法師）、影刃武士（耐心反擊型）、腐沼母巢（召喚／區域控制）
+  - 霜月魔女：「絕對零度」安全圈外判定與「霜凍地雷」為**無法閃避**（翻滾無敵幀無效，預警帶紅紫雙框與「危」標記），只能走進安全圈 / 繞開地雷。
+- 巨型 Boss：熔岩巨像（半徑 58）與腐沼母巢（半徑 64）約為人形 Boss（23~25）的 2.5 倍大，招式範圍約 ×1.4；翻滾更少更短，以重擊壓制。
+- 深淵監視者（迅捷群狼型，靈感來自《黑暗靈魂 3》）：大劍＋格擋匕首、連斬中突然停頓、後空翻重置距離；
+  一階段會呼喚同伴監視者（同時最多 1 名），偶爾冒出敵我不分的紅眼監視者（同時最多 1 名、每場最多 2 次）；
+  HP 50% 時倒地、血霧爆發、同伴消散，以「薪王」之姿燃火起身，招式留下火痕並解鎖「烈焰斬波」。
+- 呂布（飛將・重戟壓制）：方天畫戟大範圍掃擊、破盾突附易傷、鎚頂彈反；二階段解鎖「赤兔奔襲」與「斷腿不退」，大招「天喰」為貫穿全場的終極巨劈（二階段先赤兔衝鋒）。
+
+## 操作
+- 觀戰：1/2/3/4 = 速度 ×1/×2/×3/×0.5，P 暫停，L 戰鬥紀錄，Esc 回選單
+- 操控：WASD 移動、滑鼠瞄準、左鍵/右鍵/Q/E/R/F/C/V/G = 技能 1~9（依 HUD 技能列順序；鎖頭表示該階段不可用）、X 大招、空白鍵 翻滾（有無敵幀）
+- 訓練場：F2 切換操控模式（AI / 手動施放 / 親自操控）、Shift+1~9 / Shift+0 施放技能與大招、F9 重置（Boss 回一階段滿血、清除召喚物 / 區域 / 投射物 / 陷阱 / 狀態、假人回原位、清除統計）、點擊場地放置假人、1/2/3/4/5 速度 ×1/×2/×3/×0.5/×0.25
+- 除錯：F3 效能面板（FPS、幀時間 / 繪圖時間平均與 p95、粒子 / 召喚物 / 投射物 / 區域數、快取命中）；F4 開關繪圖快取（A/B 比較）；Shift+F4 顯示快取精靈外框；F6 切換 AI 偵錯覆蓋層
+
+## 訓練場
+- **進入方式**：選角畫面上方「🎯 訓練場」→ 選一位 Boss → 進入訓練場。
+- **假人行為**：不動、不反擊、不倒下；3 秒未受傷 HP 回滿；狀態與架勢照常；擊退後滑回原位或固定。
+- **三種操控模式**（按 **F2** 切換）：
+  - **AI**：AI 自動施放技能與連招。
+  - **手動施放**：底部技能面板直接點選各招按鈕（或按 Shift+1~9 / Shift+0）立即出招。
+  - **親自操控**：WASD 移動、滑鼠瞄準、按鍵出招親自操控 Boss。
+- **面板按鈕**：
+  - 技能按鈕含二階段與大招（Shift+1~9 / Shift+0）。
+  - 一階段 / 二階段 強制切換（二階段播放真實轉場與咆哮）。
+  - 無冷卻／無限體力（預設開）。
+  - 假人距離 近 / 中 / 遠 或點擊場地任意位置放置假人。
+  - 擊退 歸位（被擊退後滑回原位）/ 固定（留在原地）。
+  - 速度 ×0.25~×3、暫停、↺ 重置（F9，Boss 回一階段滿血與原位、清除召喚物 / 區域 / 投射物 / 陷阱 / 狀態、假人回原位、清除統計）、清除統計（只清傷害統計）。
+- **假人 HUD**：總傷害 / DPS（近 5 秒）/ 最後一擊（含傷害來源）/ 最高單擊 / 命中次數 / 持續傷害。
+- **快速鍵**：P 暫停、T 預警框開關、F6 AI 偵錯覆蓋層、L 戰鬥紀錄、Esc 回選單、1~5 速度（1=×1、2=×2、3=×3、4=×0.5、5=×0.25）。
+- **架構設計**：
+  訓練假人是 hidden Boss（`js/data/training/dummy.js`，`hidden: true` → 不進 `BD.bosses`，選角 / 模擬 / ai_stats / fingerprint 都看不到），訓練邏輯在 `js/engine/training.js`（`w.training`，一般對戰為 null，所有掛勾都以它閘控，對戰逐位元不變）。
+
+## AI（沉重節奏）
+- **連段**：資料驅動的多段連招，可依命中 / 翻滾方向 / 距離 / 體力 / 階段分支，決定延伸、延遲、換招或停止；資料格式見 `docs/adding-a-boss.md`。
+- **讀習慣**：`OpponentModel` 持續觀察對手的翻滾時機（早 / 準 / 晚）、方向（左 / 右 / 後 / 穿）、懲罰與翻滾後出手習慣，用來預判落點、延遲斬與誘滾。
+- **智慧閃避**：受威脅時評估多個翻滾 / 走位候選方向（牆壁、柱子、區域、陷阱、投射物、與對手距離），選出最佳者。
+- **F6 偵錯**：在場上顯示預判落點、威脅清單與閃避候選，並以面板列出模式、連段進度、習慣讀取與最後判讀；僅供觀察，不影響對戰。
+
+## 節奏預設（輕快 / 沉重）
+- `BD.PACES`（`js/data/pace.js`，純資料）定義兩組節奏：`light`（輕快＝原版）與 `heavy`（沉重＝魂系：蓄力更長、硬直更久、一擊更重）。
+  `BD.DEFAULT_PACE` 是 UI / 模擬工具的預設值；`World` 本身在 `opts.pace` 省略時一律使用 `light`。
+- `BD.applyPace(def, paceId)`（`js/engine/pace.js`）把 Boss 定義轉成該節奏的衍生定義：時間軸、傷害、冷卻、體力與 AI 個性等；
+  `pace.bosses[bossId]` 可個別覆寫（淺層合併，`ai` 另外淺層合併）。`BD.paceConfig(id, bossId)` 取得解析後的設定，`BD.clearPaceCache()` 供調校工具清快取。
+- **light 保證**：`BD.applyPace(def, 'light')` 直接回傳原始定義物件（同一參照，不複製、不改動），因此 `World` 省略 `opts.pace` 時的行為與原版逐位元一致。
+- **玩家面向（怎麼選）**：選角畫面的「戰鬥節奏」下拉選單（預設「沉重」），或在選角畫面按 **H** 切換。
+  左下說明會顯示目前節奏的簡介；結算畫面副標也會標示本場節奏。
+- **沉重（大開大合）改動**：蓄力更長、更好讀；收招硬直與空振破綻（破口）更久；出招頻率較低但每擊更重；
+  命中時有短暫凍結幀（hit-stop）；重擊會把對手打倒在地（倒地後起身附帶短暫保護）；轉向與加速更慢；
+  翻滾時間更長且有翻滾冷卻；AI 更有耐心、會貼身徘徊等待破口再懲罰；玩家輸入緩衝 0.45 秒。
+- **輕快**：原版節奏，行為與改動前逐位元一致（由 fingerprint 測試保證）。
+- 測試旗標：`node test/fingerprint.js --check`（light，比對 `test/baseline-fingerprint.json`）、`--check-heavy` / `--write-heavy`
+  （比對 / 產生 `test/baseline-fingerprint-heavy.json`）、`--pace <id>`；`node test/sim.js 1,2,3 heavy` 以指定節奏跑全配對；
+  `node test/pace_stats.js heavy` 輸出節奏統計。
+- 調校：`PACE_OVERRIDE='{"hpMul":1.6,"bosses":{"ronin":{"dmgMul":1.1}}}' node test/pace_stats.js heavy 1,2,3` 可不改檔試數值；
+  確定後寫回 `js/data/pace.js`，並以 `node test/fingerprint.js --write-heavy` **重新產生 heavy 基準**（light 基準只在刻意改變 Boss 本體時重新產生，例如 v1.2 巨型 Boss 體型放大：`node test/fingerprint.js > test/baseline-fingerprint.json`）。
+- 截圖 / 短片：`python3 test/shot_heavy.py [a] [b] [seed]` 以相同種子重播並逐幀截圖，輸出 `screenshots/12_heavy_*.png` 與 `screenshots/heavy_clip.mp4`（需要 ffmpeg）。
+
+## 特效圖鑑
+- 直接雙擊 `fx-gallery.html`（file:// 可用）即可瀏覽特效庫：每格播放一種特效，可切換元素、倍率、體型（人形 / 巨型）與沉重節奏，
+  也可依分類篩選或用 id / 中文名稱搜尋；點擊任一格可立即重播。
+- 版面依 `BD.EFFECT_CATEGORIES` 分組排序，並列出元素圖例（核心 / 外光 / 粒子色與額外粒子行為）。
+- 設計新 Boss 招式時，先找現有特效 + 元素組合，找不到再依 `docs/effects.md` 新增。
+
+## 檔案結構
+全部是普通 `<script>`（IIFE + 全域 `BD`），依 `index.html` 的順序載入；標記 `data-browser` 的檔案才會碰到 DOM / Canvas。
+- `js/core/` — `util.js` 數學、亂數、形狀判定；`registry.js` 註冊表（`registerBoss`、`defineAction`、`defineMinion`、`defineTrait`）
+- `js/data/` — `kit.js` 時間軸小工具；`bosses/<id>.js` 每位 Boss 一個純資料檔；`training/dummy.js` 訓練假人純資料
+- `js/engine/` — `boss.js` Boss 狀態機與技能時間軸、`world.js` 戰場 / 傷害 / 架勢 / 勝負、`ai.js` 魂系 AI、`kit.js` 形狀與預警、
+  `status.js` 狀態註冊表與輔助函式、`statuses/` 各狀態定義（core / effects）、`traits.js` Boss 特性（見切、影分身）、
+  `actions/` 時間軸動作（combat / projectiles / zones / movement / summon）、`entities/` 投射物 / 召喚物 / 特效、`minions/` 各召喚物種類、`training.js` 訓練場模式邏輯與假人控制器
+- `js/fx/` — 特效庫：`elements.js` 元素主題 + 每個分類一個檔案（slash / thrust / impact / shockwave / explosion / movement / projectile / zone / buff / ultimate）
+- `js/render/` — `core.js` 造型註冊表、`styles/<id>.js` 每位 Boss 一個造型檔（含 `styles/dummy.js` 假人造型）、`minions.js` 召喚物造型、`statuses.js` 狀態圖示與 HUD 狀態列、
+  `world.js` 戰場繪圖、`hud.js` HUD 與主繪製、`training.js` 訓練場假人 HUD 與傷害統計面板、`cache.js` 精靈 / 漸層快取（離屏 canvas，依繪製倍率分鍵，縮放 / DPR 變更時失效）、`perf.js` F3 效能面板
+- `js/input.js` 輸入與玩家操控、`js/training-ui.js` 訓練場底部面板 DOM 控制、`js/main.js` 選角（由註冊表產生、超過 6 位自動分頁）、遊戲迴圈、結算
+- `docs/adding-a-boss.md` 新增 Boss 的步驟、`docs/effects.md` 特效庫實作與使用手冊
+
+## 測試（無相依套件；`npm` 只是執行捷徑）
+- `npm run validate`（`node test/validate.js`）資料驗證
+- `npm run sim`（`node test/sim.js 1,2,3`）全配對無頭對戰：二階段 / 大招 / 技能使用、召喚上限與非鏡像勝率檢查
+- `npm run test:status`（`node test/status.test.js`）狀態系統單元 + 整合測試（真實 World 的護盾 / 易傷 / 硬直 / iframe / 延長賽 / 召喚物）
+- `npm run test:training`（`node test/training.test.js`，無頭：每位 Boss 一 / 二階段每招與大招都能施放並打到假人、重置、AI 模式、固定擊退、冷卻開關）
+- `npm run test:undodgeable`（`node test/undodgeable.test.js`）無法閃避旗標：無敵幀無效、invuln / 隱身仍有效、訓練場假人吃到絕對零度與地雷、AI 走進安全圈而非翻滾
+- `npm run fingerprint` 以固定種子比對逐幀行為指紋（確認重構沒有改變遊戲行為）
+- `node test/ai_stats.js heavy 1,2,3,4,5,6`：AI 指標（勝率、翻滾成功率、抓翻滾、連段使用 / 延伸 / 分支、讀習慣次數）
+- 上述 `sim.js` / `ai_stats.js` / `pace_stats.js` / `fingerprint.js` 可用 `JOBS=N` 或 `--jobs N` 依 CPU 核心平行跑（預設核心數；`JOBS=1` 為單執行緒循序，與舊版輸出逐字相同）。
+- `node test/habit_test.js 1,...,30`：腳本「習慣性早滾」玩家 vs 各 Boss，比較讀習慣開 / 關在各時段的被抓率（後段增益需明顯大於開場）
+- `python3 test/shot_ai_debug.py`：F6 AI 偵錯覆蓋層截圖（`screenshots/13_ai_debug.png`）
+- `python3 test/shot_giants.py [--root 舊版目錄] [--out 檔名]`：巨型 Boss 體型對比截圖（熔岩巨像 vs 深淵監視者、腐沼母巢 vs 影刃武士，輸出 `screenshots/14_giants.png`；需要 Pillow）
+- `python3 test/shot_fx.py`：熔岩巨像巨力砸地的固定種子戰鬥截圖（`--root`/`--frame` 可截舊版同一幀，輸出 `screenshots/16_fx_combat.png`）
+- `npm run serve` 選用的本機靜態伺服器（遊戲本身直接 file:// 開啟即可）
+- `python3 test/browser_test.py` headless Chrome 測試（file:// 開啟、無 JS 錯誤、完整對戰、玩家模式、選角分頁、截圖）
+- `python3 test/training_test.py [--shot screenshots/18_training.png]`（headless Chrome：面板按鈕、按鍵、重置、AI 模式、一般對戰不受影響；不給 --shot 不存圖）
+- `python3 test/perf_bench.py` 繪圖效能量測（固定種子的一般 / 壓力 / ultspam 大招連發場景，輸出 render 平均與 p95；`--root` 可量測其他版本、`--dpr 2`、`--shot` 截圖）
+- `python3 test/shot_status.py` 狀態圖示展示截圖（手動施加燃燒 / 中毒 / 流血 / 護盾 / 易傷 / 狂暴等，輸出 screenshots/09_status_icons.png）
+- `python3 test/fx_gallery_test.py [--shot screenshots/15_fx_gallery.png]` 特效圖鑑 headless 測試（每格都能播放、切換所有元素、無 JS 錯誤；不給 `--shot` 時不存圖）
+

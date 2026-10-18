@@ -1,0 +1,240 @@
+'use strict';
+// 特效系統（純視覺狀態：粒子、光暈、光環 / 震波、斬痕、光束、拖影、殘影、浮動文字、地面痕跡 / 裂痕、畫面震動 / 閃光）
+// 不觸碰 DOM；Node 模擬照常載入（只累積資料、不繪製），繪圖由 js/render/world.js 讀取。
+// 亂數一律使用視覺亂數 BD.vrng（不可用 w.rng），因此特效不影響戰鬥結果與行為指紋。
+// 粒子使用物件池（free-list）；死亡元素以原地壓縮移除，避免每幀配置新陣列。
+// 高層特效（斬擊、砸地…）定義在 js/fx/，以 BD.spawnFx(w, 'slam', x, y, opts) 產生；本檔只提供「原件」。
+(function (G) {
+  const BD = G.BD, U = BD.U, V = BD.vrng;
+  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, GHOST_CAP = 40;
+  // 粒子種類（kind）：繪圖端依此分批
+  const PK = BD.PK = { SQ: 0, SOFT: 1, DEBRIS: 2, EMBER: 3, SHARD: 4, BUBBLE: 5, WISP: 6, SPARK: 7, MOTE: 8 };
+  function newPart() { return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, color: '', size: 0, drag: 0, soft: false, kind: 0, z: 0, vz: 0, g: 0, ay: 0, ph: 0 }; }
+  // 原地壓縮：只保留存活元素（維持順序），dead 可回收
+  function compact(arr, onDead) {
+    let n = 0;
+    for (let i = 0; i < arr.length; i++) {
+      const e = arr[i];
+      if (e.life > 0) { arr[n++] = e; } else if (onDead) onDead(e);
+    }
+    arr.length = n;
+  }
+  class FX {
+    constructor(w) {
+      this.w = w; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
+      this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.timers = [];
+      this.pool = [];
+      this.shakeV = 0; this.flashA = 0; this.flashC = '#fff';
+    }
+    // 從池中取一個粒子（無則新建）
+    takePart() { return this.pool.length ? this.pool.pop() : newPart(); }
+    putPart(p) { p.color = ''; if (this.pool.length < POOL_CAP) this.pool.push(p); }
+    // 粒子預算：場上粒子越多，新特效的粒子數越少（PART_CAP 仍是硬上限）
+    budget(n) { const used = this.parts.length / PART_CAP; return Math.round(n * (used < 0.55 ? 1 : used < 0.8 ? 0.6 : 0.3)); }
+    // 新增一個粒子（達上限時回傳 null）
+    part(kind, x, y, vx, vy, life, color, size, drag) {
+      if (this.parts.length >= PART_CAP) return null;
+      const p = this.takePart();
+      p.x = x; p.y = y; p.vx = vx; p.vy = vy; p.life = life; p.max = life; p.color = color; p.size = size; p.drag = drag;
+      p.kind = kind; p.soft = kind === PK.SOFT || kind === PK.WISP; p.z = 0; p.vz = 0; p.g = 0; p.ay = 0; p.ph = V() * U.TAU;
+      this.parts.push(p); return p;
+    }
+    sparks(x, y, color, n, speed) {
+      for (let i = 0; i < n && this.parts.length < PART_CAP; i++) {
+        const a = V() * U.TAU, s = speed * (0.25 + V() * 0.75), l = 0.25 + V() * 0.4;
+        this.part(PK.SQ, x, y, Math.cos(a) * s, Math.sin(a) * s, l, color, 1.5 + V() * 2.5, 4);
+      }
+    }
+    // 加亮火花：沿速度方向拉長的線段（additive），dir/spread 可限制噴射角度
+    sparkle(x, y, color, n, speed, dir, spread) {
+      n = this.budget(n);
+      for (let i = 0; i < n; i++) {
+        const a = dir == null ? V() * U.TAU : dir + (V() - 0.5) * (spread || 1), s = speed * (0.35 + V() * 0.65), l = 0.18 + V() * 0.3;
+        if (!this.part(PK.SPARK, x, y, Math.cos(a) * s, Math.sin(a) * s, l, color, 1.5 + V() * 1.5, 5)) break;
+      }
+    }
+    smoke(x, y, color, n, spread) {
+      for (let i = 0; i < n && this.parts.length < PART_CAP; i++) {
+        const a = V() * U.TAU, s = 20 + V() * 60, l = 0.6 + V() * 0.6;
+        this.part(PK.SOFT, x + Math.cos(a) * V() * (spread || 20), y + Math.sin(a) * V() * (spread || 20), Math.cos(a) * s, Math.sin(a) * s, l, color, 6 + V() * 10, 2);
+      }
+    }
+    // 碎塊：有假高度 z（俯視角以陰影位移 + 縮放表現），受重力落地彈跳
+    debris(x, y, color, n, speed, size, spread) {
+      n = this.budget(n);
+      for (let i = 0; i < n; i++) {
+        const a = V() * U.TAU, s = speed * (0.3 + V() * 0.7), r = V() * (spread || 0);
+        const p = this.part(PK.DEBRIS, x + Math.cos(a) * r, y + Math.sin(a) * r, Math.cos(a) * s, Math.sin(a) * s, 0.9 + V() * 0.7, color, (size || 4) * (0.6 + V() * 0.8), 1.2);
+        if (!p) break;
+        p.vz = 120 + V() * 260 * (speed / 300); p.g = 900;
+      }
+    }
+    // 上升餘燼（additive，閃爍、緩慢上飄）
+    embers(x, y, color, n, spread, rise) {
+      n = this.budget(n);
+      for (let i = 0; i < n; i++) {
+        const a = V() * U.TAU, r = V() * (spread || 20);
+        const p = this.part(PK.EMBER, x + Math.cos(a) * r, y + Math.sin(a) * r, (V() - 0.5) * 50, -(rise || 40) * (0.4 + V() * 0.8), 0.7 + V() * 0.9, color, 1.5 + V() * 2.2, 1.2);
+        if (!p) break;
+        p.ay = -(rise || 40) * 0.8;
+      }
+    }
+    // 元素額外粒子行為（依元素主題的 extra）：embers / shards / bubbles / wisps / crackle / drips / runes / motes / dust
+    motes(x, y, E, n, spread, speed) {
+      const ex = E && E.extra; if (!ex || n <= 0) return;
+      spread = spread || 20; speed = speed || 120;
+      if (ex === 'embers') { this.embers(x, y, E.core, n, spread, 50); return; }
+      if (ex === 'dust') { this.debris(x, y, E.debris || E.particle, Math.ceil(n * 0.6), speed, 3.5, spread * 0.5); return; }
+      if (ex === 'drips') { this.debris(x, y, E.particle, n, speed * 0.8, 2.6, spread * 0.4); return; }
+      if (ex === 'crackle') {
+        // 電弧：短折線（以拖影段表現）
+        const k = Math.max(1, Math.round(n / 3));
+        for (let i = 0; i < k; i++) {
+          let px = x + (V() - 0.5) * spread * 2, py = y + (V() - 0.5) * spread * 2, a = V() * U.TAU;
+          for (let j = 0; j < 3; j++) { const L = 10 + V() * 18, nx = px + Math.cos(a) * L, ny = py + Math.sin(a) * L; this.streak(px, py, nx, ny, 2.2, E.core, 0.12 + V() * 0.08, true); px = nx; py = ny; a += (V() - 0.5) * 2.2; }
+        }
+        this.sparkle(x, y, E.glow, Math.ceil(n * 0.5), speed * 1.4);
+        return;
+      }
+      n = this.budget(n);
+      for (let i = 0; i < n; i++) {
+        const a = V() * U.TAU, r = V() * spread, px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+        let p;
+        if (ex === 'shards') { const s = speed * (0.5 + V()); p = this.part(PK.SHARD, px, py, Math.cos(a) * s, Math.sin(a) * s, 0.35 + V() * 0.35, E.core, 3 + V() * 4, 3.5); }
+        else if (ex === 'bubbles') { p = this.part(PK.BUBBLE, px, py, (V() - 0.5) * 30, -10 - V() * 25, 0.6 + V() * 0.8, E.particle, 2.5 + V() * 4, 1.5); }
+        else if (ex === 'wisps') { const s = 20 + V() * 40; p = this.part(PK.WISP, px, py, Math.cos(a) * s, Math.sin(a) * s - 15, 0.7 + V() * 0.7, E.particle, 5 + V() * 7, 1.2); }
+        else if (ex === 'runes' || ex === 'motes') { const s = 10 + V() * 40; p = this.part(PK.MOTE, px, py, Math.cos(a) * s, Math.sin(a) * s - (ex === 'motes' ? 25 : 0), 0.6 + V() * 0.8, E.core, 1.5 + V() * 2, 1.5); if (p && ex === 'motes') p.ay = -20; }
+        if (!p) break;
+      }
+    }
+    ring(x, y, r0, r1, life, color, width) { this.rings.push({ x, y, r0, r1, life, max: life, color, width: width || 3 }); }
+    // 震波：明亮前緣 + 淡淡的內部填色，半徑以 easeOut 擴張；core 為前緣亮色（additive）
+    shock(x, y, r0, r1, life, color, width, core) {
+      this.shocks.push({ x, y, r0, r1, life, max: life, color, width: width || 6, core: core || '#ffffff' });
+    }
+    // opts：{ core 亮核心色（additive）, trail 殘影弧數, glow 是否加亮 }
+    slash(x, y, ang, arc, r, color, width, life, opts) {
+      const L = life || 0.22;
+      const s = { x, y, ang, arc, r, color, width: width || 10, life: L, max: L, core: null, trail: 0 };
+      if (opts) { s.core = opts.core || null; s.trail = opts.trail || 0; }
+      this.slashes.push(s);
+    }
+    beam(x1, y1, x2, y2, w, color, life, core) { this.beams.push({ x1, y1, x2, y2, w, color, life: life || 0.25, max: life || 0.25, core: core || null }); }
+    // 拖影 / 動態殘跡：由 (x1,y1) 漸細到 (x2,y2) 的亮線（add=true 時以 additive 繪製）
+    streak(x1, y1, x2, y2, w, color, life, add) {
+      if (this.streaks.length >= STREAK_CAP) return;
+      this.streaks.push({ x1, y1, x2, y2, w, color, life: life || 0.25, max: life || 0.25, add: !!add });
+    }
+    // 光暈（additive）：r 半徑、a 不透明度；grow > 0 時半徑隨時間由 r 往 r*(1+grow) 擴張；follow 物件（有 x / y）時跟隨其位置
+    glow(x, y, r, color, life, a, grow, follow) {
+      if (this.glows.length >= GLOW_CAP) return;
+      this.glows.push({ x, y, r, color, life, max: life, a: a == null ? 1 : a, grow: grow || 0, follow: follow || null, inv: false });
+    }
+    // 蓄力光：由暗漸亮、半徑收縮（inv），並有向內聚集的光點
+    charge(x, y, r, color, life, follow, n) {
+      if (this.glows.length < GLOW_CAP) this.glows.push({ x, y, r, color, life, max: life, a: 0.9, grow: 0.8, follow: follow || null, inv: true });
+      n = this.budget(n == null ? 10 : n);
+      for (let i = 0; i < n; i++) {
+        const a = V() * U.TAU, d = r * (1.2 + V() * 0.8), l = life * (0.5 + V() * 0.5), s = d / l;
+        const p = this.part(PK.MOTE, x + Math.cos(a) * d, y + Math.sin(a) * d, -Math.cos(a) * s, -Math.sin(a) * s, l, color, 1.6 + V() * 1.6, 0);
+        if (!p) break;
+      }
+    }
+    // 局部閃光：衝擊點的短暫強光（additive）
+    flashAt(x, y, r, color, life) { this.glow(x, y, r, color || '#ffffff', life || 0.12, 1, 0.3); }
+    // 殘影：記錄單位外形（繪圖端以 R.drawBossBody 半透明繪製）
+    ghost(u, life, color) {
+      if (!u || this.ghosts.length >= GHOST_CAP) return;
+      this.ghosts.push({ x: u.x, y: u.y, face: u.face, r: u.r, def: u.def, phase: u.phase, life: life || 0.35, max: life || 0.35, color: color || null });
+    }
+    pillar(x, y, r, color, life) { this.pillars.push({ x, y, r, color, life: life || 0.5, max: life || 0.5 }); }
+    text(x, y, text, color, size) { this.texts.push({ x: x + (V() - 0.5) * 16, y, text, color, size: size || 16, life: 1.0, max: 1.0, vy: -50 }); }
+    damage(b, dmg, color) {
+      const big = dmg >= 100;
+      this.texts.push({ x: b.x + (V() - 0.5) * 30, y: b.y - b.r - 6, text: String(dmg), color, size: big ? 26 : 17, life: big ? 1.2 : 0.9, max: big ? 1.2 : 0.9, vy: -70, pop: big });
+    }
+    decal(x, y, r, color, life) { this.decals.push({ x, y, r, color, life: life || 8, max: life || 8, segs: null }); if (this.decals.length > DECAL_CAP) this.decals.shift(); }
+    // 地面裂痕（程序生成，以 vrng 決定分岔）：segs 為 [x1,y1,x2,y2,寬] 的扁平陣列；glow 為裂縫內的發光色（可為 null）
+    crack(x, y, r, color, life, glow, branches) {
+      const segs = [], nb = branches || Math.max(5, Math.round(r / 14));
+      const walk = (px, py, a, len, w, depth) => {
+        const steps = 3 + Math.floor(V() * 3), sl = len / steps;
+        for (let i = 0; i < steps; i++) {
+          a += (V() - 0.5) * 0.7;
+          const nx = px + Math.cos(a) * sl, ny = py + Math.sin(a) * sl;
+          segs.push(px, py, nx, ny, w); px = nx; py = ny; w *= 0.78;
+          if (depth < 1 && V() < 0.35) walk(px, py, a + (V() < 0.5 ? 1 : -1) * (0.5 + V() * 0.6), len * 0.45, w * 0.8, depth + 1);
+        }
+      };
+      for (let i = 0; i < nb; i++) { const a = i / nb * U.TAU + (V() - 0.5) * 0.6; walk(x + Math.cos(a) * r * 0.08, y + Math.sin(a) * r * 0.08, a, r * (0.55 + V() * 0.45), Math.max(1.5, r / 30), 0); }
+      this.decals.push({ x, y, r, color: color || 'rgba(0,0,0,0.55)', life: life || 9, max: life || 9, segs, glow: glow || null });
+      if (this.decals.length > DECAL_CAP) this.decals.shift();
+    }
+    shake(v) { this.shakeV = Math.min(26, Math.max(this.shakeV, v) + v * 0.15); }
+    flash(c, a) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
+    // 特效內部的延遲（依模擬時間；不使用 w.later，因此不影響世界排程）
+    after(t, fn) { this.timers.push({ t, fn }); }
+    update(dt) {
+      if (this.timers.length) {
+        const due = [];
+        for (const tm of this.timers) { tm.t -= dt; if (tm.t <= 0) due.push(tm); }
+        if (due.length) { this.timers = this.timers.filter((tm) => tm.t > 0); for (const tm of due) tm.fn(); }
+      }
+      const parts = this.parts, pool = this.pool;
+      for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.ay) p.vy += p.ay * dt;
+        if (p.g) {
+          p.vz -= p.g * dt; p.z += p.vz * dt;
+          if (p.z <= 0) { p.z = 0; if (p.vz < -60) { p.vz = -p.vz * 0.32; p.vx *= 0.55; p.vy *= 0.55; } else { p.vz = 0; p.vx *= 0.8; p.vy *= 0.8; } }
+        }
+        const k = Math.exp(-p.drag * dt); p.vx *= k; p.vy *= k;
+      }
+      compact(parts, (p) => { if (pool.length < POOL_CAP) { p.color = ''; pool.push(p); } });
+      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts];
+      for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
+      for (const t of this.texts) t.y += t.vy * dt, (t.vy *= Math.exp(-2.5 * dt));
+      for (let j = 0; j < arrs.length; j++) compact(arrs[j]);
+    }
+    realUpdate(dt) { this.shakeV *= Math.exp(-7 * dt); if (this.shakeV < 0.05) this.shakeV = 0; this.flashA = Math.max(0, this.flashA - dt * 1.6); }
+  }
+  BD.FX = FX;
+  BD.FX_CAPS = { PART_CAP, DECAL_CAP, GLOW_CAP, STREAK_CAP, GHOST_CAP };
+
+  // ── 特效庫入口 ──
+  // 單位（Boss / 召喚物）目前的預設元素：phase2.fxEl（二階段）→ def.fxEl → 'physical'
+  BD.fxElementOf = function (u) {
+    if (!u) return 'physical';
+    if (!u.def && u.owner) u = u.owner;
+    const d = u.def; if (!d) return 'physical';
+    return (u.phase === 2 && d.phase2 && d.phase2.fxEl) || d.fxEl || 'physical';
+  };
+  // BD.spawnFx(w, spec, x, y, opts)
+  //   spec：特效 id 字串或 { id, el, scale, color, intensity, ... }（資料中的 fx 欄位）
+  //   opts（呼叫端提供）：src 施放者、el 元素、scale 倍率、angle 角度、arc 弧度、radius 半徑、r0 內半徑、len / width 長寬、
+  //        dmg 傷害（推得 intensity）、intensity 強度、weight 重量感（預設由 src 半徑推得）、color 覆寫顏色、life 持續
+  //   合併順序：effect.params（預設）< opts（呼叫端）< spec 物件欄位（資料）
+  //   effect.spawn(fx, x, y, o) 收到的 o 另含：E 元素主題、k 綜合倍率、heavy 是否沉重節奏
+  BD.spawnFx = function (w, spec, x, y, opts) {
+    const P = BD.parseFx(spec); if (!P || !w || !w.fx) return null;
+    const def = BD.effect(P.id);
+    // 合併時略過 undefined（例如圓形判定沒有 arc / len），讓特效的預設參數不會被空值蓋掉
+    const o = {};
+    for (const part of [def.params, opts, P.opts]) if (part) for (const k in part) if (part[k] !== undefined) o[k] = part[k];
+    const src = o.src || null;
+    o.el = o.el || BD.fxElementOf(src);
+    let E = BD.element(o.el);
+    if (o.color) E = Object.assign({}, E, { glow: o.color, particle: o.color });
+    o.E = E;
+    if (o.scale == null) o.scale = 1;
+    if (o.weight == null) o.weight = src && src.r ? U.clamp(Math.pow(src.r / 24, 0.6), 0.8, 2.2) : 1;
+    if (o.intensity == null) o.intensity = o.dmg ? U.clamp(o.dmg / 90, 0.55, 2.4) : 1;
+    o.k = o.scale * Math.sqrt(o.weight * o.intensity);
+    if (o.radius == null) o.radius = 60 * o.scale * o.weight;
+    if (o.angle == null) o.angle = src && src.face != null ? src.face : 0;
+    o.heavy = !!w.pace;
+    def.spawn(w.fx, x, y, o);
+    return o;
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
