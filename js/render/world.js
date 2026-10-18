@@ -602,11 +602,18 @@
         ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, R * 0.2, 0, U.TAU); ctx.fill();
         if (big) { ctx.strokeStyle = 'rgba(255,75,92,0.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R * 0.42, 0, U.TAU); ctx.stroke(); }
       } else if (p.kind === 'airslash') {
-        // 米霍克的飛斬：月牙形斬擊（弧口朝飛行方向），深紅外暈加亮白刃緣，後方拖一道殘光
-        ctx.strokeStyle = 'rgba(168,35,46,0.4)'; ctx.lineWidth = p.r * 0.5; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(-p.r * 0.2, 0); ctx.lineTo(-p.r * 3, 0); ctx.stroke();
-        ctx.strokeStyle = 'rgba(168,35,46,0.65)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(-p.r * 0.9, 0, p.r * 1.3, -1.15, 1.15); ctx.stroke();
-        ctx.strokeStyle = '#f4f0f8'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(-p.r * 0.9, 0, p.r * 1.3, -1.05, 1.05); ctx.stroke();
+        // 米霍克的飛斬：大型月牙斬（弧口朝飛行方向）。深紅外暈 + 粗紅弦 + 白熱刃緣，後方拖三道殘光，弧尖各一點星芒
+        const k = p.r, cx = -k * 0.9, rad = k * 1.35, a0 = 1.2;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgba(168,35,46,0.35)'; ctx.lineWidth = k * 0.5;
+        for (const o of [-0.55, 0, 0.55]) { ctx.beginPath(); ctx.moveTo(cx - k * 0.2, o * k); ctx.lineTo(cx - k * (2.2 + (o ? 0.4 : 1.0)), o * k * 1.15); ctx.stroke(); }
+        ctx.strokeStyle = 'rgba(200,40,60,0.5)'; ctx.lineWidth = k * 0.38; ctx.beginPath(); ctx.arc(cx, 0, rad * 1.08, -a0, a0); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,90,110,0.8)'; ctx.lineWidth = k * 0.14; ctx.beginPath(); ctx.arc(cx, 0, rad, -a0 + 0.08, a0 - 0.08); ctx.stroke();
+        ctx.restore();
+        ctx.strokeStyle = '#fff4f6'; ctx.lineWidth = Math.max(4, k * 0.07); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, 0, rad * 0.97, -a0 + 0.14, a0 - 0.14); ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        for (const s of [-1, 1]) { const tx = cx + Math.cos(a0) * rad, ty = s * Math.sin(a0) * rad; ctx.beginPath(); ctx.arc(tx, ty, Math.max(3, k * 0.06), 0, U.TAU); ctx.fill(); }
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
           g.shadowColor = '#ff7a1a'; g.shadowBlur = 18; g.lineCap = 'round';
