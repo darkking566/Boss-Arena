@@ -21,7 +21,7 @@
   }
   class FX {
     constructor(w) {
-      this.w = w; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
+      this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
       this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.timers = [];
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
@@ -110,16 +110,18 @@
     ring(x, y, r0, r1, life, color, width) { this.rings.push({ x, y, r0, r1, life, max: life, color, width: width || 3 }); }
     // 震波：明亮前緣 + 淡淡的內部填色，半徑以 easeOut 擴張；core 為前緣亮色（additive）
     shock(x, y, r0, r1, life, color, width, core) {
-      this.shocks.push({ x, y, r0, r1, life, max: life, color, width: width || 6, core: core || '#ffffff' });
+      this.shocks.push({ x, y, r0, r1, life, max: life, color, width: width || 6, core: core || '#ffffff', rim: this.rim() });
     }
-    // opts：{ core 亮核心色（additive）, trail 殘影弧數, glow 是否加亮 }
+    // 對比邊緣色：取目前正在產生的特效的元素主題（BD.spawnFx 期間設定 curE），沒有則不描邊
+    rim() { return (this.curE && this.curE.rim) || null; }
+    // opts：{ core 亮核心色（additive）, trail 殘影弧數, rim 對比邊緣色（省略時取目前元素） }
     slash(x, y, ang, arc, r, color, width, life, opts) {
       const L = life || 0.22;
-      const s = { x, y, ang, arc, r, color, width: width || 10, life: L, max: L, core: null, trail: 0 };
-      if (opts) { s.core = opts.core || null; s.trail = opts.trail || 0; }
+      const s = { x, y, ang, arc, r, color, width: width || 10, life: L, max: L, core: null, trail: 0, rim: this.rim() };
+      if (opts) { s.core = opts.core || null; s.trail = opts.trail || 0; if (opts.rim !== undefined) s.rim = opts.rim; }
       this.slashes.push(s);
     }
-    beam(x1, y1, x2, y2, w, color, life, core) { this.beams.push({ x1, y1, x2, y2, w, color, life: life || 0.25, max: life || 0.25, core: core || null }); }
+    beam(x1, y1, x2, y2, w, color, life, core) { this.beams.push({ x1, y1, x2, y2, w, color, life: life || 0.25, max: life || 0.25, core: core || null, rim: this.rim() }); }
     // 拖影 / 動態殘跡：由 (x1,y1) 漸細到 (x2,y2) 的亮線（add=true 時以 additive 繪製）
     streak(x1, y1, x2, y2, w, color, life, add) {
       if (this.streaks.length >= STREAK_CAP) return;
@@ -192,12 +194,12 @@
     }
     flash(c, a) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
     // 特效內部的延遲（依模擬時間；不使用 w.later，因此不影響世界排程）
-    after(t, fn) { this.timers.push({ t, fn }); }
+    after(t, fn) { this.timers.push({ t, fn, e: this.curE }); }
     update(dt) {
       if (this.timers.length) {
         const due = [];
         for (const tm of this.timers) { tm.t -= dt; if (tm.t <= 0) due.push(tm); }
-        if (due.length) { this.timers = this.timers.filter((tm) => tm.t > 0); for (const tm of due) tm.fn(); }
+        if (due.length) { this.timers = this.timers.filter((tm) => tm.t > 0); for (const tm of due) { this.curE = tm.e; try { tm.fn(); } finally { this.curE = null; } } }
       }
       const parts = this.parts, pool = this.pool;
       for (let i = 0; i < parts.length; i++) {
@@ -257,7 +259,9 @@
     if (o.radius == null) o.radius = 60 * o.scale * o.weight;
     if (o.angle == null) o.angle = src && src.face != null ? src.face : 0;
     o.heavy = !!w.pace;
-    def.spawn(w.fx, x, y, o);
+    // curE 讓原件（斬擊 / 震波 / 光束）取得元素的對比邊緣色（fx.after 延遲產生的部分也會沿用）
+    w.fx.curE = E;
+    try { def.spawn(w.fx, x, y, o); } finally { w.fx.curE = null; }
     return o;
   };
 })(typeof window !== 'undefined' ? window : globalThis);

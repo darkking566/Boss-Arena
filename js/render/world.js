@@ -646,6 +646,11 @@
         // 內部填色壓低（0.16 → 0.08）：大範圍砸地時不再把整片戰場與 Boss 染成同一色
         ctx.globalAlpha = k * 0.08; ctx.fillStyle = s.color;
         ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, U.TAU); ctx.fill();
+        // 對比邊緣：前緣外側一圈細的深色 / 反差色環
+        if (s.rim) {
+          ctx.globalAlpha = k * 0.6; ctx.strokeStyle = s.rim; ctx.lineWidth = Math.max(1.5, s.width * 0.35);
+          ctx.beginPath(); ctx.arc(s.x, s.y, r + s.width * 0.55, 0, U.TAU); ctx.stroke();
+        }
         ctx.globalAlpha = k * 0.55; ctx.strokeStyle = s.color; ctx.lineWidth = s.width * (0.35 + 0.65 * k);
         ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, U.TAU); ctx.stroke();
       }
@@ -689,6 +694,8 @@
         crescentPath(ctx, s.x, s.y, rad + i * 3, a0 - off, a1 - off, W * 0.7 * f, 0.15); ctx.fill();
       }
     }
+    // 對比邊緣：主體外側多一圈深色 / 反差色，刀光才有輪廓、不會和同色系地面糊在一起
+    if (s.rim) { ctx.fillStyle = hexA(s.rim, k * 0.75); crescentPath(ctx, s.x, s.y, rad + 1.5, a0, a1, W + 5, 0.2); ctx.fill(); }
     ctx.fillStyle = hexA(s.color, Math.min(1, k * 1.1));
     crescentPath(ctx, s.x, s.y, rad, a0, a1, W, 0.15); ctx.fill();
     ctx.globalCompositeOperation = 'lighter';
@@ -832,6 +839,10 @@
     for (const b of fx.beams) {
       const k = b.life / b.max;
       ctx.lineCap = 'round';
+      if (b.rim) {
+        ctx.strokeStyle = hexA(b.rim, k * 0.55); ctx.lineWidth = b.w * (0.6 + k * 0.6) + 6;
+        ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+      }
       ctx.strokeStyle = hexA(b.color, k * 0.6); ctx.lineWidth = b.w * (0.6 + k * 0.6);
       ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
       ctx.strokeStyle = `rgba(255,255,255,${k})`; ctx.lineWidth = Math.max(1.5, b.w * 0.25 * k);

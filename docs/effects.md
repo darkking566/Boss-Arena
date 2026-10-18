@@ -259,6 +259,11 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
   - 佔比 $55\% \sim 80\%$：縮減為 $60\%$。
   - 佔比 $\ge 80\%$：縮減為 $30\%$。
 
+### 繪製分層
+
+`R.draw.fx(ctx, w, layer)` 分兩層：`'ground'`（震波、光環、半徑 ≥ 70 的大光暈）畫在 Boss 底下，`'air'`（光柱、斬擊、光束、拖影、粒子、小光暈）畫在 Boss 上面；省略 `layer` 時兩層依序全畫。
+大招的大範圍閃光因此不會把角色洗成一片白，命中閃點等小光暈仍蓋在最上層。
+
 ### 原件方法一覽
 
 | 原件方法簽名 | 一句話說明 |
@@ -283,7 +288,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `damage(b, dmg, color)` | 向上浮現的傷害數字（$\ge 100$ 自動放大並帶彈跳彈出效果） |
 | `decal(x, y, r, color, life)` | 地面留下的圓形焦痕 / 污跡印記（最多維持 `DECAL_CAP` 個） |
 | `crack(x, y, r, color, life, glow, branches)` | 程序生成的多分岔碎裂地面裂痕，縫內可透出元素發光色（`glow`） |
-| `shake(v)` | 觸發畫面震動，震度疊加並以指數衰減 |
+| `shake(v, dir)` | 觸發畫面震動，震度疊加並以指數衰減；給受擊方向 `dir`（弧度）時畫面沿該方向擺動，否則為平滑的雙頻正弦抖動 |
 | `flash(c, a)` | 觸發全螢幕覆蓋閃光與指定不透明度 |
 | `after(t, fn)` | 特效內部專用的延遲排程（依賴模擬時間，不碰 `w.later`，純視覺無副作用） |
 | `part(kind, x, y, vx, vy, life, color, size, drag)` | 產生單一底層粒子（達上限回傳 `null`） |
@@ -329,6 +334,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 - `smoke`：煙塵顏色（rgba 字串）。
 - `decal`：地面痕跡顏色（rgba 字串）。
 - `crack`：裂縫內部發光色（字串或 `null`）。
+- `rim`：對比邊緣色（選用）。斬擊、震波、光束會在外緣多畫一圈此色，讓同色系特效有輪廓；原件在 `BD.spawnFx` 期間自動取用，不必在特效裡傳。
 - `extra`：額外微粒行為（`'embers'` / `'shards'` / `'bubbles'` / `'wisps'` / `'crackle'` / `'drips'` / `'runes'` / `'motes'` / `'dust'` 或 `null`）。
 
 ### 完整範例程式碼：雷擊落點（`thunderstrike`）
