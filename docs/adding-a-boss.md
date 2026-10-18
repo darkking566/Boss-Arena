@@ -37,7 +37,7 @@
 `tele` 預警、`hit` 判定、`dash` 衝刺、`proj` 投射物、`lob` 拋射、`rain` 隕石雨、`zone` 區域、`trap` 陷阱、`erupt` 噴發柱、
 `summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線。
 `strike(at, tele, shape, hit)` = 預警 + 判定；`dashStrike(...)` = 預警 + 衝刺。
-純演出的動作欄位（不影響戰鬥、行為指紋不變）：`counter` 可加 `fx`（見切成功特效，預設 `parry`）與 `slowmo`（見切成功的慢動作秒數）；`slashes` 與其 `final` 可加 `fx`（例如 `threadcut`：刀痕懸著，等到最後一擊一齊裂開）。
+純演出的動作欄位（不影響戰鬥、行為指紋不變）：`blink` 可加 `fx`（閃現特效，預設 `blink`）；`counter` 可加 `fx`（見切成功特效，預設 `parry`）與 `slowmo`（見切成功的慢動作秒數）；`slashes` 與其 `final` 可加 `fx`（例如 `threadcut`：刀痕懸著，等到最後一擊一齊裂開）。
 
 ### 無法閃避（undodgeable）
 - `undodgeable: true` 可放在 `hit`、`trap`、`proj` 動作上（`dash` / `circle` 的 `hit: {...}` 物件中也可），表示翻滾 / 衝刺的無敵幀（iframe）無效。

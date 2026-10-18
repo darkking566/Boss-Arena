@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / posturebreak）：蓄力、架式、見切、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -198,6 +198,75 @@
         fx.motes(sx, sy, E, 24, r * 2, 180);
         fx.glow(sx, sy, r * 3, E.glow, 1.0, 0.6, 0.4, src);
         fx.shake(Math.min(16, 10 * Math.min(k, 1.5)));
+      });
+    },
+  });
+
+  BD.defineEffect('thunderwake', {
+    name: '雷槌覺醒', category: '增益',
+    desc: '沉睡的雷槌甦醒：場地沉入深藍暗幕，life 秒內電弧在施放者周圍越竄越密、光點被吸向中心；時間到時一道落雷光柱直擊施放者，鐵灰碎片四散、雙層雷電震波與全屏白藍閃光。適合雷電系角色的二階段覺醒（phase2.transFx）。',
+    params: { life: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life;
+      fx.veil(life + 0.9, 0.6, '#04070f');
+      fx.charge(x, y, r * 4, E.glow, life, src, 24);
+      for (let t = 0; t < life; t += 0.1) {
+        fx.after(t, () => {
+          const n = 1 + Math.round(4 * t / life), sx = src ? src.x : x, sy = src ? src.y : y;
+          fx.motes(sx, sy, E, n * 3, r * (1.6 - t / life), 140);
+        });
+      }
+      fx.after(life, () => {
+        const sx = src ? src.x : x, sy = src ? src.y : y;
+        fx.flash('#e6f4ff', 0.6);
+        fx.pillar(sx, sy, r * 1.4, E.glow, 0.5);
+        fx.glow(sx, sy, r * 3, E.glow, 0.9, 0.8, 0.5, src);
+        fx.shock(sx, sy, r, r * 9, 0.7, E.glow, 12 * Math.min(1.5, k), E.core);
+        fx.shock(sx, sy, r, r * 5, 0.45, '#ffffff', 6, '#ffffff');
+        fx.debris(sx, sy, '#3a3f48', 16, 420, 5, r * 0.5);
+        fx.motes(sx, sy, E, 24, r * 1.5, 260);
+        fx.crack(sx, sy, r * 3, E.decal, 9, E.crack, 8);
+        fx.shake(Math.min(24, 16 * Math.min(k, 1.5)));
+      });
+    },
+  });
+
+  BD.defineEffect('pressure', {
+    name: '威壓', category: '增益',
+    desc: '令人僵住的威壓：場地短暫變暗，三圈沉重的光環由外向施放者收攏、地面以施放者為中心龜裂，最後一記低沉的震動。適合神威、霸氣、恐懼震懾類的減速 / 易傷技能。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : 30, R0 = Math.max(o.radius || 200, r * 4);
+      fx.veil(0.9, 0.55, '#05060c');
+      for (let i = 0; i < 3; i++) fx.after(i * 0.1, () => fx.ring(x, y, R0 * (1.2 - i * 0.1), r, 0.45, i ? E.glow : '#ffffff', 5 - i));
+      fx.after(0.32, () => {
+        fx.crack(x, y, R0 * 0.7, E.decal, 6, E.crack, 10);
+        fx.shock(x, y, r, R0, 0.4, E.glow, 6, E.core);
+        fx.debris(x, y, E.debris || E.particle, 8, 220, 3, r);
+        fx.shake(Math.min(18, 12 * Math.min(k, 1.5)), Math.PI / 2);
+      });
+    },
+  });
+
+  BD.defineEffect('ironfist', {
+    name: '鐵手套・反槌', category: '增益',
+    desc: '鐵手套擋下攻擊的瞬間：場地瞬間變暗、金屬撞擊的白金火花大量迸射、白色光環收束；delay 秒後反擊重槌落在施放者面前：震波、地裂與碎石。適合重手甲 / 盾牌格擋後的重擊反擊。',
+    params: { delay: 0.25 },
+    spawn(fx, x, y, o) {
+      const E = o.E, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(0.5, 0.5, '#05060c');
+      fx.flash('#ffffff', 0.3);
+      fx.ring(x, y, r * 3, r + 4, 0.18, '#ffffff', 4);
+      fx.sparkle(x, y, '#ffe6a0', 24, 380);
+      fx.shake(8);
+      fx.after(o.delay, () => {
+        const a = src && src.face != null ? src.face : o.angle || 0;
+        const hx = (src ? src.x : x) + Math.cos(a) * r * 2, hy = (src ? src.y : y) + Math.sin(a) * r * 2;
+        fx.shock(hx, hy, r * 0.5, r * 4, 0.45, E.glow, 10, E.core);
+        fx.crack(hx, hy, r * 2.2, E.decal, 8, E.crack, 7);
+        fx.debris(hx, hy, E.debris || E.particle, 12, 300, 5, r * 0.5);
+        fx.flashAt(hx, hy, 40, E.core, 0.16);
+        fx.shake(14, a);
       });
     },
   });

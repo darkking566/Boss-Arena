@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜位移（blink / vanish / hoofcharge / warsteed / appear / leap / burrow / dash）：瞬移、隱現、鐵騎衝鋒、戰騎奔至、躍起、鑽地與衝刺殘影
+// 特效庫｜位移（blink / boltblink / vanish / hoofcharge / warsteed / appear / leap / burrow / dash）：瞬移、雷光瞬身、隱現、鐵騎衝鋒、戰騎奔至、躍起、鑽地與衝刺殘影
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、toX / toY 終點、angle 方向、len 距離、dur 衝刺時間、k 綜合倍率、src 施放者
 (function (G) {
@@ -19,6 +19,33 @@
       fx.flashAt(tx, ty, 20 * Math.min(1.6, k), E.core, 0.14);
       fx.motes(tx, ty, E, Math.round(5 * k), 20, 120);
       fx.streak(x, y, tx, ty, src && src.r ? src.r * 0.6 : 14, E.glow, 0.25, true);
+    },
+  });
+
+  BD.defineEffect('boltblink', {
+    name: '雷光瞬身', category: '位移',
+    desc: '化為一道閃電瞬移：起點與終點之間劈出鋸齒雷光（亮芯 + 元素色外層），兩端爆閃、電弧四竄，起點留下焦痕。適合雷電系的瞬步、閃現突襲。',
+    params: { len: 200 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k;
+      const tx = o.toX == null ? x + 160 : o.toX, ty = o.toY == null ? y : o.toY;
+      const len = Math.hypot(tx - x, ty - y) || 1, nx = -(ty - y) / len, ny = (tx - x) / len;
+      for (let j = 0; j < 2; j++) {
+        let px = x, py = y;
+        const n = Math.max(5, Math.round(len / 40));
+        for (let i = 1; i <= n; i++) {
+          const t = i / n, off = i === n ? 0 : (BD.vrng() - 0.5) * 36;
+          const qx = x + (tx - x) * t + nx * off, qy = y + (ty - y) * t + ny * off;
+          fx.streak(px, py, qx, qy, j ? 2 : 5, j ? '#ffffff' : E.glow, 0.3, true);
+          px = qx; py = qy;
+        }
+      }
+      fx.flashAt(x, y, 30, E.core, 0.14);
+      fx.flashAt(tx, ty, 36, E.core, 0.16);
+      fx.motes(x, y, E, Math.round(8 * k), 20, 160);
+      fx.motes(tx, ty, E, Math.round(10 * k), 24, 180);
+      fx.decal(x, y, 18, E.decal || 'rgba(0,0,0,0.3)', 4);
+      fx.shake(Math.min(8, 3 * k));
     },
   });
 

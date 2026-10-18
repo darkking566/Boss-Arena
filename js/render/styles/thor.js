@@ -331,7 +331,21 @@
   // 判定瞬間 0.16 秒內揮落 / 掃過、之後停在收招位置直到下一記；ring 震波與飛行中的槌不計入節拍
   const IDLE_HA = 2.3, FT = 0.16;
   const lerp = (a, b, k) => a + (b - a) * k;
+  // 揮槌殘影：上一擊後 FT 內從起手角掃到目前角，之後 0.15 秒淡出（s0 / s1 角度、sa 透明度）
+  let lastPrev = null;
   function hammerPose(o, st, swing) {
+    lastPrev = null;
+    const p = hammerPose0(o, st, swing), prev = lastPrev;
+    if (prev) {
+      const dt = o.inst.t - prev.at, sw = prev.shape === 'cone' || prev.shape === 'arc';
+      if (dt < FT + 0.15) {
+        p.s0 = sw ? 2.1 : 2.9; p.s1 = dt < FT ? p.ha : (sw ? -1.3 : 0.05);
+        p.sa = 0.3 * (dt < FT ? 1 : 1 - (dt - FT) / 0.15);
+      }
+    }
+    return p;
+  }
+  function hammerPose0(o, st, swing) {
     const inst = o.inst, idle = { ha: IDLE_HA + (swing || 0) * 0.15, lift: 0, both: false };
     if (st === 'stun' || st === 'stagger') return { ha: 1.25, lift: 0, both: false };
     if (st === 'feint') return { ha: 2.9, lift: 0.6, both: true };
@@ -341,10 +355,11 @@
     if (inst.skill && inst.skill.id === 'jarngreipr_guard' && hits.length && inst.t < hits[0].at - 0.4) return { ha: 1.7, lift: 0, both: false, guard: true };
     let prev = null, next = null;
     for (const a of hits) { if (a.at <= inst.t) prev = a; else { next = a; break; } }
+    lastPrev = prev;
     const sweep = (a) => a && (a.shape === 'cone' || a.shape === 'arc');
     if (prev && inst.t - prev.at < FT) {
       const k = U.clamp((inst.t - prev.at) / FT, 0, 1);
-      return sweep(prev) ? { ha: lerp(2.1, -1.3, k), lift: 0.2 * (1 - k), both: false } : { ha: lerp(2.9, 0.05, k), lift: 0.8 * (1 - k), both: true };
+      return sweep(prev) ? { ha: lerp(2.1, -1.3, k), lift: 0.2 * (1 - k), both: false, snap: 1 - k } : { ha: lerp(2.9, 0.05, k), lift: 0.8 * (1 - k), both: true, snap: 1 - k };
     }
     if (next) {
       const t0 = prev ? prev.at + FT : 0;
@@ -359,13 +374,20 @@
   function drawBody(ctx, o, t, { def, r, st, act, swing }) {
     const p2 = o.phase === 2;
     const trans = st === 'transition';
-    const transK = trans ? U.clamp((o.stateT || 0) / Math.max(0.1, o.stateDur || 1), 0, 1) : 0;
+    const roarAt = o.roarAt || 0.6, pre = trans && (o.stateT || 0) < roarAt, awake = p2 || (trans && !pre);
+    const preK = pre ? U.clamp((o.stateT || 0) / roarAt, 0, 1) : 0;
+    const transK = trans && !pre ? U.clamp(((o.stateT || 0) - roarAt) / Math.max(0.1, (o.stateDur || 1) - roarAt), 0, 1) : 0;
+    if (pre) ctx.translate((BD.vrng() - 0.5) * preK * 4, (BD.vrng() - 0.5) * preK * 4);
     const inst = o.inst || null;
     const tilt = st === 'stun' || st === 'stagger';
     const leap = leapState(o);
     const thrown = thrownState(o);
     // 一階段大招（鬥神之雷槌）：上身後仰到幾乎倒地的蓄力——整個身體往後移
-    if (inst && inst.skill && inst.skill.ult && o.phase === 1) { const pw = hammerPose(o, st, swing); if (pw.wind) ctx.translate(-r * 0.32 * pw.wind, 0); }
+    if (inst && inst.skill && inst.skill.ult && o.phase === 1) {
+      const pw = hammerPose(o, st, swing);
+      if (pw.wind) { ctx.translate(-r * 0.45 * pw.wind, 0); ctx.scale(1 - 0.2 * pw.wind, 1 + 0.06 * pw.wind); }
+      else if (pw.snap) ctx.translate(r * 0.25 * pw.snap, 0);
+    }
 
     // ── 2. 軀幹（快取：蒼白肌肉、白色斜肩帶、棕色皮帶與金扣） ──
     R.blit(ctx, 'body:thor:torso:' + r + ':' + (p2 ? 2 : 1), r * 2.4 + 16, r * 2.2 + 16, r * 1.2 + 8, r * 1.1 + 8, (g) => {
@@ -492,7 +514,7 @@
 
     // 左前臂裝備
     const la = Math.atan2(leftHand.y - (-r * 0.5), leftHand.x - (-r * 0.05));
-    if (p2 || trans) {
+    if (awake) {
       const glint = inst && inst.skill && inst.skill.ult && o.phase === 1;
       drawBareArm(ctx, (leftHand.x - r * 0.1), (leftHand.y - r * 0.05), la, r, t);
       if (glint) {
@@ -519,10 +541,15 @@
     ctx.beginPath(); ctx.moveTo(-r * 0.02, r * 0.55); ctx.quadraticCurveTo(hum * 0.4, humY * 0.78, handX, handY); ctx.stroke();
 
     const ra = Math.atan2(handY - humY, handX - hum * 0.3);
-    if (p2 || trans) drawBareArm(ctx, (handX + hum * 0.2) * 0.85, (handY + humY) * 0.5, ra, r, t);
+    if (awake) drawBareArm(ctx, (handX + hum * 0.2) * 0.85, (handY + humY) * 0.5, ra, r, t);
     else drawGauntlet(ctx, (handX + hum * 0.2) * 0.85, (handY + humY) * 0.5, ra, r);
 
     // 槌柄與槌頭（空手或飛行時不畫）
+    if (!leap && !thrown && pose.sa > 0.01) {
+      const a0 = Math.min(pose.s0, pose.s1), a1 = Math.max(pose.s0, pose.s1);
+      ctx.fillStyle = awake ? 'rgba(127,200,255,' + pose.sa + ')' : 'rgba(232,232,240,' + pose.sa + ')';
+      ctx.beginPath(); ctx.arc(handX, handY, hd + r * 0.55, a0, a1); ctx.arc(handX, handY, hd * 0.55, a1, a0, true); ctx.closePath(); ctx.fill();
+    }
     if (!leap && !thrown) {
       drawHandle(ctx, r, handX, handY, headX, headY);
       // 槌頭長軸與柄垂直（T 字形）；舉過頂時放大（較靠近鏡頭）
@@ -531,7 +558,7 @@
       ctx.rotate(ha + Math.PI / 2 + Math.sin(t * 2.6) * 0.04);
       const sc = 1 + 0.28 * lift;
       ctx.scale(sc, sc);
-      hammerHead(ctx, r, p2 || trans, t);
+      hammerHead(ctx, r, awake, t);
       ctx.restore();
     }
 
@@ -558,9 +585,12 @@
       let firstHit = Infinity;
       if (Array.isArray(inst.v && inst.v.actions)) for (const a of inst.v.actions) if (a && a.do === 'hit') { firstHit = a.at; break; }
       if (inst.t < firstHit) {
+        const wd = pose.wind || 0;
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        for (let i = 0; i < 2; i++) {
+        ctx.fillStyle = 'rgba(127,200,255,' + (0.15 + 0.35 * wd) + ')';
+        ctx.beginPath(); ctx.arc(leftHand.x, leftHand.y, r * (0.2 + 0.5 * wd), 0, U.TAU); ctx.fill();
+        for (let i = 0, n = 2 + Math.round(4 * wd); i < n; i++) {
           ctx.strokeStyle = 'rgba(127,200,255,0.5)';
           ctx.lineWidth = 2;
           bolt(ctx, leftHand.x + (BD.vrng() - 0.5) * r * 0.6, leftHand.y + (BD.vrng() - 0.5) * r * 0.6, leftHand.x + (BD.vrng() - 0.5) * r, leftHand.y + (BD.vrng() - 0.5) * r, 4, r * 0.14);
@@ -572,8 +602,25 @@
       }
     }
 
-    // ── 7. 階段轉換：鐵手套碎片飛散 + 槌頭裂紋逐步顯現強光 ──
-    if (trans) {
+    // ── 7a. 換階段・咆哮前：鐵手套裂紋發光、雷弧在槌頭與雙手間越竄越密 ──
+    if (pre) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const n = 1 + Math.round(preK * 4);
+      for (let i = 0; i < n; i++) {
+        ctx.strokeStyle = 'rgba(127,200,255,' + (0.3 + 0.5 * preK) + ')'; ctx.lineWidth = 2.2;
+        bolt(ctx, headX + (BD.vrng() - 0.5) * r * 0.8, headY + (BD.vrng() - 0.5) * r * 0.8, headX + (BD.vrng() - 0.5) * r * 1.6, headY + (BD.vrng() - 0.5) * r * 1.6, 4, r * 0.15);
+      }
+      ctx.strokeStyle = 'rgba(255,240,200,' + preK + ')'; ctx.lineWidth = 1.4;
+      for (const [gx, gy] of [[leftHand.x, leftHand.y], [(handX + hum * 0.2) * 0.85, (handY + humY) * 0.5]]) {
+        bolt(ctx, gx - r * 0.15, gy - r * 0.12, gx + r * 0.15, gy + r * 0.1, 3, r * 0.06);
+        if (preK > 0.5) bolt(ctx, gx - r * 0.1, gy + r * 0.12, gx + r * 0.12, gy - r * 0.1, 3, r * 0.06);
+      }
+      ctx.restore();
+    }
+
+    // ── 7b. 換階段・咆哮後：鐵手套碎片飛散 + 槌頭裂紋逐步顯現強光 ──
+    if (trans && !pre) {
       ctx.save();
       for (let i = 0; i < 10; i++) {
         const a = (i / 10) * U.TAU + i * 0.37;

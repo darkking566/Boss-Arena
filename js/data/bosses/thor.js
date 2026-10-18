@@ -55,7 +55,7 @@
       ],
     },
     phase2: {
-      speedMul: 1.15, dmgMul: 1.18, cdMul: 0.82, fxEl: 'lightning', transDur: 2.3, roarAt: 1.0,
+      speedMul: 1.15, dmgMul: 1.18, cdMul: 0.82, fxEl: 'lightning', transDur: 2.3, roarAt: 1.0, transFx: { id: 'thunderwake', el: 'lightning' },
       line: '……醒了嗎，貪睡的傢伙。別太快死了。',
       note: '雅恩格利佩爾碎裂、雷槌妙爾尼爾覺醒：招式轉為雷電元素；橫掃改為正反兩掃、砸地追加雷爆環、三連槌加快並以雷擊收尾、屠巨一振震波擴大；格擋失效，解鎖「雷槌迴旋擲」「雷光瞬身」「雷霆萬鈞」；大招變為「覺醒雷槌・蓋爾羅德」（擲出 → 迴旋返回 → 接槌躍擊）',
     },
@@ -70,7 +70,7 @@
           ...strike(0.88, 0.2, { shape: 'ring', r0: 110, r: 250 }, { dmg: 66, posture: 20, kb: 320, fx: 'nova' })] },
       // 原作以戴手套的右臂格擋方天戟；二階段手套已碎，此招僅限一階段
       { id: 'jarngreipr_guard', name: '雅恩格利佩爾・格擋', short: '格擋', maxPhase: 1, tags: ['counter', 'defensive'], range: [0, 220], cd: 6.0, cost: 12, track: 8, recovery: 0.45,
-        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 165, posture: 70, name: '鐵手套・反槌' },
+        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 165, posture: 70, name: '鐵手套・反槌', fx: 'ironfist', slowmo: 0.3 },
           ...strike(0.9, 0.25, { shape: 'circle', r: 115, off: 70 }, { dmg: 105, posture: 40, kb: 360, fx: 'slam' })] },
       // 原作壯舉：66 名巨人每人一振即斃、一振殲滅呂布全軍
       { id: 'giant_felling', name: '屠巨一振', short: '一振', tags: ['melee', 'aoe'], range: [0, 330], cd: 7.5, cost: 30, track: 3, recovery: 1.0,
@@ -84,9 +84,9 @@
           { do: 'hit', at: 1.08, shape: 'ring', r0: 210, r: 430, dmg: 77, posture: 22, kb: 360, fx: 'ring' }] },
       // 原作能力：令人畏懼的威壓，連戰乙女格爾都僵住
       { id: 'divine_pressure', name: '雷神威壓', short: '威壓', tags: ['defensive'], range: [0, 420], cd: 12, cost: 14, recovery: 0.5,
-        actions: [{ do: 'hit', at: 0.35, shape: 'circle', r: 200, dmg: 0, posture: 25, kb: 260, fx: 'roar', status: { id: 'slow', dur: 2.0 } },
+        actions: [{ do: 'hit', at: 0.35, shape: 'circle', r: 200, dmg: 0, posture: 25, kb: 260, fx: 'pressure', status: { id: 'slow', dur: 2.0 } },
           { do: 'status', at: 0.35, id: 'shield', dur: 4, value: 120 }],
-        actions2: [{ do: 'hit', at: 0.3, shape: 'circle', r: 240, dmg: 0, posture: 30, kb: 300, fx: 'roar', status: [{ id: 'slow', dur: 2.5 }, { id: 'vulnerable', dur: 3 }] },
+        actions2: [{ do: 'hit', at: 0.3, shape: 'circle', r: 240, dmg: 0, posture: 30, kb: 300, fx: 'pressure', status: [{ id: 'slow', dur: 2.5 }, { id: 'vulnerable', dur: 3 }] },
           { do: 'status', at: 0.3, id: 'shield', dur: 4, value: 150 }] },
       // 改編：魂系大開大合——兩記重掃後故意延遲的過頂砸地，誘使對手提早翻滾
       { id: 'hammer_chain', name: '雷槌三連', short: '三連', tags: ['melee'], range: [0, 180], cd: 5.0, cost: 30, track: 5, creep: 0.35, recovery: 0.9,
@@ -99,12 +99,12 @@
       // 原作：覺醒雷槌擲出後像迴力鏢一樣繞回——去程、回程各一段判定
       { id: 'mjolnir_throw', name: '雷槌迴旋擲', short: '迴旋擲', phase: 2, tags: ['ranged'], range: [200, 800], cd: 7, cost: 26, track: 4, recovery: 0.7,
         actions: [{ do: 'tele', at: 0.1, dur: 0.6, shape: 'rect', len: 820, w: 80, follow: true, lockBefore: 0.15, setMark: 'M' },
-          { do: 'hit', at: 0.7, shape: 'rect', anchor: 'mark', mark: 'M', len: 820, w: 80, dmg: 94, posture: 30, kb: 200, fx: 'beam' },
+          { do: 'hit', at: 0.7, shape: 'rect', anchor: 'mark', mark: 'M', len: 820, w: 80, dmg: 94, posture: 30, kb: 200, fx: 'thunderpath' },
           { do: 'tele', at: 0.8, dur: 0.6, shape: 'rect', anchor: 'mark', mark: 'M', len: 820, w: 80 },
-          { do: 'hit', at: 1.4, shape: 'rect', anchor: 'mark', mark: 'M', len: 820, w: 80, dmg: 82, posture: 25, kb: 260, fx: 'beam' }] },
+          { do: 'hit', at: 1.4, shape: 'rect', anchor: 'mark', mark: 'M', len: 820, w: 80, dmg: 82, posture: 25, kb: 260, fx: { id: 'thunderpath', scale: 1.3 } }] },
       // 原作能力：動畫第 1 話的瞬間移動（資料書確認）；改編為閃到背後的砸擊
       { id: 'thunder_step', name: '雷光瞬身', short: '瞬身', phase: 2, tags: ['gap', 'fast'], range: [180, 600], cd: 6.5, cost: 22, track: 8, recovery: 0.75,
-        actions: [{ do: 'blink', at: 0.25, to: 'behind', dist: 70 },
+        actions: [{ do: 'blink', at: 0.25, to: 'behind', dist: 70, fx: 'boltblink' },
           ...strike(0.75, 0.42, { shape: 'circle', r: 125, off: 80 }, { dmg: 132, posture: 45, kb: 460, fx: 'slam' })] },
       // 改編：依原作雷電能力（雷光充滿空間、以雷包圍奧丁）化為一列由天而降的落雷
       { id: 'thunder_rampage', name: '雷霆萬鈞', short: '萬雷', phase: 2, tags: ['ranged', 'aoe'], range: [150, 900], cd: 9, cost: 26, track: 3, recovery: 0.8,
@@ -121,9 +121,9 @@
       ],
       actions2: [ // 二階段：覺醒雷槌・蓋爾羅德——①全力擲出 ②迴旋返回（無法閃避：只能橫移離開直線）③接槌躍起、以累積的速度與離心力砸落
         { do: 'tele', at: 0.1, dur: 1.0, shape: 'rect', len: 900, w: 90, follow: true, lockBefore: 0.25, setMark: 'G1', chargeFx: 'ultcast' },
-        { do: 'hit', at: 1.1, shape: 'rect', anchor: 'mark', mark: 'G1', len: 900, w: 90, dmg: 99, posture: 30, kb: 240, fx: 'beam' },
+        { do: 'hit', at: 1.1, shape: 'rect', anchor: 'mark', mark: 'G1', len: 900, w: 90, dmg: 99, posture: 30, kb: 240, fx: 'thunderpath' },
         { do: 'tele', at: 1.15, dur: 0.85, shape: 'rect', anchor: 'mark', mark: 'G1', len: 900, w: 90 },
-        { do: 'hit', at: 2.0, shape: 'rect', anchor: 'mark', mark: 'G1', len: 900, w: 90, dmg: 110, posture: 35, kb: 300, undodgeable: true, fx: 'beam' },
+        { do: 'hit', at: 2.0, shape: 'rect', anchor: 'mark', mark: 'G1', len: 900, w: 90, dmg: 110, posture: 35, kb: 300, undodgeable: true, fx: { id: 'thunderpath', scale: 1.3 } },
         { do: 'tele', at: 2.0, dur: 1.3, shape: 'circle', r: 230, anchor: 'target', setMark: 'G2', follow: true, lockBefore: 0.55 },
         { do: 'hide', at: 2.1, fx: 'leap' },
         { do: 'land', at: 3.3, mark: 'G2' },

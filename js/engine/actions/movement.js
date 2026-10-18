@@ -3,11 +3,11 @@
 (function (G) {
   const BD = G.BD, U = BD.U, K = BD.K;
 
-  function blinkTo(w, b, x, y) {
+  function blinkTo(w, b, x, y, fx) {
     const oldX = b.x, oldY = b.y;
     b.trail.push({ x: b.x, y: b.y, face: b.face, life: 0.4 });
     b.x = x; b.y = y; w.confine(b);
-    BD.spawnFx(w, 'blink', oldX, oldY, { src: b, toX: b.x, toY: b.y });
+    BD.spawnFx(w, fx || 'blink', oldX, oldY, { src: b, toX: b.x, toY: b.y });
   }
   function blinkDest(w, b, a) {
     const t = b.enemy;
@@ -45,7 +45,7 @@
     BD.traitHook(b, 'onDash', w, b, x0, y0, ang, a);
   }, { active: true, duration: true });
 
-  BD.defineAction('blink', (w, b, inst, a) => { const [x, y] = blinkDest(w, b, a); blinkTo(w, b, x, y); b.face = U.angTo(b, b.enemy); }, { active: true });
+  BD.defineAction('blink', (w, b, inst, a) => { const [x, y] = blinkDest(w, b, a); blinkTo(w, b, x, y, a.fx); b.face = U.angTo(b, b.enemy); }, { active: true });
 
   // 繞圈疾奔：每幀的移動、火痕與接觸判定在 Boss.updateSkill（inst.circle）
   BD.defineAction('circle', (w, b, inst, a, tgt) => {

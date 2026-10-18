@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜突刺（thrust / cross / slashline / iaido / beam）：直線穿刺、斬線、居合衝刺、遲裂居合與光束
+// 特效庫｜突刺（thrust / cross / slashline / iaido / thunderpath / beam）：直線穿刺、斬線、居合衝刺、遲裂居合、雷槌軌跡與光束
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、angle 方向、len 長度、width 寬度、dur 衝刺時間、k 綜合倍率、src 施放者
 (function (G) {
@@ -113,6 +113,35 @@
           fx.shake(Math.min(10, 4 * k), a + Math.PI / 2);
         });
       });
+    },
+  });
+
+  BD.defineEffect('thunderpath', {
+    name: '雷槌軌跡', category: '突刺',
+    desc: '飛行的雷槌劃過的直線：整條路徑竄起鋸齒電弧、留下一條緩緩褪去的發光軌跡，兩側迸出火花與元素微粒。scale 越大越亮（例如迴旋返回的第二段）。適合投擲武器的去程 / 回程、雷電直線攻擊。',
+    params: { len: 400, width: 40 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, len = o.len || 400, ang = o.angle || 0;
+      const c = Math.cos(ang), s = Math.sin(ang), nx = -s, ny = c, tx = x + c * len, ty = y + s * len;
+      fx.beam(x, y, tx, ty, (o.width || 40) * 0.35 * Math.min(1.6, k), E.glow, 0.8, E.core);
+      // 鋸齒電弧：沿路徑分段、左右亂擺
+      for (let j = 0; j < 2; j++) {
+        let px = x, py = y;
+        const n = Math.max(6, Math.round(len / 45));
+        for (let i = 1; i <= n; i++) {
+          const t = i / n, off = (BD.vrng() - 0.5) * 30 * Math.min(1.5, k);
+          const qx = x + c * len * t + nx * off, qy = y + s * len * t + ny * off;
+          fx.streak(px, py, qx, qy, j ? 1.5 : 3, j ? '#ffffff' : E.glow, 0.25 + BD.vrng() * 0.15, true);
+          px = qx; py = qy;
+        }
+      }
+      const m = Math.max(3, Math.round(len / 80));
+      for (let i = 0; i < m; i++) {
+        const t = (i + 0.5) / m;
+        fx.sparkle(x + c * len * t, y + s * len * t, E.core, 2, 260, ang + (i % 2 ? 1 : -1) * Math.PI / 2, 0.6);
+        fx.motes(x + c * len * t, y + s * len * t, E, 1, 10, 100);
+      }
+      fx.shake(Math.min(10, 4 * k), ang + Math.PI / 2);
     },
   });
 
