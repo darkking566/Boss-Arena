@@ -32,7 +32,7 @@
           { skill: 'eggs' },
           { skill: 'acid', cancel: 0.3, branch: [{ when: { dist: [200, 900] }, do: 'extend' }, { do: 'stop' }] }] },
       ] },
-    phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.75, line: '孩子們……吞噬牠！', aura: 'poison',
+    phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.75, line: '孩子們……吞噬牠！', aura: 'poison', transFx: { id: 'sacburst', el: 'poison' },
       note: '酸液 5 發、幼蟲 5 隻且更快，解鎖「卵囊播種」，大招變三道蟲潮' },
     skills: [
       { id: 'acid', name: '酸液彈', short: '酸液', tags: ['ranged', 'aoe'], range: [200, 900], cd: 3, cost: 15, track: 5, recovery: 0.5,

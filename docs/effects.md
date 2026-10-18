@@ -12,7 +12,7 @@
 - **資料只宣告 `id` 與元素**：
   在 Boss 資料檔（`js/data/bosses/<id>.js`）中，招式僅以字串宣告特效（如 `fx: 'slam'`）與元素（如 `fxEl: 'fire'`），具體的粒子物理、光暈擴張、地面裂縫與色彩取樣皆由引擎與特效庫負責處理。
 - **「先挑現有特效 + 元素，找不到再新增」設計流程**：
-  特效庫目前內建 **48 種招式特效 × 9 種元素主題 = 432 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
+  特效庫目前內建 **49 種招式特效 × 9 種元素主題 = 441 種視覺組合**（例如 `slam` 砸地 × `fire` 火焰 = 熔岩碎地、`slam` × `poison` 劇毒 = 毒沼重擊）。
   設計新 Boss 招式時，請先打開特效圖鑑挑選現有特效與元素；只有在現有原型確實無法滿足表現需求時，才擴充特效庫。
 
 ---
@@ -40,7 +40,7 @@
 python3 test/fx_gallery_test.py
 ```
 
-以無頭 Chromium 走訪整頁，驗證 48 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
+以無頭 Chromium 走訪整頁，驗證 49 種特效 × 9 種元素皆能正確播放、更新至少 5 幀、畫布具備明亮像素且無任何 JavaScript 例外或 Console 報錯。加上 `--shot <輸出路徑.png>` 可截圖存檔。
 
 ---
 
@@ -162,7 +162,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 
 ---
 
-## 5. 特效一覽表（48 種特效）
+## 5. 特效一覽表（49 種特效）
 
 依 10 大分類（`BD.EFFECT_CATEGORIES`）整理，包含適合招式與當前所有 Boss 資料及引擎內建呼叫點：
 
@@ -185,6 +185,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | **爆炸** | `explode` | 爆炸 | 投射物或隕石落地劇烈爆炸、強光震波碎石焦痕 | projectiles.js `lob` / `rain` 落地爆炸（explodeAt） |
 | | `burst` | 爆散 | 小型短促爆散光環、自爆、召喚物死亡、血霧 | minion.js 召喚物死亡預設、腐沼蜘蛛自爆、深淵監視者血祭消散 |
 | | `shellburst` | 外殼爆裂 | 岩殼從內部炸開：裂縫噴火花、熱光膨脹，life 秒後岩塊四散、熔岩震波與發光裂痕 | 熔岩巨像 `phase2.transFx` |
+| | `sacburst` | 卵囊破裂 | 病綠暗幕下身後卵囊脈動冒泡，life 秒後囊膜炸開：黏液四濺、毒霧、酸液斑點與綠色震波 | 腐沼母巢 `phase2.transFx` |
 | | `impact` | 命中爆點 | 被擊中時的受擊爆點回饋、火花與重擊閃白震動 | world.js `damageBoss`（Boss 受擊時的通用回饋） |
 | **位移** | `blink` | 閃現 | 瞬移、起點收縮光環煙霧、終點綻放與拖影 | movement.js `blink` 動作（blinkTo） |
 | | `vanish` | 隱身 | 身影化煙散去、暗影粒子飄散、潛行消失 | movement.js `hide` 動作預設、深淵監視者同伴消散 |

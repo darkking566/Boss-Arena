@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜爆炸（explode / burst / shellburst / impact）：落點爆炸、小型爆散、外殼爆裂與 Boss 受擊爆點
+// 特效庫｜爆炸（explode / burst / shellburst / sacburst / impact）：落點爆炸、小型爆散、外殼爆裂、卵囊破裂與 Boss 受擊爆點
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、radius 半徑、k 綜合倍率、heavy 沉重節奏、src / victim（僅 impact）
 (function (G) {
@@ -69,6 +69,36 @@
         fx.sparkle(sx, sy, E.core, 36, 520);
         fx.glow(sx, sy, r * 2.4, E.glow, 0.9, 0.7, 0.5, src);
         fx.shake(Math.min(24, 16 * Math.min(k, 1.5)));
+      });
+    },
+  });
+
+  BD.defineEffect('sacburst', {
+    name: '卵囊破裂', category: '爆炸',
+    desc: '巨大卵囊從內部撐破：life 秒內場地被病綠暗幕籠罩、腹部（施放者身後）脈動發光並冒出氣泡；時間到時囊膜炸開，黏液四濺、毒霧翻湧、地面留下酸液斑點與綠色震波。適合蟲巢 / 母體系 Boss 的二階段覺醒（phase2.transFx）。',
+    params: { life: 0.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : o.radius || 60, life = o.life;
+      // 卵囊在施放者身後約 0.45r
+      const sac = () => { const a = src && src.face != null ? src.face : 0, bx = src ? src.x : x, by = src ? src.y : y; return [bx - Math.cos(a) * r * 0.45, by - Math.sin(a) * r * 0.45]; };
+      fx.veil(life + 0.7, 0.5, '#0a1405');
+      for (let t = 0; t < life; t += 0.12) {
+        fx.after(t, () => { const [sx, sy] = sac(); fx.motes(sx, sy, E, 3, r * 0.5, 60); fx.glow(sx, sy, r * 0.9, E.glow, 0.14, 0.35, 0.3); });
+      }
+      fx.after(life, () => {
+        const [sx, sy] = sac();
+        fx.flash(E.glow, 0.4);
+        fx.debris(sx, sy, E.particle, 26, 380, 4, r * 0.4);
+        fx.smoke(sx, sy, E.smoke, 22, r);
+        fx.shock(sx, sy, r * 0.5, r * 4.5, 0.6, E.glow, 10 * Math.min(1.5, k), E.core);
+        fx.motes(sx, sy, E, 30, r * 0.8, 200);
+        fx.sparkle(sx, sy, E.core, 24, 380);
+        for (let i = 0; i < 7; i++) {
+          const a = BD.vrng() * Math.PI * 2, d = r * (0.6 + BD.vrng() * 1.8);
+          fx.decal(sx + Math.cos(a) * d, sy + Math.sin(a) * d, r * (0.12 + BD.vrng() * 0.18), E.decal || 'rgba(0,0,0,0.3)', 8);
+        }
+        fx.glow(sx, sy, r * 2, E.glow, 0.8, 0.6, 0.5);
+        fx.shake(Math.min(18, 12 * Math.min(k, 1.5)));
       });
     },
   });
