@@ -77,6 +77,17 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   ok(w.fx.scars.length === n, '水面不留痕跡');
   BD.spawnFx(w, 'treecut', 300, 300, { angle: 0, r: 32 });
   ok(kinds().includes('stump') && kinds().includes('litter'), '砍樹留下樹墩與落葉');
+  const w2 = mk(), n2 = () => w2.fx.scars.length;
+  BD.spawnFx(w2, 'skyrend', 1000, 900, { angle: 0, len: 1200, width: 150, el: 'blood' });
+  ok(w2.fx.scars.some((s) => s.k === 'gash') && w2.fx.scars.some((s) => s.k === 'blot'), '天喰沿線留下深溝與焦痕');
+  const n3 = n2(); BD.spawnFx(w2, 'threadcut', 1000, 1000, { angle: 0, len: 400, hold: 0.5 });
+  ok(n2() === n3, '懸斬在裂開前不留痕');
+  w2.fx.update(0.6);
+  ok(n2() === n3 + 1, '懸斬裂開時才留下刀痕');
+  const n4 = n2(); BD.spawnFx(w2, 'hoofcharge', 1000, 800, { angle: 0, len: 300 });
+  ok(n2() === n4 + 2, '鐵騎衝鋒沿路留下兩道蹄痕');
+  const n5 = n2(); BD.spawnFx(w2, 'domain', 1500, 900, { pts: [1400, 800, 1500, 850, 1600, 900] });
+  ok(n2() === n5 + 3, '領域爆發在各點留下痕跡');
   for (let i = 0; i < 400; i++) BD.spawnFx(w, 'slam', 1300 + (i % 50), 700, { radius: 60 });
   ok(w.fx.scars.length <= 260, '痕跡數量有上限');
   const before = w.fx.scars[0].age; w.fx.update(1);

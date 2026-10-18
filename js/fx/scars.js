@@ -27,7 +27,7 @@
     const sand = BD.biomeAt(x).id === 'desert', D = sand ? SAND : PAL.physical;
     const P = o.el === 'physical' && sand ? SAND : PAL[o.el] || PAL.physical;
     const a = o.angle || 0, r = o.radius, k = o.k;
-    const add = (s) => { s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
+    const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
     const gash = (gx, gy, ga, len, wd, arc, al) => add({ k: 'gash', x: gx, y: gy, a: ga, len, wd, arc, al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
     const blot = (bx, by, br) => add({ k: 'blot', x: bx, y: by, r: br, rot: V() * TAU, pts: jag(12, 0.6), c: P.c, c2: P.c2, glow: P.glow });
     const pit = (px, py, pr) => add({ k: 'pit', x: px, y: py, r: pr, rot: V() * TAU, pts: jag(10, 0.8), c: D.c, c2: D.c2,
@@ -54,7 +54,18 @@
     } else if (cat === '位移') {
       if (id === 'leap') pit(x, y, 20);
       else if (id === 'burrow') pit(x, y, clamp(36 * k, 20, 60));
-      else if (id === 'dash' && o.src && o.len > 0) for (const s of [-1, 1]) gash(x - Math.sin(a) * s * o.src.r * 0.5, y + Math.cos(a) * s * o.src.r * 0.5, a, o.len, 2, 0, 0.45);
+      else if ((id === 'dash' || id === 'hoofcharge') && o.len > 0) { // 衝刺滑痕 / 蹄痕：沿路兩道淡痕
+        const gap = id === 'dash' ? (o.src && o.src.r || 20) * 0.5 : 14;
+        for (const s of [-1, 1]) gash(x - Math.sin(a) * s * gap, y + Math.cos(a) * s * gap, a, o.len, 2, 0, 0.45);
+      }
+    } else if (cat === '大招') {
+      if (id === 'skyrend' && o.len > 0) { // 沿整條判定線的深溝，溝上每隔一段留一塊元素焦痕
+        const w = o.width || 120;
+        gash(x, y, a, o.len, clamp(w * 0.12, 6, 16), 0);
+        for (let d = 90; d < o.len; d += 180) blot(x + Math.cos(a) * d, y + Math.sin(a) * d, w * 0.35);
+      } else if (id === 'threadcut' && o.len > 0) fx.after(Math.max(0, o.hold || 0), () => gash(x, y, a, o.len, clamp((o.width || 40) * 0.1, 3, 8), 0)); // 刀線裂開時才現形
+      else if (id === 'domain') for (let i = 0; i + 1 < (o.pts || []).length && i < 20; i += 2) blot(o.pts[i], o.pts[i + 1], 24 + V() * 16);
+      else if (id === 'finale') blot(x, y, clamp((o.src && o.src.r || r) * 2.2, 50, 130));
     } else if (cat === '地形') {
       if (id === 'treecut') { add({ k: 'stump', x, y, r: o.r }); litter(14, o.r * 1.6); }
       else if (id === 'treesmash') { pit(x, y, o.r * 0.9); litter(14, o.r * 2); }
