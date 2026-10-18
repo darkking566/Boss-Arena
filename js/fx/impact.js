@@ -59,4 +59,49 @@
       fx.shake(Math.min(8, 3 * Math.min(k, 1.6)));
     },
   });
+
+  BD.defineEffect('thunderstrike', {
+    name: '雷擊落點', category: '砸地',
+    desc: '蒼雷轟頂的落雷衝擊：一道白熱光柱貫穿地面、向四周炸開電弧與震波，地面留下發光碎裂焦痕。適合雷擊、神罰、落雷召喚。',
+    params: { radius: 90 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, r = o.radius || 90;
+      const life = o.heavy ? 0.6 : 0.45;
+
+      // 1. 垂直天降光柱與貫穿閃光
+      fx.pillar(x, y, r * 0.7 * Math.min(1.4, k), E.glow, life);
+      fx.flashAt(x, y, r * 0.9, E.core, 0.16);
+
+      // 天降折線雷擊：3 段連續拖影線由天際直落地面，並以外光細線加疊
+      const topY = y - 420 * Math.min(1.4, k);
+      const jAmp = 30 * Math.min(1.4, k);
+      const p0x = x + (BD.vrng() - 0.5) * jAmp, p0y = topY;
+      const p1x = x + (BD.vrng() - 0.5) * jAmp, p1y = topY + (y - topY) * (1 / 3);
+      const p2x = x + (BD.vrng() - 0.5) * jAmp, p2y = topY + (y - topY) * (2 / 3);
+      const p3x = x, p3y = y;
+      const wBolt = 5 * Math.min(1.5, k);
+      const segs = [[p0x, p0y, p1x, p1y], [p1x, p1y, p2x, p2y], [p2x, p2y, p3x, p3y]];
+      for (const [x1, y1, x2, y2] of segs) {
+        fx.streak(x1, y1, x2, y2, wBolt, E.core, 0.18, true);
+        fx.streak(x1, y1, x2, y2, wBolt * 0.5, E.glow, 0.18, true);
+      }
+
+      // 2. 地面明亮前緣震波
+      fx.shock(x, y, 10, r, life, E.glow, 8 * Math.min(1.5, k), E.core);
+
+      // 3. 地面碎裂發光裂痕與焦痕
+      fx.crack(x, y, r * 0.8, E.decal, o.heavy ? 8 : 6, E.crack, Math.round(6 + 3 * k));
+      fx.decal(x, y, r * 0.6, E.decal, 6);
+
+      // 4. 向上噴濺的高亮火花與碎石
+      fx.sparkle(x, y, E.core, Math.round(14 * k), 420, -Math.PI / 2, 1.8);
+      fx.debris(x, y, E.debris, Math.round(8 * k), 260, 3 + k, r * 0.25);
+
+      // 5. 元素特徵微粒（雷元素時會炸出折線電弧）
+      fx.motes(x, y, E, Math.round(12 * k), r * 0.5, 200);
+
+      // 6. 畫面震動
+      fx.shake((o.heavy ? 12 : 8) * Math.min(1.6, k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

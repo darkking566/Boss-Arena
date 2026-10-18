@@ -1,5 +1,5 @@
 'use strict';
-// 無法閃避（undodgeable）：無敵幀無效、invuln / untargetable 仍有效、魔女大招 / 地雷、訓練場假人、AI 走進安全圈
+// 無法閃避（undodgeable）：無敵幀無效、invuln / untargetable 仍有效、魔女大招 / 地雷、索爾蓋爾羅德回程、訓練場假人、AI 走進安全圈
 const { load } = require('./lib/load');
 const { BD } = load();
 const U = BD.U;
@@ -32,7 +32,17 @@ function ok(c, m) { if (c) passed++; else { failed++; console.log('FAIL ' + m); 
   }
   const mines = wd.skills.find((s) => s.id === 'mines');
   ok([...mines.actions, ...mines.actions2].every((x) => x.do !== 'trap' || x.undodgeable === true), '霜凍地雷需 undodgeable');
-  ok(!BD.bosses.some((d) => d.id !== 'witch' && JSON.stringify(d).includes('undodgeable')), '目前只有魔女使用 undodgeable');
+  ok(!BD.bosses.some((d) => d.id !== 'witch' && d.id !== 'thor' && JSON.stringify(d).includes('undodgeable')), '目前只有魔女與索爾使用 undodgeable');
+  // 索爾：只有二階段大招「覺醒雷槌・蓋爾羅德」的回程直線無法閃避，且需有 ≥0.6 秒、同形狀的預警（反制：橫移離開直線）
+  {
+    const thor = BD.bossById.thor, u = thor.ultimate;
+    ok(thor.skills.every((s) => !JSON.stringify(s).includes('undodgeable')), '索爾一般招式不可 undodgeable');
+    ok(!(u.actions || []).some((x) => x.undodgeable), '索爾一階段大招（鬥神之雷槌）必須可閃避');
+    const und = (u.actions2 || []).filter((x) => x.undodgeable);
+    ok(und.length === 1 && und[0].do === 'hit' && und[0].shape === 'rect' && und[0].anchor === 'mark', '蓋爾羅德只有回程直線（rect、沿擲出標記）無法閃避');
+    const h = und[0] || {}, tele = (u.actions2 || []).find((x) => x.do === 'tele' && x.shape === 'rect' && x.mark === h.mark && x.at < h.at && x.at + x.dur >= h.at - 0.01);
+    ok(!!tele && h.at - tele.at >= 0.6 && tele.w === h.w && tele.len === h.len, '蓋爾羅德回程需有 ≥0.6 秒、同寬同長的預警');
+  }
 }
 
 // ── 3. 訓練場：假人持續帶無敵幀（模擬翻滾）仍吃到大招與地雷 ──

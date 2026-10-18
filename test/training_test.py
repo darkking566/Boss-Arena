@@ -78,6 +78,21 @@ async def main():
 
         # ── 2. For EACH boss id: phase 1 and phase 2 skills + ult ──
         boss_ids = await pg.evaluate("BD.bosses.map(b => b.id)")
+        # 索爾（第 7 位 Boss）必須出現在訓練場角色清單
+        for must in ['lubu', 'thor']:
+            if must not in boss_ids:
+                failures.append(f"Step 2: boss '{must}' missing from BD.bosses")
+        # 7 位 Boss 超過一頁（6 張）→ 選角分頁；索爾在第 2 頁
+        thor_card = await pg.evaluate("""(() => {
+            const nx = document.querySelector('#sideA .pager button[data-d="1"]');
+            if (nx) nx.click();
+            const ok = !!document.querySelector('#sideA .card[data-id=thor]');
+            const pv = document.querySelector('#sideA .pager button[data-d="-1"]');
+            if (pv) pv.click();
+            return ok;
+        })()""")
+        if not thor_card:
+            failures.append("Step 2: thor card missing from training select")
         for boss_id in boss_ids:
             await pg.evaluate(f"__BD.startTraining('{boss_id}', {{ mode: 'manual', range: 'mid' }})")
             await pg.wait_for_timeout(200)
