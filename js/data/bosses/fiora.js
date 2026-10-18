@@ -9,8 +9,8 @@
   const fiora = {
     id: 'fiora', name: '菲歐拉', title: '無雙劍姬', archetype: '決鬥劍士',
     desc: '德瑪西亞勞倫特家的無雙劍姬。以刺劍追逐對手防禦的破綻：從破綻方位刺中會追加真實傷害並回復體力；招架能擋下進攻並立刻反刺；終極挑戰讓四個破綻同時暴露。',
-    color: '#2f6fd6', color2: '#e8eef8', glow: '#9fc4ff', style: 'fiora',
-    radius: 22, maxHp: 1350, speed: 265, turn: 10, mass: 0.8, fxEl: 'ice',
+    color: '#d4a94a', color2: '#f4f1ee', glow: '#e0527a', style: 'fiora',
+    radius: 22, maxHp: 1350, speed: 265, turn: 10, mass: 0.8, fxEl: 'holy',
     traits: ['duelist', 'counter'],
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [90, 230], aggression: 0.7, dodge: 0.55, precision: 0.85, reaction: 0.2, strafe: 0.9, walk: 0.5,
@@ -35,7 +35,7 @@
             { when: { dist: [0, 170] }, do: 'extend' },
             { do: 'stop' }] }] },
       ] },
-    phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.8, fxEl: 'ice',
+    phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.8, fxEl: 'holy',
       line: '決鬥，才剛開始。',
       note: '劍姬認真起來：移形之體追加第三段突刺、劍術多一記收尾刺、招架反擊更強；決鬥之舞追加傷害 3% → 4%；解鎖「交叉步」；終極挑戰刺得更快' },
     skills: [
@@ -51,9 +51,9 @@
           ...strike(1.38, 0.18, thrust(170, 55), { dmg: 66, posture: 18, kb: 180, fx: 'thrust', vital: true })] },
       // 原作 W：招架擋下下一次攻擊並立刻反刺（成功時由 counter 特性反擊，沒被攻擊則收劍刺出）
       { id: 'parry_w', name: '招架', short: '招架', tags: ['counter', 'defensive'], range: [0, 220], cd: 6.5, cost: 12, track: 8, recovery: 0.45,
-        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 140, posture: 70, name: '招架・反刺', fx: { id: 'parry', el: 'ice' }, slowmo: 0.3 },
+        actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 140, posture: 70, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3 },
           ...strike(0.9, 0.22, thrust(190, 55), { dmg: 70, posture: 24, kb: 220, fx: 'thrust', vital: true })],
-        actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'ice' }, slowmo: 0.3 },
+        actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3 },
           ...strike(0.9, 0.2, thrust(200, 55), { dmg: 78, posture: 26, kb: 240, fx: 'thrust', vital: true })] },
       // 原作 E：連續兩擊，第一擊緩速、第二擊強力（原作必定暴擊）
       { id: 'bladework', name: '劍術', short: '劍術', tags: ['melee', 'fast'], range: [0, 160], cd: 3.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4,
