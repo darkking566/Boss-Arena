@@ -1,6 +1,6 @@
 'use strict';
 // Boss 造型：亞當（人類始祖）——依原作設計（docs/bosses/adam.md）：
-// 白金色蓬鬆短髮（瀏海垂在額前、一撮呆毛）、天藍色大眼、纖瘦但線條分明的蒼白偏粉肌膚；
+// 白金色蓬鬆短髮（瀏海垂在額前、一撮呆毛）、纖瘦但線條分明的蒼白偏粉肌膚；
 // 手指虎只戴在右手：黑色握環加銀白尖刺，泛著青綠光；神虛視發動時雙眼化為粉紅色放射輪紋（外圈一道白環）；
 // 「模倣」蛇神時雙手長成三倍大、覆滿墨綠鱗片與三根白骨爪；神之斧畫出掃踢的腿；
 // 二階段過載：眼、鼻、耳流血；死立不倒時全身燃起光焰。
@@ -151,11 +151,10 @@
       g.beginPath(); g.moveTo(r * 0.02, -r * 0.04); g.quadraticCurveTo(-r * 0.18, -r * 0.3, -r * 0.02, -r * 0.46); g.stroke();
     });
 
-    // 6. 眼睛：天藍色大眼從瀏海縫隙露出；神虛視時變為粉紅色放射輪紋
+    // 6. 眼睛：平時被瀏海遮住（俯視角下兩顆藍點像脫湯，故不畫）；神虛視時才亮起粉紅色放射輪紋
     for (const s of [-1, 1]) {
       const ex = r * 0.44, ey = s * r * 0.15;
       if (eye > 0.35) replicaEye(ctx, ex, ey, r * (0.085 + 0.03 * eye), eye, t);
-      else { ctx.fillStyle = '#7fc8ff'; ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.09, r * 0.065, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex + r * 0.03, ey - r * 0.02, r * 0.02, 0, U.TAU); ctx.fill(); }
     }
     // 7. 二階段過載：眼、鼻、耳流血
     if (p2) {
