@@ -126,6 +126,7 @@
       for (const key of ['actions', 'actions2']) {
         if (!Array.isArray(s[key])) continue;
         const list = clone(s[key]);
+        if (isUlt && key === 'actions2' && cfg.ult2Stretch) for (const a of list) a.at *= cfg.ult2Stretch;
         makeTransform(cfg, isUlt)(list);
         s[key] = makeRetime(cfg)(list, isUlt);
       }

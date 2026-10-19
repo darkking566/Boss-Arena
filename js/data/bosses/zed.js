@@ -47,7 +47,7 @@
     id: 'zed', name: '劫', title: '影流之主', archetype: '影分身刺客',
     desc: '影流教派之主。奪走均衡教派禁忌的影之匣後，以影子作為第二具身體：影子會同步擲出諸刃、揮出鬼斬，也能與本體瞬間換位；禁奧義「瞬獄影殺陣」在三秒後引爆期間累積的傷害。',
     color: '#e01e37', color2: '#15161c', glow: '#ff6b7d', style: 'zed',
-    radius: 24, maxHp: 2150, speed: 245, turn: 9, mass: 0.85, fxEl: 'umbra',
+    radius: 24, maxHp: 2150, speed: 245, turn: 9, mass: 0.85, fxEl: 'umbra', hurt: 'shadow',
     traits: ['contempt'], // 影忍法・滅魂劫（js/engine/actions/shadow.js）
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [110, 320], aggression: 0.68, dodge: 0.6, precision: 0.85, reaction: 0.18, strafe: 0.85, walk: 0.55,

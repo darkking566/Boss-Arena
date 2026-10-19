@@ -62,7 +62,7 @@
     }
     const P = BD.parseFx(spec);
     let pts;
-    if (P && P.id === 'domain') {
+    if (P && (P.id === 'domain' || P.id === 'absolutezero')) {
       pts = [];
       for (let i = 0; i < 40; i++) pts.push(w.rng.range(0, A().w), w.rng.range(0, A().h));
     }

@@ -36,6 +36,7 @@
   R.defineStatusIcon('burn', { glyph: '燒', color: '#ff8a2a' });
   R.defineStatusIcon('poison', { glyph: '毒', color: '#8fdc3a' });
   R.defineStatusIcon('bleed', { glyph: '血', color: '#ff3344' });
+  R.defineStatusIcon('frostbite', { glyph: '冰', color: '#9fe6ff' });
   R.defineStatusIcon('shield', { glyph: '盾', color: '#7fc8ff' });
   R.defineStatusIcon('vulnerable', { glyph: '易', color: '#c07aff' });
   R.defineStatusIcon('deathmark', { glyph: '印', color: '#ff3048' });
@@ -72,7 +73,7 @@
       const rem = BD.statusRemaining(b, st.id);
       if (isFinite(rem)) label += ` ${rem.toFixed(1)}s`;
       if (def.stacking === 'stack' && st.stacks > 1) {
-        label += def.id === 'bleed' ? ` ${Math.round(st.stacks)}/100` : ` ×${st.stacks}`;
+        label += def.id === 'bleed' || def.id === 'frostbite' ? ` ${Math.round(st.stacks)}/100` : ` ×${st.stacks}`;
       }
       if (def.id === 'shield') label += ` (${Math.ceil(st.value)})`;
       const gw = 12;

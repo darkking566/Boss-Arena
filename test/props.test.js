@@ -84,6 +84,9 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   const n0 = w.fx.puffs.length;
   BD.hitProps(w, a, { kind: 'circle', x: 600, y: 900, r: 80 }, { dmg: 90, kb: 300, fx: 'slam' });
   ok(w.fx.puffs.length > n0 && w.fx.puffs.some((p) => p.tint === 'snow'), '雪地命中炸開雪霧');
+  const n1 = w.fx.puffs.length;
+  BD.projTerrain(w, { kind: 'ice', x: 800, y: 900, vx: 800, vy: 0, r: 40, dmg: 30 }, 1 / 60);
+  ok(w.fx.puffs.length > n1, '投射物飛過雪地揚起雪霧');
 
   const wh = mk('wheat'); const a2 = wh.bosses[0], b2 = wh.bosses[1];
   const cut = (shape, p) => BD.hitProps(wh, a2, shape, Object.assign({ dmg: 60, kb: 100, fx: 'slash' }, p));
@@ -94,6 +97,9 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   ok(Object.keys(wh.fx.field).length === cutN && wh.fx.stalks.length === st, '已摧毀的麥叢不重複');
   cut({ kind: 'circle', x: 1900, y: 500, r: 120 }, { kb: 400, fx: 'slam' });
   ok(Object.keys(wh.fx.field).length > cutN + 10, '重擊炸開一整片麥叢');
+  const g0 = Object.keys(wh.fx.field).length;
+  BD.projCutsWheat(wh, { kind: 'airslash', x: 1000, y: 1400, vx: 950, vy: 0, r: 95, dmg: 100 });
+  ok(Object.keys(wh.fx.field).length > g0 + 8, '飛斬沿路徑削飛麥叢');
   b2.x = 2100; b2.y = 1300; b2.vx = 150; b2.vy = 0; b2.kbx = 0; b2.kby = 0;
   const f0 = Object.keys(wh.fx.field).length;
   BD.updateTerrain(wh, 1 / 60);
@@ -155,7 +161,13 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   const n5 = n2(); BD.spawnFx(w2, 'domain', 1500, 900, { pts: [1400, 800, 1500, 850, 1600, 900] });
   ok(n2() === n5 + 3, '領域爆發在各點留下痕跡');
   for (let i = 0; i < 400; i++) BD.spawnFx(w, 'slam', 1300 + (i % 50), 700, { radius: 60 });
-  ok(w.fx.scars.length <= 260, '痕跡數量有上限');
+  ok(w.fx.scars.length <= 420, '痕跡數量有上限');
+  const g0 = w2.fx.stalks.length, g1 = n2(); BD.spawnFx(w2, 'gore', 1200, 900, { victim: { r: 30, def: { hurt: 'magma' } }, dmg: 120, angle: 0 });
+  ok(w2.fx.stalks.length > g0 + 8, '受擊依材質噴出液滴');
+  for (const hurt of Object.keys(BD.HURT)) BD.spawnFx(w2, 'gore', 1200, 900, { victim: { r: 30, def: { hurt } }, dmg: 200, big: true, lethal: true, omni: true });
+  ok(true, '所有材質都能正常產生受擊特效');
+  for (let i = 0; i < 20; i++) w2.fx.update(1 / 60);
+  ok(n2() > g1, '受擊在地上留下落地痕跡');
   const before = w.fx.scars[0].age; w.fx.update(1);
   ok(w.fx.scars[0].age === before + 1, '痕跡累計 age（餘燼冷卻用）且不會自行消失');
 }

@@ -56,6 +56,22 @@
     },
   });
 
+  // ── 冰凍值（霜月魔女二階段）：stacks 即冰凍值，每秒自然衰減 5 點；累積至 100 時瞬間凍結並歸零 ──
+  BD.defineStatus('frostbite', {
+    name: '冰凍值', tags: ['buildup', 'debuff'], stacking: 'stack', maxStacks: 100, defaultDur: 6, visual: 'frostbite',
+    onApply: function (u, st, opts, w, isNew) {
+      if (st.stacks < 100) return;
+      BD.removeStatus(u, 'frostbite', 'burst', w);
+      if (!w || u.state === 'dead' || u.state === 'transition') return;
+      BD.applyStatus(u, 'frozen', { dur: 0.8 }, w);
+      BD.spawnFx(w, 'nova', u.x, u.y, { src: st.source, radius: u.r + 40 });
+    },
+    onTick: function (u, st, dt, w) {
+      st.stacks = Math.max(0, st.stacks - 5 * dt);
+      if (st.stacks <= 0) BD.removeStatus(u, 'frostbite', 'decay', w);
+    },
+  });
+
   // ── 護盾：st.value 為剩餘可吸收傷害；重新施加時保留較大值；吸收完畢即破碎 ──
   BD.defineStatus('shield', {
     name: '護盾', tags: ['buff', 'shield'], stacking: 'refresh', defaultDur: 8,

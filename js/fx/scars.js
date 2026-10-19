@@ -3,7 +3,7 @@
 // 由 BD.spawnFx 依特效分類自動呼叫 BD.leaveScar，所以日後新增的招式只要分類正確就會自動留痕。
 // 純視覺：亂數只用 BD.vrng、不碰戰鬥狀態與 DOM；繪圖見 js/render/world.js 的 drawScars。水面不留痕。
 (function (G) {
-  const BD = G.BD, V = BD.vrng, TAU = Math.PI * 2, CAP = 260;
+  const BD = G.BD, V = BD.vrng, TAU = Math.PI * 2, CAP = 420;
   // c 主色（痕跡本體）、c2 邊緣 / 次色、glow 剛造成時的餘燼 / 微光（會在數秒內冷卻）
   const PAL = {
     physical: { c: '#2a1d12', c2: '#7a6446' },

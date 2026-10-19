@@ -39,18 +39,24 @@
     const A = BD.ARENA;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     // 生態區底色：橫向漸層，交界處各留 120px 的柔和過渡
-    const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], lake: ['#46a0aa', '#2b7480'], swamp: ['#3d4a30', '#2a3626'] };
+    const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], lake: ['#d99a78', '#b98aa0'], swamp: ['#3d4a30', '#2a3626'] };
     const lg = g.createLinearGradient(0, 0, A.w, 0);
     A.biomes.forEach((b, i) => {
       const c = GROUND[b.id][0], pad = 120;
       lg.addColorStop(i ? (b.x0 + pad) / A.w : 0, c); lg.addColorStop(i < A.biomes.length - 1 ? (b.x1 - pad) / A.w : 1, c);
     });
     g.fillStyle = lg; g.fillRect(0, 0, A.w, A.h);
+    if (A.biomes[0].id === 'lake') { // 夕陽下平靜的水面：上緣映著落日的金橙、往下漸漸沉入暮藍，不放任何雜物
+      const sg = g.createLinearGradient(0, 0, 0, A.h);
+      [[0, '#f0c27a'], [0.22, '#eb9f6c'], [0.5, '#b98aa0'], [0.78, '#5f84b0'], [1, '#33618f']].forEach(([p, c]) => sg.addColorStop(p, c));
+      g.fillStyle = sg; g.fillRect(0, 0, A.w, A.h);
+    }
     g.lineWidth = 1.5; g.lineCap = 'round';
     for (const b of A.biomes) {
+      if (b.id === 'lake') continue;
       const x0 = b.x0 + 70, x1 = b.x1 - 70, area = (x1 - x0) * A.h / 1.23e6, X = () => x0 + rnd() * (x1 - x0), dark = GROUND[b.id][1];
       for (let i = 0, n = Math.round(260 * area); i < n; i++) {
-        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : b.id === 'lake' ? 'rgba(235,225,170,0.6)' : 'rgba(150,190,90,0.5)';
+        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : 'rgba(150,190,90,0.5)';
         g.globalAlpha = 0.14; g.beginPath(); g.ellipse(X(), rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
       }
       g.globalAlpha = 1;
@@ -66,9 +72,6 @@
         } else if (b.id === 'wheat') { // 麥茬：被割後的短稈（麥叢被摧毀後露出的地面）
           g.strokeStyle = rnd() < 0.5 ? 'rgba(214,176,84,0.7)' : 'rgba(110,80,30,0.6)';
           const h = 5 + rnd() * 7, an = -1.2 - rnd() * 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * h, y + Math.sin(an) * h); g.stroke();
-        } else if (b.id === 'lake') { // 湖底：細碎漣漪弧 + 水底卵石
-          if (rnd() < 0.7) { g.strokeStyle = rnd() < 0.5 ? 'rgba(255,255,255,0.2)' : 'rgba(20,70,85,0.22)'; g.beginPath(); g.arc(x, y, 14 + rnd() * 38, 3.5, 5.3); g.stroke(); }
-          else { g.fillStyle = rnd() < 0.5 ? 'rgba(180,175,150,0.45)' : 'rgba(90,100,95,0.4)'; g.beginPath(); g.ellipse(x, y, 3 + rnd() * 4, 2 + rnd() * 3, rnd() * 3, 0, U.TAU); g.fill(); }
         } else { // 草叢 / 沼澤雜草
           g.strokeStyle = rnd() < 0.5 ? (b.id === 'swamp' ? 'rgba(120,150,70,0.35)' : 'rgba(160,205,100,0.35)') : 'rgba(25,55,20,0.45)';
           const h = 4 + rnd() * 7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
@@ -79,26 +82,6 @@
       }
     }
     g.lineCap = 'butt';
-    if (A.biomes[0].id === 'lake') { // 淺水湖泊：四邊淡入的沙岸、岸邊蘆葦、水面睡蓮
-      for (const [x0, y0, x1, y1] of [[0, 0, 170, 0], [A.w, 0, A.w - 170, 0], [0, 0, 0, 170], [0, A.h, 0, A.h - 170]]) {
-        const sg = g.createLinearGradient(x0, y0, x1, y1); sg.addColorStop(0, 'rgba(218,200,142,0.95)'); sg.addColorStop(1, 'rgba(218,200,142,0)');
-        g.fillStyle = sg; g.fillRect(0, 0, A.w, A.h);
-      }
-      g.lineCap = 'round'; g.lineWidth = 2;
-      for (let i = 0; i < 260; i++) {
-        const side = i % 4, t = rnd(), d = 8 + rnd() * 120, x = side < 2 ? t * A.w : side === 2 ? d : A.w - d, y = side < 2 ? (side ? A.h - d : d) : t * A.h, h = 18 + rnd() * 20;
-        g.strokeStyle = 'rgba(100,135,55,0.9)'; g.beginPath();
-        for (let j = -1; j <= 1; j++) { g.moveTo(x + j * 3, y); g.lineTo(x + j * 5 + (rnd() - 0.5) * 6, y - h); }
-        g.stroke();
-        if (rnd() < 0.5) { g.fillStyle = '#6b4a2a'; g.beginPath(); g.ellipse(x, y - h - 4, 2.2, 6, 0, 0, U.TAU); g.fill(); }
-      }
-      g.lineCap = 'butt';
-      for (let i = 0; i < 60; i++) {
-        const lx = 200 + rnd() * (A.w - 400), ly = 200 + rnd() * (A.h - 400), lr = 9 + rnd() * 7;
-        g.fillStyle = 'rgba(70,125,60,0.92)'; g.beginPath(); g.ellipse(lx, ly, lr, lr * 0.65, rnd() * 3, 0.3, U.TAU - 0.3); g.lineTo(lx, ly); g.fill();
-        if (rnd() < 0.25) { g.fillStyle = '#f4b6c8'; g.beginPath(); g.arc(lx, ly, 3.5, 0, U.TAU); g.fill(); }
-      }
-    }
     // 沼澤：泥岸 → 水面 → 睡蓮葉
     for (const p of A.ponds) {
       g.fillStyle = '#3a3220'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 16, p.ry + 12, 0, 0, U.TAU); g.fill();
@@ -430,11 +413,11 @@
     if (BD.ARENA.biomes[0].id === 'lake') { // 湖面：世界座標固定的閃爍漣漪，只畫鏡頭附近的
       const c = R.cam, A = BD.ARENA;
       ctx.save(); ctx.lineWidth = 1.5;
-      for (let i = 0; i < 420; i++) {
+      for (let i = 0; i < 70; i++) {
         const gx = (i * 977) % A.w, gy = (i * 613 + 41) % A.h;
         if (gx < c.x - 60 || gx > c.x + R.VW + 60 || gy < c.y - 40 || gy > c.y + R.VH + 40) continue;
         const k = (t * (0.1 + (i % 5) * 0.03) + i * 0.137) % 1;
-        ctx.strokeStyle = `rgba(235,250,255,${(1 - k) * 0.4})`; ctx.beginPath(); ctx.ellipse(gx, gy, 6 + k * 42, 3 + k * 19, 0, 0, U.TAU); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,244,225,${(1 - k) * 0.22})`; ctx.beginPath(); ctx.ellipse(gx, gy, 6 + k * 42, 3 + k * 19, 0, 0, U.TAU); ctx.stroke();
       }
       ctx.restore();
     }
@@ -450,13 +433,13 @@
     });
     ctx.restore();
   }
-  // 水面倒影：把站在池邊 / 池中的 Boss 上下翻轉畫在腳下、半透明、輕微晃動，再蓋一層水色
+  // 水面倒影：把站在池邊 / 池中的 Boss 壓扁複製一份畫在腳下（不翻轉，武器與本體角度一致）、半透明、輕微晃動，再蓋一層水色
   function drawReflections(ctx, w, t) {
     if (BD.ARENA.biomes[0].id === 'lake') { // 淺水湖泊：整張圖都是水面，每個 Boss 都映出自己的倒影
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, BD.ARENA.w, BD.ARENA.h); ctx.clip();
       for (const b of w.bosses) {
         if (b.state === 'dead') continue;
-        ctx.save(); ctx.globalAlpha = 0.5; ctx.translate(Math.sin(t * 3 + b.x * 0.02) * 2.5, b.y * 2 + b.r * 1.6); ctx.scale(1, -1);
+        ctx.save(); ctx.globalAlpha = 0.5; ctx.translate(Math.sin(t * 3 + b.x * 0.02) * 2.5, b.y * 0.2 + b.r * 1.5); ctx.scale(1, 0.8);
         R.drawBossBody(ctx, b, t); ctx.restore();
       }
       ctx.restore();
@@ -468,7 +451,7 @@
       if (!list.length) continue;
       ctx.save(); ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, U.TAU); ctx.clip();
       for (const b of list) {
-        ctx.save(); ctx.globalAlpha = 0.45; ctx.translate(Math.sin(t * 3 + b.x * 0.02) * 2.5, b.y * 2 + b.r * 1.6); ctx.scale(1, -1);
+        ctx.save(); ctx.globalAlpha = 0.45; ctx.translate(Math.sin(t * 3 + b.x * 0.02) * 2.5, b.y * 0.2 + b.r * 1.5); ctx.scale(1, 0.8);
         R.drawBossBody(ctx, b, t); ctx.restore();
       }
       ctx.fillStyle = 'rgba(40,95,105,0.22)'; ctx.fillRect(p.x - p.rx, p.y - p.ry, p.rx * 2, p.ry * 2);
@@ -794,6 +777,12 @@
         case 'bleed': {
           const k = U.clamp(st.stacks / 100, 0, 1);
           ctx.strokeStyle = 'rgba(255,51,68,0.85)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.arc(b.x, b.y, r + 5, -Math.PI / 2, -Math.PI / 2 + U.TAU * k); ctx.stroke();
+          break;
+        }
+        case 'frostbite': {
+          const k = U.clamp(st.stacks / 100, 0, 1);
+          ctx.strokeStyle = 'rgba(150,230,255,0.9)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
           ctx.beginPath(); ctx.arc(b.x, b.y, r + 5, -Math.PI / 2, -Math.PI / 2 + U.TAU * k); ctx.stroke();
           break;
         }

@@ -65,6 +65,9 @@
     // 沙漠 / 雪地：沿招式方向揚起沙塵 / 雪霧
     for (const q of pts) { const fxId = DUST[BD.biomeAt(q.x).id]; if (fxId) BD.spawnFx(w, fxId, q.x, q.y, { scale: k * (pts.length > 1 ? 0.7 : 1), angle: shape.ang, dir: line }); }
     // 麥田：被命中的麥叢整片摧毀（斬擊 → 兩側削飛、重擊 → 炸開、輕擊 → 削掉）
+    cutWheat(w, shape, c, cls === 'smash' ? 'blast' : 'cut', dmg);
+  };
+  function cutWheat(w, shape, c, mode, dmg) {
     const reach = shape.kind === 'rect' ? shape.len / 2 + shape.w : shape.r || 150, cells = [], field = w.fx.field;
     for (let y = Math.max(WHEAT.y0, c.y - reach); y < Math.min(WHEAT.y1, c.y + reach); y += CELL) {
       for (let x = Math.max(WHEAT.x0, c.x - reach); x < Math.min(WHEAT.x1, c.x + reach); x += CELL) {
@@ -72,7 +75,18 @@
         if (!field[i] && U.hitShape(shape, { x: WHEAT.cx(i), y: WHEAT.cy(i), r: CELL * 0.5 })) cells.push(i);
       }
     }
-    if (cells.length) BD.spawnFx(w, 'wheatburst', c.x, c.y, { cells, mode: cls === 'smash' ? 'blast' : 'cut', angle: shape.ang, dirless: shape.ang == null, radius: reach, dmg });
+    if (cells.length) BD.spawnFx(w, 'wheatburst', c.x, c.y, { cells, mode, angle: shape.ang, dirless: shape.ang == null, radius: reach, dmg });
+  }
+  // 所有投射物飛行時沿路徑把麥子削飛（滾木撞飛成一片）；每幀只處理尚未被摧毀的格子
+  BD.projTerrain = function (w, p, dt) {
+    const fxId = DUST[BD.biomeAt(p.x).id]; // 沙地 / 雪地：飛行路徑上持續掀起沙塵 / 雪霧
+    p.dustT = (p.dustT || 0) - dt;
+    if (fxId && p.dustT <= 0) { p.dustT = 0.05; BD.spawnFx(w, fxId, p.x, p.y, { scale: U.clamp(p.r / 80, 0.3, 0.9), angle: Math.atan2(p.vy, p.vx), dir: true }); }
+    BD.projCutsWheat(w, p);
+  };
+  BD.projCutsWheat = function (w, p) {
+    if (WHEAT.x1 <= WHEAT.x0) return;
+    cutWheat(w, { kind: 'circle', x: p.x, y: p.y, r: p.r, ang: Math.atan2(p.vy, p.vx) }, p, p.kind === 'log' ? 'blast' : 'cut', p.dmg);
   };
   const DUST = { desert: 'sanddust', snow: 'snowburst' };
   // 投射物撞樹：掉血（滾木撞樹力道大）；呼叫端已讓投射物消失

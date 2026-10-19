@@ -12,7 +12,7 @@
   const myBoss = {
     id: 'golemking', name: '岩王', title: '…', archetype: '…', desc: '…',
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
-    radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', // 預設特效元素
+    radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
     traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,

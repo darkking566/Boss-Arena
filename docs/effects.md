@@ -227,6 +227,8 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `posturebreak` | 架勢崩潰 | 架勢被打斷破防瞬間、金色光環彈開、金色火花四濺 | world.js `damageBoss`（Boss 架勢條歸零破防時） |
 | **大招** | `ultcast` | 大招發動 | 施放大招起手詠唱、全屏一閃、巨大蓄力光收束 | boss.js `startSkill` 施放大招起手前置 |
 | | `domain` | 領域爆發 | 領域展開、結界覆蓋、全屏核心色閃光與強震、點陣爆散 | 霜月魔女大招「絕對零度」 |
+| | `zerocast` | 絕對零度蓄勢 | 全場冰封預兆：畫面漸暗、安全圈冷光與收束光環、場上雪光與霜紋 | 霜月魔女大招預警（tele 的 `teleFx`） |
+| | `absolutezero` | 絕對零度 | 全屏白光、冰晶光束放射、雙冰環橫掃、點陣霜晶爆散 | 霜月魔女大招爆發 |
 | | `nightfall` | 夜幕 | 化煙遁入黑暗，場地暗幕籠罩 life 秒，只剩角色與預警發亮 | 影刃武士大招「百鬼夜斬」隱身 |
 | | `threadcut` | 懸斬 | 刀痕懸在空中，hold 秒後才裂開；多道同時到期就一齊裂開 | 影刃武士大招「百鬼夜斬」的斬線（slashes 的 fx） |
 | | `skyrend` | 天喰 | 沿整條直線劈出巨大刃光、地面沿線裂開發光，0.25 秒後裂口噴出煙霧與二次刃光 | 呂布「天喰・未完成」與大招「天喰」 |
@@ -460,3 +462,7 @@ BD.defineEffect('thunderstrike', {
    - 以巨型單位（半徑 58、重擊 240 傷害、`heavyHit`）連續執行所有特效 3 次並推進更新 400 幀，確認場上粒子數絕不超過 `PART_CAP`（900），且所有 `fx.after` 延遲排程全數清空無殘留。
 9. **`fx-gallery.html` 腳本一致性**：
    - 檢查 `fx-gallery.html` 所載入的 `<script>` 清單與順序，必須與 `index.html` 完全一致（排除 `input.js`、`main.js` 與圖鑑專屬的 `fx-gallery.js`）。新增 Boss 或特效檔案時兩處必須同步。
+
+## 受擊血肉（gore）
+
+角色被命中時，`World.damageBoss` 會自動播放 `gore`（js/fx/gore.js）：依角色資料的 `hurt` 材質噴出液滴與額外粒子，重擊追加二波與血霧，落地後留下永久痕跡（水面上改成暈開的霧）。材質：`flesh`（血，預設）、`magma`（熔渣火星）、`frost`（冰屑）、`ooze`（黏液氣泡）、`shadow`（暗影霧）、`straw`（乾草，訓練假人）。新增材質只要在 `BD.HURT` 加一筆。輕擊（15 傷害以上）另有 0.035 秒的實際播放頓挫；它只暫停播放、不改變模擬，因此不影響指紋。

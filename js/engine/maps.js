@@ -12,8 +12,8 @@
       desc: '散布的水池：水中減速、濺起水花、有角色倒影。' },
     { id: 'wheat', name: '麥田', icon: '🌾', biome: 'wheat', colors: ['#e3b94a', '#9a7a2e'], desc: '高聳的金黃麥田：被斬飛、炸開、踩倒，漫天麥稈麥粒翻飛，風圈讓麥浪外倒。' },
     { id: 'snow', name: '雪地', icon: '❄', biome: 'snow', colors: ['#f2f7fc', '#b4c7da'], desc: '深雪：略微減速、行走留下腳印（久久不散），招式炸開大片雪霧與雪塊。' },
-    { id: 'lake', name: '淺水湖泊', icon: '🌊', biome: 'lake', colors: ['#5fb3bd', '#2a6f7c'],
-      desc: '整片淺水：角色與倒影一起戰鬥，攻擊濺起大片水花；火焰蒸發成水氣、熔岩凝固成岩石、冰霜凍結水面、雷電沿水面竄走、毒與血在水中暈開。' },
+    { id: 'lake', name: '淺水湖泊', icon: '🌊', biome: 'lake', colors: ['#f0c27a', '#33618f'],
+      desc: '夕陽下平靜如鏡的淺水：角色與倒影一起戰鬥，攻擊濺起大片水花；火焰蒸發成水氣、熔岩凝固成岩石、冰霜凍結水面、雷電沿水面竄走、毒與血在水中暈開。' },
   ];
   BD.mapById = {}; for (const m of BD.MAPS) BD.mapById[m.id] = m;
   BD.DEFAULT_MAP = 'desert';

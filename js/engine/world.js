@@ -195,17 +195,22 @@
       if (p.slow) BD.applyStatus(b, 'slow', { dur: p.slow === true ? 0.6 : p.slow }, this);
       if (p.root) BD.applyStatus(b, 'root', { dur: p.root }, this);
       if (p.status) applyHitStatuses(this, src, b, p.status);
+      const fs = src && (src.isBoss ? src : src.owner); // 二階段霜月魔女：每次命中累積冰凍值
+      if (fs && fs.phase === 2 && fs.def.phase2.frostbite && !BD.hasStatus(b, 'frozen')) BD.applyStatus(b, 'frostbite', { stacks: p.dot ? 3 : fs.def.phase2.frostbite, source: fs }, this);
       b.hurtFlash = 0.12;
       const big = pc ? dmg >= 120 : dmg >= 100;
       if (pc) {
         // 沉重：命中凍結
         if (!p.dot && dmg >= pc.hitstop.minDmg) this.freezeF = Math.max(this.freezeF, U.clamp(Math.round(dmg * pc.hitstop.perDmg), pc.hitstop.minF, pc.hitstop.maxF));
+        else if (!p.dot && dmg >= 15) this.hitstop = Math.max(this.hitstop, 0.035); // 輕擊也有一點點頓挫（只暫停實際播放，不改變模擬）
       } else {
         if (big) this.hitstop = Math.max(this.hitstop, 0.06);
       }
       if (!p.dot || dmg >= 20) {
         const atkSrc = src && (src.isBoss ? src : src.owner) || null;
         BD.spawnFx(this, 'impact', b.x, b.y, { src: atkSrc, victim: b, dmg, big, heavyHit: !!pc });
+        const o = p.kbAng != null ? null : src, hitAng = p.kbAng != null ? p.kbAng : o ? Math.atan2(b.y - o.y, b.x - o.x) : null;
+        BD.spawnFx(this, 'gore', b.x, b.y, { src: atkSrc, victim: b, dmg, big, angle: hitAng, omni: hitAng == null, lethal: b.hp <= 0 });
       }
       fx.damage(b, dmg, p.dot ? '#c9a0ff' : (dmg >= 150 ? '#ffdd55' : '#ffffff'));
       if (dmg >= 150) this.log(src && src.isBoss ? src : (src && src.owner) || null, '重創 ' + b.name + '（' + dmg + '）');

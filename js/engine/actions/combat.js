@@ -30,6 +30,7 @@
     if (a.chargeFx !== false && a.dur >= 0.5 && (a.anchor || 'self') === 'self') {
       BD.spawnFx(w, a.chargeFx || 'charge', b.x, b.y, { src: b, life: Math.min(a.dur, 1.4) });
     }
+    if (a.teleFx) BD.spawnFx(w, a.teleFx, s.x, s.y, { src: b, life: a.dur, radius: a.r });
   });
 
   BD.defineAction('hit', (w, b, inst, a) => {

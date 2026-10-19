@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜大招（ultcast / domain / nightfall / threadcut / skyrend / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
+// 特效庫｜大招（ultcast / domain / zerocast / absolutezero / nightfall / threadcut / skyrend / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、color 覆寫、radius 半徑、k 綜合倍率、src 施放者（可為 null）、pts 預先算好的點陣
 (function (G) {
@@ -42,6 +42,56 @@
       fx.ring(x, y, r, r + 40, 0.6, E.glow, 6 * Math.min(1.4, k));
       fx.shock(x, y, 10, r * 1.6, 0.8, E.glow, 6, E.core);
       fx.glow(x, y, r * 0.9, E.glow, 0.8, 0.4, 0.5);
+    },
+  });
+
+  BD.defineEffect('zerocast', {
+    name: '絕對零度蓄勢', category: '大招',
+    desc: '全場冰封的預兆：畫面漸暗泛藍，安全圈亮起燈塔般的冷光並不斷有光環向圈心收束，場上飄起雪光、地面陸續裂出霜紋，施放者周身一圈圈寒氣外擴。位置為安全圈圓心，life 為預警時長。',
+    params: { life: 2.6, radius: 115 },
+    spawn(fx, x, y, o) {
+      const E = o.E, life = o.life || 2.6, r = o.radius || 115, src = o.src || null, A = BD.ARENA;
+      fx.veil(life, 0.42, '#041a33');
+      fx.glow(x, y, r * 1.4, E.glow, life, 0.55, 0);
+      for (let t = 0; t < life; t += 0.2) fx.after(t, () => {
+        fx.ring(x, y, r * 3.2, r, 0.55, E.glow, 3);
+        for (let i = 0; i < 6; i++) fx.sparkle(BD.vrng() * A.w, BD.vrng() * A.h, '#ffffff', 1, 40, -Math.PI / 2, 1);
+        fx.motes(x, y, E, 2, r, 60);
+      });
+      for (let t = 0.3; t < life; t += 0.5) fx.after(t, () => fx.crack(BD.vrng() * A.w, BD.vrng() * A.h, 70 + BD.vrng() * 60, E.decal, 6, E.crack, 3));
+      if (src) for (let t = 0; t < life - 0.4; t += 0.7) fx.after(t, () => { fx.ring(src.x, src.y, src.r, src.r * 4.5, 0.7, E.glow, 4); fx.motes(src.x, src.y, E, 4, src.r * 2, 90); });
+      fx.after(life - 0.15, () => fx.flash(E.glow, 0.2));
+    },
+  });
+
+  BD.defineEffect('absolutezero', {
+    name: '絕對零度', category: '大招',
+    desc: '全場瞬間凍結的爆發：全屏白光與強震、自安全圈向四面八方射出冰晶光束、兩道巨大冰環橫掃全場，預先算好的各點接連爆出霜晶與霜紋，餘波的雪光緩緩飄落。位置為安全圈圓心。',
+    params: { radius: 115 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, pts = o.pts || [], r = o.radius || 115;
+      fx.flash('#ffffff', 0.85);
+      fx.shake(Math.min(30, 20 * Math.min(k, 1.5)));
+      fx.veil(0.9, 0.3, '#7fd8ff');
+      fx.shock(x, y, 10, 1500, 0.9, E.glow, 10, E.core);
+      fx.ring(x, y, r, 1800, 1.0, E.glow, 12);
+      fx.after(0.18, () => fx.ring(x, y, r, 1800, 1.0, '#ffffff', 5));
+      fx.glow(x, y, r * 1.6, E.glow, 0.9, 0.8, 0.4);
+      const n = 14, a0 = BD.vrng() * Math.PI * 2;
+      for (let i = 0; i < n; i++) {
+        const a = a0 + i * Math.PI * 2 / n, len = 800 + BD.vrng() * 500;
+        fx.beam(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len, 14 + BD.vrng() * 10, E.glow, 0.55, E.core);
+      }
+      for (let i = 0; i + 1 < pts.length; i += 2) {
+        const px = pts[i], py = pts[i + 1], d = Math.hypot(px - x, py - y) / 1800;
+        fx.after(d * 0.5, () => {
+          fx.sparkle(px, py, E.core, 3, 320);
+          fx.sparks(px, py, E.core, 2, 160);
+          fx.motes(px, py, E, 2, 14, 70);
+          if (i % 4 === 0) fx.crack(px, py, 60 + BD.vrng() * 50, E.decal, 9, E.crack, 3);
+        });
+      }
+      for (let t = 0.3; t < 1.8; t += 0.15) fx.after(t, () => { for (let j = 0; j < 8; j++) fx.sparkle(BD.vrng() * BD.ARENA.w, BD.vrng() * BD.ARENA.h, '#ffffff', 1, 50, Math.PI / 2, 1); });
     },
   });
 
