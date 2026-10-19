@@ -1,6 +1,6 @@
 'use strict';
 // Boss 造型：灰燼審判者古達：灰鐵重甲與冠盔、胸口貫穿的螺旋劍（Coiled Sword）、破爛披風、長戟；
-// 二階段人之膿自後頸破體而出（黑色肉團與帶爪巨手）
+// 二階段人之膿自後頸破體而出（長條蛇狀肉身、赤紅雙眼、利齒巨口與慘白枯槁的巨爪）
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA;
 
@@ -38,47 +38,69 @@
     return H;
   }
 
-  // 人之膿：後頸黑色肉團 + 帶爪巨手。k 成長 0~1，reach 巨手前伸 0~1，aim 前伸方向（面向為 0）
+  // 人之膿：自後頸竄出的巨大長條蛇狀肉身（體長約為古達的四倍以上），末端是張著利齒巨口的頭。
+  // k 成長 0~1，reach 前撲 0~1，aim 撲擊方向（面向為 0）；平時盤在身後蠕動
+  function limb(ctx, p0, p1, p2, w0, w1, t, ph, k) {
+    const N = 16;
+    ctx.fillStyle = '#0c090d';
+    for (let i = 0; i <= N; i++) {
+      const s = i / N, u = 1 - s;
+      const x = u * u * p0[0] + 2 * u * s * p1[0] + s * s * p2[0], y = u * u * p0[1] + 2 * u * s * p1[1] + s * s * p2[1];
+      const bulge = 1 + 0.25 * Math.sin(t * 4 - s * 9 + ph); // 肉身沿身長起伏蠕動
+      ctx.beginPath(); ctx.arc(x, y, (w0 + (w1 - w0) * s) * bulge * k, 0, U.TAU); ctx.fill();
+    }
+    ctx.strokeStyle = '#3a2c46'; ctx.lineWidth = w0 * 0.15; ctx.beginPath(); ctx.moveTo(p0[0], p0[1] - w0 * 0.4);
+    ctx.quadraticCurveTo(p1[0], p1[1] - w0 * 0.35, p2[0], p2[1] - w1 * 0.4); ctx.stroke();
+  }
+  function drawClaw(ctx, base, r, t, reach, aim, k) {
+    const rest = Math.PI - 1.0 + Math.sin(t * 1.3) * 0.12, a = rest + (aim - rest) * reach * 0.8;
+    const L = r * (3.4 + 2.4 * reach) * k, tip = [base[0] + Math.cos(a) * L, Math.sin(a) * L];
+    const mid = [(base[0] + tip[0]) / 2 + Math.cos(a - 1.57) * r * 1.1, tip[1] / 2 + Math.sin(a - 1.57) * r * 1.1];
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const [col, w] of [['#2a2430', r * 0.85], ['#c9c0b6', r * 0.58]]) { // 先畫暗色輪廓再畫慘白臂骨
+      ctx.strokeStyle = col; ctx.lineWidth = w;
+      ctx.beginPath(); ctx.moveTo(base[0], 0); ctx.lineTo(mid[0], mid[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+    }
+    ctx.fillStyle = '#d8d0c6'; ctx.beginPath(); ctx.arc(mid[0], mid[1], r * 0.45, 0, U.TAU); ctx.fill(); // 肘關節
+    for (let c = 0; c < 4; c++) { // 四根彎曲的枯指
+      const fa = a + (c - 1.5) * 0.42 + Math.sin(t * 3 + c) * 0.06, fl = r * (1.8 + 0.25 * (c % 2));
+      const f1 = [tip[0] + Math.cos(fa) * fl * 0.6, tip[1] + Math.sin(fa) * fl * 0.6], f2 = [f1[0] + Math.cos(fa + 0.7) * fl * 0.5, f1[1] + Math.sin(fa + 0.7) * fl * 0.5];
+      ctx.strokeStyle = '#2a2430'; ctx.lineWidth = r * 0.34; ctx.beginPath(); ctx.moveTo(tip[0], tip[1]); ctx.lineTo(f1[0], f1[1]); ctx.lineTo(f2[0], f2[1]); ctx.stroke();
+      ctx.strokeStyle = '#d8d0c6'; ctx.lineWidth = r * 0.2; ctx.stroke();
+    }
+  }
   function drawMass(ctx, r, t, k, reach, aim) {
     if (k <= 0.01) return;
-    const baseX = -r * 0.35, wob = Math.sin(t * 6) * 0.12;
-    ctx.save();
-    ctx.globalAlpha *= Math.min(1, k * 1.5);
-    // 肉團本體
-    ctx.fillStyle = '#0c090d';
-    ctx.beginPath();
-    for (let i = 0; i < 9; i++) {
-      const a = i / 9 * U.TAU, rr = r * (0.5 + 0.12 * Math.sin(t * 5 + i * 2.3)) * k;
-      const x = baseX - r * 0.15 + Math.cos(a) * rr, y = Math.sin(a) * rr;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    const base = [-r * 0.3, 0];
+    ctx.save(); ctx.globalAlpha *= Math.min(1, k * 1.5); ctx.lineCap = 'round';
+    // 一條較細的尾在身後蠕動
+    for (let i = 0; i < 1; i++) {
+      const s = i ? 1 : -1, a = Math.PI + s * 0.75 + Math.sin(t * 2.5 + i * 2) * 0.25, L = r * 3.6;
+      limb(ctx, base, [base[0] + Math.cos(a - s * 0.5) * L * 0.55, Math.sin(a - s * 0.5) * L * 0.55 + Math.sin(t * 3 + i) * r * 0.5], [base[0] + Math.cos(a) * L, Math.sin(a) * L], r * 0.7, r * 0.28, t, i * 2, k);
     }
-    ctx.closePath(); ctx.fill();
-    // 兩條蠕動觸手 + 主巨手
-    ctx.lineCap = 'round';
-    const arms = [[Math.PI - 0.7, 0.5], [Math.PI + 0.7, 0.5], [Math.PI + aim * 0 + 3.1, 0.65]];
-    for (let i = 0; i < 2; i++) {
-      const [ba, len] = arms[i], a = ba + Math.sin(t * 4 + i * 2) * 0.35;
-      const tx = baseX + Math.cos(a) * r * len * 1.6 * k, ty = Math.sin(a) * r * len * 1.6 * k;
-      ctx.strokeStyle = '#0c090d'; ctx.lineWidth = r * 0.2;
-      ctx.beginPath(); ctx.moveTo(baseX, 0); ctx.quadraticCurveTo((baseX + tx) / 2, ty * 0.3 + Math.sin(t * 7 + i) * r * 0.2, tx, ty); ctx.stroke();
+    // 慘白枯槁的巨爪：兩節枯瘦臂骨加四根彎曲長指，平時垂在身側，出招時隨頭一同前撲
+    drawClaw(ctx, base, r, t, reach, aim, k);
+    // 主體：從後頸高高拱起、頭部撲向前方
+    const rest = Math.PI + 0.55 + Math.sin(t * 1.7) * 0.18, a = rest + (aim - rest) * reach;
+    const L = r * (4.6 + 2.6 * reach) * k;
+    const head = [base[0] + Math.cos(a) * L, Math.sin(a) * L];
+    const ca = a + 1.0 * (1 - 0.7 * reach), cl = L * 0.6 + Math.sin(t * 2.2) * r * 0.5;
+    const ctrl = [base[0] + Math.cos(ca) * cl, Math.sin(ca) * cl];
+    limb(ctx, base, ctrl, head, r * 1.4, r * 1.05, t, 0, k);
+    // 頭：沿身體末端切線朝外張口，噬咬時張得更大；暗紅口腔與慘白利齒
+    const ta = Math.atan2(head[1] - ctrl[1], head[0] - ctrl[0]), mo = (1 + 0.7 * reach) * k;
+    ctx.save(); ctx.translate(head[0], head[1]); ctx.rotate(ta);
+    ctx.fillStyle = '#0c090d'; ctx.beginPath(); ctx.ellipse(0, 0, r * 1.3 * k, r * 1.1 * k, 0, 0, U.TAU); ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; // 頭頂的赤紅眼睛
+    for (const ey of [-0.45, 0.45]) { ctx.fillStyle = hexA('#ff2a2a', 0.85 + 0.15 * Math.sin(t * 5)); ctx.beginPath(); ctx.ellipse(-r * 0.2, r * ey, r * 0.5 * k, r * 0.3 * k, 0, 0, U.TAU); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = '#5a1220'; ctx.beginPath(); ctx.ellipse(r * 0.5, 0, r * 0.85 * mo, r * 0.9 * mo, 0, 0, U.TAU); ctx.fill();
+    ctx.fillStyle = '#e0d4dc';
+    for (let i = 0; i < 8; i++) {
+      const b = i / 8 * U.TAU, ex = r * 0.5 + Math.cos(b) * r * 0.85 * mo, ey = Math.sin(b) * r * 0.9 * mo;
+      ctx.beginPath(); ctx.moveTo(ex + Math.sin(b) * 3, ey - Math.cos(b) * 3); ctx.lineTo(ex - Math.cos(b) * r * 0.22, ey - Math.sin(b) * r * 0.22); ctx.lineTo(ex - Math.sin(b) * 3, ey + Math.cos(b) * 3); ctx.closePath(); ctx.fill();
     }
-    // 主巨手：從頸後越過肩膀前伸；reach=0 時垂在身後
-    const rest = Math.PI + 0.35 + wob, a = rest + (aim - rest) * reach;
-    const L = r * (1.0 + 1.5 * reach) * k;
-    const hx = baseX + Math.cos(a) * L, hy = Math.sin(a) * L;
-    ctx.strokeStyle = '#0c090d'; ctx.lineWidth = r * 0.34;
-    ctx.beginPath(); ctx.moveTo(baseX, 0); ctx.quadraticCurveTo(baseX + Math.cos(a - 0.5) * L * 0.6, Math.sin(a - 0.5) * L * 0.6, hx, hy); ctx.stroke();
-    ctx.strokeStyle = '#34283e'; ctx.lineWidth = r * 0.06;
-    ctx.beginPath(); ctx.moveTo(baseX, 0); ctx.quadraticCurveTo(baseX + Math.cos(a - 0.5) * L * 0.6, Math.sin(a - 0.5) * L * 0.6, hx, hy); ctx.stroke();
-    // 三指爪
-    ctx.strokeStyle = '#c9bcd6'; ctx.lineWidth = 2.2;
-    for (let c = -1; c <= 1; c++) {
-      const ca = a + c * 0.45 + Math.sin(t * 9 + c) * 0.08;
-      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + Math.cos(ca) * r * 0.6, hy + Math.sin(ca) * r * 0.6); ctx.stroke();
-    }
-    // 肉團上的慘白微光
-    ctx.fillStyle = hexA('#d8c8e8', 0.55 + 0.25 * Math.sin(t * 8));
-    ctx.beginPath(); ctx.arc(baseX - r * 0.3, -r * 0.12, 2.2, 0, U.TAU); ctx.arc(baseX - r * 0.3, r * 0.12, 2.2, 0, U.TAU); ctx.fill();
+    ctx.restore();
     ctx.restore();
   }
 

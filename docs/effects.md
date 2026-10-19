@@ -214,6 +214,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `stance` | 架式 | 光環由外向內收束成細環、中心微光 | combat.js `counter` 動作（見切架式） |
 | | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功（預設） |
 | | `mikiri` | 見切・一閃 | 看穿瞬間場地轉暗、光環收束；delay 秒後背後一記巨大白弧斬 | 影刃武士「見切」成功（counter 動作的 fx） |
+| | `divinesight` | 神虛視 | 看穿並複製招式的瞬間：場地轉暗、金色眼紋光環盪開、三道殘影疊出、八道放射光線 | 亞當「神虛視」複製成功（trait `reflect`）與二階段 `phase2.transFx` |
 | | `pojun` | 破軍 | 重兵器彈反：暗紅暗幕、震波與光環收束；delay 秒後沿面向劈出粗大刃光 | 呂布「鎚頂」彈反成功（counter 動作的 fx） |
 | | `ironfist` | 鐵手套・反槌 | 鐵手套擋下的金屬火花與光環收束；delay 秒後面前重槌震波與地裂 | 索爾「雅恩格利佩爾・格擋」彈反成功 |
 | | `summon` | 召喚 | 召喚物現身的小光圈擴張、微粒聚攏與閃光 | minion.js `spawnMinion` 召喚物現身 |
@@ -232,6 +233,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `nightfall` | 夜幕 | 化煙遁入黑暗，場地暗幕籠罩 life 秒，只剩角色與預警發亮 | 影刃武士大招「百鬼夜斬」隱身 |
 | | `threadcut` | 懸斬 | 刀痕懸在空中，hold 秒後才裂開；多道同時到期就一齊裂開 | 影刃武士大招「百鬼夜斬」的斬線（slashes 的 fx） |
 | | `skyrend` | 天喰 | 沿整條直線劈出巨大刃光、地面沿線裂開發光，0.25 秒後裂口噴出煙霧與二次刃光 | 呂布「天喰・未完成」與大招「天喰」 |
+| | `timefist` | 超越時間之拳 | 時間凍結般的暗幕與收束光環，0.12 秒後沿整條直線炸出白熱光束、連鎖震波與地裂，終點巨大衝擊 | 亞當「超越時間之拳」與大招（dash 的 fx） |
 | | `finale` | 終結 | Boss 被擊倒終結演出、全屏白光、強震、海量火花碎塊 | world.js `onBossDeath` 擊殺結算演出 |
 
 ---

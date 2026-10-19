@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / divinesight / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、神虛視、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -284,4 +284,26 @@
       fx.shake(Math.min(8, 3 * k));
     },
   });
+  BD.defineEffect('divinesight', {
+    name: '神虛視', category: '增益',
+    desc: '看穿並複製對手招式的瞬間：場地轉暗、一對金色眼紋光環向外盪開，施放者身後疊出三道殘影，八道放射光線與秘紋光點四散。適合複製、見切、看破類的反擊（亞當的神虛視）。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(0.45, 0.5, '#000000');
+      fx.flash(E.glow, 0.3);
+      fx.ring(x, y, r * 0.5, r * 3.2, 0.35, E.core, 5);
+      fx.ring(x, y, r * 0.5, r * 2.2, 0.3, E.glow, 3);
+      fx.glow(x, y, r * 2.4, E.glow, 0.5, 0.45, 0.3, src);
+      for (let i = 0; i < 8; i++) {
+        const a = i / 8 * Math.PI * 2 + BD.vrng() * 0.2;
+        fx.streak(x + Math.cos(a) * r, y + Math.sin(a) * r, x + Math.cos(a) * r * 4.2, y + Math.sin(a) * r * 4.2, 3, E.core, 0.3, true);
+      }
+      if (src) { fx.ghost(src, 0.5, E.glow); fx.after(0.08, () => fx.ghost(src, 0.42, E.core)); fx.after(0.16, () => fx.ghost(src, 0.34, E.glow)); }
+      fx.sparkle(x, y, E.core, Math.round(14 * Math.min(1.5, k)), 340);
+      fx.motes(x, y, E, 8, r * 1.6, 120);
+      fx.shake(Math.min(8, 4 * k));
+    },
+  });
+
 })(typeof window !== 'undefined' ? window : globalThis);

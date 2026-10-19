@@ -215,7 +215,10 @@
       fx.damage(b, dmg, p.dot ? '#c9a0ff' : (dmg >= 150 ? '#ffdd55' : '#ffffff'));
       if (dmg >= 150) this.log(src && src.isBoss ? src : (src && src.owner) || null, '重創 ' + b.name + '（' + dmg + '）');
       if (this.training) this.training.onDamage(b, dmg, p, src); // 訓練場：統計假人傷害、假人 HP 回滿、Boss 不會倒下
-      if (b.hp <= 0) { b.hp = 0; this.kill(b); return 'kill'; }
+      if (b.hp <= 0) {
+        if (b.traits.some((t) => t.onLethal && t.onLethal(this, b))) return 'hit'; // 例如亞當的死立不倒
+        b.hp = 0; this.kill(b); return 'kill';
+      }
       if (b.phase === 1 && b.hp <= b.maxHp * 0.5 && !b.isDummy) { b.startTransition(); return 'phase'; }
       // 沉重：擊倒（倒地）——階段轉換 / 已倒地 / 起身保護期間不觸發
       let downed = false;

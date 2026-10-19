@@ -32,7 +32,7 @@ function ok(c, m) { if (c) passed++; else { failed++; console.log('FAIL ' + m); 
   }
   const mines = wd.skills.find((s) => s.id === 'mines');
   ok([...mines.actions, ...mines.actions2].every((x) => x.do !== 'trap' || x.undodgeable === true), '霜凍地雷需 undodgeable');
-  ok(!BD.bosses.some((d) => d.id !== 'witch' && d.id !== 'thor' && JSON.stringify(d).includes('undodgeable')), '目前只有魔女與索爾使用 undodgeable');
+  ok(!BD.bosses.some((d) => d.id !== 'witch' && d.id !== 'thor' && d.id !== 'adam' && JSON.stringify(d).includes('undodgeable')), '目前只有魔女、索爾與亞當使用 undodgeable');
   // 索爾：只有二階段大招「覺醒雷槌・蓋爾羅德」的回程直線無法閃避，且需有 ≥0.6 秒、同形狀的預警（反制：橫移離開直線）
   {
     const thor = BD.bossById.thor, u = thor.ultimate;

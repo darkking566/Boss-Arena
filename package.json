@@ -12,6 +12,6 @@
     "test:training": "node test/training.test.js",
     "test:undodgeable": "node test/undodgeable.test.js",
     "test:props": "node test/props.test.js",
-    "test": "node test/validate.js && node test/status.test.js && node test/training.test.js && node test/undodgeable.test.js && node test/props.test.js && node test/sim.js && node test/fingerprint.js --check"
+    "test": "node test/validate.js && node test/status.test.js && node test/training.test.js && node test/undodgeable.test.js && node test/reflect.test.js && node test/props.test.js && node test/sim.js && node test/fingerprint.js --check"
   }
 }

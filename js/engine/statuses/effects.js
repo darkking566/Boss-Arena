@@ -121,4 +121,10 @@
     name: '狂暴', tags: ['buff'], stacking: 'refresh', defaultDur: 8,
     modifiers: { dmgDealtMul: 1.3, speedMul: 1.2 },
   });
+  // ── 死立不倒（亞當）：生命鎖在 1，期間無敵且出拳更重更快；時間到才真正倒下（對手先倒則以對手獲勝為準）──
+  BD.defineStatus('deathstand', {
+    name: '死立不倒', tags: ['buff'], stacking: 'refresh', defaultDur: 4, visual: 'deathstand',
+    modifiers: { invuln: true, dmgDealtMul: 1.3, speedMul: 1.15 },
+    onRemove(u, st, w) { if (w && !w.winner && u.state !== 'dead' && u.hp <= 1) { u.hp = 0; w.kill(u); } },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

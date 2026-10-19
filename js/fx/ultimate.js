@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜大招（ultcast / domain / zerocast / absolutezero / nightfall / threadcut / skyrend / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
+// 特效庫｜大招（ultcast / domain / zerocast / absolutezero / nightfall / threadcut / skyrend / timefist / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、color 覆寫、radius 半徑、k 綜合倍率、src 施放者（可為 null）、pts 預先算好的點陣
 (function (G) {
@@ -158,6 +158,40 @@
         }
         fx.beam(x, y, tx, ty, w * 0.5, E.glow, 0.3, E.core);
         fx.shake(8, ang + Math.PI / 2);
+      });
+    },
+  });
+
+  BD.defineEffect('timefist', {
+    name: '超越時間之拳', category: '大招',
+    desc: '快到時間停下的一拳：先是整個場地暗下、光環收束、全屏一閃，彷彿時間凍結；0.12 秒後沿整條直線同時炸出白熱光束與連鎖震波，地面沿線留下發光裂痕，終點爆開巨大衝擊。適合極速直線強襲、時間靜止系的終結一擊。',
+    params: { len: 500, width: 90 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, len = o.len || 500, w = o.width || 90, ang = o.angle || 0;
+      const tx = x + Math.cos(ang) * len, ty = y + Math.sin(ang) * len;
+      fx.veil(0.8, 0.8, '#000000');
+      fx.flash('#ffffff', 0.35);
+      fx.ring(x, y, 160, 20, 0.16, '#ffffff', 5);
+      fx.after(0.12, () => {
+        fx.beam(x, y, tx, ty, w, E.glow, 0.45, E.core);
+        fx.beam(x, y, tx, ty, w * 0.25, '#ffffff', 0.55, E.core);
+        fx.flash('#ffffff', 0.5);
+        const n = Math.max(4, Math.round(len / 80));
+        for (let i = 0; i < n; i++) {
+          const t = (i + 0.5) / n, px = x + (tx - x) * t, py = y + (ty - y) * t;
+          fx.after(i * 0.012, () => {
+            fx.shock(px, py, 8, w * 0.9, 0.35, E.glow, 4, E.core);
+            fx.crack(px, py, w * 0.5, E.decal, 8, E.crack, 3);
+            fx.sparkle(px, py, E.core, 2, 360, ang + (i % 2 ? 1 : -1) * Math.PI / 2, 0.6);
+          });
+        }
+        fx.after(0.1, () => {
+          fx.shock(tx, ty, 10, w * 2.2 * Math.min(1.4, k), 0.5, E.glow, 8, E.core);
+          fx.flashAt(tx, ty, w * 1.6, '#ffffff', 0.25);
+          fx.debris(tx, ty, E.debris || E.particle, 8, 320, 5, w * 0.4);
+          fx.motes(tx, ty, E, 8, w, 220);
+          fx.shake(22, ang);
+        });
       });
     },
   });
