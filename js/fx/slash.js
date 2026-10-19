@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜斬擊（slash / cleave / whirl）：弧形揮砍、重劈與 360° 迴旋斬
+// 特效庫｜斬擊（slash / cleave / whirl / divineaxe）：弧形揮砍、重劈、360° 迴旋斬與神之斧
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、angle 揮擊方向、arc 張角、radius 半徑、k 綜合倍率、heavy 沉重節奏、src 施放者
 (function (G) {
@@ -80,6 +80,33 @@
       }
       if (k > 1.4) fx.flashAt(x, y, r * 0.5, E.core, 0.12);
       fx.shake(Math.min(10, 3 * k));
+    },
+  });
+
+  BD.defineEffect('divineaxe', {
+    name: '神之斧', category: '斬擊',
+    desc: '把對手一分為二的迴旋掃踢：場地一暗，腿後浮現一柄巨斧的幻影——漆黑的寬大斧面帶著白熱斧刃掃過整個扇面，殘影疊三層；刃緣沿路噴出火花，最後在掃擊終點裂地。適合巨大的掃踢、斧刃幻影、一刀兩斷的大弧斬。',
+    params: { arc: 3.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, r = o.radius || 230, arc = o.arc || 3.6, ang = o.angle || 0;
+      fx.veil(0.4, 0.45, '#000000');
+      fx.flash(E.glow, 0.2);
+      fx.slash(x, y, ang, arc, r * 0.72, '#16100e', r * 0.42, 0.42, { core: null, trail: 3, rim: E.glow }); // 斧面：漆黑寬弧
+      fx.slash(x, y, ang, arc, r * 0.95, E.glow, 14 * Math.min(1.6, k), 0.4, { core: E.core, trail: 4 });   // 斧刃：白熱細弧
+      fx.slash(x, y, ang, arc * 0.9, r * 1.02, '#ffffff', 4, 0.22, { core: '#ffffff' });
+      const n = 7;
+      for (let i = 0; i < n; i++) { // 刃緣沿著掃擊方向依序噴火花
+        const a = ang - arc / 2 + arc * (i + 0.5) / n;
+        fx.after(i * 0.025, () => fx.sparkle(x + Math.cos(a) * r * 0.95, y + Math.sin(a) * r * 0.95, E.core, 4, 300, a + Math.PI / 2, 0.7));
+      }
+      const ea = ang + arc / 2, hx = x + Math.cos(ea) * r * 0.85, hy = y + Math.sin(ea) * r * 0.85;
+      fx.after(0.18, () => {
+        fx.crack(hx, hy, r * 0.35, E.decal, o.heavy ? 8 : 6, E.crack, 5);
+        fx.debris(hx, hy, E.debris, Math.round(8 * k), 260, 4 + k, r * 0.1);
+        fx.flashAt(hx, hy, r * 0.35, E.core, 0.14);
+      });
+      fx.motes(x, y, E, Math.round(8 * k), r * 0.6, 160);
+      fx.shake(Math.min(20, 9 * k));
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

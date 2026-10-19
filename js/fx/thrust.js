@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜突刺（thrust / cross / slashline / iaido / thunderpath / beam）：直線穿刺、斬線、居合衝刺、遲裂居合、雷槌軌跡與光束
+// 特效庫｜突刺（thrust / cross / slashline / iaido / thunderpath / beam / fistrain）：直線穿刺、斬線、居合衝刺、遲裂居合、雷槌軌跡、光束與拳雨
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、angle 方向、len 長度、width 寬度、dur 衝刺時間、k 綜合倍率、src 施放者
 (function (G) {
@@ -164,6 +164,42 @@
       fx.flashAt(tx, ty, w * 0.7 + 10, E.core, 0.16);
       fx.sparkle(tx, ty, E.core, Math.round(6 * k), 300, ang, 0.7);
       fx.shake(Math.min(18, 8 * Math.min(k, 1.5)));
+    },
+  });
+
+  BD.defineEffect('fistrain', {
+    name: '拳雨', category: '突刺',
+    desc: '快到化成一片的連打：整條直線閃一下，前方塞滿忽隱忽現的拳影光點與放射速度線，金色鋸齒電弧沿路竄過，終點炸開前緣明亮的震波與向前噴的火花。適合黃昏流星拳、真・神之右這類「看不見的拳雨」收尾。',
+    params: { len: 260, width: 130 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, ang = o.angle || 0, len = o.len || 260, w = o.width || 130;
+      const ca = Math.cos(ang), sa = Math.sin(ang), nx = -sa, ny = ca;
+      const at = (t, l) => [x + ca * len * t + nx * l, y + sa * len * t + ny * l];
+      fx.flash(E.glow, 0.16);
+      for (let i = 0; i < 14; i++) { // 1. 速度線：由施放者向前放射
+        const l = (V() - 0.5) * w * 1.3, [x1, y1] = at(0.05 + 0.15 * V(), l * 0.4), [x2, y2] = at(0.75 + 0.35 * V(), l);
+        fx.streak(x1, y1, x2, y2, 2 + 2 * V(), i % 3 ? E.core : E.glow, 0.22 + 0.1 * V(), true);
+      }
+      const n = fx.budget(Math.round(18 * Math.min(1.6, k)));
+      for (let i = 0; i < n; i++) { // 2. 拳影：沿直線一個接一個亮起的拳頭殘像
+        const [px, py] = at(0.25 + 0.75 * V(), (V() - 0.5) * w), s = (12 + 8 * V()) * Math.min(1.4, k);
+        fx.after(i * 0.014, () => { fx.glow(px, py, s, E.core, 0.22, 0.85, 0.6); fx.ring(px, py, s * 0.3, s * 1.4, 0.18, E.glow, 3); });
+      }
+      for (let j = 0; j < 3; j++) { // 3. 金色鋸齒電弧（動畫中拳雨周圍竄動的電光）
+        let [px, py] = at(0.1, (V() - 0.5) * w);
+        for (let s = 1; s <= 5; s++) {
+          const [qx, qy] = at(0.1 + s * 0.18, (V() - 0.5) * w * 1.1);
+          fx.streak(px, py, qx, qy, 3, E.glow, 0.3, true); px = qx; py = qy;
+        }
+      }
+      const [tx, ty] = at(1, 0);
+      fx.after(0.1, () => { // 4. 終點衝擊
+        fx.shock(tx, ty, 10, w * 0.95, 0.4, E.glow, 6 * Math.min(1.5, k), E.core);
+        fx.flashAt(tx, ty, w * 0.8, '#ffffff', 0.18);
+        fx.sparkle(tx, ty, E.core, Math.round(12 * k), 420, ang, 0.9);
+        fx.motes(tx, ty, E, Math.round(8 * k), w * 0.4, 180);
+        fx.shake(Math.min(16, 8 * k), ang);
+      });
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

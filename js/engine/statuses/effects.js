@@ -121,6 +121,17 @@
     name: '狂暴', tags: ['buff'], stacking: 'refresh', defaultDur: 8,
     modifiers: { dmgDealtMul: 1.3, speedMul: 1.2 },
   });
+  // ── 鬥神狂喜（宙斯一階段 trait 'battlelust'）：挨打挨到興奮，肌肉再膨脹一圈 ──
+  BD.defineStatus('ecstasy', {
+    name: '鬥神狂喜', tags: ['buff'], stacking: 'refresh', defaultDur: 5,
+    modifiers: { dmgDealtMul: 1.2, speedMul: 1.12 },
+  });
+  // ── 阿陀磨須（宙斯二階段常駐）：肌肉壓縮到極限、近乎不壞，但肉體每秒都在崩壞（損耗最大生命，不會因此倒下）──
+  BD.defineStatus('adamas', {
+    name: '阿陀磨須', tags: ['buff'], stacking: 'refresh',
+    modifiers: { dmgTakenMul: 0.85 },
+    onTick(u, st, dt) { if (u.hp > 1 && u.state !== 'dead') u.hp = Math.max(1, u.hp - u.maxHp * 0.0035 * dt); },
+  });
   // ── 死立不倒（亞當）：生命鎖在 1，期間無敵且出拳更重更快；時間到才真正倒下（對手先倒則以對手獲勝為準）──
   BD.defineStatus('deathstand', {
     name: '死立不倒', tags: ['buff'], stacking: 'refresh', defaultDur: 4, visual: 'deathstand',

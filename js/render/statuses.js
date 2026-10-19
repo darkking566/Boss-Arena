@@ -44,6 +44,8 @@
   R.defineStatusIcon('knockdown', { glyph: '倒', color: '#ffb070' });
   R.defineStatusIcon('kdGuard', { glyph: '起', color: '#ffe0b0' });
   R.defineStatusIcon('deathstand', { glyph: '立', color: '#ffe27a' });
+  R.defineStatusIcon('ecstasy', { glyph: '喜', color: '#ffd36a' });
+  R.defineStatusIcon('adamas', { glyph: '剛', color: '#b07bff' });
 
   // ─────────────────────── HUD 狀態列 ───────────────────────
   function roundRect(ctx, x, y, w, h, r) {

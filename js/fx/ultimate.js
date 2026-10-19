@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜大招（ultcast / domain / zerocast / absolutezero / nightfall / threadcut / skyrend / timefist / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
+// 特效庫｜大招（ultcast / domain / zerocast / absolutezero / nightfall / threadcut / skyrend / timefist / timestop / finale）：大招蓄勢、領域爆發、夜幕、懸斬、天喰巨劈與擊倒終結
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、color 覆寫、radius 半徑、k 綜合倍率、src 施放者（可為 null）、pts 預先算好的點陣
 (function (G) {
@@ -214,6 +214,38 @@
         fx.motes(x + Math.cos(a) * d, y + Math.sin(a) * d, E, 1, 10, 80);
       }
       fx.sparkle(x, y, E.core, Math.round(24 * k), 420);
+    },
+  });
+
+  BD.defineEffect('timestop', {
+    name: '時間停止', category: '大招',
+    desc: '時間靜止的蓄勢：場地沉入暗幕，施放者腳下浮現一面巨大鐘面——外環、十二道刻度與兩根指針，指針一格一格「逆轉」，光點被吸回拳頭；life 秒內持續，最後鐘面收成一圈白光。適合超越時間之拳這類「時間停下」的蓄力（tele 的 chargeFx）。',
+    params: { life: 1.0 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, src = o.src || null, r = (src && src.r ? src.r : 30) * 3.2 * Math.min(1.3, k), life = o.life || 1;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.veil(life + 0.3, 0.55, '#000000');
+      fx.charge(x, y, r * 0.9, E.glow, life, src, 18);
+      const ticks = Math.max(4, Math.round(life / 0.12));
+      for (let i = 0; i < ticks; i++) {
+        fx.after(i * life / ticks, () => {
+          const [cx, cy] = pos(), q = i / ticks;
+          fx.ring(cx, cy, r, r * 0.98, 0.16, E.glow, 2);                         // 鐘面外環
+          for (let h = 0; h < 12; h++) {                                           // 十二道刻度
+            const a = h / 12 * Math.PI * 2, r1 = r * (h % 3 ? 0.88 : 0.8);
+            fx.streak(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1, cx + Math.cos(a) * r * 0.96, cy + Math.sin(a) * r * 0.96, h % 3 ? 2 : 4, E.core, 0.16, true);
+          }
+          const am = -Math.PI / 2 - q * Math.PI * 4, ah = -Math.PI / 2 - q * Math.PI / 3; // 指針逆轉
+          fx.streak(cx, cy, cx + Math.cos(am) * r * 0.85, cy + Math.sin(am) * r * 0.85, 4, '#ffffff', 0.14, true);
+          fx.streak(cx, cy, cx + Math.cos(ah) * r * 0.55, cy + Math.sin(ah) * r * 0.55, 6, E.glow, 0.14, true);
+          if (i % 2 === 0) fx.motes(cx, cy, E, 3, r, 90);
+        });
+      }
+      fx.after(life, () => {
+        const [cx, cy] = pos();
+        fx.ring(cx, cy, r, r * 0.15, 0.2, '#ffffff', 5);
+        fx.flash('#ffffff', 0.25);
+      });
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

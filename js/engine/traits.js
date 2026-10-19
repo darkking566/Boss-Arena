@@ -46,6 +46,19 @@
     onDash(w, b, x0, y0, ang, a) { if (b.phase === 2) echo(w, b, { kind: 'rect', x: x0, y: y0, ang, len: a.dist, w: 60 }, Object.assign({ fx: 'cross' }, a.hit)); },
   });
 
+  // ── battlelust：鬥神狂喜（宙斯）——原作被亞當打中反而「開心得受不了」、青筋暴起肌肉再膨脹：一階段每挨 3 下（非持續傷害）進入狂喜 ──
+  BD.defineTrait('battlelust', {
+    interceptDamage(w, b, src, p) {
+      if (b.phase !== 1 || p.dot || !src || BD.hasStatus(b, 'ecstasy') || BD.getMod(b, 'invuln')) return null;
+      if ((b._lust = (b._lust || 0) + 1) < 3) return null;
+      b._lust = 0; BD.applyStatus(b, 'ecstasy', {}, w);
+      w.fx.text(b.x, b.y - b.r - 30, '太開心了！', '#ffd36a', 22);
+      BD.spawnFx(w, 'awaken', b.x, b.y, { src: b, el: 'holy' });
+      w.log(b, '越挨打越興奮——肌肉又膨脹了一圈！');
+      return null; // 只計數，不攔截傷害
+    },
+  });
+
   // ── reflect：神虛視（亞當）──
   // 帶 reflect:true 的見切架式被攻擊時（或已看過的招式再被打中時，每 4 秒一次），不用固定反斬，而是把對手「正在使出的整招」複製成自己的時間軸立刻打回去：
   // 只複製預警 / 判定 / 衝刺 / 投射物 / 噴發等攻擊動作，節奏壓到 0.6 倍、傷害 60%（原作：複製不會超越原招），同一招每多看一次 +10%、最高 80%。

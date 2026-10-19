@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / divinesight / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、神虛視、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / divinesight / gfoc / adamas / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、神虛視、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -306,4 +306,62 @@
     },
   });
 
+  BD.defineEffect('gfoc', {
+    name: '全宇宙之父', category: '增益',
+    desc: '眾神之王的登場：金光爆環向外推開，頭頂炸出「GFOC」字樣，四周飄起小提琴的音符（赫密士演奏的 G 弦之歌），施放者身上的肌肉一圈圈膨脹（三層殘影由小到大）。適合帶點滑稽的王者登場、自我強化。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.flash(E.glow, 0.3);
+      fx.shock(x, y, r, r * 6.5, 0.5, E.glow, 8 * Math.min(1.5, k), E.core);
+      fx.ring(x, y, r, r * 4, 0.35, '#ffffff', 4);
+      fx.glow(x, y, r * 2.6, E.glow, 0.7, 0.55, 0.4, src);
+      fx.text(x, y - r - 46, 'G F O C', E.glow, 34);
+      for (let i = 0; i < 8; i++) { // 小提琴的音符：一個個從四周飄起
+        const a = i / 8 * Math.PI * 2 + V() * 0.4, d = r * (1.6 + V());
+        fx.after(i * 0.07, () => fx.text(x + Math.cos(a) * d, y + Math.sin(a) * d, i % 2 ? '♪' : '♫', i % 3 ? E.core : E.glow, 22 + 6 * V()));
+      }
+      if (src) for (let i = 0; i < 3; i++) fx.after(i * 0.09, () => { fx.ghost(src, 0.35, E.glow); fx.ring(src.x, src.y, r * (1 + i * 0.4), r * (1.6 + i * 0.6), 0.25, E.core, 3); });
+      fx.sparkle(x, y, E.core, Math.round(16 * Math.min(1.5, k)), 360);
+      fx.motes(x, y, E, 14, r * 2, 160);
+      fx.shake(Math.min(12, 6 * k));
+    },
+  });
+
+  BD.defineEffect('adamas', {
+    name: '阿陀磨須', category: '增益',
+    desc: '把全身肌肉壓縮到極限的變身：life 秒內施放者渾身燒成橘紅、蒸氣不斷往上冒、光環一圈圈向身體擠壓；時間到時一大團白煙炸開，紫黑星海的暗幕籠罩全場、星光點點，雙層震波與光柱把新的形態推出煙霧。適合肌肉壓縮、肉體極限化、令眾生本能顫抖的終極形態（phase2.transFx）。',
+    params: { life: 1.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life || 1.6;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.glow(x, y, r * 1.6, '#ff7a2a', life, 0.75, 0.6, src); // 1. 壓縮中：橘紅的高熱身體
+      for (let t = 0; t < life; t += 0.12) {
+        fx.after(t, () => {
+          const [cx, cy] = pos(), q = t / life;
+          fx.ring(cx, cy, r * (3.4 - q), r * 0.9, 0.2, q > 0.6 ? '#ffffff' : '#ffb070', 3 + 3 * q); // 光環向身體擠壓
+          fx.smoke(cx + (V() - 0.5) * r, cy + (V() - 0.5) * r, 'rgba(255,240,230,0.5)', 2 + Math.round(3 * q), r * 0.8); // 蒸氣
+          fx.embers(cx, cy, '#ffb070', 2, r, 60);
+          fx.shake(2 + 6 * q);
+        });
+      }
+      fx.after(life, () => { // 2. 白煙炸開，紫黑星海籠罩
+        const [cx, cy] = pos();
+        fx.veil(1.6, 0.7, '#120424');
+        fx.flash(E.core, 0.6);
+        fx.smoke(cx, cy, 'rgba(235,230,240,0.7)', fx.budget(40), r * 3);
+        fx.pillar(cx, cy, r * 1.6, E.glow, 0.6);
+        fx.shock(cx, cy, r, r * 11, 0.9, E.glow, 14 * Math.min(1.5, k), E.core);
+        fx.shock(cx, cy, r, r * 6, 0.55, '#ffffff', 6, '#ffffff');
+        fx.glow(cx, cy, r * 3.5, E.glow, 1.2, 0.8, 0.3, src);
+        for (let i = 0; i < 26; i++) { // 星光：散在暗幕上忽明忽滅
+          const a = V() * Math.PI * 2, d = r * (2 + V() * 9), s = 4 + 6 * V(), l = 0.5 + V() * 0.6;
+          fx.after(V() * 0.8, () => fx.glow(cx + Math.cos(a) * d, cy + Math.sin(a) * d, s, '#ffffff', l, 0.9, 0.2));
+        }
+        fx.motes(cx, cy, E, 30, r * 3, 240);
+        fx.crack(cx, cy, r * 3.2, E.decal, 10, E.crack, 9);
+        fx.shake(Math.min(26, 18 * Math.min(1.5, k)));
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

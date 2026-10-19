@@ -14,11 +14,12 @@
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
     radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
-    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）
+    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,
           feint: 0.1, delay: 0.3, retreat: 0.1, punish: 0.6, nervous: 0.1, patience: 0.3 },
     phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, line: '二階段台詞', aura: 'fire', fxEl: 'fire',
               transFx: { id: 'shadowrise', el: 'shadow' },  // 選用：換階段開始時播放的特效（life＝咆哮前的秒數；純演出）
+              status: { id: 'adamas' },                  // 選用：進入二階段時施加的常駐狀態（例如宙斯的阿陀磨須）
               note: '只寫招式變化——「速度 +15%、傷害 +20%、冷卻 −20%」會由倍率自動產生，請勿手寫百分比' },
     skills: [
       // 動作帶 fx 範例：指定 fx: 'slam' 播放砸地特效（元素預設取自 Boss 的 fxEl）

@@ -176,6 +176,7 @@
       this.phase = 2; this.speedMul *= p.speedMul; this.dmgMul *= p.dmgMul; this.cdMul *= p.cdMul;
       this.ult = Math.min(100, this.ult + 45); this.posture = 0; this.sta = this.maxSta;
       this.state = 'idle'; this.stateT = 0; this.stats.phase2At = this.world.time;
+      if (p.status) BD.applyStatus(this, p.status.id, p.status, this.world); // 二階段常駐狀態（例如宙斯的阿陀磨須）
       BD.spawnFx(this.world, 'awaken', this.x, this.y, { src: this });
     }
 
