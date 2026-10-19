@@ -73,7 +73,7 @@
 - trait：`js/engine/traits.js` 的 `reflect`（`interceptDamage` 複製反擊、`onLethal` 死立不倒）；`js/engine/world.js` `damageBoss` 在致命傷前詢問各 trait 的 `onLethal`。
 - 狀態：`deathstand`（`js/engine/statuses/effects.js`，無敵、傷害 ×1.3、速度 ×1.15，到期自動倒下）。
 - 特效：`divinesight`（`js/fx/buff.js`）、`timefist`（`js/fx/ultimate.js`）；元素 `replica`（`js/fx/elements.js`）。
-- 造型：`js/render/styles/adam.js`（全部以程式繪製：白金髮、藍眼 / 粉紅輪紋眼、單手銀刺手指虎、樹葉、蛇爪鱗手、掃踢的腿、過載流血、死立不倒光焰）。
+- 造型：`js/render/styles/adam.js`（全部以程式繪製：白金髮、藍眼 / 粉紅輪紋眼、單手銀刺手指虎、蛇爪鱗手（蔽體樹葉在俯視角下會變成水平飄著，故省略不畫）、掃踢的腿、過載流血、死立不倒光焰）。
 - 測試：`test/reflect.test.js`；`adam:divine_sight` 加入訓練場 ALLOW_MISS。
 - 平衡（8 種子、全配對）：輕快約 49%、沉重約 52%（沉重 `hpMul` 1.36，見 `js/data/pace.js`）。
 

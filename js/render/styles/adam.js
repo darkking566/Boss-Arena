@@ -1,6 +1,6 @@
 'use strict';
 // Boss 造型：亞當（人類始祖）——依原作設計（docs/bosses/adam.md）：
-// 白金色蓬鬆短髮（瀏海垂在額前、一撮呆毛）、天藍色大眼、纖瘦但線條分明的蒼白偏粉肌膚、只用一片大樹葉蔽體；
+// 白金色蓬鬆短髮（瀏海垂在額前、一撮呆毛）、天藍色大眼、纖瘦但線條分明的蒼白偏粉肌膚；
 // 手指虎只戴在右手：黑色握環加銀白尖刺，泛著青綠光；神虛視發動時雙眼化為粉紅色放射輪紋（外圈一道白環）；
 // 「模倣」蛇神時雙手長成三倍大、覆滿墨綠鱗片與三根白骨爪；神之斧畫出掃踢的腿；
 // 二階段過載：眼、鼻、耳流血；死立不倒時全身燃起光焰。
@@ -95,12 +95,7 @@
       ctx.restore();
     }
 
-    // 3. 樹葉蔽體：胸前下緣探出一片大葉（原作造型）
-    ctx.fillStyle = '#4f9a3c'; ctx.strokeStyle = '#2a5a1e'; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(r * 0.45, 0); ctx.quadraticCurveTo(r * 0.7, -r * 0.34, r * 1.1, 0); ctx.quadraticCurveTo(r * 0.7, r * 0.34, r * 0.45, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = '#8fd070'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(r * 0.45, 0); ctx.lineTo(r * 1.08, 0); ctx.moveTo(r * 0.68, 0); ctx.lineTo(r * 0.84, -r * 0.15); ctx.moveTo(r * 0.68, 0); ctx.lineTo(r * 0.84, r * 0.15); ctx.stroke();
-
-    // 4. 軀幹與肩：纖瘦、線條分明（精靈快取）
+    // 3. 軀幹與肩：纖瘦、線條分明（精靈快取）
     R.blit(ctx, 'body:adam2:torso:' + r, r * 2.4 + 20, r * 2.4 + 20, r * 1.2 + 10, r * 1.2 + 10, (g) => {
       g.lineWidth = 1.5; g.strokeStyle = LINE;
       const gr = g.createRadialGradient(r * 0.1, 0, 2, 0, 0, r * 0.9);
@@ -116,7 +111,7 @@
       }
     });
 
-    // 5. 雙臂：右手（+y）戴手指虎、左手空拳；出拳左右交替；神虛視架式時雙拳收在胸前；模倣蛇神時雙手長成鱗爪
+    // 4. 雙臂：右手（+y）戴手指虎、左手空拳；出拳左右交替；神虛視架式時雙拳收在胸前；模倣蛇神時雙手長成鱗爪
     const guard = sid === 'divine_sight' || sid === 'fatherly_ward' || sid === 'endurance_clash';
     const claws = sid === 'serpent_shred';
     const ck = claws ? (sn > 0 || hitI > 0 ? 1 : Math.min(1, 0.25 + wd * 1.4)) : 0;
@@ -141,7 +136,7 @@
       else bareFist(ctx, fx, fy, r, glow);
     }
 
-    // 6. 頭：白金蓬鬆短髮、耳、額前瀏海與呆毛（精靈快取）
+    // 5. 頭：白金蓬鬆短髮、耳、額前瀏海與呆毛（精靈快取）
     R.blit(ctx, 'body:adam2:head:' + r, r * 1.8, r * 1.8, r * 0.9, r * 0.9, (g) => {
       g.fillStyle = SKIN; g.strokeStyle = LINE; g.lineWidth = 1.4;
       for (const s of [-1, 1]) { g.beginPath(); g.ellipse(r * 0.08, s * r * 0.4, r * 0.09, r * 0.13, 0, 0, U.TAU); g.fill(); g.stroke(); }
@@ -156,13 +151,13 @@
       g.beginPath(); g.moveTo(r * 0.02, -r * 0.04); g.quadraticCurveTo(-r * 0.18, -r * 0.3, -r * 0.02, -r * 0.46); g.stroke();
     });
 
-    // 7. 眼睛：天藍色大眼從瀏海縫隙露出；神虛視時變為粉紅色放射輪紋
+    // 6. 眼睛：天藍色大眼從瀏海縫隙露出；神虛視時變為粉紅色放射輪紋
     for (const s of [-1, 1]) {
       const ex = r * 0.44, ey = s * r * 0.15;
       if (eye > 0.35) replicaEye(ctx, ex, ey, r * (0.085 + 0.03 * eye), eye, t);
       else { ctx.fillStyle = '#7fc8ff'; ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.09, r * 0.065, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex + r * 0.03, ey - r * 0.02, r * 0.02, 0, U.TAU); ctx.fill(); }
     }
-    // 8. 二階段過載：眼、鼻、耳流血
+    // 7. 二階段過載：眼、鼻、耳流血
     if (p2) {
       ctx.strokeStyle = '#c0102a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
       for (const s of [-1, 1]) {
