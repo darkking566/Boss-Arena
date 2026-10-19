@@ -72,7 +72,7 @@
       if (!cp) return null; // 沒有可複製的攻擊動作：交給 counter 特性（固定反斬）
       seen[id] = (seen[id] || 0) + 1; b.stats.counters++;
       w.fx.text(b.x, b.y - b.r - 30, '神虛視！', '#ffe27a', 26);
-      BD.spawnFx(w, 'divinesight', b.x, b.y, { src: b }); w.hitstop = 0.12; w.slowmo = Math.max(w.slowmo, 0.3);
+      BD.spawnFx(w, 'divinesight', b.x, b.y, { src: b, el: 'replica' }); w.hitstop = 0.12; w.slowmo = Math.max(w.slowmo, 0.3);
       w.log(b, '神虛視——完整複製了 ' + src.name + ' 的【' + src.inst.skill.name + '】！', true);
       if (b.phase === 2) { // 眼睛過載：每複製一次損耗生命（不會因此倒下）
         b.hp = Math.max(1, b.hp - b.maxHp * 0.012); w.fx.text(b.x + 34, b.y - b.r - 8, '眼睛過載', '#ff5a5a', 16);
@@ -86,7 +86,7 @@
       if (b._stood || b.phase !== 2) return false;
       b._stood = true; b.hp = 1; b.posture = 0; BD.applyStatus(b, 'deathstand', { dur: 4 }, w);
       w.fx.text(b.x, b.y - b.r - 36, '死立不倒', '#ffe27a', 30);
-      BD.spawnFx(w, 'roar', b.x, b.y, { src: b, el: 'holy', flashColor: '#fff2c0' }); w.slowmo = Math.max(w.slowmo, 0.8);
+      BD.spawnFx(w, 'roar', b.x, b.y, { src: b, el: 'replica', flashColor: '#ffd0dc' }); w.slowmo = Math.max(w.slowmo, 0.8);
       w.banner('死立不倒', b.name + ' 已超越極限，仍在揮拳', b.def.color);
       w.log(b, '生命耗盡，卻憑意志繼續站著揮拳！', true);
       return true;

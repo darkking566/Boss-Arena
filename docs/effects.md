@@ -214,7 +214,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `stance` | 架式 | 光環由外向內收束成細環、中心微光 | combat.js `counter` 動作（見切架式） |
 | | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功（預設） |
 | | `mikiri` | 見切・一閃 | 看穿瞬間場地轉暗、光環收束；delay 秒後背後一記巨大白弧斬 | 影刃武士「見切」成功（counter 動作的 fx） |
-| | `divinesight` | 神虛視 | 看穿並複製招式的瞬間：場地轉暗、金色眼紋光環盪開、三道殘影疊出、八道放射光線 | 亞當「神虛視」複製成功（trait `reflect`）與二階段 `phase2.transFx` |
+| | `divinesight` | 神虛視 | 看穿並複製招式的瞬間：場地轉暗、金色眼紋光環盪開、三道殘影疊出、八道放射光線 | 亞當「神虛視」複製成功（trait `reflect`，搭配 `replica` 元素）與二階段 `phase2.transFx` |
 | | `pojun` | 破軍 | 重兵器彈反：暗紅暗幕、震波與光環收束；delay 秒後沿面向劈出粗大刃光 | 呂布「鎚頂」彈反成功（counter 動作的 fx） |
 | | `ironfist` | 鐵手套・反槌 | 鐵手套擋下的金屬火花與光環收束；delay 秒後面前重槌震波與地裂 | 索爾「雅恩格利佩爾・格擋」彈反成功 |
 | | `summon` | 召喚 | 召喚物現身的小光圈擴張、微粒聚攏與閃光 | minion.js `spawnMinion` 召喚物現身 |
@@ -253,6 +253,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `holy` | 聖光 | `#fffef0` | `#ffe27a` | `#fff1b0` | `#e8d9a8` / `#ffe9a0` | `motes`（聖光微粒） | 神聖衝擊、祝福、天罰、光柱 |
 | `lightning` | 雷電 | `#ffffff` | `#7fc8ff` | `#cfe9ff` | `#5a6a88` / `#a8dcff` | `crackle`（電弧折線） | 落雷、電弧、電磁衝擊、雷射貫穿 |
 | `blood` | 血 | `#ffd0d0` | `#d0102a` | `#9a0a1c` | `#7a0a18` / `#ff2a40` | `drips`（血滴彈跳） | 斬殺爆血、鮮血獻祭、血狂撕裂 |
+| `replica` | 神虛視 | `#fff0f4` | `#ff4f7e` | `#ffa0bc` | `#8a2a48` / `#ff6f95` | `runes`（秘紋光點） | 粉紅色的看穿、複製類演出（亞當的神虛視） |
 | `arcane` | 秘法 | `#f6e8ff` | `#c77dff` | `#e0b8ff` | `#6a3a8a` / `#d9a0ff` | `runes`（秘紋光點） | 奧術光束、星體魔法、符印法陣、時空裂隙 |
 
 ### `BD.kindElement` 對照表
