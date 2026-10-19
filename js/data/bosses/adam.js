@@ -17,7 +17,7 @@
     id: 'adam', name: '亞當', title: '人類始祖', archetype: '神虛視・拳骨主義',
     desc: '神按自己的形象造出的第一個人類、全人類之父，白金髮色的纖瘦青年，只用一片樹葉蔽體。右手戴著瑞吉蕾芙化成的銀色手指虎，以神虛視看穿並完整複製神的招式；為了「保護孩子們」而出拳，眼睛過載、甚至死去之後，也要站著打到最後。',
     color: '#e6d58a', color2: '#4a3a28', glow: '#ff6f8f', style: 'adam',
-    radius: 28, maxHp: 2000, speed: 205, turn: 6, mass: 1.1, fxEl: 'lightning', hurt: 'flesh',
+    radius: 28, maxHp: 1850, speed: 205, turn: 6, mass: 1.1, fxEl: 'lightning', hurt: 'flesh',
     traits: ['reflect', 'counter'], // reflect：神虛視（先判定）；counter：沒有可複製的招式時退回固定反斬
     stamina: { max: 120, regen: 30 }, posture: 150, dodgeCost: 18, dodgeSpeed: 540,
     ai: {
@@ -35,7 +35,7 @@
       nervous: 0.04,
       patience: 0.5,
       read: 0.7,
-      counter: 0.7,
+      counter: 0.95,
       combos: [
         { id: 'jab_axe', name: '亞光速連打', phase: 1, weight: 1.3, steps: [
           { skill: 'jab_combo' },
@@ -96,9 +96,9 @@
         actions2: [...strike(0.26, 0.2, { shape: 'rect', len: 155, w: 70 }, { dmg: 46, posture: 12, kb: 100, fx: 'thrust' }),
           ...strike(0.85, 0.46, { shape: 'cone', r: 250, arc: 220 * D }, { dmg: 160, posture: 55, kb: 560, fx: { id: 'cleave', scale: 1.3, el: 'blood' } })] },
       // 核心——神虛視：架式中被攻擊，就把對手整招複製後立刻打回去（trait 'reflect'）
-      { id: 'divine_sight', name: '神虛視', short: '神虛視', tags: ['counter', 'defensive'], range: [0, 260], cd: 6.5, cost: 14, track: 10, recovery: 0.4,
-        actions: [{ do: 'counter', at: 0, dur: 0.8, dmg: 150, posture: 55, name: '神虛視', reflect: true }],
-        actions2: [{ do: 'counter', at: 0, dur: 1.0, dmg: 160, posture: 60, name: '神虛視', reflect: true }] },
+      { id: 'divine_sight', name: '神虛視', short: '神虛視', tags: ['counter', 'defensive'], range: [0, 260], cd: 2.0, cost: 8, track: 10, recovery: 0.4,
+        actions: [{ do: 'counter', at: 0, dur: 1.0, dmg: 150, posture: 55, name: '神虛視', reflect: true }],
+        actions2: [{ do: 'counter', at: 0, dur: 1.2, dmg: 160, posture: 60, name: '神虛視', reflect: true }] },
       // 原作：複製科羅諾斯傳給宙斯的「超越時間之拳」，快到時間停下
       { id: 'time_fist', name: '超越時間之拳', short: '時間拳', tags: ['gap', 'melee'], range: [140, 540], cd: 11, cost: 30, track: 5, recovery: 1.1,
         actions: [{ do: 'tele', at: 0.1, dur: 0.95, shape: 'rect', len: 540, w: 80, follow: true, lockBefore: 0.3, undodgeable: true },

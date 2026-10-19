@@ -47,13 +47,14 @@
   });
 
   // ── reflect：神虛視（亞當）──
-  // 帶 reflect:true 的見切架式被攻擊時，不用固定反斬，而是把對手「正在使出的整招」複製成自己的時間軸立刻打回去：
-  // 只複製預警 / 判定 / 衝刺 / 投射物 / 噴發等攻擊動作，節奏壓到 0.6 倍、傷害 80%（原作：複製不會超越原招），同一招看第三次起 100%。
+  // 帶 reflect:true 的見切架式被攻擊時（或已看過的招式再被打中時，每 4 秒一次），不用固定反斬，而是把對手「正在使出的整招」複製成自己的時間軸立刻打回去：
+  // 只複製預警 / 判定 / 衝刺 / 投射物 / 噴發等攻擊動作，節奏壓到 0.6 倍、傷害 60%（原作：複製不會超越原招），同一招每多看一次 +10%、最高 80%。
+  const REFLECT_GAP = 4;
   const COPYABLE = new Set(['tele', 'hit', 'dash', 'proj', 'lob', 'erupt', 'zone']);
   function reflectCopy(b, src, seen) {
     const sk = src.inst.skill, acts = src.inst.v.actions.filter((a) => COPYABLE.has(a.do)).slice(0, 14);
     if (!acts.length) return null;
-    const t0 = acts[0].at, mul = 0.8 + 0.1 * Math.min(2, seen), cap = (d) => Math.min(210, d * mul);
+    const t0 = acts[0].at, mul = 0.6 + 0.1 * Math.min(2, seen), cap = (d) => Math.min(210, d * mul);
     const actions = acts.map((a) => {
       const c = Object.assign({}, a, { at: 0.12 + (a.at - t0) * 0.6 });
       if (a.dur != null && (a.do === 'tele' || a.do === 'dash')) c.dur = Math.max(0.15, a.dur * 0.6);
@@ -66,11 +67,14 @@
   }
   BD.defineTrait('reflect', {
     interceptDamage(w, b, src, p) {
-      const cs = BD.getStatus(b, 'counter');
-      if (!(cs && cs.data && cs.data.reflect) || !src || !src.isBoss || !src.inst || p.dot || p.unblockable) return null;
-      const seen = b._seen || (b._seen = {}), id = src.inst.skill.id, cp = reflectCopy(b, src, seen[id] || 0);
+      if (!src || !src.isBoss || !src.inst || p.dot || p.unblockable) return null;
+      const cs = BD.getStatus(b, 'counter'), seen = b._seen || (b._seen = {}), id = src.inst.skill.id;
+      // 架式中一定複製；沒擺架式時，「已經看過」的招式被打中也會自動複製（每 REFLECT_GAP 秒一次，且只在待機 / 出招中）
+      const stance = cs && cs.data && cs.data.reflect, auto = seen[id] > 0 && w.time - (b._reflectAt || -99) > REFLECT_GAP && (b.state === 'idle' || b.state === 'skill');
+      if (!stance && !auto) return null;
+      const cp = reflectCopy(b, src, seen[id] || 0);
       if (!cp) return null; // 沒有可複製的攻擊動作：交給 counter 特性（固定反斬）
-      seen[id] = (seen[id] || 0) + 1; b.stats.counters++;
+      seen[id] = (seen[id] || 0) + 1; b.stats.counters++; b._reflectAt = w.time;
       w.fx.text(b.x, b.y - b.r - 30, '神虛視！', '#ffe27a', 26);
       BD.spawnFx(w, 'divinesight', b.x, b.y, { src: b, el: 'replica' }); w.hitstop = 0.12; w.slowmo = Math.max(w.slowmo, 0.3);
       w.log(b, '神虛視——完整複製了 ' + src.name + ' 的【' + src.inst.skill.name + '】！', true);
