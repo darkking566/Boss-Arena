@@ -132,6 +132,11 @@
     modifiers: { dmgTakenMul: 0.85 },
     onTick(u, st, dt) { if (u.hp > 1 && u.state !== 'dead') u.hp = Math.max(1, u.hp - u.maxHp * 0.0035 * dt); },
   });
+  // ── 鬼背（範馬勇次郎二階段常駐）：肌肉撐破上衣、背上浮出惡鬼的面孔——身體更硬、拳腳更重 ──
+  BD.defineStatus('ogreback', {
+    name: '鬼背', tags: ['buff'], stacking: 'refresh',
+    modifiers: { dmgTakenMul: 0.9, dmgDealtMul: 1.05 },
+  });
   // ── 死立不倒（亞當）：生命鎖在 1，期間無敵且出拳更重更快；時間到才真正倒下（對手先倒則以對手獲勝為準）──
   BD.defineStatus('deathstand', {
     name: '死立不倒', tags: ['buff'], stacking: 'refresh', defaultDur: 4, visual: 'deathstand',

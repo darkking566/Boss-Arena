@@ -364,4 +364,43 @@
       });
     },
   });
+
+  BD.defineEffect('ogreback', {
+    name: '鬼背解放', category: '增益',
+    desc: '肌肉撐破衣服、背上浮出惡鬼面孔的變身：life 秒內赤紅光暈越來越亮、背肌鼓動般的光環一圈圈搏動，地面不斷震動；時間到時衣服碎片炸飛、暗紅暗幕籠罩，巨大的「鬼」字浮現並向外炸開雙層震波、血紅火花與地裂。適合變身、解放本能、令人窒息的威壓（phase2.transFx）。',
+    params: { life: 1.6 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life || 1.6;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.glow(x, y, r * 1.8, '#ff2a1a', life, 0.7, 0.5, src); // 1. 壓抑中：赤紅的光暈越來越亮
+      for (let t = 0; t < life; t += 0.14) {
+        fx.after(t, () => {
+          const [cx, cy] = pos(), q = t / life;
+          fx.ring(cx, cy, r * 0.8, r * (1.4 + 1.6 * q), 0.22, q > 0.6 ? '#ffffff' : E.glow, 3 + 3 * q); // 背肌搏動
+          fx.smoke(cx, cy, 'rgba(120,10,10,0.35)', 2 + Math.round(3 * q), r);
+          fx.sparkle(cx, cy, E.core, 1 + Math.round(2 * q), 160 + 200 * q);
+          fx.shake(2 + 7 * q);
+        });
+      }
+      fx.after(life, () => { // 2. 撐破上衣，鬼臉浮現
+        const [cx, cy] = pos();
+        fx.veil(1.5, 0.65, '#1a0204');
+        fx.flash(E.core, 0.6);
+        for (let i = 0; i < 16; i++) { // 黑色布片炸飛
+          const a = V() * Math.PI * 2;
+          fx.debris(cx, cy, '#1b1517', 1, 280 + 220 * V(), 3 + 3 * V(), r * 0.3);
+          fx.streak(cx, cy, cx + Math.cos(a) * r * 3.5, cy + Math.sin(a) * r * 3.5, 3, '#ffb0a0', 0.3, true);
+        }
+        fx.text(cx, cy - r - 70, '鬼', E.glow, 96);
+        fx.pillar(cx, cy, r * 1.6, E.glow, 0.6);
+        fx.shock(cx, cy, r, r * 11, 0.9, E.glow, 14 * Math.min(1.5, k), E.core);
+        fx.shock(cx, cy, r, r * 6, 0.55, '#ffffff', 6, '#ffffff');
+        fx.glow(cx, cy, r * 3.5, E.glow, 1.2, 0.8, 0.3, src);
+        fx.sparkle(cx, cy, E.core, fx.budget(34), 480);
+        fx.motes(cx, cy, E, 24, r * 3, 240);
+        fx.crack(cx, cy, r * 3.2, E.decal, 10, E.crack, 9);
+        fx.shake(Math.min(26, 18 * Math.min(1.5, k)));
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

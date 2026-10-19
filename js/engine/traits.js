@@ -2,6 +2,7 @@
 // Boss 特性（trait）：個別 Boss 的特殊機制，Boss 資料以 traits: [...] 啟用
 //   counter：見切 / 彈反——架式（do:'counter'）期間被 Boss 直接攻擊時，閃到背後反斬
 //   echo：影分身追斬——二階段每記斬擊 / 衝刺在 0.3 秒後由影子以 40% 威力重複
+//   learn：一看就會（範馬勇次郎）——同一招每被他「看過」一次，下次的傷害與架勢傷害降低 12%（最多 36%）
 //   reflect：神虛視（亞當）——見切架式（counter 動作帶 reflect:true）看穿對手出招時，把整招複製成自己的反擊；二階段過載、將死時死立不倒
 (function (G) {
   const BD = G.BD, K = BD.K;
@@ -107,6 +108,18 @@
       w.banner('死立不倒', b.name + ' 已超越極限，仍在揮拳', b.def.color);
       w.log(b, '生命耗盡，卻憑意志繼續站著揮拳！', true);
       return true;
+    },
+  });
+
+  // ── learn：一看就會（勇次郎）——原作他看一眼就能學會任何招式（郭海皇的消力）：同一招每施放一次（多段算一次）就被他「看過」一次，之後再被這招打中，傷害與架勢傷害各降 12%、最多 36% ──
+  BD.defineTrait('learn', {
+    interceptDamage(w, b, src, p) {
+      if (!src || !src.isBoss || !src.inst || p.dot) return null;
+      const id = src.inst.skill.id, seen = b._learn || (b._learn = {}), e = seen[id] || (seen[id] = { n: 0, inst: null });
+      if (e.inst !== src.inst) { e.inst = src.inst; e.n++; if (e.n === 2) w.fx.text(b.x, b.y - b.r - 30, '看過了', '#ffb0a0', 20); }
+      const cut = 1 - 0.12 * Math.min(3, e.n - 1);
+      if (cut < 1) { p.dmg *= cut; if (p.posture != null) p.posture *= cut; }
+      return null; // 只減傷，不攔截
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

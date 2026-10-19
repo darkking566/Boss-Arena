@@ -57,4 +57,25 @@
       fx.shake(Math.min(18, 9 * Math.min(k, 1.7)));
     },
   });
+
+  BD.defineEffect('quakehalt', {
+    name: '止震之拳', category: '震波',
+    desc: '一拳砸停地震：落點爆出白熱前緣的震波與放射狀的粗大地裂，地裂中透出元素光；接著三圈震波一圈比一圈寬地接連推出，彷彿把搖晃的大地硬生生按住，碎石與塵土向上炸起。適合重拳砸地、鎮壓震動。',
+    params: { radius: 140 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, r = o.radius || 140;
+      fx.flashAt(x, y, r * 0.9, E.core, 0.18);
+      fx.shock(x, y, 8, r, o.heavy ? 0.5 : 0.38, E.glow, 12 * Math.min(1.5, k), E.core);
+      for (let i = 1; i <= 3; i++) fx.after(i * 0.11, () => fx.shock(x, y, r * 0.6, r * (1 + i * 0.7), 0.4, i % 2 ? E.glow : E.core, 6 - i, E.core));
+      for (let i = 0; i < 9; i++) { // 放射狀粗裂痕
+        const a = i / 9 * Math.PI * 2 + V() * 0.3;
+        fx.crack(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, r * 0.7, E.decal, o.heavy ? 9 : 7, E.crack, 6);
+      }
+      fx.decal(x, y, r * 0.75, E.decal, 8);
+      fx.debris(x, y, E.debris, Math.round(12 * k), 320, 3 + k, r * 0.4);
+      fx.sparkle(x, y, E.core, Math.round(16 * k), 420, -Math.PI / 2, 2.2);
+      fx.motes(x, y, E, Math.round(14 * k), r * 0.7, 220);
+      fx.shake(Math.min(20, 12 * Math.min(k, 1.6)));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

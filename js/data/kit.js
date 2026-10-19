@@ -19,5 +19,11 @@
       Object.assign({ do: 'dash', at, dist: len, dur, hit }, extra || {}),
     ];
   }
-  BD.DataKit = { D, strike, dashStrike };
+  // 連續出拳：n 記小傷害的連打（同一判定形狀，從 t0 起；間隔 gap 每拳再乘 ratio——小於 1 即越打越快）
+  function flurry(t0, n, gap, shape, hit, fx, ratio) {
+    const out = []; let t = t0, g = gap;
+    for (let i = 0; i < n; i++) { out.push(Object.assign({ do: 'hit', at: +t.toFixed(3) }, shape, hit, { fx })); t += g; g *= ratio || 1; }
+    return out;
+  }
+  BD.DataKit = { D, strike, dashStrike, flurry };
 })(typeof window !== 'undefined' ? window : globalThis);

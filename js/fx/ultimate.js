@@ -248,4 +248,29 @@
       });
     },
   });
+
+  BD.defineEffect('nukefist', {
+    name: '撼地一拳', category: '大招',
+    desc: '核爆般的一拳：全屏瞬間泛白、全場一暗，落點炸出純白核心與四圈快速擴張的震波、粗大放射地裂與噴上天的碎石，一道光柱貫穿地面，最後留下發光的焦黑坑洞，畫面劇烈震動。適合最強一拳、大招終結一擊、砸凹大地。',
+    params: { radius: 170 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, r = (o.radius || 170) * Math.min(1.6, o.scale || 1);
+      fx.veil(0.8, 0.5, '#000000');
+      fx.flash('#ffffff', 0.7);
+      fx.flashAt(x, y, r * 1.6, '#ffffff', 0.3);
+      fx.pillar(x, y, r * 0.6, E.glow, 0.6);
+      fx.glow(x, y, r * 1.2, E.glow, 0.7, 0.8, 0.5);
+      for (let i = 0; i < 4; i++) fx.after(i * 0.07, () => fx.shock(x, y, r * 0.2, r * (1.1 + i * 0.7), 0.55 + 0.05 * i, i % 2 ? E.glow : E.core, 14 - 2 * i, E.core));
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2 + V() * 0.25;
+        fx.crack(x + Math.cos(a) * r * 0.55, y + Math.sin(a) * r * 0.55, r * 0.9, E.decal, 9, E.crack, 7);
+        fx.streak(x, y, x + Math.cos(a) * r * 2.2, y + Math.sin(a) * r * 2.2, 3, E.core, 0.3, true);
+      }
+      fx.decal(x, y, r * 0.95, E.decal, 12);
+      fx.debris(x, y, E.debris, fx.budget(Math.round(18 * Math.min(1.6, k))), 420, 4 + k, r * 0.5);
+      fx.sparkle(x, y, E.core, fx.budget(Math.round(26 * Math.min(1.6, k))), 520, -Math.PI / 2, 3);
+      fx.motes(x, y, E, 20, r * 0.8, 260);
+      fx.shake(Math.min(30, 20 * Math.min(1.5, k)));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

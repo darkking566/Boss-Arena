@@ -4,15 +4,8 @@
 // 二階段「阿陀磨須」：把全身肌肉壓縮到極限，身體近乎不壞、卻在一點一滴崩壞（phase2.status 'adamas'）。
 // 元素：一階段 holy（金色神威）、神之斧 blood（動畫中的血紅背景）、二階段 cosmos（阿陀磨須身後的紫黑星海，新增元素）。
 (function (G) {
-  const BD = G.BD, { D, strike, dashStrike } = BD.DataKit;
+  const BD = G.BD, { D, strike, dashStrike, flurry } = BD.DataKit;
   const COSMOS = { el: 'cosmos' };
-
-  // 連續出拳：n 記小傷害的連打（同一判定形狀，從 t0 起；間隔 gap 每拳再乘 ratio——小於 1 即越打越快）
-  function flurry(t0, n, gap, shape, hit, fx, ratio) {
-    const out = []; let t = t0, g = gap;
-    for (let i = 0; i < n; i++) { out.push(Object.assign({ do: 'hit', at: +t.toFixed(3) }, shape, hit, { fx })); t += g; g *= ratio || 1; }
-    return out;
-  }
 
   const zeus = {
     id: 'zeus', name: '宙斯', title: '全宇宙之父', archetype: '鬥神・肌肉變形',

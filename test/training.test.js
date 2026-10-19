@@ -28,6 +28,7 @@ const ALLOW_MISS = new Set([
   'fiora:parry_w',  // 招架：架式期間需受攻擊才會觸發反擊；假人不攻擊
   'adam:divine_sight', // 神虛視：架式期間需受攻擊才會複製反擊；假人不攻擊
   'mihawk:parry',   // 撥擋：架式期間需受攻擊才會觸發反擊；假人不攻擊
+  'yujiro:xiaoli',  // 消力：架式期間需受攻擊才會反擊；假人不攻擊
   'ronin:mikiri',  // 見切：架式期間需受攻擊才會觸發反斬；假人不攻擊
   'watcher:parry',  // 匕首彈反：架式期間需受攻擊才會觸發反斬；假人不攻擊
   'witch:mines',    // 霜凍地雷：陷阱散布於兩者之間，假人站立不動不會踩中

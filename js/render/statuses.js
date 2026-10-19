@@ -46,6 +46,7 @@
   R.defineStatusIcon('deathstand', { glyph: '立', color: '#ffe27a' });
   R.defineStatusIcon('ecstasy', { glyph: '喜', color: '#ffd36a' });
   R.defineStatusIcon('adamas', { glyph: '剛', color: '#b07bff' });
+  R.defineStatusIcon('ogreback', { glyph: '鬼', color: '#ff4a33' });
 
   // ─────────────────────── HUD 狀態列 ───────────────────────
   function roundRect(ctx, x, y, w, h, r) {
