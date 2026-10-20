@@ -196,7 +196,7 @@
     ctx.strokeStyle = 'rgba(' + ORANGE + ',0.8)'; ctx.lineWidth = S * 0.16; ctx.beginPath(); ctx.moveTo(S * 0.05, S * 1.0); ctx.lineTo(S * 0.85, S * 1.2); ctx.lineTo(S * 1.5, S * 0.95); ctx.stroke();
     ctx.save(); ctx.translate(S * 1.5, S * 0.95); ctx.rotate(sw);
     ctx.fillStyle = 'rgba(' + ORANGE + ',0.85)'; ctx.strokeStyle = 'rgba(' + GOLD + ',1)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-S * 0.05, S * 0.26, S * 0.17, 0, U.TAU); ctx.fill(); ctx.stroke(); // 酒壺
-    const bl = S * (p2 ? 3.7 : 3.2);
+    const bl = S * 3.0;
     ctx.strokeStyle = 'rgba(150,120,255,0.55)'; ctx.lineWidth = S * 0.2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bl, 0); ctx.stroke(); // 靈刃外暈
     ctx.strokeStyle = 'rgba(214,200,255,0.95)'; ctx.lineWidth = S * 0.09; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bl, 0); ctx.stroke();
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = S * 0.035; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(bl, 0); ctx.stroke(); // 白熱刃芯

@@ -120,7 +120,7 @@
       // 二階段：須佐能乎・十拳劍——酒壺中湧出的靈劍刺穿目標，被刺中者被封印（定身 + 易傷）
       { id: 'totsuka', name: '須佐能乎・十拳劍', short: '十拳', phase: 2, tags: ['melee', 'zone'], range: [0, 380], cd: 9, cost: 28, track: 6, recovery: 0.75,
         actions: [{ do: 'status', at: 0.05, id: 'susanoo' }, { do: 'strain', at: 0.1, pct: 0.008 },
-          ...strike(1.05, 1.0, rect(380, 130), { dmg: 125, posture: 60, kb: 320, fx: 'totsuka', status: [{ id: 'root', dur: 1.2 }, { id: 'vulnerable', dur: 4 }] })] },
+          ...strike(1.05, 1.0, rect(720, 150), { dmg: 125, posture: 60, kb: 320, fx: 'totsuka', status: [{ id: 'root', dur: 1.2 }, { id: 'vulnerable', dur: 4 }] })] },
     ],
     // 大招：鼬在對手面前同時動用三種瞳術——月讀拖進幻境、天照的黑炎沿著視線一路燒過去；二階段再以須佐能乎揮出十拳劍的巨斬
     ultimate: { id: 'ult', name: '月讀・天照', name2: '月讀・天照・須佐能乎', ult: true, range: [0, 900], track: 0, recovery: 0.8,
