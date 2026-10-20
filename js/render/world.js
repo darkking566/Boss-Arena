@@ -941,11 +941,11 @@
           ctx.beginPath(); ctx.moveTo(-r * 2.6, yy); ctx.quadraticCurveTo(-r * 3.6, yy + Math.sin(ph) * r * 0.5, -r * (4.4 + i * 0.4), yy * 1.3 + Math.cos(ph) * r * 0.4); ctx.stroke();
         }
         ctx.restore();
-        ctx.rotate(t * 13 + p.x * 0.012); ctx.scale(0.8, 0.8);
-        R.blit(ctx, 'proj:magatama8:' + r, r * 6.4 + 30, r * 6.4 + 30, r * 3.2 + 15, r * 3.2 + 15, (g) => {
-          const H = r * 0.6, D = r * 1.6, RO = D + H;               // 頭半徑、頭心到中心的距離（三枚逗點彼此分開）
+        ctx.rotate(t * 13 + p.x * 0.012); ctx.scale(0.7, 0.7);
+        R.blit(ctx, 'proj:magatama10:' + r, r * 7.6 + 30, r * 7.6 + 30, r * 3.8 + 15, r * 3.8 + 15, (g) => {
+          const H = r * 0.7, D = r * 0.95, RO = D + H;               // 頭半徑、頭心到中心的距離（三枚逗點彼此分開）
           const P = (rad, ang) => [r * rad * Math.cos(ang), r * rad * Math.sin(ang)];  // 極座標（rad 以 r 為單位）
-          const c1 = P(2.8, 0.4), c2 = P(2.95, 0.95), tip = P(2.55, 1.45), ic = P(1.95, 0.95);
+          const c1 = P(2.4, 0.3), c2 = P(3.3, 0.7), tip = P(3.5, 1.45), ic = P(1.9, 1.0);
           const tail = () => { // 尾：外緣自頭外側盪出、繞著鄰居的頭甩成彎月收尖，內緣凹進回到頭心
             g.beginPath(); g.moveTo(RO, 0);
             g.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], tip[0], tip[1]);
@@ -958,17 +958,17 @@
           g.strokeStyle = '#8a3a08'; g.lineWidth = 7; g.beginPath(); g.arc(0, 0, D, 0, U.TAU); g.stroke();   // 串起三個頭的橘色細線（先畫外緣暗邊再畫亮線）
           g.strokeStyle = '#ff9a2a'; g.lineWidth = 4; g.stroke(); g.strokeStyle = '#ffe2a0'; g.lineWidth = 1.4; g.stroke();
           each(() => { g.strokeStyle = '#5a1c04'; g.lineWidth = 6; tail(); g.stroke(); head(); g.stroke(); }); // 先畫外框，再用填色蓋掉內側線條
-          const gr = g.createRadialGradient(0, 0, r * 0.8, 0, 0, r * 3);
+          const gr = g.createRadialGradient(0, 0, r * 0.8, 0, 0, r * 3.6);
           gr.addColorStop(0, '#ffd77a'); gr.addColorStop(0.55, '#f0902a'); gr.addColorStop(1, '#c05a10');
           each(() => { g.fillStyle = gr; tail(); g.fill(); head(); g.fill(); });
           each(() => {
             g.strokeStyle = '#a84510'; g.lineWidth = 2.4; // 頭部漩渦線與尾部流線
             g.beginPath(); g.arc(D, 0, H * 0.55, 0.3, 4.6); g.stroke();
-            const f0 = P(2.25, 0.18), f1 = P(2.65, 0.8), f2 = P(2.35, 1.25);
+            const f0 = P(2.1, 0.15), f1 = P(3.0, 0.6), f2 = P(3.0, 1.3);
             g.beginPath(); g.moveTo(f0[0], f0[1]); g.quadraticCurveTo(f1[0], f1[1], f2[0], f2[1]); g.stroke();
             g.strokeStyle = 'rgba(255,246,200,0.95)'; g.lineWidth = 2.4; // 外緣高光
             g.beginPath(); g.arc(D, 0, H * 0.8, -2.3, -0.8); g.stroke();
-            const h0 = P(2.4, 0.08), h1 = P(3.0, 0.7), h2 = P(2.7, 1.25);
+            const h0 = P(2.2, 0.1), h1 = P(3.4, 0.6), h2 = P(3.3, 1.35);
             g.beginPath(); g.moveTo(h0[0], h0[1]); g.quadraticCurveTo(h1[0], h1[1], h2[0], h2[1]); g.stroke();
           });
 // 三枚頭相接處的中心點
