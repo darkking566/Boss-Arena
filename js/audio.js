@@ -30,7 +30,7 @@
       projHit: ['arrow_hit1', 'arrow_hit2', 'arrow_hit3', 'arrow_hit4'], ultCast: ['totem_of_undying'], poison: ['lava_pop'],
       victory: ['event_raidhorn1', 'event_raidhorn2', 'event_raidhorn3', 'event_raidhorn4'],
       wood: ['cherry_wood_break1', 'cherry_wood_break2', 'cherry_wood_break3', 'cherry_wood_break4', 'cherry_wood_break5'],
-      grass: ['peelgrass_break1', 'peelgrass_break2', 'peelgrass_break3', 'peelgrass_break4'],
+      grass: ['grass_dig1', 'grass_dig2', 'grass_dig3', 'grass_dig4'],
       splash: ['water_splash1', 'water_splash2'],
       stun: ['ravager_stun1', 'ravager_stun2', 'ravager_stun3'],
       start: ['event_raidhorn1', 'event_raidhorn2'],
