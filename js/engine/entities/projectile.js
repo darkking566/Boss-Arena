@@ -8,7 +8,7 @@
     const r0 = (src.r || 10) + 4;
     w.projectiles.push({ team: owner.team, owner, x: src.x + Math.cos(ang) * r0, y: src.y + Math.sin(ang) * r0,
       vx: Math.cos(ang) * a.speed, vy: Math.sin(ang) * a.speed, r: a.r, dmg: a.dmg, posture: a.posture, kb: a.kb || 40,
-      life: a.life || 2, homing: a.homing || 0, pierce: !!a.pierce, kind: a.kind, slow: a.slow, status: a.status, undodgeable: a.undodgeable, hitSet: new Set(), t: 0, alive: true, ret: a.ret || 0, back: false });
+      life: a.life || 2, homing: a.homing || 0, pierce: !!a.pierce, kind: a.kind, slow: a.slow, status: a.status, undodgeable: a.undodgeable, hitSet: new Set(), seq: w.projSeq = (w.projSeq | 0) + 1, t: 0, alive: true, ret: a.ret || 0, back: false });
   };
 
   BD.updateProjectiles = function (w, dt) {

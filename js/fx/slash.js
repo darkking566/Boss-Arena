@@ -173,7 +173,8 @@
           fx.sparkle(x + px * off + c * L, y + py * off + s * L, '#ffe39a', fx.budget(5), 300, ang, 0.9);
         });
       }
-      fx.after(0.1, () => { fx.flashAt(x + c * len * 0.6, y + s * len * 0.6, 50, '#fff0c0', 0.14); fx.text(x + c * len * 0.5, y + s * len * 0.5 - 28, '虎切', '#ffd36a', 32); fx.shake(Math.min(9, 5 * k), ang); });
+      // 書法字放在衝刺尾端並偏向一側，避免連段「燕返し・虎切」時與「燕」「返」疊在一起
+      fx.after(0.1, () => { fx.flashAt(x + c * len * 0.6, y + s * len * 0.6, 50, '#fff0c0', 0.14); fx.text(x + c * len * 0.9 + px * 46, y + s * len * 0.9 + py * 46 - 20, '虎切', '#ffd36a', 32); fx.shake(Math.min(9, 5 * k), ang); });
       if (o.src) fx.ghost(o.src, 0.3, '#ffc84a');
     },
   });

@@ -915,8 +915,8 @@
         ctx.fillStyle = '#ffffff';
         for (const s of [-1, 1]) { const tx = cx + Math.cos(a0) * rad, ty = s * Math.sin(a0) * rad; ctx.beginPath(); ctx.arc(tx, ty, Math.max(3, k * 0.06), 0, U.TAU); ctx.fill(); }
       } else if (p.kind === 'swordghost') {
-        // 小次郎的歷代劍豪幻影（動畫：一排前人劍豪在速度線中疾奔）：青白發光的奔跑人影，依個體換笠 / 白髮 / 髻 / 長髮，刀向前、身後拖長長的速度線
-        const k = p.r / 42 * 1.7, who = ((p.y * 0.37 + p.x * 0.11) | 0) % 5, run = Math.sin(t * 26 + who * 1.7);
+        // 以發射序號 p.seq 決定劍豪造型（同一輪 5 道各不相同、飛行中不變臉）。小次郎的歷代劍豪幻影（動畫：一排前人劍豪在速度線中疾奔）：青白發光的奔跑人影，依個體換笠 / 白髮 / 髻 / 長髮，刀向前、身後拖長長的速度線
+        const k = p.r / 42 * 1.7, who = p.seq % 5, run =Math.sin(t * 26 + who * 1.7);
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
         const gl = ctx.createRadialGradient(0, 0, 2, 0, 0, 34 * k); gl.addColorStop(0, 'rgba(160,220,255,0.55)'); gl.addColorStop(1, 'rgba(160,220,255,0)');
         ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, 34 * k, 0, U.TAU); ctx.fill();

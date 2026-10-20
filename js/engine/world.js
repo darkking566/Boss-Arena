@@ -164,7 +164,7 @@
           if (this.time - b.lastDodgeStart < 0.2 && !p.noPerfect) {
             b.stats.perfect++; b.ult = Math.min(100, b.ult + 6); b.sta = Math.min(b.maxSta, b.sta + 10);
             fx.text(b.x, b.y - b.r - 14, '完美閃避', '#7dffb0', 18); this.log(b, '完美閃避！');
-            if (src && src.def && src.def.learnReset && src._learn) { src._learn = {}; fx.text(src.x, src.y - src.r - 30, '預測被打亂', '#ffb0a0', 20); } // 千手被超越：學習歸零
+            if (src && src.def && src.def.learnReset && src._learn) { src._learn = {}; fx.text(src.x, src.y - src.r - 30, '預測被打亂', '#ffb0a0', 20); fx.shock(src.x, src.y, src.r, src.r * 2.6, 0.35, '#9fd8ff', 4, '#ffffff'); fx.sparkle(src.x, src.y, '#cfe8ff', fx.budget(10), 260); } // 千手被超越：學習歸零
           } else fx.text(b.x, b.y - b.r - 10, '閃避', '#ccffdd', 14);
         }
         return 'dodged';
