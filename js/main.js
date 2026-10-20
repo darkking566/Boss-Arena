@@ -186,7 +186,6 @@
   function show(name, msg) {
     state.screen = name;
     if (name !== 'result' && BD.sfx) BD.sfx.stop(); // 離開 / 重開戰鬥時停掉殘留音效
-    if (name === 'game' && BD.sfx) BD.sfx.play('start', 0.7);
     $('#select').classList.toggle('hidden', name !== 'select');
     $('#result').classList.toggle('hidden', name !== 'result');
     if (name !== 'game' && BD.TrainingUI) BD.TrainingUI.hide();

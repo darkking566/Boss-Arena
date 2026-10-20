@@ -4,7 +4,23 @@
   const BD = G.BD, { D, strike, dashStrike } = BD.DataKit;
   // 二階段火焰：延遲 0.5 秒才燃起，對應原作「揮劍後地面遲一拍炸出火焰」
   const FIRE = { kind: 'fire', r: 44, dur: 3, dps: 22, delay: 0.5 };
-  const ignite = (list, zone) => list.map((a) => (a.do === 'hit' ? Object.assign({}, a, { zone }) : a));
+  // 二階段每一揮都帶出粗大的火焰刃光（fx 放大 1.45 倍、火元素）並在原地留火
+  const flame = (fx) => ({ id: fx, scale: 1.45, el: 'fire' });
+  const ignite = (list, zone) => list.map((a) => (a.do === 'hit' ? Object.assign({}, a, { zone, fx: flame(a.fx) }) : a));
+  // 不死隊連環劍舞：每揮一劍就踏步貼近，三擊一刺，收尾重劈；fire = 二階段（踏步拖火痕、隔擊留火、尾擊火環）
+  const legion = (fire) => {
+    const out = [], n = 9, t0 = 0.9, gap = 0.4;
+    for (let i = 0; i < n; i++) {
+      const t = +(t0 + i * gap).toFixed(2), tele = i ? 0.2 : 0.5, stab = i % 3 === 2;
+      out.push(Object.assign({ do: 'dash', at: +(t - tele - 0.16).toFixed(2), dist: 95, dur: 0.14 }, fire && { trail: { kind: 'fire', r: 34, dur: 3, dps: 20, delay: 0.5 } }));
+      out.push(...strike(t, tele, stab ? { shape: 'rect', len: 190, w: 60 } : { shape: 'cone', r: 135, arc: 150 * D },
+        { dmg: stab ? 62 : 38, posture: stab ? 24 : 14, kb: stab ? 260 : 140, fx: fire ? flame(stab ? 'thrust' : 'slash') : stab ? 'thrust' : 'slash', zone: fire && i % 2 ? FIRE : undefined }));
+    }
+    const tf = +(t0 + n * gap + 0.3).toFixed(2);
+    out.push(...strike(tf, 0.45, { shape: 'circle', r: 175 }, { dmg: 130, posture: 55, kb: 480, fx: fire ? { id: 'bigslam', scale: 1.2, el: 'fire' } : 'bigslam', zone: fire ? { kind: 'fire', r: 140, dur: 4, dps: 28, delay: 0.4 } : undefined }));
+    if (fire) out.push(...strike(tf + 0.4, 0.25, { shape: 'ring', r0: 175, r: 270 }, { dmg: 70, posture: 25, kb: 320, fx: 'pillarring' }));
+    return out;
+  };
   const wCombo = [
     ...strike(0.28, 0.24, { shape: 'cone', r: 120, arc: 120 * D }, { dmg: 48, posture: 18, kb: 120, fx: 'slash' }),
     ...strike(0.52, 0.2, { shape: 'cone', r: 120, arc: 120 * D }, { dmg: 48, posture: 18, kb: 120, fx: 'slash' }),
@@ -23,12 +39,6 @@
     { do: 'tele', at: 0.25, dur: 0.8, shape: 'circle', r, anchor: 'target', setMark: 'P', follow: true, lockBefore: 0.35 },
     { do: 'land', at: 1.05, mark: 'P' },
     Object.assign({ do: 'hit', at: 1.05, shape: 'circle', r, anchor: 'mark', mark: 'P', dmg, posture: 45, kb: 380, fx: 'bigslam' }, extra || {}),
-  ];
-  const leap = (t0, dur, r, mark, hit) => [
-    { do: 'hide', at: t0, fx: 'leap' },
-    { do: 'tele', at: t0, dur, shape: 'circle', r, anchor: 'target', setMark: mark, follow: true, lockBefore: 0.3 },
-    { do: 'land', at: t0 + dur, mark },
-    Object.assign({ do: 'hit', at: t0 + dur, shape: 'circle', r, anchor: 'mark', mark, fx: 'bigslam' }, hit),
   ];
   const watcher = {
     id: 'watcher', name: '深淵監視者', title: '法蘭不死隊', archetype: '迅捷群狼型',
@@ -97,17 +107,9 @@
         actions: [...dashStrike(0.5, 0.5, 340, 56, 0.3, { dmg: 84, posture: 32, kb: 260 }, { fx: 'slashline', trail: { kind: 'fire', r: 34, dur: 3, dps: 20, delay: 0.5 } }),
           ...strike(1.2, 0.35, { shape: 'circle', r: 95, off: -85 }, { dmg: 72, posture: 26, kb: 260, fx: 'pillarring', zone: { kind: 'fire', r: 90, dur: 3.5, dps: 24 } })] },
     ],
-    ultimate: { id: 'ult', name: '狼血連環躍斬', name2: '薪王焚環', ult: true, range: [0, 900], track: 6, recovery: 1.0,
-      actions: [...leap(0.2, 0.65, 100, 'A', { dmg: 75, posture: 25, kb: 300 }),
-        ...leap(1.0, 0.6, 100, 'B', { dmg: 75, posture: 25, kb: 300 }),
-        ...leap(1.75, 0.8, 170, 'C', { dmg: 150, posture: 60, kb: 500 }),
-        { do: 'tele', at: 2.55, dur: 0.3, shape: 'ring', r0: 170, r: 260, anchor: 'mark', mark: 'C' },
-        { do: 'hit', at: 2.85, shape: 'ring', r0: 170, r: 260, anchor: 'mark', mark: 'C', dmg: 60, posture: 20, kb: 300, fx: 'ring' }],
-      actions2: [{ do: 'tele', at: 0.1, dur: 1.9, shape: 'ring', r0: 165, r: 245, anchor: 'target', setMark: 'C' },
-        { do: 'circle', at: 0.25, dur: 1.3, mark: 'C', r: 205, trail: { kind: 'fire', r: 40, dur: 4, dps: 24 }, hit: { dmg: 70, posture: 30, kb: 300 } },
-        { do: 'hit', at: 2.0, shape: 'ring', r0: 165, r: 245, anchor: 'mark', mark: 'C', dmg: 130, posture: 50, kb: 350, fx: 'pillarring' },
-        ...leap(2.1, 0.75, 150, 'D', { dmg: 170, posture: 70, kb: 550, zone: { kind: 'fire', r: 110, dur: 4, dps: 28 } })],
-      desc: '一階段「狼血連環躍斬」：連續三次追蹤目標的躍空下劈，最後一擊引發衝擊波；二階段「薪王焚環」：繞目標疾奔一圈留下火痕，火環爆燃後再一記爆炎下劈' },
+    ultimate: { id: 'ult', name: '不死隊連環劍舞', name2: '薪王焚天連斬', ult: true, range: [0, 900], track: 6, recovery: 1.2,
+      actions: legion(false), actions2: legion(true),
+      desc: '一階段「不死隊連環劍舞」：法蘭不死隊的劍技，九記踏步斬刺（三擊一刺）連綿不斷追著目標，最後以一記重劈收尾；二階段「薪王焚天連斬」：同樣的連斬，每一揮都帶出粗大的火焰刃光，踏步拖出火痕，隔擊留火，尾擊引爆火環' },
   };
 
   BD.registerBoss(watcher);
