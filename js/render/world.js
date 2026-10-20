@@ -926,26 +926,40 @@
         }
         ctx.fillStyle = '#ff3048'; ctx.fillRect(10 * k, -1.5 * k, 2.5 * k, 2.5 * k);
       } else if (p.kind === 'magatama') {
-        // 須佐能乎的八尺瓊勾玉：逗點形的發光玉（頭圓、尾彎曲收尖、頭上一個孔），邊飛邊旋轉，後方拖著火尾與光暈
-        const r = p.r;
+        // 須佐能乎的八坂ノ勾玉（漫畫原作）：金橘色的扁平大逗點——渾圓的頭、向後甩出一條長長彎曲的尾，內部套著較小的逗點輪廓與漩渦線，
+        // 墨黑外框 + 淺黃高光；身後是放射狀的紅白速度線與飄動的火舌。朝飛行方向，不旋轉（尾巴拖在後面）
+        const r = p.r, wob = Math.sin(t * 18 + p.x * 0.02) * r * 0.06;
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-        for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,' + (110 + i * 25) + ',40,' + (0.3 - i * 0.08) + ')'; ctx.lineWidth = r * (1.5 - i * 0.4); ctx.beginPath(); ctx.moveTo(-r * 0.6, 0); ctx.lineTo(-r * (3 + i * 1.3), Math.sin(t * 14 + i) * r * 0.25); ctx.stroke(); }
+        for (let i = 0; i < 9; i++) { // 速度線：紅白相間，長短不一
+          const yy = (i - 4) * r * 0.34, len = r * (4.5 + (i * 37 % 5) * 1.1);
+          ctx.strokeStyle = i % 2 ? 'rgba(255,90,70,0.45)' : 'rgba(255,240,210,0.5)'; ctx.lineWidth = i % 2 ? 3 : 1.6;
+          ctx.beginPath(); ctx.moveTo(-r * 2.2, yy * 0.7); ctx.lineTo(-r * 2.2 - len, yy * 1.5); ctx.stroke();
+        }
+        for (let i = 0; i < 4; i++) { // 尾後的火舌
+          const ph = t * 9 + i * 1.7, yy = (i - 1.5) * r * 0.5;
+          ctx.strokeStyle = 'rgba(255,' + (120 + i * 25) + ',40,0.35)'; ctx.lineWidth = r * (0.5 - i * 0.07);
+          ctx.beginPath(); ctx.moveTo(-r * 3.4, yy); ctx.quadraticCurveTo(-r * 4.4, yy + Math.sin(ph) * r * 0.5, -r * (5.2 + i * 0.4), yy * 1.3 + Math.cos(ph) * r * 0.4); ctx.stroke();
+        }
         ctx.restore();
-        ctx.rotate(t * 6 + p.x * 0.01);
-        R.blit(ctx, 'proj:magatama2:' + r, r * 5.4 + 28, r * 5.4 + 28, r * 2.7 + 14, r * 2.7 + 14, (g) => {
-          g.shadowColor = '#ff7a2a'; g.shadowBlur = 22;
-          const gr = g.createRadialGradient(r * 0.15, r * 0.25, r * 0.1, 0, 0, r * 1.3);
-          gr.addColorStop(0, '#fff4cc'); gr.addColorStop(0.45, '#ffb04a'); gr.addColorStop(1, '#c8300a');
-          g.fillStyle = gr; g.strokeStyle = '#ffd9a0'; g.lineWidth = 2.5;
-          g.beginPath(); g.moveTo(-r * 0.35, -r * 2.2);
-          g.bezierCurveTo(r * 0.55, -r * 1.7, r * 1.05, -r * 0.95, r * 0.98, 0);
-          g.arc(0, 0, r * 0.98, 0, Math.PI, false);
-          g.bezierCurveTo(-r * 1.08, -r * 0.9, -r * 0.95, -r * 1.75, -r * 0.35, -r * 2.2);
-          g.closePath(); g.fill(); g.stroke();
-          g.shadowBlur = 0;
-          g.fillStyle = 'rgba(90,10,0,0.9)'; g.strokeStyle = '#ffe9b8'; g.lineWidth = 1.8; g.beginPath(); g.arc(-r * 0.05, -r * 0.1, r * 0.24, 0, U.TAU); g.fill(); g.stroke(); // 穿孔
-          g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 2.2; g.beginPath(); g.arc(0, 0, r * 0.7, 2.2, 3.5); g.stroke(); // 高光
-          g.strokeStyle = 'rgba(200,50,10,0.6)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(-r * 0.45, -r * 1.9); g.quadraticCurveTo(r * 0.4, -r * 1.1, r * 0.55, -r * 0.1); g.stroke(); // 玉面紋路
+        ctx.translate(0, wob); ctx.scale(1.3, 1.3); // 漫畫裡的勾玉比判定大得多
+        R.blit(ctx, 'proj:magatama3:' + r, r * 7 + 30, r * 4.4 + 30, r * 5 + 15, r * 2.4 + 15, (g) => {
+          const comma = (k) => { // 逗點輪廓：頭圓半徑 k·r，尾端在 (-4.2, -1.2)·k·r
+            const R0 = r * k;
+            g.beginPath(); g.moveTo(-R0 * 4.2, -R0 * 1.25);
+            g.bezierCurveTo(-R0 * 2.8, -R0 * 2.1, -R0 * 0.7, -R0 * 1.5, R0 * 0.36, -R0 * 0.94);
+            g.arc(0, 0, R0, -1.2, 2.5, false);
+            g.bezierCurveTo(-R0 * 1.4, R0 * 0.75, -R0 * 3.0, R0 * 0.1, -R0 * 4.2, -R0 * 1.25);
+            g.closePath();
+          };
+          const gr = g.createLinearGradient(-r * 4.2, 0, r, 0);
+          gr.addColorStop(0, '#c4600f'); gr.addColorStop(0.45, '#eb8d26'); gr.addColorStop(1, '#ffd070');
+          g.fillStyle = gr; comma(1); g.fill();
+          g.lineJoin = 'round'; g.strokeStyle = '#6a2406'; g.lineWidth = 4; comma(1); g.stroke();                 // 墨黑外框
+          g.strokeStyle = '#b8581a'; g.lineWidth = 3; g.save(); g.translate(-r * 0.15, r * 0.04); comma(0.62); g.stroke(); g.restore(); // 內層逗點線
+          g.strokeStyle = '#a24410'; g.lineWidth = 2.4; g.beginPath(); g.arc(-r * 0.05, 0, r * 0.42, 0.4, 4.4); g.stroke();          // 頭部的漩渦線
+          g.beginPath(); g.moveTo(-r * 1.2, -r * 0.55); g.quadraticCurveTo(-r * 2.4, -r * 0.5, -r * 3.2, -r * 0.9); g.stroke();      // 尾部的流線
+          g.strokeStyle = 'rgba(255,244,196,0.9)'; g.lineWidth = 3; g.beginPath(); g.moveTo(-r * 3.6, -r * 1.2); g.bezierCurveTo(-r * 2.6, -r * 1.85, -r * 0.7, -r * 1.35, r * 0.34, -r * 0.84); g.stroke(); // 上緣高光
+          g.fillStyle = '#ffe9a8'; g.beginPath(); g.arc(r * 0.35, -r * 0.35, r * 0.13, 0, U.TAU); g.fill();
         });
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
