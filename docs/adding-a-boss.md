@@ -158,6 +158,7 @@ BD.defineStatus('burn', {
 | `susanoo` | 須佐能乎 | buff | 承受傷害 ×0.75，預設 16 秒；造型檔 `under()` 畫出約 6 倍大的巨人（鼬） |
 | `jhorage` | 暴怒 | buff | 承受傷害 ×0.92、造成傷害 ×1.08（恐暴龍二階段常駐；造型膨脹泛紅）|
 | `dragonblight` | 龍封 | debuff | 造成傷害 ×0.85，預設 6 秒（恐暴龍的龍息）|
+| `manju` | 萬手無雙 | buff | 移動速度 ×1.08、承受傷害 ×0.95（小次郎二階段常駐）|
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：

@@ -142,6 +142,11 @@
     name: '暴怒', tags: ['buff'], stacking: 'refresh',
     modifiers: { dmgTakenMul: 0.92, dmgDealtMul: 1.08 },
   });
+  // ── 萬手無雙（小次郎二階段常駐）：千手進化，連空氣與地面的震動都讀得到——移動更快、承受傷害降低 ──
+  BD.defineStatus('manju', {
+    name: '萬手無雙', tags: ['buff'], stacking: 'refresh',
+    modifiers: { speedMul: 1.08, dmgTakenMul: 0.95 },
+  });
   // ── 龍封（恐暴龍的龍息）：龍屬性能量侵蝕身體——造成的傷害降低 15%（原作：龍封力使武器屬性失效）──
   BD.defineStatus('dragonblight', {
     name: '龍封', tags: ['debuff'], stacking: 'refresh', defaultDur: 6, visual: 'dragonblight',

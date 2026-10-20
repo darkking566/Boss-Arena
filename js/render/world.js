@@ -914,6 +914,28 @@
         ctx.beginPath(); ctx.arc(cx, 0, rad * 0.97, -a0 + 0.14, a0 - 0.14); ctx.stroke();
         ctx.fillStyle = '#ffffff';
         for (const s of [-1, 1]) { const tx = cx + Math.cos(a0) * rad, ty = s * Math.sin(a0) * rad; ctx.beginPath(); ctx.arc(tx, ty, Math.max(3, k * 0.06), 0, U.TAU); ctx.fill(); }
+      } else if (p.kind === 'swordghost') {
+        // 小次郎的歷代劍豪幻影（動畫：一排前人劍豪在速度線中疾奔）：青白發光的奔跑人影，依個體換笠 / 白髮 / 髻 / 長髮，刀向前、身後拖長長的速度線
+        const k = p.r / 42 * 1.7, who = ((p.y * 0.37 + p.x * 0.11) | 0) % 5, run = Math.sin(t * 26 + who * 1.7);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        const gl = ctx.createRadialGradient(0, 0, 2, 0, 0, 34 * k); gl.addColorStop(0, 'rgba(160,220,255,0.55)'); gl.addColorStop(1, 'rgba(160,220,255,0)');
+        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, 34 * k, 0, U.TAU); ctx.fill();
+        for (let i = 0; i < 7; i++) {
+          const yy = (i - 3) * 8 * k, len = (60 + (i * 29 % 4) * 24) * k;
+          ctx.strokeStyle = i % 2 ? 'rgba(120,200,255,0.7)' : 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2.2 * k;
+          ctx.beginPath(); ctx.moveTo(-14 * k, yy); ctx.lineTo(-14 * k - len, yy * 1.3); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3 * k; // 刀
+        ctx.beginPath(); ctx.moveTo(6 * k, 11 * k); ctx.lineTo(56 * k, 8 * k); ctx.stroke();
+        ctx.strokeStyle = 'rgba(40,90,170,0.9)'; ctx.lineWidth = 5 * k; // 雙腿
+        ctx.beginPath(); ctx.moveTo(-8 * k, -6 * k); ctx.lineTo((-22 + run * 10) * k, -9 * k); ctx.moveTo(-8 * k, 6 * k); ctx.lineTo((-22 - run * 10) * k, 9 * k); ctx.stroke();
+        ctx.fillStyle = 'rgba(70,120,200,0.92)'; ctx.strokeStyle = '#d8f0ff'; ctx.lineWidth = 1.6; // 身軀（前傾疾奔）
+        ctx.beginPath(); ctx.ellipse(-2 * k, 0, 13 * k, 17 * k, 0, 0, U.TAU); ctx.fill(); ctx.stroke();
+        const hc = ['#c9b27a', '#eef2fa', '#1c1c26', '#2c3a44', '#14121a'][who];
+        if (who === 0) { ctx.fillStyle = '#c9b27a'; ctx.strokeStyle = '#6a5a30'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(4 * k, 0, 14 * k, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#e6d6a0'; ctx.beginPath(); ctx.arc(4 * k, 0, 5 * k, 0, U.TAU); ctx.fill(); } // 笠
+        else { ctx.fillStyle = hc; ctx.strokeStyle = '#d8f0ff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(4 * k, 0, 9 * k, 0, U.TAU); ctx.fill(); ctx.stroke(); }
+        if (who === 4) { ctx.strokeStyle = hc; ctx.lineWidth = 3.5 * k; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-26 * k, 4 * k); ctx.stroke(); } // 長髮
       } else if (p.kind === 'crow') {
         // 鼬的烏鴉：展翅的漆黑烏鴉剪影（翅膀隨時間拍動）、拖一道暗紅殘影、眼睛一點紅光
         const fl = Math.sin(t * 24 + p.x * 0.05) * 0.5 + 0.5, k = p.r / 22;

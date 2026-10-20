@@ -48,6 +48,7 @@
   R.defineStatusIcon('adamas', { glyph: '剛', color: '#b07bff' });
   R.defineStatusIcon('ogreback', { glyph: '鬼', color: '#ff4a33' });
   R.defineStatusIcon('jhorage', { glyph: '暴', color: '#e8402a' });
+  R.defineStatusIcon('manju', { glyph: '萬', color: '#9fd8ff' });
   R.defineStatusIcon('dragonblight', { glyph: '龍', color: '#d0143c' });
   R.defineStatusIcon('tsukuyomi', { glyph: '月', color: '#ff3048' });
   R.defineStatusIcon('amaterasu', { glyph: '照', color: '#b3123c' });

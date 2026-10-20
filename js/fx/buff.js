@@ -519,4 +519,79 @@
       });
     },
   });
+
+  // ── 小次郎：千手無雙 / 萬手無雙（見切成功）與神器再錬（二階段變身）──
+  BD.defineEffect('senju', {
+    name: '千手無雙', category: '增益',
+    desc: '在腦中模擬對手上千次：場地轉暗，對手周圍一圈圈青白細線構成的「模擬格線」逐條亮起、再猛然向對手收束，全屏一閃、浮出「見切」。適合讀招反擊、預判型見切。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const src = o.src || null, t = src && src.enemy ? src.enemy : { x, y, r: 26 }, r = t.r || 26;
+      fx.veil(0.7, 0.55, '#02060e');
+      for (let i = 0; i < 18; i++) {
+        const a = i * Math.PI * 2 / 18;
+        fx.after(i * 0.018, () => fx.beam(t.x + Math.cos(a) * r * 1.2, t.y + Math.sin(a) * r * 1.2, t.x + Math.cos(a) * r * 5.2, t.y + Math.sin(a) * r * 5.2, 2, '#9fd8ff', 0.3, '#ffffff'));
+      }
+      for (let i = 0; i < 3; i++) fx.after(0.1 + i * 0.08, () => fx.ring(t.x, t.y, r * (6 - i), r * 1.1, 0.26, i ? '#9fd8ff' : '#ffffff', 2.5));
+      fx.after(0.38, () => { fx.flash('#ffffff', 0.35); fx.sparkle(t.x, t.y, '#ffffff', fx.budget(14), 340); fx.text(x, y - r - 34, '見切', '#cfe8ff', 34); fx.shake(7); });
+      if (t.x !== x) fx.ghost(t, 0.45, '#9fd8ff');
+    },
+  });
+
+  BD.defineEffect('manju', {
+    name: '萬手無雙', category: '增益',
+    desc: '千手的進化：不只讀對手，連空氣與地面傳來的震動都讀進來。場地轉暗，一圈圈震動環同時由空中（青白）與地面（金色）向外盪開，對手周圍的模擬格線更密，全屏白閃、震波盪開，浮出「萬手」。適合讀招反擊的強化版。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const k = Math.min(1.5, o.k), src = o.src || null, t = src && src.enemy ? src.enemy : { x, y, r: 26 }, r = t.r || 26;
+      fx.veil(0.9, 0.62, '#02040c');
+      for (let i = 0; i < 28; i++) {
+        const a = i * Math.PI * 2 / 28, L = r * (4.4 + (i % 3) * 1.4);
+        fx.after(i * 0.012, () => fx.beam(t.x + Math.cos(a) * r * 1.1, t.y + Math.sin(a) * r * 1.1, t.x + Math.cos(a) * L, t.y + Math.sin(a) * L, 2, i % 2 ? '#9fd8ff' : '#ffe39a', 0.34, '#ffffff'));
+      }
+      for (let i = 0; i < 4; i++) fx.after(i * 0.07, () => { fx.ring(x, y, r, r * (5 + i * 2), 0.5, '#9fd8ff', 3); fx.ring(x, y, r, r * (4 + i * 1.6), 0.5, '#ffd36a', 3); });
+      fx.after(0.36, () => { fx.flash('#ffffff', 0.45); fx.shock(t.x, t.y, r, r * 6, 0.45, '#9fd8ff', 6, '#ffffff'); fx.sparkle(t.x, t.y, '#ffffff', fx.budget(20), 420); fx.text(x, y - r - 38, '萬手', '#ffe9a0', 40); fx.shake(Math.min(12, 9 * k)); });
+      if (t.x !== x) fx.ghost(t, 0.55, '#ffe39a');
+    },
+  });
+
+  BD.defineEffect('rewelund', {
+    name: '神器再錬', category: '增益',
+    desc: '物干し竿被折斷、神器再錬成二刀的變身：life 秒內暗幕籠罩，先是刀身白光龜裂、一記脆響折成兩段（白閃、金屬碎片四散、「折」字），接著鍛造的橘紅光與火星一下下搏動（錘擊光環），時間到長刀（紅）與小太刀（紫）的光刃交叉貫出、雙層震波與光柱、「神器再錬」字樣。適合武器損毀後重生的變身（phase2.transFx）。',
+    params: { life: 1.9 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.5, o.k), V = BD.vrng, TAU = Math.PI * 2, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life || 1.9;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.veil(life + 0.9, 0.7, '#08040a');
+      for (let t = 0; t < 0.5; t += 0.05) fx.after(t, () => { const [cx, cy] = pos(); fx.sparkle(cx + (V() - 0.5) * r * 3, cy + (V() - 0.5) * r * 3, '#ffffff', 2, 160, V() * TAU, 0.4); fx.shake(1 + t * 8); });
+      fx.after(0.5, () => { // 折斷
+        const [cx, cy] = pos();
+        fx.flash('#ffffff', 0.6); fx.flashAt(cx, cy, r * 4, '#ffffff', 0.2);
+        for (let i = 0; i < 12; i++) fx.debris(cx, cy, '#dfe6f0', 1, 280 + 220 * V(), 2.5 + 3 * V(), r * 0.3);
+        for (const s of [-1, 1]) fx.streak(cx, cy, cx + Math.cos(s * 0.9) * r * 6, cy + Math.sin(s * 0.9) * r * 6, 6, '#ffffff', 0.4, true);
+        fx.text(cx, cy - r - 36, '折', '#ffffff', 40); fx.shake(14);
+      });
+      for (let t = 0.7, n = 0; t < life; t += 0.17, n++) fx.after(t, () => { // 鍛造：錘擊
+        const [cx, cy] = pos(), q = (t - 0.7) / (life - 0.7);
+        fx.glow(cx, cy, r * (2.4 + q * 1.2), '#ff7a2a', 0.2, 0.5 + 0.3 * q, 0.3, src);
+        fx.ring(cx, cy, r * (3.2 - q), r * 0.8, 0.2, n % 2 ? '#ffb347' : '#ffe3a0', 3);
+        fx.sparkle(cx, cy, '#ffb347', fx.budget(6), 260, -Math.PI / 2, 1.6);
+        fx.embers(cx, cy, '#ff8a2a', 3, r * 1.4, 90);
+        fx.shake(2 + 5 * q);
+      });
+      fx.after(life, () => {
+        const [cx, cy] = pos(), a = src && src.face != null ? src.face : 0;
+        fx.flash('#ffffff', 0.7);
+        fx.beam(cx, cy, cx + Math.cos(a - 0.75) * r * 9, cy + Math.sin(a - 0.75) * r * 9, 20, '#ff4a3a', 0.6, '#ffffff'); // 長刀（紅柄）
+        fx.beam(cx, cy, cx + Math.cos(a + 0.75) * r * 7, cy + Math.sin(a + 0.75) * r * 7, 14, '#a07aff', 0.6, '#ffffff'); // 小太刀（紫柄）
+        fx.pillar(cx, cy, r * 1.4, '#ffb347', 0.7);
+        fx.shock(cx, cy, r, r * 9, 0.8, '#ff7a2a', 11 * Math.min(1.5, k), '#fff0d0');
+        fx.shock(cx, cy, r, r * 5, 0.5, '#ffffff', 5, '#ffffff');
+        fx.sparkle(cx, cy, '#ffe3a0', fx.budget(28), 460);
+        fx.text(cx, cy - r - 60, '神器再錬', '#ffd36a', 38);
+        fx.crack(cx, cy, r * 3, E.decal, 9, E.crack, 8);
+        fx.shake(Math.min(22, 15 * k));
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

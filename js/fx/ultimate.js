@@ -308,4 +308,34 @@
       fx.after(life, () => { fx.flash('#ffffff', 0.7); fx.shock(x, y, 10, 260, 0.55, '#ff2a44', 9, '#ffffff'); fx.shake(14); });
     },
   });
+
+  // 小次郎大招收尾：雙刀交叉的十字斬。圖片依據＝動畫雙燕斬虎分鏡（整面血紅底、白熱十字斬線、血花）
+  BD.defineEffect('souen', {
+    name: '雙燕斬虎', category: '大招',
+    desc: '雙刀交叉的十字斬：整個畫面染成血紅、場地轉暗，兩道白熱粗斬線在落點交成 X（長度隨 radius），中心閃白、血花與火花向四面噴出，裂地發光、「雙燕斬虎」字樣浮現，畫面劇烈震動。適合雙刀 / 十字終結技（hit 的 fx，落點為圓形判定中心）。',
+    params: { radius: 220 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), ang = o.angle || 0, L = (o.radius || 220) * 1.25;
+      fx.veil(0.9, 0.6, '#240008');
+      fx.flash('#ff2a40', 0.5);
+      for (const s of [-1, 1]) {
+        const a = ang + s * Math.PI / 4, c = Math.cos(a), sn = Math.sin(a);
+        fx.beam(x - c * L, y - sn * L, x + c * L, y + sn * L, 34 * k, '#ff2a40', 0.5, '#ffffff');
+        fx.beam(x - c * L, y - sn * L, x + c * L, y + sn * L, 8, '#ffffff', 0.4, '#ffffff');
+        fx.sparkle(x + c * L, y + sn * L, '#ffffff', fx.budget(10), 420, a, 0.8);
+        fx.sparkle(x - c * L, y - sn * L, '#ffffff', fx.budget(10), 420, a + Math.PI, 0.8);
+      }
+      for (let i = 0; i < 8; i++) { // 速度線
+        const yy = (i - 3.5) * 26;
+        fx.streak(x - 520, y + yy, x + 520, y + yy * 0.8, 4, i % 2 ? '#ffffff' : '#ff6a7d', 0.3, true);
+      }
+      fx.flashAt(x, y, L * 0.5, '#ffffff', 0.18);
+      fx.shock(x, y, 10, L * 1.2, 0.5, '#ff2a40', 10, '#ffffff');
+      fx.motes(x, y, E, Math.round(10 * k), L * 0.4, 220);
+      fx.sparkle(x, y, '#d0102a', fx.budget(18), 360);
+      fx.crack(x, y, L * 0.9, E.decal, 9, E.crack, 8);
+      fx.text(x, y - L * 0.45, '雙燕斬虎', '#ffffff', 40);
+      fx.shake(Math.min(24, 15 * k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

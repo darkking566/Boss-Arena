@@ -124,6 +124,7 @@
     zeus: { short: '鬥神', arch: 'fury', passive: { name: '鬥神狂喜', mods: { dmg: 0.06, hp: 60 } }, set2: { name: '全宇宙之父', mods: { hp: 100 } }, set4: { name: '阿陀磨須', mods: { dmg: 0.12, lifesteal: 0.02 } } },
     yujiro: { short: '鬼背', arch: 'bulwark', passive: { name: '一看就會', mods: { def: 0.07, dmg: 0.04 } }, set2: { name: '震樓之軀', mods: { hp: 100 } }, set4: { name: '地上最強', mods: { def: 0.1, dmg: 0.1 } } },
     deviljho: { short: '暴食', arch: 'vital', passive: { name: '健啖', mods: { lifesteal: 0.02, hp: 60 } }, set2: { name: '腐蝕涎液', mods: { hp: 100 } }, set4: { name: '龍息・滅世', mods: { lifesteal: 0.03, dmg: 0.1 } } },
+    kojiro: { short: '燕返', arch: 'swift', passive: { name: '千手無雙', mods: { def: 0.04, cdr: 0.06 } }, set2: { name: '二天岩流', mods: { cdr: 0.04 } }, set4: { name: '萬手無雙', mods: { dmg: 0.1, spd: 0.05 } } },
     itachi: { short: '曉', arch: 'arcane', passive: { name: '寫輪眼', mods: { cdr: 0.06, mana: 20 } }, set2: { name: '幻術', mods: { mana: 30 } }, set4: { name: '月讀・天照', mods: { cdr: 0.1, dmg: 0.08 } } },
   };
 

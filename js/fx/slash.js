@@ -132,4 +132,49 @@
       else fx.shake(Math.min(5, 2.5 * k));
     },
   });
+
+  // ── 小次郎（《終末的女武神》）：圖片依據＝動畫燕返し分鏡（白閃、青白燕影、書法字「燕返し」）與虎切分鏡（逆手握刀、書法字「岩流秘奧・虎切」）──
+  BD.defineEffect('tsubame', {
+    name: '燕返し', category: '斬擊',
+    desc: '下劈被躲開的瞬間刀勢急停、翻成上撩：全屏白閃、一道巨大的白熱月牙弧由下往上撩起，青白色的燕影（細長拖尾）沿弧線掠過、刀尖爆出火花，書法字「燕」「返」浮現，施放者留下青白殘影。適合反轉斬、回馬槍、第二擊。',
+    params: { radius: 340, arc: 3.0 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), ang = o.angle || 0, r = o.radius || 340, arc = o.arc || 3.0, src = o.src || null;
+      fx.flash('#ffffff', 0.3);
+      fx.slash(x, y, ang, arc, r, E.glow, 20 * k, o.heavy ? 0.42 : 0.3, { core: '#ffffff', trail: 3 });
+      fx.slash(x, y, ang, arc * 0.8, r * 0.7, '#ffffff', 8, 0.2, { core: E.core, trail: 1 });
+      for (let i = 0; i < 4; i++) { // 燕影：沿弧線由下往上掠過的細長拖尾
+        const a0 = ang - arc * 0.45 + i * arc * 0.08, rr = r * (0.55 + 0.12 * i);
+        for (let s = 0; s < 6; s++) {
+          const a1 = a0 + s * arc * 0.1;
+          fx.after(i * 0.025 + s * 0.012, () => fx.streak(x + Math.cos(a1) * rr, y + Math.sin(a1) * rr, x + Math.cos(a1 + 0.35) * rr * 1.08, y + Math.sin(a1 + 0.35) * rr * 1.08, 5, E.glow, 0.22, true));
+        }
+      }
+      const tipA = ang + arc * 0.5, tx = x + Math.cos(tipA) * r, ty = y + Math.sin(tipA) * r;
+      fx.sparkle(tx, ty, '#ffffff', fx.budget(10), 380, tipA + Math.PI / 2, 0.8);
+      fx.flashAt(x + Math.cos(ang) * r * 0.6, y + Math.sin(ang) * r * 0.6, r * 0.3, '#ffffff', 0.14);
+      fx.text(x + Math.cos(ang) * r * 0.5, y + Math.sin(ang) * r * 0.5 - 24, '燕', E.core, 44);
+      fx.after(0.12, () => fx.text(x + Math.cos(ang) * r * 0.5 + 40, y + Math.sin(ang) * r * 0.5 - 6, '返', E.glow, 34));
+      if (src) fx.ghost(src, 0.4, E.glow);
+      fx.shake(Math.min(14, 7 * k), ang);
+    },
+  });
+
+  BD.defineEffect('torakiri', {
+    name: '虎切', category: '斬擊',
+    desc: '逆手握刀、突然換握的橫斬：沿衝刺路徑劃出三道平行的金色爪痕（虎爪），爪痕尾端噴出火花，書法字「虎切」浮現。附在 dash 的 fx 使用（讀取 angle / len）。',
+    params: { len: 260 },
+    spawn(fx, x, y, o) {
+      const k = Math.min(1.5, o.k), ang = o.angle || 0, len = o.len || 260, c = Math.cos(ang), s = Math.sin(ang), px = -s, py = c;
+      for (let i = -1; i <= 1; i++) { // 三道爪痕：中間最長最亮
+        const off = i * 24, L = len * (i ? 0.86 : 1.0);
+        fx.after(0.03 * Math.abs(i), () => {
+          fx.beam(x + px * off, y + py * off, x + px * off + c * L, y + py * off + s * L, i ? 9 : 14, '#ffc84a', 0.3, '#ffffff');
+          fx.sparkle(x + px * off + c * L, y + py * off + s * L, '#ffe39a', fx.budget(5), 300, ang, 0.9);
+        });
+      }
+      fx.after(0.1, () => { fx.flashAt(x + c * len * 0.6, y + s * len * 0.6, 50, '#fff0c0', 0.14); fx.text(x + c * len * 0.5, y + s * len * 0.5 - 28, '虎切', '#ffd36a', 32); fx.shake(Math.min(9, 5 * k), ang); });
+      if (o.src) fx.ghost(o.src, 0.3, '#ffc84a');
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);
