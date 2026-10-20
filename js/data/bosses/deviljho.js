@@ -20,10 +20,10 @@
     id: 'deviljho', name: '恐暴龍', title: '健啖的惡魔', archetype: '暴食・龍息',
     desc: '《魔物獵人》系列的流浪暴食者 Deviljho，別名「恐暴龍」。深苔綠的粗皮、背與尾排滿鋸齒狀的黃褐棘刺，窄吻配上巨大的下顎與好幾排牙，後肢壯碩、前肢細小；新陳代謝快到必須不停進食，涎液帶有腐蝕性。被激怒時背與肩的筋肉鼓脹、全身泛起赤紅，並從口中噴出龍屬性的吐息。',
     color: '#8aa064', color2: '#2f3a2a', glow: '#d0143c', style: 'deviljho',
-    radius: 70, maxHp: 2700, speed: 225, turn: 4.6, mass: 2.0, fxEl: 'physical', hurt: 'flesh',
+    radius: 90, maxHp: 2700, speed: 225, turn: 4.6, mass: 2.0, fxEl: 'physical', hurt: 'flesh',
     stamina: { max: 150, regen: 34 }, posture: 235, dodgeCost: 24, dodgeSpeed: 500,
     ai: {
-      prefRange: [90, 260],
+      prefRange: [120, 300],
       aggression: 0.9,
       dodge: 0.2,
       precision: 0.6,
@@ -179,6 +179,14 @@
       desc: '一階段「饕餮盛宴」：威嚇讓對手緩速，隨後躍起壓上去重砸、連咬三口（吃肉回血）、最後甩出去；二階段「龍息・滅世」：全程無敵，龍息朝四面八方橫掃整整一圈（跑出範圍外、或看準空檔翻滾穿過），最後炸開一圈龍爆。',
     },
   };
+
+  // 體型依實際體長（約 21 公尺）放大後，近身招式的判定同步放大才夠得到頭前方（遠程 / 位移招式不動）
+  const GEO = 1.5;
+  for (const sk of deviljho.skills) {
+    if (!sk.tags.includes('melee') || sk.range[1] > 400) continue;
+    sk.range = sk.range.map((v) => Math.round(v * GEO));
+    for (const list of [sk.actions, sk.actions2]) for (const a of list || []) for (const k of ['r', 'r0', 'off', 'len', 'w', 'dist']) if (typeof a[k] === 'number') a[k] = Math.round(a[k] * GEO);
+  }
 
   BD.registerBoss(deviljho);
 })(typeof window !== 'undefined' ? window : globalThis);

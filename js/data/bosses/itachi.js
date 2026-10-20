@@ -22,7 +22,7 @@
     id: 'itachi', name: '宇智波鼬', title: '寫輪眼之鼬', archetype: '幻術與火遁的天才忍者',
     desc: '被稱為「寫輪眼的鼬」的宇智波天才。一階段頭戴斗笠、不願多戰：苦無與手裏劍、豪火球之術，再以烏鴉分身周旋，一旦與他眼神交會就會被拖進月讀；撐到半血，他脫下斗笠、萬花筒寫輪眼全開——黑炎天照燒到燒盡為止，須佐能乎的八咫鏡擋下一切、十拳劍將人封進酒壺。',
     color: '#b3123c', color2: '#14141c', glow: '#ff3a58', style: 'itachi',
-    radius: 33, maxHp: 2050, speed: 250, turn: 9, mass: 0.85, fxEl: 'umbra', hurt: 'flesh',
+    radius: 27, maxHp: 2050, speed: 250, turn: 9, mass: 0.85, fxEl: 'umbra', hurt: 'flesh',
     traits: ['counter', 'crowsub'], // 寫輪眼見切、烏鴉分身替身（js/engine/traits.js）
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [140, 360], aggression: 0.5, dodge: 0.65, precision: 0.9, reaction: 0.17, strafe: 0.7, walk: 0.7,

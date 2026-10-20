@@ -34,7 +34,7 @@
     id: 'watcher', name: '深淵監視者', title: '法蘭不死隊', archetype: '迅捷群狼型',
     desc: '飲下狼血的不死隊劍士：大劍配格擋匕首，連斬中夾雜突然停頓，靠後空翻與側翻不斷重置距離；一階段會呼喚同伴群攻，偶爾還會冒出敵我不分的紅眼監視者。',
     color: '#d23a3a', color2: '#22232c', glow: '#ff6b5a', style: 'watcher',
-    radius: 38, maxHp: 2250, speed: 245, turn: 8, mass: 1.0, fxEl: 'shadow', hurt: 'shadow',
+    radius: 32, maxHp: 2250, speed: 245, turn: 8, mass: 1.0, fxEl: 'shadow', hurt: 'shadow',
     traits: ['counter'], // 匕首彈反（js/engine/traits.js）；同伴 / 紅眼規則見 js/engine/minions/watcher.js
     stamina: { max: 110, regen: 34 }, posture: 120, dodgeCost: 16, dodgeSpeed: 620,
     ai: { prefRange: [90, 190], aggression: 0.8, dodge: 0.7, precision: 0.75, reaction: 0.2, strafe: 0.7, walk: 0.75,

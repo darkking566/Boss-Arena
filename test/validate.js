@@ -31,7 +31,7 @@ for (const def of bosses) {
   if (ids.has(def.id)) err(W, '重複的 id'); ids.add(def.id);
   for (const k of ['id', 'name', 'title', 'archetype', 'desc', 'color', 'color2', 'glow', 'style'])
     if (typeof def[k] !== 'string' || !def[k]) err(W, `缺少字串欄位 ${k}`);
-  if (!inR(def.radius, 10, 80)) err(W, `radius ${def.radius} 不合理`);
+  if (!inR(def.radius, 10, 120)) err(W, `radius ${def.radius} 不合理`);
   if (!inR(def.maxHp, 500, 10000)) err(W, `maxHp ${def.maxHp} 不合理`);
   if (!inR(def.speed, 60, 500)) err(W, `speed ${def.speed} 不合理`);
   if (!inR(def.turn, 1, 20)) err(W, `turn ${def.turn} 不合理`);
