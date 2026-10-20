@@ -1,5 +1,10 @@
 'use strict';
 // 無法閃避（undodgeable）：無敵幀無效、invuln / untargetable 仍有效、魔女大招 / 地雷、索爾蓋爾羅德回程、訓練場假人、AI 走進安全圈
+const { run, stripJobs } = require('./lib/par');
+const cli = stripJobs(process.argv.slice(2));
+process.argv = process.argv.slice(0, 2).concat(cli.argv);
+if (cli.jobs) process.env.JOBS = String(cli.jobs);
+const { isMainThread } = require('worker_threads');
 const { load } = require('./lib/load');
 const { BD } = load();
 const U = BD.U;
@@ -7,7 +12,7 @@ let passed = 0, failed = 0;
 function ok(c, m) { if (c) passed++; else { failed++; console.log('FAIL ' + m); } }
 
 // ── 1. 傷害判定 ──
-{
+if (isMainThread) {
   const w = new BD.World(BD.bossById.magmus, BD.bossById.ronin, { seed: 3 });
   const a = w.bosses[0], b = w.bosses[1];
   w.intro = 0;
@@ -24,7 +29,7 @@ function ok(c, m) { if (c) passed++; else { failed++; console.log('FAIL ' + m); 
 }
 
 // ── 2. 資料：魔女大招安全圈外判定與地雷有旗標、放射冰刺沒有 ──
-{
+if (isMainThread) {
   const wd = BD.bossById.witch;
   for (const acts of [wd.ultimate.actions, wd.ultimate.actions2]) {
     ok(acts.some((x) => x.do === 'hit' && x.shape === 'except' && x.undodgeable === true), '絕對零度的 except 判定需 undodgeable');
@@ -46,7 +51,7 @@ function ok(c, m) { if (c) passed++; else { failed++; console.log('FAIL ' + m); 
 }
 
 // ── 3. 訓練場：假人持續帶無敵幀（模擬翻滾）仍吃到大招與地雷 ──
-for (const pace of ['light', 'heavy']) {
+if (isMainThread) for (const pace of ['light', 'heavy']) {
   for (const phase of [1, 2]) {
     const w = new BD.World(BD.bossById.witch, BD.bossById.dummy, { seed: 5, pace, training: { mode: 'manual', range: 'mid' } });
     const tr = w.training, d = tr.dummy;
@@ -69,33 +74,38 @@ for (const pace of ['light', 'heavy']) {
   }
 }
 
-// ── 4. AI：面對絕對零度走進安全圈，而不是翻滾 ──
-for (const pace of ['light', 'heavy']) {
+// ── 4. AI：面對絕對零度走進安全圈，而不是翻滾（每場獨立模擬，平行跑；視覺特效略過）──
+BD.spawnFx = () => {}; // 特效純視覺；上面第 3 節已在有特效下跑完
+const PACES = ['light', 'heavy'], jobs = [];
+for (const pace of PACES) for (const def of BD.bosses) if (def.id !== 'witch') for (let n = 0; n < 12; n++) jobs.push({ pace, id: def.id, n });
+function runOne({ pace, id, n }) {
+  const def = BD.bossById[id], seed = (n >> 1) + 1, side = n & 1;
+  const w = side ? new BD.World(def, BD.bossById.witch, { seed, pace }) : new BD.World(BD.bossById.witch, def, { seed, pace });
+  const wi = w.bosses[side ? 1 : 0], op = w.bosses[side ? 0 : 1], seen = new Map();
   let ults = 0, inside = 0, rolls = 0;
-  for (const def of BD.bosses) {
-    if (def.id === 'witch') continue;
-    for (let n = 0; n < 12; n++) {
-      const seed = (n >> 1) + 1, side = n & 1;
-      const w = side ? new BD.World(def, BD.bossById.witch, { seed, pace }) : new BD.World(BD.bossById.witch, def, { seed, pace });
-      const wi = w.bosses[side ? 1 : 0], op = w.bosses[side ? 0 : 1], seen = new Map();
-      for (let f = 0; f < 60 * 300 && !w.winner; f++) {
-        w.step(1 / 60);
-        for (const t of w.telegraphs) if (t.owner === wi && t.shape.kind === 'except' && !seen.has(t)) seen.set(t, { d0: op.lastDodgeStart });
-        for (const [t, rec] of seen) {
-          if (rec.done || w.telegraphs.includes(t)) continue;
-          rec.done = true;
-          ults++;
-          if (U.dist(op, t.shape) <= t.shape.r - op.r * 0.5) inside++;
-          if (op.lastDodgeStart !== rec.d0) rolls++;
-        }
-      }
+  for (let f = 0; f < 60 * 300 && !w.winner; f++) {
+    w.step(1 / 60);
+    for (const t of w.telegraphs) if (t.owner === wi && t.shape.kind === 'except' && !seen.has(t)) seen.set(t, { d0: op.lastDodgeStart });
+    for (const [t, rec] of seen) {
+      if (rec.done || w.telegraphs.includes(t)) continue;
+      rec.done = true;
+      ults++;
+      if (U.dist(op, t.shape) <= t.shape.r - op.r * 0.5) inside++;
+      if (op.lastDodgeStart !== rec.d0) rolls++;
     }
   }
-  console.log(`${pace}：絕對零度 ${ults} 次，對手在安全圈內 ${inside}（${Math.round(inside / ults * 100)}%），預警期間翻滾 ${rolls}`);
-  ok(ults >= 60, `${pace}：樣本太少（${ults}）`);
-  ok(inside / ults >= 0.45, `${pace}：AI 應多半走進安全圈（${inside}/${ults}）`);
-  ok(rolls / ults <= 0.25, `${pace}：AI 不應依賴翻滾（${rolls}/${ults}）`);
+  return { ults, inside, rolls };
 }
-
-console.log(failed ? `UNDODGEABLE TEST FAIL (${failed} failed, ${passed} passed)` : `UNDODGEABLE TEST PASS (${passed} checks)`);
-process.exit(failed ? 1 : 0);
+const results = run(__filename, jobs, runOne);
+if (results) results.then((res) => {
+  for (const pace of PACES) {
+    let ults = 0, inside = 0, rolls = 0;
+    res.forEach((r, k) => { if (jobs[k].pace === pace) { ults += r.ults; inside += r.inside; rolls += r.rolls; } });
+    console.log(`${pace}：絕對零度 ${ults} 次，對手在安全圈內 ${inside}（${Math.round(inside / ults * 100)}%），預警期間翻滾 ${rolls}`);
+    ok(ults >= 60, `${pace}：樣本太少（${ults}）`);
+    ok(inside / ults >= 0.45, `${pace}：AI 應多半走進安全圈（${inside}/${ults}）`);
+    ok(rolls / ults <= 0.25, `${pace}：AI 不應依賴翻滾（${rolls}/${ults}）`);
+  }
+  console.log(failed ? `UNDODGEABLE TEST FAIL (${failed} failed, ${passed} passed)` : `UNDODGEABLE TEST PASS (${passed} checks)`);
+  process.exit(failed ? 1 : 0);
+});

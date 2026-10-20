@@ -26,6 +26,7 @@ function load(opts) {
     vm.runInContext(fs.readFileSync(file, 'utf8'), ctx, { filename: s.src });
     files.push(s.src);
   }
+  if (opts.noFx) ctx.BD.spawnFx = () => {}; // 全配對模擬不需要視覺特效（特效純視覺、不影響戰鬥）：略過可省約一半時間
   return { BD: ctx.BD, ctx, files };
 }
 module.exports = { load, scriptList, ROOT };

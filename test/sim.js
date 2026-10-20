@@ -6,7 +6,7 @@ const cli = stripJobs(process.argv.slice(2));
 process.argv = process.argv.slice(0, 2).concat(cli.argv);
 if (cli.jobs) process.env.JOBS = String(cli.jobs);
 const { load } = require('./lib/load');
-const { BD, files } = load();
+const { BD, files } = load({ noFx: true });
 const { isMainThread } = require('worker_threads');
 const BOSSES = BD.bosses || BD.BOSSES, BY_ID = BD.bossById || BD.BOSS_BY_ID;
 const HAS_WATCHER = !!BY_ID.watcher;

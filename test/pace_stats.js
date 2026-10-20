@@ -6,7 +6,7 @@ const cli = stripJobs(process.argv.slice(2));
 process.argv = process.argv.slice(0, 2).concat(cli.argv);
 if (cli.jobs) process.env.JOBS = String(cli.jobs);
 const { load } = require('./lib/load');
-const { BD } = load();
+const { BD } = load({ noFx: true });
 const pace = process.argv[2] || 'light';
 const seeds = (process.argv[3] || '1,2,3,4,5,6').split(',').map(Number);
 const ids = BD.bosses.map((b) => b.id), byId = BD.bossById;

@@ -41,7 +41,7 @@ if (CHECK_HEAVY && !fs.existsSync(BASE_HEAVY)) {
 }
 const { isMainThread } = require('worker_threads');
 const { load } = require('./lib/load');
-const { BD } = load();
+const { BD } = load({ noFx: true });
 const bosses = BD.bosses || BD.BOSSES, byId = BD.bossById || BD.BOSS_BY_ID;
 const seeds = (seedArg || '1,2,3,4,5,6').split(',').map(Number);
 const buf = new Float64Array(1), u32 = new Uint32Array(buf.buffer);
