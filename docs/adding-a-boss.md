@@ -156,6 +156,8 @@ BD.defineStatus('burn', {
 | `tsukuyomi` | 月讀 | cc, debuff | 無法行動（onApply 設定 stun）、承受傷害 ×1.25，期間每 0.2 秒 20 點刺擊、結束再補 70 點（鼬；注意：綁定 `bindState` 的狀態不會 tick，需要持續效果的控制狀態不要綁） |
 | `amaterasu` | 天照 | dot, fire, debuff | 永不熄滅（無期限）、可疊 5 層，每層每秒 6 點（鼬） |
 | `susanoo` | 須佐能乎 | buff | 承受傷害 ×0.75，預設 16 秒；造型檔 `under()` 畫出約 6 倍大的巨人（鼬） |
+| `jhorage` | 暴怒 | buff | 承受傷害 ×0.92、造成傷害 ×1.08（恐暴龍二階段常駐；造型膨脹泛紅）|
+| `dragonblight` | 龍封 | debuff | 造成傷害 ×0.85，預設 6 秒（恐暴龍的龍息）|
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：
@@ -163,6 +165,8 @@ BD.defineStatus('burn', {
 { do: 'hit', at: 0.4, shape: { kind: 'circle', r: 90 }, dmg: 60, status: { id: 'burn', dur: 3 } }
 // 也可傳陣列：status: [{ id: 'burn', dur: 3 }, { id: 'slow', dur: 2 }]
 ```
+命中類參數另可加 `heal: 0.4`：施放者每次命中回復「造成傷害 × heal」的生命（恐暴龍的啃咬）。
+
 時間軸動作 `{ do: 'status', at, id, dur, stacks, value, target: 'enemy' }`（省略 `target` 表示對自己）：
 ```js
 { do: 'status', at: 0.6, id: 'shield', dur: 8, value: 120 }        // 自身護盾

@@ -182,6 +182,9 @@
       } else if (src && src.isBoss) { src.stats.dealt += dmg; src.ult = Math.min(100, src.ult + dmg * 0.06); }
       else if (src && src.owner && !src.neutral) { src.owner.stats.dealt += dmg; src.owner.ult = Math.min(100, src.owner.ult + dmg * 0.04); }
       if (src && src.lifesteal && src.state !== 'dead') src.hp = Math.min(src.maxHp, src.hp + dmg * src.lifesteal); // 獵魂主角吸血
+      if (p.heal && src && src.isBoss && src.state !== 'dead') { // 招式的 heal：吃到肉就回血（恐暴龍的啃咬）
+        const g = Math.round(dmg * p.heal); src.hp = Math.min(src.maxHp, src.hp + g); fx.text(src.x, src.y - src.r - 20, '+' + g, '#7dffb0', 14);
+      }
       if (src && !src.isBoss && src.kind) { const mt = BD.minionTypes[src.kind]; if (mt && mt.onHitBoss) mt.onHitBoss(this, src, b); }
       b.ult = Math.min(100, b.ult + (pc ? dmg * 0.05 * pc.ultGainMul : dmg * 0.05));
       b.posture += p.posture != null ? p.posture : dmg * 0.25; b.postureDelay = 1.4;

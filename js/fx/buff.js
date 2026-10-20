@@ -478,4 +478,45 @@
       fx.shake(8);
     },
   });
+  // ── 恐暴龍：暴怒（筋肉膨脹）──
+  BD.defineEffect('dragonrage', {
+    name: '暴怒膨脹', category: '增益',
+    desc: '怒氣引爆的變身：life 秒內赤紅光暈越來越亮、全身筋肉像在膨脹般一圈圈搏動，口中龍屬性能量噴湧成折線電弧、地面不斷震動；時間到時暗紅暗幕籠罩、巨大的「怒」字浮現，雙層震波與向四面八方竄出的龍雷一起炸開。',
+    params: { life: 1.7 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, src = o.src || null, r = src && src.r ? src.r : 40, life = o.life || 1.7;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.glow(x, y, r * 2, '#d0143c', life, 0.7, 0.5, src);
+      for (let t = 0; t < life; t += 0.14) {
+        fx.after(t, () => {
+          const [cx, cy] = pos(), q = t / life, f = src ? src.face : 0, mx = cx + Math.cos(f) * r * 1.5, my = cy + Math.sin(f) * r * 1.5;
+          fx.ring(cx, cy, r * 0.9, r * (1.5 + 1.4 * q), 0.22, q > 0.6 ? '#ffffff' : E.glow, 3 + 3 * q); // 筋肉搏動
+          fx.motes(mx, my, E, 2 + Math.round(4 * q), 18, 160 + 160 * q);                                // 口中溢出的龍屬性能量
+          fx.smoke(mx, my, E.smoke, 1 + Math.round(2 * q), r * 0.5);
+          fx.shake(2 + 7 * q);
+        });
+      }
+      fx.after(life, () => {
+        const [cx, cy] = pos();
+        fx.veil(1.5, 0.6, '#12000a');
+        fx.flash(E.core, 0.6);
+        for (let i = 0; i < 12; i++) { // 龍雷：向四面八方的三段折線
+          let px = cx, py = cy, a = i / 12 * Math.PI * 2 + (V() - 0.5) * 0.3;
+          for (let s = 0; s < 3; s++) {
+            a += (V() - 0.5) * 0.7; const nx = px + Math.cos(a) * r * 2.6, ny = py + Math.sin(a) * r * 2.6;
+            fx.streak(px, py, nx, ny, 8, E.glow, 0.4, true); fx.streak(px, py, nx, ny, 3, E.core, 0.28, true); px = nx; py = ny;
+          }
+        }
+        fx.text(cx, cy - r - 70, '怒', E.glow, 96);
+        fx.pillar(cx, cy, r * 1.6, E.glow, 0.6);
+        fx.shock(cx, cy, r, r * 10, 0.9, E.glow, 14 * Math.min(1.5, k), E.core);
+        fx.shock(cx, cy, r, r * 5.5, 0.55, '#ffffff', 6, '#ffffff');
+        fx.glow(cx, cy, r * 3.5, E.glow, 1.2, 0.8, 0.3, src);
+        fx.sparkle(cx, cy, E.core, fx.budget(30), 460);
+        fx.motes(cx, cy, E, 24, r * 3, 240);
+        fx.crack(cx, cy, r * 3.2, E.decal, 10, E.crack, 9);
+        fx.shake(Math.min(26, 18 * Math.min(1.5, k)));
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

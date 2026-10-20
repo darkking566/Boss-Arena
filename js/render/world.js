@@ -1019,6 +1019,13 @@
         ctx.fillStyle = '#ff3048'; ctx.fillRect(10 * kk, -1.5 * kk, 2.5 * kk, 2.5 * kk);
         ctx.restore(); continue;
       }
+      if (l.kind === 'rock') { // 恐暴龍掘起的岩塊：翻滾的灰褐色多邊形，頂面亮、側面暗
+        ctx.save(); ctx.translate(x, y - h); ctx.rotate(t * 7 + l.x0 * 0.05);
+        ctx.fillStyle = '#6f6350'; ctx.strokeStyle = '#2a241a'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(16, -4); ctx.lineTo(8, 14); ctx.lineTo(-10, 12); ctx.lineTo(-17, -2); ctx.lineTo(-6, -15); ctx.lineTo(10, -13); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(210,190,150,0.55)'; ctx.beginPath(); ctx.moveTo(-6, -15); ctx.lineTo(10, -13); ctx.lineTo(2, -2); ctx.lineTo(-10, -4); ctx.closePath(); ctx.fill();
+        ctx.restore(); continue;
+      }
       const col = l.kind === 'acid' ? '#b6ff5c' : l.kind === 'egg' ? '#d9e8b0' : '#ff8a3a';
       const cr = l.sky ? 14 : 10;
       // 發光球：以顏色 + 半徑快取（含陰影），於 (x, y-h) 繪製

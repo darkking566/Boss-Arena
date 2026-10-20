@@ -137,6 +137,16 @@
     name: '鬼背', tags: ['buff'], stacking: 'refresh',
     modifiers: { dmgTakenMul: 0.9, dmgDealtMul: 1.05 },
   });
+  // ── 暴怒（恐暴龍二階段常駐）：筋肉膨脹、紅光與龍屬性能量噴湧——皮更厚（身體膨脹）、咬勁更重 ──
+  BD.defineStatus('jhorage', {
+    name: '暴怒', tags: ['buff'], stacking: 'refresh',
+    modifiers: { dmgTakenMul: 0.92, dmgDealtMul: 1.08 },
+  });
+  // ── 龍封（恐暴龍的龍息）：龍屬性能量侵蝕身體——造成的傷害降低 15%（原作：龍封力使武器屬性失效）──
+  BD.defineStatus('dragonblight', {
+    name: '龍封', tags: ['debuff'], stacking: 'refresh', defaultDur: 6, visual: 'dragonblight',
+    modifiers: { dmgDealtMul: 0.85 },
+  });
   // ── 死立不倒（亞當）：生命鎖在 1，期間無敵且出拳更重更快；時間到才真正倒下（對手先倒則以對手獲勝為準）──
   BD.defineStatus('deathstand', {
     name: '死立不倒', tags: ['buff'], stacking: 'refresh', defaultDur: 4, visual: 'deathstand',

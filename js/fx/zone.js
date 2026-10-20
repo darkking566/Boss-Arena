@@ -115,4 +115,39 @@
       });
     },
   });
+  // ── 恐暴龍：龍息 ──
+  BD.defineEffect('dragonbreath', {
+    name: '龍息', category: '區域',
+    desc: '龍屬性能量的吐息：暗紅濃霧從口中一波波推出、填滿整個扇形，霧裡竄著紅黑色龍雷的折線電弧，最前緣炸開一團赤紅光球與電光，地面留下暗紅焦痕。多個扇形接力（angOff 逐格轉動）就是橫掃全場的龍息。',
+    params: { arc: 1.1 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, r = o.radius || 400, ang = o.angle || 0, arc = o.arc || 1.1;
+      const dur = o.heavy ? 0.32 : 0.26, steps = 5;
+      fx.flashAt(x, y, 36, E.core, 0.1);
+      for (let i = 0; i < steps; i++) {
+        fx.after(i * dur / steps, () => {
+          const q = (i + 1) / steps, d = r * (0.1 + 0.9 * q);
+          for (let j = 0, n = 2 + Math.round(q * 2); j < n; j++) { // 暗紅濃霧：整個扇形寬度
+            const a = ang + (V() - 0.5) * arc * 0.9, dd = d * (0.5 + 0.5 * V());
+            fx.glow(x + Math.cos(a) * dd, y + Math.sin(a) * dd, (24 + 30 * q) * Math.min(1.4, k), ['#5a0614', '#d0143c', '#1a0208'][j % 3], 0.45, 0.4, 0.3);
+            if (V() < 0.5) fx.smoke(x + Math.cos(a) * dd, y + Math.sin(a) * dd, E.smoke, 1, 22);
+          }
+          let ax = x, ay = y; // 龍雷：三段折線由口中竄向前緣
+          for (let s = 0; s < 3; s++) {
+            const a = ang + (V() - 0.5) * arc * 0.8, nx = ax + Math.cos(a) * d * 0.4, ny = ay + Math.sin(a) * d * 0.4;
+            fx.streak(ax, ay, nx, ny, 3.4, E.glow, 0.18, true); fx.streak(ax, ay, nx, ny, 1.6, E.core, 0.12, true); ax = nx; ay = ny;
+          }
+          fx.glow(x + Math.cos(ang) * d, y + Math.sin(ang) * d, 50 * Math.min(1.4, k), E.glow, 0.28, 0.7, 0.5);
+          fx.motes(ax, ay, E, 3, 20 + 30 * q, 160);
+          fx.shake(1.5 + 2 * q);
+        });
+      }
+      fx.after(dur, () => {
+        const ex = x + Math.cos(ang) * r * 0.85, ey = y + Math.sin(ang) * r * 0.85;
+        fx.shock(ex, ey, r * 0.06, r * 0.26, 0.35, E.glow, 4, E.core);
+        fx.decal(x + Math.cos(ang) * r * 0.55, y + Math.sin(ang) * r * 0.55, r * 0.22, E.decal, 6);
+        fx.sparkle(ex, ey, E.core, fx.budget(4), 260, ang, arc * 0.4);
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

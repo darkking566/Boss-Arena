@@ -109,4 +109,27 @@
       fx.shake(Math.min(20, 9 * k));
     },
   });
+  // ── 恐暴龍：咬碎 ──
+  BD.defineEffect('devour', {
+    name: '咬碎', category: '斬擊',
+    desc: '巨顎合攏的一口：兩道弧形顎刃從兩側夾向落點，一排利齒的白線向中心收束，咬合瞬間閃光、骨渣與黃綠色涎沫四濺並浮出「喀」；scale 越大咬得越深（大咬會再震出一圈震波）。適合啃咬、吞食、撕咬。',
+    params: { radius: 90 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, sc = o.scale || 1, r = (o.radius || 90) * Math.min(1.5, sc), ang = o.angle || 0, big = sc > 1.2;
+      for (const s of [-1, 1]) fx.slash(x, y, ang + s * 1.35, 1.5, r, E.core, 16 * Math.min(1.5, k), 0.2, { core: '#ffffff', trail: 1 }); // 上下顎
+      for (let i = 0; i < 10; i++) { // 兩排牙：由外向中心收束的亮線
+        const a = ang + (i < 5 ? 1 : -1) * (0.3 + (i % 5) * 0.3), c = Math.cos(a), s = Math.sin(a);
+        fx.streak(x + c * r * 1.2, y + s * r * 1.2, x + c * r * 0.3, y + s * r * 0.3, 3, '#f4ead0', 0.16, true);
+      }
+      fx.ring(x, y, r * 1.2, r * 0.2, 0.16, E.glow, 5);
+      fx.flashAt(x, y, r * 0.7, '#ffffff', 0.1);
+      fx.sparkle(x, y, '#f4ead0', fx.budget(8), 260, ang, 1.6);                    // 骨渣
+      fx.debris(x, y, '#e8dcc0', Math.round(5 * k), 200, 2.5, r * 0.3);
+      fx.smoke(x, y, 'rgba(190,210,90,0.45)', 4, r * 0.5);                          // 涎沫
+      fx.sparkle(x, y, '#d4e878', fx.budget(6), 220, ang, 1.4);
+      fx.text(x + (V() - 0.5) * r * 0.5, y - r * 0.4, '喀', E.core, 18 + 8 * Math.min(2, sc));
+      if (big) { fx.shock(x, y, 10, r * 1.8, 0.4, E.glow, 8, E.core); fx.decal(x, y, r * 0.7, E.decal, 6); fx.shake(Math.min(12, 7 * k)); }
+      else fx.shake(Math.min(5, 2.5 * k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);
