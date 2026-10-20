@@ -5,6 +5,7 @@
   const A = () => BD.ARENA;
 
   BD.spawnProj = function (w, src, owner, ang, a) {
+    if (BD.sfx) BD.sfx.proj(a.kind); // 音效（僅瀏覽器）
     const r0 = (src.r || 10) + 4;
     w.projectiles.push({ team: owner.team, owner, x: src.x + Math.cos(ang) * r0, y: src.y + Math.sin(ang) * r0,
       vx: Math.cos(ang) * a.speed, vy: Math.sin(ang) * a.speed, r: a.r, dmg: a.dmg, posture: a.posture, kb: a.kb || 40,

@@ -185,6 +185,8 @@
 
   function show(name, msg) {
     state.screen = name;
+    if (name !== 'result' && BD.sfx) BD.sfx.stop(); // 離開 / 重開戰鬥時停掉殘留音效
+    if (name === 'game' && BD.sfx) BD.sfx.play('start', 0.7);
     $('#select').classList.toggle('hidden', name !== 'select');
     $('#result').classList.toggle('hidden', name !== 'result');
     if (name !== 'game' && BD.TrainingUI) BD.TrainingUI.hide();
@@ -246,6 +248,7 @@
       rows.map(([n, f]) => `<tr><td>${n}</td><td>${f(hero)}</td><td>${f(boss)}</td></tr>`).join('') + `<tr><td>使用藥水</td><td>${hero.hunt.used}</td><td>—</td></tr>`;
     $('#btnRematch').textContent = '🔁 再戰一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回據點';
     show('result');
+    if (win && BD.sfx) BD.sfx.play('victory', 0.7);
     state.screen = 'result';
   }
 
@@ -338,6 +341,7 @@
       const w = state.world;
       if (w) {
         w.tick(dt);
+        if (BD.sfx) BD.sfx.tick(w, dt);
         const rt = performance.now();
         R.render(ctx, w, view);
         if (R.perf) R.perf.push(frameMs, performance.now() - rt);

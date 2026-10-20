@@ -498,6 +498,7 @@
         ctx.lineWidth = prog > 0.8 ? 3 : 2; pathShape(ctx, s); ctx.stroke();
       }
       if (te.undodgeable) {
+        if (BD.sfx) BD.sfx.once(te, 'bell', 0.6);
         ctx.save();
         ctx.setLineDash([]);
         const a = 0.55 + 0.45 * Math.sin(t * 9);
@@ -599,6 +600,7 @@
       ctx.save(); ctx.translate(tr.x, tr.y);
       if (tr.kind === 'mine') {
         if (tr.undodgeable && armed) {
+          if (BD.sfx) BD.sfx.once(tr, 'bell', 0.6);
           const g = 0.6 + 0.4 * Math.sin(t * 5 + tr.y);
           const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 26);
           gr.addColorStop(0, `rgba(255,60,90,${0.35 * g})`);

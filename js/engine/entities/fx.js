@@ -299,6 +299,7 @@
     if (o.radius == null) o.radius = 60 * o.scale * o.weight;
     if (o.angle == null) o.angle = src && src.face != null ? src.face : 0;
     o.heavy = !!w.pace;
+    if (BD.sfx) BD.sfx.fx(P.id, def.category, o); // 音效（僅瀏覽器載入 js/audio.js；無頭模擬沒有 BD.sfx）
     // curE 讓原件（斬擊 / 震波 / 光束）取得元素的對比邊緣色（fx.after 延遲產生的部分也會沿用）
     w.fx.curE = E;
     // 斬擊 / 突刺的震動順著揮擊方向，砸地則上下重擊；其餘維持原本的四向抖動

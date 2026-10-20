@@ -2,3 +2,5 @@ node_modules/
 *.log
 __pycache__/
 .claude/settings.local.json
+audio/mc/
+audio/mc_set/
