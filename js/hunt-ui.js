@@ -34,7 +34,7 @@
       <button class="primary" id="hGo">⚔ 挑戰 ${ui.target ? def(ui.target).name : '（請先選擇 Boss）'}</button></div>`;
   }
   function viewWeapon() {
-    return `<h3>初始武器（左鍵 / 右鍵兩招；法杖耗法力，其餘耗體力）</h3><div class="h-grid">${H.WEAPONS.map((w) => `<div class="h-card${w.id === ui.save.loadout.weapon ? ' sel' : ''}" data-weapon="${w.id}">
+    return `<h3>武器（其餘武器之後開放）</h3><div class="h-grid">${H.WEAPONS.filter((w) => !w.hidden).map((w) => `<div class="h-card${w.id === ui.save.loadout.weapon ? ' sel' : ''}" data-weapon="${w.id}">
       <b>${w.icon} ${w.name}</b><p>${w.desc}</p><div class="dim">${w.skills.map((s) => s.name).join(' / ')}${Object.keys(w.bonus).length ? '　加成：' + Hunt.describeMods(w.bonus) : ''}</div></div>`).join('')}</div>`;
   }
   function viewSoul() {

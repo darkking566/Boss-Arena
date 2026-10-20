@@ -42,10 +42,10 @@
         { id: 'w_shatter', name: '碎地', short: '碎地', tags: ['melee', 'aoe'], range: [0, 180], cd: 8, cost: 40, track: 4, recovery: 0.95,
           actions: [hit(0.95, circle(175), { dmg: 200, posture: 95, kb: 500, fx: 'slam' })] },
       ] },
-    { id: 'katana', name: '太刀', icon: '🔪', el: 'physical', ai: [80, 170], bonus: { staRegen: 0.1 }, traits: ['counter'],
-      desc: '魔物獵人式太刀：左鍵三連斬累積「氣刃」；右鍵消耗氣刃接氣刃斬 I→II→III→氣刃大回旋斬（命中提升練氣等級：白 / 黃 / 紅，傷害 +5% / 10% / 20%）；Q 見切斬（架式中被打中就反擊並回氣）；E 居合。',
+    { id: 'katana', name: '太刀', icon: '🔪', el: 'physical', ai: [80, 170], bonus: { staRegen: 0.1 }, traits: ['deflect', 'counter'],
+      desc: '拚刀太刀：左鍵五式連斬（不耗體力、可不間斷進攻），揮刀瞬間若剛好擋下攻擊就是「彈刀」——近戰攻擊免傷並反震敵人架勢、投射物會被打回；連斬命中累積「氣刃」，右鍵消耗氣刃接氣刃斬 I→II→III→氣刃大回旋斬（命中提升練氣等級：白 / 黃 / 紅）；Q 見切斬（架式中被打中就反擊並回氣）；E 居合。',
       skills: [
-        { id: 'k_a1', grp: 'a', name: '踏步斬', short: '連斬', tags: ['melee', 'fast'], range: [0, 150], cd: 0.05, cost: 12, track: 7, creep: 0.5, recovery: 0.28,
+        { id: 'k_a1', grp: 'a', sw: 'cw', name: '踏步斬', short: '連斬', tags: ['melee', 'fast'], range: [0, 150], cd: 0.05, cost: 0, track: 7, creep: 0.5, recovery: 0.26,
           actions: [hit(0.22, cone(150, 80), { dmg: 52, posture: 14, kb: 120, fx: 'slash' })] },
         { id: 'k_s1', grp: 's', name: '氣刃斬 I', short: '氣刃', tags: ['melee', 'gap'], range: [0, 220], cd: 0.05, cost: 10, res: 'spirit', track: 8, recovery: 0.3,
           actions: [{ do: 'dash', at: 0.15, dist: 120, dur: 0.1 }, hit(0.27, cone(150, 90), { dmg: 62, posture: 18, kb: 160, fx: 'slash' })] },
@@ -54,12 +54,16 @@
         { id: 'w_iai', name: '居合', short: '居合', tags: ['gap'], range: [60, 330], cd: 5, cost: 26, track: 8, recovery: 0.5,
           actions: [{ do: 'dash', at: 0.4, dist: 300, dur: 0.13, iframe: true, fx: 'iaido', hit: { dmg: 110, posture: 40, kb: 250 } }] },
       ],
-      // 連段變體：不佔技能欄，由 BD.Hunt 的太刀邏輯依連段順序挑選（見 js/engine/hunt.js）
+      // 連段變體：不佔技能欄，由 BD.Hunt 的太刀邏輯依連段順序挑選（見 js/engine/hunt.js）；sw = 揮刀動作（供繪圖）
       variants: [
-        { id: 'k_a2', grp: 'a', name: '返し斬', short: '連斬', tags: ['melee', 'fast'], range: [0, 150], cd: 0.05, cost: 12, track: 7, creep: 0.4, recovery: 0.28,
-          actions: [hit(0.2, cone(150, 80), { dmg: 56, posture: 15, kb: 130, fx: 'slash' })] },
-        { id: 'k_a3', grp: 'a', name: '逆袈裟斬', short: '連斬', tags: ['melee'], range: [0, 160], cd: 0.05, cost: 16, track: 6, recovery: 0.5,
-          actions: [hit(0.28, cone(165, 100), { dmg: 80, posture: 26, kb: 250, fx: { id: 'slash', scale: 1.2 } })] },
+        { id: 'k_a2', grp: 'a', sw: 'ccw', name: '返し斬', short: '連斬', tags: ['melee', 'fast'], range: [0, 150], cd: 0.05, cost: 0, track: 7, creep: 0.4, recovery: 0.26,
+          actions: [hit(0.2, cone(155, 100), { dmg: 56, posture: 15, kb: 130, fx: 'slash' })] },
+        { id: 'k_a3', grp: 'a', sw: 'thrust', name: '突刺', short: '連斬', tags: ['melee', 'gap'], range: [0, 230], cd: 0.05, cost: 0, track: 8, recovery: 0.32,
+          actions: [{ do: 'dash', at: 0.14, dist: 80, dur: 0.08 }, hit(0.22, { shape: 'rect', len: 200, w: 70 }, { dmg: 66, posture: 20, kb: 200, fx: 'thrust' })] },
+        { id: 'k_a4', grp: 'a', sw: 'spin', name: '旋身斬', short: '連斬', tags: ['melee', 'aoe'], range: [0, 160], cd: 0.05, cost: 0, track: 6, recovery: 0.34,
+          actions: [hit(0.24, circle(155), { dmg: 64, posture: 20, kb: 200, fx: 'whirl' })] },
+        { id: 'k_a5', grp: 'a', sw: 'down', name: '袈裟落斬', short: '連斬', tags: ['melee'], range: [0, 170], cd: 0.05, cost: 0, track: 6, recovery: 0.5,
+          actions: [hit(0.3, cone(170, 110), { dmg: 98, posture: 34, kb: 300, fx: { id: 'slash', scale: 1.3 } })] },
         { id: 'k_s2', grp: 's', name: '氣刃斬 II', short: '氣刃', tags: ['melee', 'gap'], range: [0, 200], cd: 0.05, cost: 10, res: 'spirit', track: 8, recovery: 0.3,
           actions: [{ do: 'dash', at: 0.14, dist: 90, dur: 0.1 }, hit(0.26, cone(150, 90), { dmg: 68, posture: 20, kb: 170, fx: 'slash' })] },
         { id: 'k_s3', grp: 's', name: '氣刃斬 III', short: '氣刃', tags: ['melee'], range: [0, 180], cd: 0.05, cost: 10, res: 'spirit', track: 7, recovery: 0.4,
@@ -131,6 +135,8 @@
     { id: 'soul', name: '魂力（借用招式威力）', per: 0.05, max: 10, unit: '%', base: 3, step: 1 },
     { id: 'potion', name: '藥水容量', per: 1, max: 3, unit: '', base: 6, step: 4 },
   ];
+
+  for (const w of WEAPONS) if (w.id !== 'katana') w.hidden = true; // 暫時只開放太刀（其餘武器之後比照重製再開放）
 
   BD.HUNT = {
     WEAPONS, WEAPON_BY_ID: Object.fromEntries(WEAPONS.map((w) => [w.id, w])), SLOTS, ARCH, BOSS_META, UPGRADES,

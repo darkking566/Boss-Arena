@@ -47,7 +47,13 @@
     body(ctx, o, t, { def, r }) {
       const hf = o.hurtFlash > 0 ? o.hurtFlash : 0, s = swing(o);
       // 武器：握在身體右側（區域 y 軸正向），出招時以 s 擺動
-      ctx.save(); ctx.translate(r * 0.2, r * 0.55); ctx.rotate(s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
+      const sw = o.state === 'skill' && o.inst.skill.sw; // 太刀連斬各式的揮刀動作
+      ctx.save(); ctx.translate(r * 0.2, r * 0.55);
+      if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
+      else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
+      if (o.state === 'skill' && o.inst.skill.grp === 'a' && o.inst.t < 0.2) { // 彈刀判定中：刀前一道白弧
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r * 1.7, -0.9, 0.9); ctx.stroke();
+      }
       // 披肩 + 肩線
       ctx.fillStyle = def.color2; ctx.strokeStyle = def.color; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(-r * 0.1, 0, r * 0.8, r * 1.05, 0, 0, U.TAU); ctx.fill(); ctx.stroke();

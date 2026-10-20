@@ -50,7 +50,7 @@
   // ── 存檔 ──
   function newSave() {
     return { v: 1, souls: {}, kills: {}, unlocked: {}, crafted: {}, equip: { helm: null, chest: null, legs: null, boots: null },
-      loadout: { weapon: 'greatsword', skills: [], ult: null, passives: [] }, upg: {} };
+      loadout: { weapon: 'katana', skills: [], ult: null, passives: [] }, upg: {} };
   }
   // 讀檔 / 匯入時整理：補預設值，丟掉無效或未解鎖的項目
   function sanitize(raw) {
@@ -62,7 +62,7 @@
     for (const k in s.crafted) { const [b, sl] = k.split(':'); if (!H.BOSS_META[b] || !H.SLOTS.some((x) => x.id === sl)) delete s.crafted[k]; }
     for (const sl of H.SLOTS) { const e = raw.equip && raw.equip[sl.id]; if (e && s.crafted[e + ':' + sl.id]) s.equip[sl.id] = e; }
     const lo = raw.loadout || {};
-    if (H.WEAPON_BY_ID[lo.weapon]) s.loadout.weapon = lo.weapon;
+    if (H.WEAPON_BY_ID[lo.weapon] && !H.WEAPON_BY_ID[lo.weapon].hidden) s.loadout.weapon = lo.weapon;
     const pick = (arr, kind, max) => [...new Set(arr || [])].filter((k) => s.unlocked[k] && abilityByKey(k).kind === kind).slice(0, max);
     s.loadout.skills = pick(lo.skills, 'skill', H.SKILL_SLOTS);
     s.loadout.passives = pick(lo.passives, 'passive', H.PASSIVE_SLOTS);
@@ -185,7 +185,7 @@
   // ── 太刀（魔物獵人式）：氣刃槽 + 練氣等級 + 連段 ──
   // 左鍵連斬 a1→a2→a3 命中累積氣刃；右鍵消耗氣刃 s1→s2→s3→大回旋（大回旋命中提升練氣等級）；見切斬成功回氣並升級。
   const KT = { lv: ['—', '白', '黃', '紅'], mul: [1, 1.05, 1.1, 1.2], chainWin: 0.75, lvTime: 25, idleDecay: 4 };
-  const A_CHAIN = ['k_a1', 'k_a2', 'k_a3'], S_CHAIN = ['k_s1', 'k_s2', 'k_s3', 'k_spin'];
+  const A_CHAIN = ['k_a1', 'k_a2', 'k_a3', 'k_a4', 'k_a5'], S_CHAIN = ['k_s1', 'k_s2', 'k_s3', 'k_spin'];
   function setLevel(b, n) {
     const kt = b.hunt.kt; n = Math.max(0, Math.min(3, n));
     if (n > kt.level) { b.world.fx.text(b.x, b.y - b.r - 36, '練氣：' + KT.lv[n], ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 22); b.world.fx.sparkle(b.x, b.y, ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 12, 160, -Math.PI / 2, 1); }
@@ -228,6 +228,25 @@
   };
   BD.defineTrait('hunter', { // 裝備 / 被動的減傷
     interceptDamage(w, b, src, p) { const d = b.def.hunt && b.def.hunt.def; if (d && p.dmg) p.dmg *= 1 - d; return null; },
+  });
+
+  // 彈刀（拚刀）：左鍵揮刀的前 DEFLECT_WIN 秒內被直接攻擊 → 免傷；近戰反震敵人（傷害 + 架勢），投射物改向打回；成功回氣刃
+  const DEFLECT_WIN = 0.2;
+  BD.defineTrait('deflect', {
+    interceptDamage(w, b, src, p) {
+      const i = b.inst;
+      if (!i || i.skill.grp !== 'a' || i.t > DEFLECT_WIN || p.dot || p.unblockable || !src) return null;
+      const pr = p.proj, U = BD.U;
+      w.fx.text(b.x, b.y - b.r - 30, pr ? '彈開！' : '彈刀！', '#ffffff', 24);
+      BD.spawnFx(w, 'parry', b.x, b.y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.08);
+      b.spirit = Math.min(b.maxSpirit, b.spirit + 12); b.hunt.kt.gainAt = w.time; b.stats.deflects = (b.stats.deflects || 0) + 1;
+      if (pr) { // 依主角面向改變軌跡，換成主角的投射物
+        const sp = Math.hypot(pr.vx, pr.vy) * 1.25;
+        pr.vx = Math.cos(b.face) * sp; pr.vy = Math.sin(b.face) * sp; pr.team = b.team; pr.owner = b; pr.homing = 0; pr.ret = 0; pr.hitSet = new Set();
+        pr.dmg *= 1.5; pr.life = Math.max(pr.life, 1.2); pr.x = b.x + Math.cos(b.face) * (b.r + pr.r + 4); pr.y = b.y + Math.sin(b.face) * (b.r + pr.r + 4);
+      } else if (src.isBoss) w.damageBoss(b, src, { dmg: 45, posture: 40, kb: 260, unblockable: true, noPerfect: true });
+      return 'deflected';
+    },
   });
 
   // 喝藥水：只能在待機時喝，有短暫硬直；血 / 法力已滿或沒有藥水時不消耗

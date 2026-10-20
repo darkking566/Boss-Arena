@@ -46,7 +46,7 @@
         if (p.hitSet.has(u)) continue;
         if (Math.hypot(u.x - p.x, u.y - p.y) < u.r + p.r) {
           p.hitSet.add(u);
-          w.damageUnit(p.owner, u, { dmg: p.dmg, posture: p.posture, kb: p.kb, kbAng: Math.atan2(p.vy, p.vx), slow: p.kind === 'ice' ? 0.8 : p.slow, status: p.status, undodgeable: p.undodgeable });
+          if (w.damageUnit(p.owner, u, { proj: p, dmg: p.dmg, posture: p.posture, kb: p.kb, kbAng: Math.atan2(p.vy, p.vx), slow: p.kind === 'ice' ? 0.8 : p.slow, status: p.status, undodgeable: p.undodgeable }) === 'deflected') break; // 被太刀彈開：已改向並換隊，不再命中
           if (!p.pierce) { p.alive = false; BD.spawnFx(w, 'projhit', p.x, p.y, { el: BD.kindElement(p.kind, BD.fxElementOf(p.owner)), angle: Math.atan2(p.vy, p.vx), dirHit: true }); break; }
         }
       }

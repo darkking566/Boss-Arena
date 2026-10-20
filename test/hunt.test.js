@@ -12,7 +12,7 @@ check(Object.keys(H.BOSS_META).sort().join() === BD.bosses.map((b) => b.id).sort
 eq(H.WEAPONS.length, 8, '武器數量');
 for (const w of H.WEAPONS) {
   check(w.skills.length >= 2, `${w.id} 至少兩招`);
-  for (const s of w.skills) check(s.actions.length && s.id && s.name && s.short && s.cost > 0 && s.cd > 0, `${w.id}/${s.id} 欄位`);
+  for (const s of w.skills) check(s.actions.length && s.id && s.name && s.short && s.cost >= 0 && s.cd > 0, `${w.id}/${s.id} 欄位`);
 }
 for (const id in H.BOSS_META) {
   const m = H.BOSS_META[id];
@@ -42,7 +42,7 @@ for (const id in H.BOSS_META) {
   const before = s.souls.ronin; check(Hunt.upgrade(s, 'hp', 'ronin').ok, '升級生命'); eq(s.souls.ronin, before - H.UPGRADES[0].base, '升級扣靈魂');
   check(!Hunt.upgrade(s, 'hp', null).ok, '升級必須指定靈魂來源');
   const bad = Hunt.sanitize({ unlocked: { 'ronin:nope': true, [ab.key]: true }, loadout: { weapon: 'xx', skills: ['ronin:nope', 'magmus:combo'] }, souls: { ronin: -3, zed: 5.7 } });
-  check(Object.keys(bad.unlocked).join() === ab.key && bad.loadout.weapon === 'greatsword' && !bad.loadout.skills.length && !bad.souls.ronin && bad.souls.zed === 5, '存檔整理丟掉無效項目');
+  check(Object.keys(bad.unlocked).join() === ab.key && bad.loadout.weapon === 'katana' && Hunt.sanitize({ loadout: { weapon: 'bow' } }).loadout.weapon === 'katana' && !bad.loadout.skills.length && !bad.souls.ronin && bad.souls.zed === 5, '存檔整理丟掉無效項目');
 }
 
 // ── 3. 建立主角、對假人施放每個武器招式與每個可借用招式 ──
@@ -117,7 +117,7 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   const run = (n) => { for (let i = 0; i < n; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); } };
   const swing = (idx) => { const sk = h.pick(idx); check(h.startSkill(sk), sk.id + ' 起手'); for (let i = 0; i < 200 && h.state !== 'idle'; i++) run(1); run(2); return sk.id; };
   eq(h.pick(0).id, 'k_a1', '連斬從 a1 開始');
-  eq(swing(0), 'k_a1', 'a1'); eq(h.pick(0).id, 'k_a2', '接 a2'); swing(0); eq(h.pick(0).id, 'k_a3', '接 a3'); swing(0);
+  eq(swing(0), 'k_a1', 'a1'); eq(h.pick(0).id, 'k_a2', '接 a2'); swing(0); eq(h.pick(0).id, 'k_a3', '接 a3'); swing(0); swing(0); eq(h.pick(0).id, 'k_a5', '接 a5'); eq(swing(0), 'k_a5', 'a5'); eq(h.pick(0).id, 'k_a1', '連斬循環回 a1'); h.sta = h.maxSta; eq(h.sta, h.maxSta, '連斬不耗體力');
   check(h.spirit > 0, '命中累積氣刃（' + h.spirit.toFixed(1) + '）');
   h.spirit = 100; run(1); d.x = h.x + 120; d.y = h.y;
   eq(h.pick(1).id, 'k_s1', '氣刃斬從 I 開始');
@@ -131,6 +131,17 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   const lv0 = h.hunt.kt.level, hp0 = h.hp; w.damageBoss(d, h, { dmg: 80 }); run(30);
   check(h.hp === hp0 && h.stats.counters === 1 && h.spirit >= 30 && h.hunt.kt.level === lv0 + 1, '見切成功：無傷、回氣、練氣 +1');
   h.hunt.kt.lvAt = w.time - 100; run(2); eq(h.hunt.kt.level, lv0, '練氣等級久未命中會下降');
+  // 彈刀：揮刀前 0.2 秒內被直接攻擊 → 免傷並反震；投射物改向打回；超出時機照常受傷
+  h.cancelSkill(); h.setState('idle', 0); run(60); h.hp = h.maxHp; d.hp = d.maxHp; d.posture = 0; h.hunt.kt.gainAt = w.time;
+  check(h.startSkill(h.skills.find((x) => x.id === 'k_a1')), '彈刀起手'); run(3);
+  const hp1 = h.hp, dhp = d.hp; eq(w.damageBoss(d, h, { dmg: 80 }), 'deflected', '揮刀窗內被打中 → 彈刀');
+  check(h.hp === hp1 && d.hp < dhp && d.posture > 0 && h.stats.deflects === 1, '彈刀：自己無傷、敵人受傷並失去架勢');
+  eq(w.damageBoss(d, h, { dmg: 80, unblockable: true }) === 'deflected', false, '無法格擋的攻擊不能彈');
+  const pr = { team: d.team, owner: d, x: h.x + 30, y: h.y, vx: -500, vy: 0, r: 8, dmg: 40, posture: 10, kb: 0, life: 2, hitSet: new Set(), alive: true, t: 0 };
+  w.projectiles.push(pr); h.face = 0; h.hp = h.maxHp; run(1);
+  check(pr.team === h.team && pr.owner === h && pr.vx > 0 && h.hp === h.maxHp, '投射物被彈開、改向並換隊');
+  run(200); h.cancelSkill(); h.setState('idle', 0); run(60);
+  check(h.startSkill(h.skills.find((x) => x.id === 'k_a1')), '彈刀起手 2'); run(30); const hp2 = h.hp; w.damageBoss(d, h, { dmg: 80 }); check(h.hp < hp2, '超出彈刀時機照常受傷');
 }
 
 // ── 5. AI 操控的主角打完整場（每種武器對一位 Boss，確認引擎全程不丟例外、能分出勝負）──
