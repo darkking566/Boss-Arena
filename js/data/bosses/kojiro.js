@@ -13,7 +13,7 @@
     desc: '終末的女武神第 3 回戰、人類代表。一生從未勝過任何人，卻把每一場敗北都化成養分。長刀「物干し竿」使出燕返し；被折斷後神器再錬成二刀的「二天岩流」，千手進化成萬手，看穿一切攻擊。',
     color: '#8c4a3a', color2: '#4a5a3a', glow: '#cfe8ff', style: 'kojiro',
     radius: 25, maxHp: 2050, speed: 240, turn: 7.5, mass: 0.95, fxEl: 'physical', hurt: 'flesh',
-    traits: ['counter', 'learn'],
+    traits: ['counter', 'learn'], learnReset: true, // 被完美閃避＝預測被超越，千手的學習歸零（原作波賽頓超越千手）
     stamina: { max: 105, regen: 34 }, posture: 120, dodgeCost: 18, dodgeSpeed: 580,
     ai: { prefRange: [150, 290], aggression: 0.5, dodge: 0.65, precision: 0.9, reaction: 0.18, strafe: 0.6, walk: 0.75,
       feint: 0.25, delay: 0.45, retreat: 0.1, punish: 0.85, nervous: 0.03, patience: 0.8, read: 0.9, counter: 0.55,
@@ -121,7 +121,7 @@
         { do: 'tele', at: 1.9, dur: 0.18, ...cone(480, 250), follow: true },
         { do: 'hit', at: 2.08, ...cone(480, 250), dmg: 155, posture: 52, kb: 340, fx: { id: 'tsubame', el: 'ice', scale: 1.2 } },
         ...strike(2.85, 0.6, rect(560, 130), { dmg: 188, posture: 70, kb: 400, fx: { id: 'skyrend', el: 'ice' } })],
-      actions2: [{ do: 'proj', at: 0.2, n: 5, spread: 0.26, speed: 900, r: 44, dmg: 50, posture: 16, kb: 160, life: 1.0, pierce: true, kind: 'swordghost' },
+      actions2: [{ do: 'proj', at: 0.9, n: 5, spread: 0.26, speed: 900, r: 44, dmg: 50, posture: 16, kb: 160, life: 1.0, pierce: true, kind: 'swordghost' },
         { do: 'tele', at: 0.1, dur: 0.8, ...cone(720, 60), follow: true },
         ...dashStrike(1.2, 0.55, 520, 90, 0.14, { dmg: 88, posture: 30, kb: 220, fx: 'slash' }, { fx: 'slashline' }),
         { do: 'tele', at: 1.35, dur: 0.35, ...cone(300, 120, -35), follow: true },
