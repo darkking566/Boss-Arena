@@ -199,11 +199,11 @@
     const bl = S * 3.0; // 十拳劍（依原作圖）：寬厚、向前漸寬、尖端微彎的橘紅巨刃，刀背隆起、中央一道亮脊；柄纏繩、小護手
     ctx.strokeStyle = 'rgba(70,15,5,0.95)'; ctx.lineWidth = S * 0.13; ctx.beginPath(); ctx.moveTo(-S * 0.45, 0); ctx.lineTo(S * 0.05, 0); ctx.stroke(); // 劍柄
     ctx.strokeStyle = 'rgba(' + GOLD + ',0.8)'; ctx.lineWidth = 2.5; for (let i = 0; i < 5; i++) { const x = -S * 0.42 + i * S * 0.09; ctx.beginPath(); ctx.moveTo(x, -S * 0.06); ctx.lineTo(x + S * 0.04, S * 0.06); ctx.stroke(); }
-    const blade = () => { ctx.beginPath(); ctx.moveTo(S * 0.1, -S * 0.15); ctx.bezierCurveTo(bl * 0.45, -S * 0.27, bl * 0.85, -S * 0.46, bl * 1.05, S * 0.1); ctx.bezierCurveTo(bl * 0.86, S * 0.46, bl * 0.4, S * 0.34, S * 0.1, S * 0.15); ctx.closePath(); };
-    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,110,30,0.28)'; ctx.translate(0, 0); ctx.scale(1.06, 1.35); blade(); ctx.fill(); ctx.restore(); // 外暈
+    const blade = () => { ctx.beginPath(); ctx.moveTo(S * 0.1, -S * 0.18); ctx.bezierCurveTo(bl * 0.4, -S * 0.22, bl * 0.75, -S * 0.24, bl * 0.9, -S * 0.2); ctx.quadraticCurveTo(bl * 1.03, -S * 0.1, bl * 1.1, S * 0.04); ctx.quadraticCurveTo(bl * 0.98, S * 0.2, bl * 0.88, S * 0.22); ctx.bezierCurveTo(bl * 0.6, S * 0.22, bl * 0.35, S * 0.2, S * 0.1, S * 0.18); ctx.closePath(); };
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,110,30,0.28)'; ctx.translate(0, 0); ctx.scale(1.03, 1.3); blade(); ctx.fill(); ctx.restore(); // 外暈
     const bg = ctx.createLinearGradient(0, 0, bl, 0); bg.addColorStop(0, '#c4400f'); bg.addColorStop(0.5, '#ff8a28'); bg.addColorStop(1, '#ffc060');
     ctx.fillStyle = bg; blade(); ctx.fill(); ctx.strokeStyle = 'rgba(110,25,5,0.95)'; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = 'rgba(' + GOLD + ',0.95)'; ctx.lineWidth = 2.5; ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,240,190,0.9)'; ctx.lineWidth = S * 0.05; ctx.beginPath(); ctx.moveTo(S * 0.3, 0); ctx.bezierCurveTo(bl * 0.5, -S * 0.04, bl * 0.8, -S * 0.1, bl * 0.98, S * 0.06); ctx.stroke(); // 亮脊
+    ctx.strokeStyle = 'rgba(255,240,190,0.9)'; ctx.lineWidth = S * 0.05; ctx.beginPath(); ctx.moveTo(S * 0.3, 0); ctx.bezierCurveTo(bl * 0.5, -S * 0.03, bl * 0.8, -S * 0.04, bl * 1.05, S * 0.03); ctx.stroke(); // 亮脊
     ctx.fillStyle = 'rgba(' + GOLD + ',1)'; ctx.strokeStyle = 'rgba(110,25,5,0.95)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(S * 0.08, 0, S * 0.05, S * 0.26, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); // 護手
     ctx.restore();
     ctx.restore();
