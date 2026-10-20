@@ -64,7 +64,7 @@
       const sway = Math.sin(t * 4) * 0.2 + (inst && inst.dash ? 0.35 : 0);
       if (w) { ctx.save(); ctx.translate(w.lean, 0); if (w.sc !== 1) ctx.scale(w.sc, w.sc); }
       // 破爛披風（衝刺時飄得更開）
-      ctx.fillStyle = p2 ? '#1a0f10' : '#1c1d26';
+      ctx.fillStyle = p2 ? '#3a0c0c' : '#6a1218'; // 原作的暗紅披風
       ctx.beginPath(); ctx.moveTo(-r * 0.1, -r * 0.95);
       for (let i = 0; i <= 6; i++) { const yy = -r * 0.95 + i * (r * 1.9 / 6); ctx.lineTo(-r * (1.45 + (i % 2 ? 0.4 : 0) + sway * (i / 6)), yy); }
       ctx.lineTo(-r * 0.1, r * 0.95); ctx.closePath(); ctx.fill();
@@ -82,9 +82,12 @@
       // 鎧甲圓盤（徑向漸層 + 同一路徑外框）以精靈快取
       R.blit(ctx, 'body:watcher:armor:' + o.phase + ':' + r + ':' + def.color2, r * 2 + 8, r * 2 + 8, r + 4, r + 4, (g) => {
         // 精靈繪製回呼，每種樣式只建立一次
-        const gr = g.createRadialGradient(-r * 0.3, -r * 0.3, 2, 0, 0, r); gr.addColorStop(0, '#565a68'); gr.addColorStop(1, def.color2);
+        const gr = g.createRadialGradient(-r * 0.3, -r * 0.3, 2, 0, 0, r); gr.addColorStop(0, '#5f7694'); gr.addColorStop(1, def.color2);
         g.fillStyle = gr; g.beginPath(); g.arc(0, 0, r, 0, U.TAU); g.fill(); g.strokeStyle = '#0c0c12'; g.lineWidth = 2; g.stroke();
       });
+      // 藍鋼肩甲（持劍的右肩較大）
+      ctx.fillStyle = '#41597a'; ctx.strokeStyle = '#0c0c12'; ctx.lineWidth = 1.5;
+      for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(-r * 0.05, s * r * 0.78, r * 0.5, r * (s > 0 ? 0.34 : 0.28), 0, 0, U.TAU); ctx.fill(); ctx.stroke(); }
       // 狼血印記
       ctx.strokeStyle = '#8a1020'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-r * 0.35, 0, r * 0.42, 1.9, 4.4); ctx.stroke();
       ctx.fillStyle = '#8a1020'; ctx.beginPath(); ctx.arc(-r * 0.62, 0, 2.5, 0, U.TAU); ctx.fill();
@@ -110,8 +113,10 @@
         });
         ctx.restore();
       }
-      ctx.fillStyle = '#d9dde6';
+      ctx.fillStyle = '#b9c2d0';
       ctx.beginPath(); ctx.moveTo(r * 0.35, -3.8); ctx.lineTo(L - 6, -3.8); ctx.lineTo(L + 4, 0); ctx.lineTo(L - 6, 3.8); ctx.lineTo(r * 0.35, 3.8); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(122,26,34,0.75)'; ctx.lineWidth = 1.8; // 沾血的血槽
+      ctx.beginPath(); ctx.moveTo(r * 0.5, 0); ctx.lineTo(L - 10, 0); ctx.stroke();
       ctx.strokeStyle = '#2a2a33'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(r * 0.35, -8); ctx.lineTo(r * 0.35, 8); ctx.stroke();
       ctx.strokeStyle = '#4a3020'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(r * 0.33, 0); ctx.stroke();
       if (p2) for (let i = 0; i < 6; i++) {
@@ -120,12 +125,16 @@
       }
       ctx.restore();
       // 兜帽與紅眼
-      ctx.fillStyle = '#14151c'; ctx.beginPath(); ctx.arc(r * 0.18, 0, r * 0.62, 0, U.TAU); ctx.fill();
+      // 尖頂鐵盔（帽尖朝前）＋腦後兜帽布
+      ctx.fillStyle = '#14151c'; ctx.beginPath(); ctx.arc(r * 0.1, 0, r * 0.55, 0, U.TAU); ctx.fill();
       ctx.beginPath(); ctx.moveTo(-r * 0.25, -r * 0.4); ctx.lineTo(-r * 0.9, 0); ctx.lineTo(-r * 0.25, r * 0.4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#232b3a'; ctx.beginPath(); ctx.moveTo(r * 0.95, 0); ctx.lineTo(r * 0.3, -r * 0.4); ctx.lineTo(r * 0.3, r * 0.4); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#0c0c12'; ctx.lineWidth = 1.2; ctx.stroke();
       // 紅眼（固定區域座標 + 陰影）：依 rogue / 半徑快取，精靈框含 16px 陰影
       const er = o.rogue ? 3.2 : 2.6;
+      // 本體盔內透出橘光（薪王之火），紅眼監視者才是血紅
       R.blit(ctx, 'body:watcher:eyes:' + (o.rogue ? 'rogue' : 'boss') + ':' + r, r * 0.3 + 44, r * 0.56 + 44, r * 0.1 + 22, r * 0.28 + 22, (g) => {
-        g.shadowColor = '#ff2020'; g.shadowBlur = o.rogue ? 16 : 10; g.fillStyle = o.rogue ? '#ff1a1a' : '#ff4a3a';
+        g.shadowColor = o.rogue ? '#ff2020' : '#ff8a2a'; g.shadowBlur = o.rogue ? 16 : 10; g.fillStyle = o.rogue ? '#ff1a1a' : '#ffa040';
         g.beginPath(); g.arc(r * 0.55, -r * 0.17, er, 0, U.TAU); g.arc(r * 0.55, r * 0.17, er, 0, U.TAU); g.fill();
       });
       if (w && w.eye > 0.02) {
