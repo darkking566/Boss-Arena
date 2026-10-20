@@ -213,6 +213,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | | `swarmtrail` | 蟲群尾跡 | 蟲群飛行留下的細碎微光火花與毒泡 | projectile.js `swarm` 飛行中 |
 | | `trail` | 拖痕火花 | 移動中留下的短暫微粒與元素餘燼 | zones.js `dropTrail`（衝刺或繞圈留下火痕時） |
 | **區域** | `amaterasu` | 天照 | 黑炎：墨黑濃煙與暗紅火星竄起、焦黑地面與暗紅裂痕（搭配元素 `blackfire`） | 鼬「天照」與大招的黑炎噴發柱 |
+| | `flamethrow` | 噴火 | 真正塗滿扇形的火焰噴射：火團一波波沿整個錐形範圍向外推進、黑煙與火星、最前緣巨大火球、終點熱浪 | 鼬「火遁・豪火球之術」 |
 | | `breath` | 噴吐 | 廣角錐形扇形刃光、錐內微粒與火花翻湧 | 熔岩巨像「熔岩噴吐」 |
 | | `ambient` | 區域氛圍 | 毒池、火海、冰域等持續性地表跳動微粒與淡光暈 | zones.js `updateZones` 每 0.4 秒 tick |
 | | `trapset` | 佈置陷阱 | 地雷、蛛網、符印設置時的收束光環與微光提示 | zones.js `trap` 動作佈置陷阱 |

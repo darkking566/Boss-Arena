@@ -72,9 +72,9 @@
           { do: 'proj', at: 0.58, n: 1, speed: 1150, r: 12, dmg: 52, posture: 18, kb: 120, life: 0.8, pierce: true, kind: 'shuriken', status: { id: 'burn', dur: 2 } }] },
       // 火遁・豪火球之術：宇智波的代表忍術——鼬的火焰多到連佐助的豪火球都被壓過
       { id: 'fireball', name: '火遁・豪火球之術', short: '豪火球', tags: ['ranged', 'aoe'], range: [120, 400], cd: 6, cost: 22, track: 7, recovery: 0.6,
-        actions: strike(0.8, 0.8, cone(340, 75), { dmg: 100, posture: 40, kb: 280, fx: { id: 'breath', el: 'fire' }, status: { id: 'burn', dur: 3 } }),
-        actions2: [...strike(0.7, 0.7, cone(400, 90), { dmg: 108, posture: 44, kb: 300, fx: { id: 'breath', el: 'fire' }, status: { id: 'burn', dur: 3 } }),
-          ...strike(1.25, 0.4, cone(300, 70), { dmg: 60, posture: 20, kb: 200, fx: { id: 'breath', el: 'fire' }, status: { id: 'burn', dur: 2 } })] },
+        actions: strike(0.8, 0.8, cone(340, 75), { dmg: 100, posture: 40, kb: 280, fx: { id: 'flamethrow', el: 'fire' }, status: { id: 'burn', dur: 3 } }),
+        actions2: [...strike(0.7, 0.7, cone(400, 90), { dmg: 108, posture: 44, kb: 300, fx: { id: 'flamethrow', el: 'fire' }, status: { id: 'burn', dur: 3 } }),
+          ...strike(1.25, 0.4, cone(300, 70), { dmg: 60, posture: 20, kb: 200, fx: { id: 'flamethrow', el: 'fire' }, status: { id: 'burn', dur: 2 } })] },
       // 烏鴉分身：化作烏鴉群四散、拉開距離，同時放出一群烏鴉撲向對手（原作：以烏鴉牽制、擾亂對手）
       { id: 'crow_clone', name: '烏鴉分身', short: '烏鴉', tags: ['escape', 'ranged'], range: [0, 240], cd: 8, cost: 16, recovery: 0.4,
         actions: [{ do: 'blink', at: 0.1, to: 'away', dist: 300, fx: 'crowburst' },
