@@ -7,11 +7,11 @@
     id: 'thor', name: '索爾', title: '雷之狂戰士', archetype: '重槌壓制',
     desc: '北歐最強的雷神。寡言而冷漠，只在遇到值得一戰的對手時露出笑容；以鐵手套雅恩格利佩爾壓住沉睡的雷槌妙爾尼爾，雷槌覺醒後雷霆萬鈞。',
     color: '#3d8bff', color2: '#1a2238', glow: '#9fd4ff', style: 'thor',
-    radius: 32, maxHp: 2900, speed: 195, turn: 5, mass: 1.6, fxEl: 'physical', hurt: 'flesh',
+    radius: 44, maxHp: 2900, speed: 195, turn: 5, mass: 1.6, fxEl: 'physical', hurt: 'flesh',
     traits: ['counter'], // 雅恩格利佩爾格擋反擊（js/engine/traits.js）
     stamina: { max: 115, regen: 28 }, posture: 180, dodgeCost: 22, dodgeSpeed: 500,
     ai: {
-      prefRange: [90, 220],
+      prefRange: [100, 230],
       aggression: 0.6,
       dodge: 0.3,
       precision: 0.75,

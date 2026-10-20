@@ -168,7 +168,7 @@
       id: 'hero', hero: true, weapon: wp.id, name: '獵魂者', title: '無名的挑戰者', archetype: wp.name,
       desc: '沒有任何特殊能力的基礎角色，靠武器與從 Boss 身上奪來的靈魂變強。',
       color: '#7fd6ff', color2: '#1b2a3a', glow: '#cfeeff', style: 'hero',
-      radius: 20, maxHp: Math.round(B.hp + up.hp * 40 + (m.hp || 0)), speed: 240 * (1 + (m.spd || 0)), turn: 9, mass: 1, fxEl: wp.el, hurt: 'flesh',
+      radius: 28, maxHp: Math.round(B.hp + up.hp * 40 + (m.hp || 0)), speed: 240 * (1 + (m.spd || 0)), turn: 9, mass: 1, fxEl: wp.el, hurt: 'flesh',
       traits: ['hunter'].concat(wp.traits || []), variants, stamina: { max: B.sta + up.sta * 8 + (m.sta || 0), regen: 34 * (1 + (m.staRegen || 0)) },
       mana: { max: B.mana + up.mana * 10 + (m.mana || 0), regen: 5 * (1 + (m.manaRegen || 0)) },
       posture: 90, dodgeCost: 20, dodgeSpeed: 560,

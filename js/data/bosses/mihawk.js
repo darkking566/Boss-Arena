@@ -10,7 +10,7 @@
     id: 'mihawk', name: '鷹眼米霍克', title: '世界第一大劍豪', archetype: '輕視對手的劍聖',
     desc: '王下七武海、世界第一大劍豪。一階段只用胸前的十字小刀，從容撥開所有攻擊；對手撐到半血，他才佩服地拔出黑刀「夜」，揮出能斬開艦隊的飛斬。',
     color: '#c9a24a', color2: '#16121a', glow: '#e8c860', style: 'mihawk',
-    radius: 24, maxHp: 1950, speed: 245, turn: 8, mass: 0.9, fxEl: 'physical', hurt: 'flesh',
+    radius: 36, maxHp: 1950, speed: 245, turn: 8, mass: 0.9, fxEl: 'physical', hurt: 'flesh',
     traits: ['counter'],
     stamina: { max: 100, regen: 34 }, posture: 115, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [130, 260], aggression: 0.4, dodge: 0.7, precision: 0.92, reaction: 0.17, strafe: 0.6, walk: 0.8,

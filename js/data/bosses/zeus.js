@@ -11,7 +11,7 @@
     id: 'zeus', name: '宙斯', title: '全宇宙之父', archetype: '鬥神・肌肉變形',
     desc: '希臘眾神之王、眾神會議議長，自稱「全宇宙之父（GFOC）」。外表是禿頂、灰色衝天髮、長鬚綁著金珠的瘦小老人，一開打就把肌肉膨脹成巨漢；不用神器、只想親耳聽對手骨頭碎裂的聲音。被逼到絕境時把全身肌肉壓縮成「阿陀磨須」，連神明都會本能地發抖。',
     color: '#f2ead8', color2: '#5a4a3a', glow: '#ffd36a', style: 'zeus',
-    radius: 31, maxHp: 2250, speed: 205, turn: 6, mass: 1.5, fxEl: 'holy', hurt: 'flesh',
+    radius: 43, maxHp: 2250, speed: 205, turn: 6, mass: 1.5, fxEl: 'holy', hurt: 'flesh',
     traits: ['battlelust'], // 鬥神狂喜：每挨 3 下就興奮到渾身肌肉再膨脹一圈（js/engine/traits.js）
     stamina: { max: 125, regen: 30 }, posture: 175, dodgeCost: 20, dodgeSpeed: 520,
     ai: {

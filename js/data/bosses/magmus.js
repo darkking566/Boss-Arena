@@ -16,9 +16,9 @@
     id: 'magmus', name: '熔岩巨像', title: '焚城者', archetype: '狂暴重戰士',
     desc: '皮糙肉厚的近戰怪物，以弧線逼近並用重擊、衝撞碾壓對手，體力見底才會退開。',
     color: '#ff7a2e', color2: '#4a1a0a', glow: '#ffb347', style: 'golem',
-    radius: 58, maxHp: 3250, speed: 165, turn: 4.2, mass: 1.8, fxEl: 'fire', hurt: 'magma',
+    radius: 72, maxHp: 3250, speed: 165, turn: 4.2, mass: 1.8, fxEl: 'fire', hurt: 'magma',
     stamina: { max: 120, regen: 26 }, posture: 170, dodgeCost: 24, dodgeSpeed: 420,
-    ai: { prefRange: [85, 200], aggression: 0.85, dodge: 0.3, precision: 0.45, reaction: 0.3, strafe: 0.4, walk: 0.72,
+    ai: { prefRange: [110, 220], aggression: 0.85, dodge: 0.3, precision: 0.45, reaction: 0.3, strafe: 0.4, walk: 0.72,
       feint: 0.1, delay: 0.3, retreat: 0.06, punish: 0.6, nervous: 0.12, patience: 0.2, read: 0.45,
       // 連段（僅沉重；格式見 js/engine/combo.js）
       combos: [

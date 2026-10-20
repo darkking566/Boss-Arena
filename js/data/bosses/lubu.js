@@ -7,7 +7,7 @@
     id: 'lubu', name: '呂布', title: '飛將', archetype: '重戟壓制',
     desc: '手持方天畫戟的天下無雙飛將，以狂瀾巨戟與霸道衝殺壓制全場，縱橫沙場只為尋得能全力一戰的宿敵。',
     color: '#c81e2b', color2: '#2b1a1a', glow: '#ff3a3a', style: 'lubu',
-    radius: 34, maxHp: 2400, speed: 205, turn: 6, mass: 1.5, fxEl: 'physical', hurt: 'flesh',
+    radius: 44, maxHp: 2400, speed: 205, turn: 6, mass: 1.5, fxEl: 'physical', hurt: 'flesh',
     traits: ['counter'], // 鎚頂彈反反擊（js/engine/traits.js）
     stamina: { max: 110, regen: 30 }, posture: 170, dodgeCost: 20, dodgeSpeed: 540,
     ai: {

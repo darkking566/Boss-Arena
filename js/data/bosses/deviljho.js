@@ -20,10 +20,10 @@
     id: 'deviljho', name: '恐暴龍', title: '健啖的惡魔', archetype: '暴食・龍息',
     desc: '《魔物獵人》系列的流浪暴食者 Deviljho，別名「恐暴龍」。深苔綠的粗皮、背與尾排滿鋸齒狀的黃褐棘刺，窄吻配上巨大的下顎與好幾排牙，後肢壯碩、前肢細小；新陳代謝快到必須不停進食，涎液帶有腐蝕性。被激怒時背與肩的筋肉鼓脹、全身泛起赤紅，並從口中噴出龍屬性的吐息。',
     color: '#8aa064', color2: '#2f3a2a', glow: '#d0143c', style: 'deviljho',
-    radius: 44, maxHp: 2700, speed: 225, turn: 4.6, mass: 2.0, fxEl: 'physical', hurt: 'flesh',
+    radius: 70, maxHp: 2700, speed: 225, turn: 4.6, mass: 2.0, fxEl: 'physical', hurt: 'flesh',
     stamina: { max: 150, regen: 34 }, posture: 235, dodgeCost: 24, dodgeSpeed: 500,
     ai: {
-      prefRange: [60, 240],
+      prefRange: [90, 260],
       aggression: 0.9,
       dodge: 0.2,
       precision: 0.6,

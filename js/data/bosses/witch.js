@@ -7,7 +7,7 @@
     id: 'witch', name: '霜月魔女', title: '永凍之眼', archetype: '風箏型法師',
     desc: '永遠保持距離，以冰錐、冰槍、地雷與哨兵消耗對手；被貼身時冰爆擊退並閃現脫離。',
     color: '#7fd8ff', color2: '#1b3a5c', glow: '#e0f7ff', style: 'witch',
-    radius: 25, maxHp: 2500, speed: 190, turn: 6, mass: 0.9, fxEl: 'ice', hurt: 'frost',
+    radius: 32, maxHp: 2500, speed: 190, turn: 6, mass: 0.9, fxEl: 'ice', hurt: 'frost',
     stamina: { max: 110, regen: 30 }, posture: 110, dodgeCost: 20, dodgeSpeed: 540,
     ai: { prefRange: [300, 470], aggression: 0.5, dodge: 0.62, precision: 0.7, reaction: 0.22, strafe: 0.85, walk: 0.68,
       feint: 0.05, delay: 0.15, retreat: 0.55, punish: 0.5, nervous: 0.25, patience: 0.45, read: 0.55, kiter: true,
