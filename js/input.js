@@ -48,7 +48,7 @@
         if (key === ' ') ok = b.tryDodge(l ? Math.atan2(my, mx) : b.face + Math.PI);
         else if (key === 'x') ok = b.startSkill(b.ultimate);
         else if (b.hunt && DRINK[key]) ok = BD.Hunt.drink(b, DRINK[key]);
-        else { const idx = SKILL_KEYS.indexOf(key); if (idx >= 0 && b.skills[idx]) ok = b.startSkill(b.skills[idx]); else ok = true; }
+        else { const idx = SKILL_KEYS.indexOf(key); if (idx >= 0 && b.skills[idx]) ok = b.startSkill(b.pick ? b.pick(idx) : b.skills[idx]); else ok = true; }
         if (ok || ![...SKILL_KEYS, 'x', ' ', '1', '2'].includes(key)) { buf.splice(i, 1); i--; }
       }
     }

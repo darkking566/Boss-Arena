@@ -31,7 +31,7 @@
     const ky = uy + 18, cw = 66, gap = 6;
     ctx.textAlign = 'center';
     b.skills.forEach((s, i) => {
-      const sx = x + i * (cw + gap), cd = Math.max(0, b.cds[s.id] || 0), max = (s.cd || 1) * b.cdMul, active = b.inst && b.inst.skill === s;
+      const sx = x + i * (cw + gap), cd = Math.max(0, b.cds[s.id] || 0), max = (s.cd || 1) * b.cdMul, active = b.inst && (b.inst.skill === s || (b.inst.skill.grp && b.inst.skill.grp === s.grp));
       const afford = s.res === 'mana' ? b.mana >= s.cost : b.sta >= (s.cost || 0);
       ctx.fillStyle = active ? 'rgba(127,214,255,0.8)' : 'rgba(255,255,255,0.12)'; ctx.fillRect(sx, ky, cw, 22);
       if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(sx, ky, cw * U.clamp(cd / max, 0, 1), 22); }
@@ -41,6 +41,11 @@
     ctx.textAlign = 'right'; ctx.font = `bold 14px ${FONT}`;
     ctx.fillStyle = h.hpPotions ? '#7dffb0' : '#666'; ctx.fillText(`1 生命藥水 ×${h.hpPotions}`, x + PW - 130, ky + 16);
     ctx.fillStyle = h.manaPotions ? '#8fc4ff' : '#666'; ctx.fillText(`2 法力藥水 ×${h.manaPotions}`, x + PW, ky + 16);
+    if (b.maxSpirit) { // 太刀：氣刃槽與練氣等級
+      const lv = b.hunt.kt.level, col = ['#999', '#fff', '#ffe27a', '#ff5a4a'][lv];
+      ctx.textAlign = 'left'; ctx.font = `bold 13px ${FONT}`; ctx.fillStyle = col; ctx.fillText('氣刃 練氣：' + ['—', '白', '黃', '紅'][lv], x + PW - 290, y + 24);
+      bar(ctx, x + PW - 150, y + 12, 150, 10, b.spirit / b.maxSpirit, col);
+    }
     R.drawStatusRow(ctx, b, x, ky + 26, false, PW);
   };
 

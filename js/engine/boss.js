@@ -64,7 +64,7 @@
     canAct() { return this.state === 'idle' && this.world.intro <= 0 && !this.world.over && BD.getMod(this, 'canAct'); }
     skillReady(s) {
       if (s.ult) return this.ult >= 100;
-      if (s.res === 'mana') return (this.cds[s.id] || 0) <= 0 && this.mana >= (s.cost || 0);
+      if (s.res) return (this.cds[s.id] || 0) <= 0 && this[s.res] >= (s.cost || 0); // 獵魂：res 指向 mana / spirit 等資源池
       return (this.cds[s.id] || 0) <= 0 && this.sta >= (s.cost || 0);
     }
     skillPhase() { // windup / active / recovery
@@ -86,7 +86,7 @@
       this.inst = { skill, v: this.phase === 2 ? skill.v2 : skill.v1, t: 0, hold: opts.hold || 0, idx: 0, marks: {}, id: w.nextId++, dash: null };
       if (opts.chase) { this.inst.chase = opts.chase; this.inst.chaseStop = opts.chaseStop || 0; } // 沉重限定
       if (!skill.ult && !opts.force) {
-        if (skill.res === 'mana') this.mana -= skill.cost || 0;
+        if (skill.res) this[skill.res] -= skill.cost || 0;
         else { this.sta -= (skill.cost || 0) * (opts.costMul != null ? opts.costMul : 1); this.staDelay = 0.9; }
         this.cds[skill.id] = (skill.cd || 1) * this.cdMul;
       }
@@ -203,6 +203,7 @@
         this.sta = Math.min(this.maxSta, this.sta + this.def.stamina.regen * dt * (this.state === 'idle' ? 1 : 0.5));
       }
       if (this.maxMana) this.mana = Math.min(this.maxMana, this.mana + this.def.mana.regen * dt);
+      if (this.hunt && this.hunt.tick) this.hunt.tick(this, dt); // 獵魂武器的逐幀邏輯（例如太刀的氣刃）
       if (this.postureDelay <= 0) this.posture = Math.max(0, this.posture - (this.state === 'idle' ? 16 : 9) * dt);
       if (this.ult < 100 && w.intro <= 0) this.ult = Math.min(100, this.ult + (this.def.pace ? 0.8 * this.def.pace.ultGainMul * dt : 0.8 * dt));
 

@@ -25,7 +25,11 @@
       blade(ctx, r * 2.1, 4, '#8a6a46'); ctx.fillStyle = '#c9d0d8';
       ctx.beginPath(); ctx.moveTo(r * 1.5, 0); ctx.lineTo(r * 2.1, -r * 0.8); ctx.lineTo(r * 2.2, r * 0.6); ctx.closePath(); ctx.fill();
     },
-    katana(ctx, r) { blade(ctx, r * 2.2, 3, '#f2f5fa'); ctx.fillStyle = '#c0a050'; ctx.fillRect(-1, -4, 3, 8); },
+    katana(ctx, r, t, o) {
+      const lv = (o && o.hunt && o.hunt.kt && o.hunt.kt.level) || 0; // 練氣等級：刀身發光（白 / 黃 / 紅）
+      if (lv) { ctx.shadowColor = ['', '#fff', '#ffe27a', '#ff3a2a'][lv]; ctx.shadowBlur = 10 + lv * 4; }
+      blade(ctx, r * 2.2, 3, ['#f2f5fa', '#ffffff', '#fff2b0', '#ff9a8a'][lv]); ctx.shadowBlur = 0; ctx.fillStyle = '#c0a050'; ctx.fillRect(-1, -4, 3, 8);
+    },
     staff(ctx, r, t) {
       blade(ctx, r * 2.2, 3, '#7a5a3a');
       ctx.fillStyle = `rgba(170,140,255,${0.6 + 0.4 * Math.sin(t * 6)})`; ctx.beginPath(); ctx.arc(r * 2.3, 0, r * 0.38, 0, U.TAU); ctx.fill();
@@ -43,7 +47,7 @@
     body(ctx, o, t, { def, r }) {
       const hf = o.hurtFlash > 0 ? o.hurtFlash : 0, s = swing(o);
       // 武器：握在身體右側（區域 y 軸正向），出招時以 s 擺動
-      ctx.save(); ctx.translate(r * 0.2, r * 0.55); ctx.rotate(s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t); ctx.restore();
+      ctx.save(); ctx.translate(r * 0.2, r * 0.55); ctx.rotate(s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
       // 披肩 + 肩線
       ctx.fillStyle = def.color2; ctx.strokeStyle = def.color; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(-r * 0.1, 0, r * 0.8, r * 1.05, 0, 0, U.TAU); ctx.fill(); ctx.stroke();

@@ -160,6 +160,8 @@
     const wp = H.WEAPON_BY_ID[save.loadout.weapon], { mods: m, up } = stats(save), B = H.BASE;
     const cdr = m.cdr || 0, soulK = B.soulMul * (1 + 0.05 * up.soul);
     const weapon = wp.skills.map((s) => { const c = clone(s); c.cd *= 1 - cdr; return c; });
+    const variants = {};
+    for (const v of wp.variants || []) { const c = clone(v); c.cd *= 1 - cdr; variants[c.id] = c; }
     const skills = weapon.concat(save.loadout.skills.map((k) => borrow(abilityByKey(k), paceId, soulK, cdr)));
     const ultAb = save.loadout.ult && abilityByKey(save.loadout.ult);
     const def = {
@@ -167,7 +169,7 @@
       desc: '沒有任何特殊能力的基礎角色，靠武器與從 Boss 身上奪來的靈魂變強。',
       color: '#7fd6ff', color2: '#1b2a3a', glow: '#cfeeff', style: 'hero',
       radius: 20, maxHp: Math.round(B.hp + up.hp * 40 + (m.hp || 0)), speed: 240 * (1 + (m.spd || 0)), turn: 9, mass: 1, fxEl: wp.el, hurt: 'flesh',
-      traits: ['hunter'], stamina: { max: B.sta + up.sta * 8 + (m.sta || 0), regen: 34 * (1 + (m.staRegen || 0)) },
+      traits: ['hunter'].concat(wp.traits || []), variants, stamina: { max: B.sta + up.sta * 8 + (m.sta || 0), regen: 34 * (1 + (m.staRegen || 0)) },
       mana: { max: B.mana + up.mana * 10 + (m.mana || 0), regen: 5 * (1 + (m.manaRegen || 0)) },
       posture: 90, dodgeCost: 20, dodgeSpeed: 560,
       ai: { prefRange: wp.ai, aggression: 0.6, dodge: 0.6, precision: 0.7, reaction: 0.2, strafe: 0.6, walk: 0.6, feint: 0.1, delay: 0.2, retreat: 0.2, punish: 0.7, nervous: 0.1, patience: 0.5, gapMul: 1.9, midWait: 0.45, stalk: 0.5 },
@@ -180,11 +182,47 @@
     return def;
   }
 
+  // ── 太刀（魔物獵人式）：氣刃槽 + 練氣等級 + 連段 ──
+  // 左鍵連斬 a1→a2→a3 命中累積氣刃；右鍵消耗氣刃 s1→s2→s3→大回旋（大回旋命中提升練氣等級）；見切斬成功回氣並升級。
+  const KT = { lv: ['—', '白', '黃', '紅'], mul: [1, 1.05, 1.1, 1.2], chainWin: 0.75, lvTime: 25, idleDecay: 4 };
+  const A_CHAIN = ['k_a1', 'k_a2', 'k_a3'], S_CHAIN = ['k_s1', 'k_s2', 'k_s3', 'k_spin'];
+  function setLevel(b, n) {
+    const kt = b.hunt.kt; n = Math.max(0, Math.min(3, n));
+    if (n > kt.level) { b.world.fx.text(b.x, b.y - b.r - 36, '練氣：' + KT.lv[n], ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 22); b.world.fx.sparkle(b.x, b.y, ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 12, 160, -Math.PI / 2, 1); }
+    kt.level = n; kt.lvAt = b.world.time; b.dmgMul = b.hunt.baseDmg * KT.mul[n];
+  }
+  const LOGIC = {
+    katana: {
+      init(b) {
+        b.spirit = 0; b.maxSpirit = 100; b.kv = {};
+        for (const id in b.def.variants) b.kv[id] = BD.prepSkill(b.def.variants[id]);
+        for (const s of b.skills) b.kv[s.id] = s;
+        b.hunt.kt = { level: 0, lvAt: 0, gainAt: 0, taken: 0, counters: 0 };
+      },
+      pick(b, idx) {
+        if (idx > 1) return b.skills[idx];
+        const last = b.world.time - b.lastSkillEnd < KT.chainWin ? b.lastSkillId : null, chain = idx === 0 ? A_CHAIN : S_CHAIN, j = chain.indexOf(last);
+        return b.kv[chain[j >= 0 && j < chain.length - 1 ? j + 1 : 0]];
+      },
+      tick(b, dt) {
+        const kt = b.hunt.kt, e = b.enemy, t = b.world.time, sk = b.inst && b.inst.skill;
+        const d = e.stats.taken - kt.taken; kt.taken = e.stats.taken;
+        if (d > 0 && !(sk && sk.grp === 's')) { b.spirit = Math.min(b.maxSpirit, b.spirit + Math.min(14, d * 0.15)); kt.gainAt = t; } // 氣刃斬本身不回氣
+        if (t - kt.gainAt > KT.idleDecay) b.spirit = Math.max(0, b.spirit - 2 * dt);
+        if (sk && sk.id === 'k_spin' && b.inst.landed && !b.inst.lvDone) { b.inst.lvDone = true; setLevel(b, kt.level + 1); }
+        if (b.stats.counters > kt.counters) { kt.counters = b.stats.counters; b.spirit = Math.min(b.maxSpirit, b.spirit + 30); kt.gainAt = t; setLevel(b, kt.level + 1); }
+        if (kt.level > 0 && t - kt.lvAt > KT.lvTime) setLevel(b, kt.level - 1);
+      },
+    },
+  };
+
   // World 以 opts.hunt 啟用：把主角（隊伍 0）的存檔數值套到單位上
   BD.setupHunt = function (w) {
     const b = w.bosses[0], h = b.def.hunt;
     b.dmgMul = 1 + h.dmg; b.lifesteal = h.lifesteal;
-    b.hunt = { hpPotions: h.potions, manaPotions: h.potions, used: 0 };
+    b.hunt = { hpPotions: h.potions, manaPotions: h.potions, used: 0, baseDmg: b.dmgMul };
+    const L = LOGIC[b.def.weapon]; // 武器專屬邏輯（目前只有太刀）
+    if (L) { L.init(b); b.hunt.tick = L.tick; b.pick = (i) => L.pick(b, i); }
     w.enrageAt = 720; // 挑戰 Boss 不必趕時間
     w.hunt = true;
   };
