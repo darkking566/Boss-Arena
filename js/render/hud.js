@@ -12,6 +12,7 @@
     ctx.fillStyle = color; ctx.fillRect(rtl ? x + w - fw : x, y, fw, h);
   }
   function drawPanel(ctx, b, w, t) {
+    if (b.def.hero && R.drawHeroPanel) { R.drawHeroPanel(ctx, b, w, t); return; }
     if (w.training && b.def.training && R.drawDummyPanel) { R.drawDummyPanel(ctx, b, w, t); return; }
     const rtl = b.team === 1, PW = 640, x = rtl ? R.W - 40 - PW : 40, y = 14;
     const al = rtl ? 'right' : 'left', ex = rtl ? x + PW : x;
@@ -204,7 +205,8 @@
       ctx.font = `${player ? 12 : 13}px ${FONT}`;
       ctx.fillText((player ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F C V G 技能 · X 大招 · 空白鍵 翻滾 · ' + hint : hint), R.W - 50, R.H - 6);
     } else {
-      ctx.fillText(view.player != null
+      ctx.fillText(w.hunt ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F 技能 · X 大招 · 空白鍵 翻滾 · 1 生命藥水 · 2 法力藥水 · P 暫停 · Esc 回據點'
+        : view.player != null
         ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F C V G 技能 · X 大招 · 空白鍵 翻滾 · P 暫停 · Esc 選單'
         : '1/2/3/4 切換速度 ×1/×2/×3/×0.5 · P 暫停 · L 戰鬥紀錄 · Esc 回選單 · F3 效能 · F4 快取 · F6 AI', R.W - 50, R.H - 6);
     }

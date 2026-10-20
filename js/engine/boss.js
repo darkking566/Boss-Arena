@@ -37,7 +37,8 @@
       this.maxHp = def.maxHp; this.hp = def.maxHp; this.hpTrail = def.maxHp;
       this.phase = 1; this.maxSta = def.stamina.max; this.sta = this.maxSta; this.staDelay = 0;
       this.maxPosture = def.posture; this.posture = 0; this.postureDelay = 0;
-      this.ult = 15; this.state = 'idle'; this.stateT = 0; this.stateDur = 0; this.inst = null;
+      this.ult = 15; if (def.mana) { this.maxMana = def.mana.max; this.mana = this.maxMana; } // 獵魂模式主角的法力
+      this.state = 'idle'; this.stateT = 0; this.stateDur = 0; this.inst = null;
       this.cds = {}; this.statuses = [];
       this.dmgMul = 1; this.speedMul = 1; this.cdMul = 1;
       this.moveX = 0; this.moveY = 0;
@@ -63,6 +64,7 @@
     canAct() { return this.state === 'idle' && this.world.intro <= 0 && !this.world.over && BD.getMod(this, 'canAct'); }
     skillReady(s) {
       if (s.ult) return this.ult >= 100;
+      if (s.res === 'mana') return (this.cds[s.id] || 0) <= 0 && this.mana >= (s.cost || 0);
       return (this.cds[s.id] || 0) <= 0 && this.sta >= (s.cost || 0);
     }
     skillPhase() { // windup / active / recovery
@@ -84,8 +86,8 @@
       this.inst = { skill, v: this.phase === 2 ? skill.v2 : skill.v1, t: 0, hold: opts.hold || 0, idx: 0, marks: {}, id: w.nextId++, dash: null };
       if (opts.chase) { this.inst.chase = opts.chase; this.inst.chaseStop = opts.chaseStop || 0; } // 沉重限定
       if (!skill.ult && !opts.force) {
-        if (opts.costMul != null) this.sta -= (skill.cost || 0) * opts.costMul; else this.sta -= skill.cost || 0;
-        this.staDelay = 0.9;
+        if (skill.res === 'mana') this.mana -= skill.cost || 0;
+        else { this.sta -= (skill.cost || 0) * (opts.costMul != null ? opts.costMul : 1); this.staDelay = 0.9; }
         this.cds[skill.id] = (skill.cd || 1) * this.cdMul;
       }
       this.stats.skills++;
@@ -200,6 +202,7 @@
       if (this.staDelay <= 0 && this.state !== 'skill' && this.state !== 'dodge') {
         this.sta = Math.min(this.maxSta, this.sta + this.def.stamina.regen * dt * (this.state === 'idle' ? 1 : 0.5));
       }
+      if (this.maxMana) this.mana = Math.min(this.maxMana, this.mana + this.def.mana.regen * dt);
       if (this.postureDelay <= 0) this.posture = Math.max(0, this.posture - (this.state === 'idle' ? 16 : 9) * dt);
       if (this.ult < 100 && w.intro <= 0) this.ult = Math.min(100, this.ult + (this.def.pace ? 0.8 * this.def.pace.ultGainMul * dt : 0.8 * dt));
 

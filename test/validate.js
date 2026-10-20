@@ -539,7 +539,7 @@ if (BD.FX && typeof BD.spawnFx === 'function') {
   if (!fs.existsSync(gal)) err('fx-gallery.html', '找不到特效圖鑑頁面');
   else {
     const list = (html) => [...html.matchAll(/<script\b[^>]*\bsrc\s*=\s*"([^"]+)"/g)].map((m) => m[1]);
-    const want = list(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).filter((f) => f !== 'js/input.js' && f !== 'js/main.js' && f !== 'js/training-ui.js');
+    const want = list(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).filter((f) => f !== 'js/input.js' && f !== 'js/main.js' && f !== 'js/training-ui.js' && f !== 'js/hunt-ui.js');
     const have = list(fs.readFileSync(gal, 'utf8')).filter((f) => f !== 'js/fx-gallery.js');
     if (want.join('\n') !== have.join('\n')) {
       const miss = want.filter((f) => !have.includes(f)), extra = have.filter((f) => !want.includes(f));

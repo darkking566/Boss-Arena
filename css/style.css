@@ -97,3 +97,40 @@ table.stats td:first-child { color: #aaa; text-align: left; }
 .tp .tp-skills button .cdt { font-size: 11px; color: #ffb070; margin-left: 5px; }
 .tp .tg { display: inline-block; margin-left: 5px; padding: 0 5px; border-radius: 4px; font-size: 11px; line-height: 16px;
   background: rgba(255,160,90,0.18); color: #ffb98a; vertical-align: middle; }
+
+/* ── 獵魂據點 ── */
+#hunt { z-index: 5; }
+.h-wrap { width: min(1180px, 96vw); }
+.h-tabs { display: flex; gap: 8px; justify-content: center; align-items: center; margin: 6px 0 12px; flex-wrap: wrap; }
+.h-tabs .tab { font-size: 16px; padding: 8px 18px; }
+.h-tabs .tab.on { background: linear-gradient(#d9772a, #a3441a); border-color: #ffb065; color: #fff; }
+.h-total { margin-left: 18px; color: #ffd27a; font-weight: bold; }
+.h-body { text-align: left; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 14px 18px; min-height: 420px; max-height: 66vh; overflow-y: auto; line-height: 1.55; font-size: 14px; }
+.h-body h3 { margin: 4px 0 10px; font-size: 16px; color: #ffd27a; }
+.h-msg { min-height: 22px; margin-top: 8px; color: #ffb070; }
+.h-body .dim, .h-sum .dim { color: #999; font-size: 13px; }
+.h-sum { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.chip { font-size: 13px; padding: 4px 10px; border-width: 2px; display: flex; gap: 8px; align-items: baseline; }
+.chip.sel { background: rgba(255,255,255,0.18); }
+.chip i { font-style: normal; color: #ffd27a; }
+.chip2 { display: inline-block; margin: 2px 8px 2px 0; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.08); }
+.h-bosses { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.h-boss { display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border: 2px solid; border-radius: 8px; cursor: pointer; background: rgba(0,0,0,0.3); font-size: 13px; opacity: 0.8; }
+.h-boss:hover { opacity: 1; transform: translateY(-2px); }
+.h-boss.sel { opacity: 1; background: rgba(255,210,122,0.14); box-shadow: 0 0 12px rgba(255,210,122,0.4); }
+.h-boss b { font-size: 16px; }
+.h-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.h-card { padding: 10px 14px; border: 2px solid transparent; border-radius: 8px; background: rgba(255,255,255,0.05); cursor: pointer; }
+.h-card:hover { background: rgba(255,255,255,0.1); }
+.h-card.sel { border-color: #ffd27a; background: rgba(255,210,122,0.12); }
+.h-card p { margin: 4px 0; color: #ccc; }
+.h-rows { display: flex; flex-direction: column; gap: 5px; }
+.h-row { display: flex; gap: 10px; align-items: center; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); }
+.h-row.sel { background: rgba(255,210,122,0.14); }
+.h-row b { min-width: 150px; }
+.h-row .dim { flex: 1; }
+.h-row button { font-size: 14px; padding: 4px 12px; min-width: 110px; }
+.h-sets { margin-top: 8px; color: #9fe8a0; }
+.tag { font-size: 12px; padding: 1px 7px; border-radius: 4px; background: rgba(255,255,255,0.12); }
+.tag.ult { background: #8a5cff; } .tag.passive { background: #2f8f6a; } .tag.skill { background: #3f6fb0; }

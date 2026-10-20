@@ -178,16 +178,19 @@
     sel.addEventListener('change', () => setPace(sel.value));
     setPace(BD.DEFAULT_PACE);
   })();
-  $('#btnRematch').addEventListener('click', () => start(state.last.a, state.last.b, state.last.opts));
+  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map) : start(state.last.a, state.last.b, state.last.opts)));
   $('#btnSwap').addEventListener('click', () => start(state.last.b, state.last.a, state.last.opts));
-  $('#btnMenu').addEventListener('click', () => show('select'));
+  $('#btnMenu').addEventListener('click', () => show(state.resultKind === 'hunt' ? 'hunt' : 'select'));
+  $('#modeHunt').addEventListener('click', () => show('hunt'));
 
-  function show(name) {
+  function show(name, msg) {
     state.screen = name;
     $('#select').classList.toggle('hidden', name !== 'select');
     $('#result').classList.toggle('hidden', name !== 'result');
     if (name !== 'game' && BD.TrainingUI) BD.TrainingUI.hide();
-    if (name === 'select') { state.world = null; refreshSelect(); }
+    if (BD.HuntUI) { if (name === 'hunt') BD.HuntUI.open(msg); else BD.HuntUI.hide(); }
+    if (name === 'select' || name === 'hunt') state.world = null;
+    if (name === 'select') refreshSelect();
   }
 
   function start(a, b, opts) {
@@ -218,10 +221,37 @@
     return w;
   }
   state.startTraining = startTraining;
+
+  // 獵魂模式：存檔中的主角（沉重節奏）挑戰所選 Boss；擊敗後在結算畫面發放靈魂
+  function startHunt(bossId, mapId) {
+    const w = new BD.World(BD.Hunt.buildHero(BD.HuntUI.getSave(), 'heavy'), BD.bossById[bossId], { player: 0, input, pace: 'heavy', map: mapId || state.map, hunt: true });
+    w.speed = 1;
+    state.world = w; state.resultShown = false; state.hunt = { boss: bossId, map: mapId || state.map };
+    view.player = 0;
+    show('game');
+    return w;
+  }
+  state.startHunt = startHunt;
   state.rebuildSelect = () => buildSelect(); // 測試掛勾：新增 Boss 後重建選角卡片
 
+  function showHuntResult(w) {
+    state.resultShown = true; state.resultKind = 'hunt';
+    const [hero, boss] = w.bosses, win = w.winner === hero, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
+    const rw = win ? BD.Hunt.reward(BD.HuntUI.getSave(), state.hunt.boss) : null;
+    if (win) BD.HuntUI.persist();
+    $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 已被擊敗！` : `<span style="color:${hero.def.color}">獵魂者</span> 倒下了…`;
+    $('#resSub').textContent = `戰鬥時間 ${mm} 分 ${ss} 秒 · ` + (win ? `獲得 ${boss.name} 的靈魂 ×${rw.souls}${rw.first ? '（首殺加成）' : ''}` : `對 ${boss.name} 造成 ${Math.round((1 - boss.hp / boss.maxHp) * 100)}% 的傷害`);
+    const rows = [['造成傷害', (b) => Math.round(b.stats.dealt)], ['施放技能次數', (b) => b.stats.skills], ['翻滾 / 完美閃避', (b) => `${b.stats.dodges} / ${b.stats.perfect}`], ['被架勢崩潰', (b) => b.stats.breaks]];
+    $('#resStats').innerHTML = `<tr><th></th><th style="color:${hero.def.color}">獵魂者</th><th style="color:${boss.def.color}">${boss.name}</th></tr>` +
+      rows.map(([n, f]) => `<tr><td>${n}</td><td>${f(hero)}</td><td>${f(boss)}</td></tr>`).join('') + `<tr><td>使用藥水</td><td>${hero.hunt.used}</td><td>—</td></tr>`;
+    $('#btnRematch').textContent = '🔁 再戰一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回據點';
+    show('result');
+    state.screen = 'result';
+  }
+
   function showResult(w) {
-    state.resultShown = true;
+    state.resultShown = true; state.resultKind = 'duel';
+    $('#btnRematch').textContent = '🔁 重賽（同組合）'; $('#btnSwap').style.display = ''; $('#btnMenu').textContent = '↩ 重新選角';
     const win = w.winner, lose = win.enemy;
     $('#resTitle').innerHTML = `<span style="color:${win.def.color}">${win.name}</span> 獲勝！`;
     const mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
@@ -290,7 +320,7 @@
       }
     }
     if (k === 'p') w.paused = !w.paused;
-    if (k === 'Escape') { show('select'); return; }
+    if (k === 'Escape') { show(w.hunt ? 'hunt' : 'select'); return; }
     if (k === 'l') view.showLog = !view.showLog;
     if (k === 't') setTele(!R.hideTele, true);
     if (view.player == null) {
@@ -315,7 +345,7 @@
           view.player = w.training.mode === 'player' ? 0 : null;
           if (BD.TrainingUI) BD.TrainingUI.update(w);
         }
-        if (w.over && !state.resultShown) showResult(w);
+        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : showResult)(w);
       } else {
         if (R.perf) R.perf.push(frameMs, 0);
         ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, R.W, R.H);
@@ -326,6 +356,7 @@
     requestAnimationFrame(frame);
   }
   if (BD.TrainingUI) BD.TrainingUI.create($('#app'), canvas);
+  BD.HuntUI.create($('#app'), { onStart: startHunt, onBack: () => show('select') });
   setMode(state.mode);
   buildSelect();
   requestAnimationFrame(frame);

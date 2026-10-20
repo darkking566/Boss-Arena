@@ -995,6 +995,8 @@
         ctx.fillStyle = '#c8ff7a'; ctx.beginPath();
         for (let i = 0; i < 20; i++) { const an = i * 2.39996 * 1.7 + t * 2, rr = Math.sqrt(i / 20) * p.r * 0.85; ctx.rect(Math.cos(an) * rr, Math.sin(an) * rr, 2, 2); }
         ctx.fill();
+      } else if (R.huntProj && R.huntProj[p.kind]) {
+        R.huntProj[p.kind](ctx, p, t);
       } else {
         ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.arc(0, 0, p.r, 0, U.TAU); ctx.fill();
       }

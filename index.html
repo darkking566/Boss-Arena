@@ -14,7 +14,7 @@
     <div class="sel-wrap">
       <h1>Boss<span>鬥技場</span></h1>
       <p class="sub">俯視角 Boss 對決 —— 選出兩位 Boss，觀看具有魂系 AI 的牠們一決勝負</p>
-      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTrain" class="mode">🎯 訓練場</button></div>
+      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button></div>
       <div class="cols">
         <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div></div>
         <div class="vs">VS</div>
@@ -89,6 +89,7 @@
 <script src="js/data/bosses/yujiro.js"></script>
 <script src="js/data/bosses/itachi.js"></script>
 <script src="js/data/training/dummy.js"></script>
+<script src="js/data/hunt.js"></script>
 <!-- 特效庫（純視覺、不觸碰 DOM；Boss 資料以 fx / fxEl 引用，見 docs/effects.md）-->
 <script src="js/fx/elements.js"></script>
 <script src="js/fx/slash.js"></script>
@@ -121,6 +122,7 @@
 <script src="js/engine/actions/duelist.js"></script>
 <script src="js/engine/pace.js"></script>
 <script src="js/engine/traits.js"></script>
+<script src="js/engine/hunt.js"></script>
 <script src="js/engine/minions/brood.js"></script>
 <script src="js/engine/minions/witch.js"></script>
 <script src="js/engine/minions/watcher.js"></script>
@@ -153,13 +155,16 @@
 <script src="js/render/styles/yujiro.js" data-browser></script>
 <script src="js/render/styles/itachi.js" data-browser></script>
 <script src="js/render/styles/dummy.js" data-browser></script>
+<script src="js/render/styles/hero.js" data-browser></script>
 <script src="js/render/minions.js" data-browser></script>
 <script src="js/render/statuses.js" data-browser></script>
 <script src="js/render/world.js" data-browser></script>
 <script src="js/render/ai_debug.js" data-browser></script>
 <script src="js/render/training.js" data-browser></script>
+<script src="js/render/hunt.js" data-browser></script>
 <script src="js/render/hud.js" data-browser></script>
 <script src="js/training-ui.js" data-browser></script>
+<script src="js/hunt-ui.js" data-browser></script>
 <script src="js/main.js" data-browser></script>
 </body>
 </html>

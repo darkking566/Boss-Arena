@@ -44,11 +44,13 @@
       this.stats = BD.minionStats(); // 召喚物種類提供的統計欄位（例如紅眼監視者）
       this.hitstop = 0; this.freezeF = 0; this.slowmo = 0; this.acc = 0; this.speed = 1; this.paused = false; this.nextId = 1;
       this.fx = new BD.FX(this);
-      this.bosses = [new Boss(this, BD.applyPace(defA, this.paceId), 0, ARENA.w / 2 - 350, ARENA.h / 2), new Boss(this, BD.applyPace(defB, this.paceId), 1, ARENA.w / 2 + 350, ARENA.h / 2)];
+      const pd = (d) => (d.hero ? d : BD.applyPace(d, this.paceId)); // 獵魂主角的定義已是最終數值，不再轉換節奏
+      this.bosses = [new Boss(this, pd(defA), 0, ARENA.w / 2 - 350, ARENA.h / 2), new Boss(this, pd(defB), 1, ARENA.w / 2 + 350, ARENA.h / 2)];
       this.bosses.forEach((b, i) => {
         b.controller = (opts.player === i && BD.PlayerController) ? new BD.PlayerController(b, this, opts.input) : new BD.AIController(b, this);
       });
       if (opts.training && BD.setupTraining) BD.setupTraining(this, opts); else this.training = null;
+      if (opts.hunt && BD.setupHunt) BD.setupHunt(this, opts);
     }
     tick(realDt) {
       if (this.paused) return;
@@ -179,6 +181,7 @@
         else if (src && src.owner && !src.neutral) { src.owner.stats.dealt += dmg; src.owner.ult = Math.min(100, src.owner.ult + dmg * 0.04 * ug); }
       } else if (src && src.isBoss) { src.stats.dealt += dmg; src.ult = Math.min(100, src.ult + dmg * 0.06); }
       else if (src && src.owner && !src.neutral) { src.owner.stats.dealt += dmg; src.owner.ult = Math.min(100, src.owner.ult + dmg * 0.04); }
+      if (src && src.lifesteal && src.state !== 'dead') src.hp = Math.min(src.maxHp, src.hp + dmg * src.lifesteal); // 獵魂主角吸血
       if (src && !src.isBoss && src.kind) { const mt = BD.minionTypes[src.kind]; if (mt && mt.onHitBoss) mt.onHitBoss(this, src, b); }
       b.ult = Math.min(100, b.ult + (pc ? dmg * 0.05 * pc.ultGainMul : dmg * 0.05));
       b.posture += p.posture != null ? p.posture : dmg * 0.25; b.postureDelay = 1.4;
@@ -219,7 +222,7 @@
         if (b.traits.some((t) => t.onLethal && t.onLethal(this, b))) return 'hit'; // 例如亞當的死立不倒
         b.hp = 0; this.kill(b); return 'kill';
       }
-      if (b.phase === 1 && b.hp <= b.maxHp * 0.5 && !b.isDummy) { b.startTransition(); return 'phase'; }
+      if (b.phase === 1 && b.hp <= b.maxHp * 0.5 && !b.isDummy && !b.def.hero) { b.startTransition(); return 'phase'; }
       // 沉重：擊倒（倒地）——階段轉換 / 已倒地 / 起身保護期間不觸發
       let downed = false;
       if (pc) {

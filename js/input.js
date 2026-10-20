@@ -30,6 +30,7 @@
   BD.Input = Input;
 
   const SKILL_KEYS = ['mouse0', 'mouse2', 'q', 'e', 'r', 'f', 'c', 'v', 'g'];
+  const DRINK = { 1: 'hp', 2: 'mana' }; // 獵魂模式藥水鍵
   class PlayerController {
     constructor(b, w, input) { this.b = b; this.w = w; this.input = input; this.isPlayer = true; }
     aimPoint() { return { x: this.input.mouse.x, y: this.input.mouse.y, vx: 0, vy: 0 }; }
@@ -46,8 +47,9 @@
         const key = buf[i].k; let ok = false;
         if (key === ' ') ok = b.tryDodge(l ? Math.atan2(my, mx) : b.face + Math.PI);
         else if (key === 'x') ok = b.startSkill(b.ultimate);
+        else if (b.hunt && DRINK[key]) ok = BD.Hunt.drink(b, DRINK[key]);
         else { const idx = SKILL_KEYS.indexOf(key); if (idx >= 0 && b.skills[idx]) ok = b.startSkill(b.skills[idx]); else ok = true; }
-        if (ok || ![...SKILL_KEYS, 'x', ' '].includes(key)) { buf.splice(i, 1); i--; }
+        if (ok || ![...SKILL_KEYS, 'x', ' ', '1', '2'].includes(key)) { buf.splice(i, 1); i--; }
       }
     }
   }

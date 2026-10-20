@@ -26,6 +26,16 @@
 
 - 鷹眼米霍克（世界第一大劍豪・輕視對手的劍聖，《ONE PIECE》）：一階段只用胸前十字小刀（連刺 / 撥擋 / 貫胸一刺 / 鷹眼遠距鎖定）；HP 50% 佩服對手而拔出黑刀「夜」，近戰改用大刀並解鎖飛斬 / 一斬沉艦 / 荒星；大招「世界第一大劍豪」橫貫全場的巨斬。考據見 docs/bosses/mihawk.md。
 
+## 獵魂模式（Soul Hunt）
+選角畫面上方「🗡 獵魂」進入據點。玩家操控沒有任何特殊能力的「獵魂者」（沉重節奏），自由挑戰任一 Boss，存檔在 localStorage（`bd.hunt.save`）。
+- **武器**（8 種，左鍵 / 右鍵兩招）：弓箭、雙手劍、雙刀、巨斧、太刀、法杖（耗法力）、輕弩、重弩。**翻滾**（空白鍵）耗體力；**藥水**：1 生命、2 法力，每場各 3 瓶（可強化），喝藥有 0.55 秒硬直。
+- **靈魂**：擊敗 Boss 得到該 Boss 的靈魂（基本 2 顆、首殺 +3，可無限重複刷）。靈魂用來：
+  - 解鎖該 Boss 的**每個招式 / 大招 / 被動**（招式 3~4 顆、被動 5、大招 8）。裝備最多 4 個招式（Q E R F）、3 個被動、1 個大招（X）；借用招式耗法力、威力為原招的 75%（「魂力」強化可提升），並去掉預警。需要 Boss 專屬特性 / 召喚物 / 影子的招式（見 `js/engine/hunt.js` 的 `DENY`）不開放。
+  - **鍛造**該 Boss 的裝備：頭盔 / 胸甲 / 護腿 / 鞋子各 1 顆靈魂；同一位 Boss 穿滿 2 件、4 件有套裝獎勵（`js/data/hunt.js` 的 `BOSS_META`）。
+  - **強化**基礎數值：生命 / 體力 / 法力 / 攻擊 / 魂力 / 藥水容量（可用任一位 Boss 的靈魂支付）。
+- **架構**：主角是不進註冊表的 hero 定義（`BD.Hunt.buildHero(save)`，`js/engine/hunt.js`），沿用同一個 Boss 引擎與 `PlayerController`；`new BD.World(hero, boss, { player: 0, hunt: true })` 啟用（`BD.setupHunt`）。法力（`def.mana`、招式 `res: 'mana'`）、吸血（`b.lifesteal`）是對 Boss 引擎的小型通用掛勾，一般對戰不受影響。資料在 `js/data/hunt.js`，介面在 `js/hunt-ui.js`，繪圖在 `js/render/hunt.js`、`js/render/styles/hero.js`。測試：`npm run test:hunt`。
+- 新增 Boss 時要在 `js/data/hunt.js` 的 `BOSS_META` 補上一筆（簡稱、裝備原型、被動、二件 / 四件套裝），否則 `test/hunt.test.js` 會失敗。
+
 ## 操作
 - 觀戰：1/2/3/4 = 速度 ×1/×2/×3/×0.5，P 暫停，L 戰鬥紀錄，Esc 回選單
 - 操控：WASD 移動、滑鼠瞄準、左鍵/右鍵/Q/E/R/F/C/V/G = 技能 1~9（依 HUD 技能列順序；鎖頭表示該階段不可用）、X 大招、空白鍵 翻滾（有無敵幀）
