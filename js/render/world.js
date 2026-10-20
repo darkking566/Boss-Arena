@@ -938,6 +938,25 @@
         if (who === 0) { ctx.fillStyle = '#c9b27a'; ctx.strokeStyle = '#6a5a30'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(4 * k, 0, 14 * k, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#e6d6a0'; ctx.beginPath(); ctx.arc(4 * k, 0, 5 * k, 0, U.TAU); ctx.fill(); } // 笠
         else { ctx.fillStyle = hc; ctx.strokeStyle = '#d8f0ff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(4 * k, 0, 9 * k, 0, U.TAU); ctx.fill(); ctx.stroke(); }
         if (who === 4) { ctx.strokeStyle = hc; ctx.lineWidth = 3.5 * k; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-26 * k, 4 * k); ctx.stroke(); } // 長髮
+      } else if (p.kind === 'tidewave') {
+        // 波賽頓的怒濤：向前推進的巨浪——弧口朝後的月牙浪頭（深藍浪身 + 天藍中層 + 白色浪花緣），浪緣一排翻滾的泡沫，身後拖著水痕與細碎水珠
+        const k = p.r, cx = -k * 0.55, rad = k * 1.5, a0 = 1.25;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        for (let i = 0; i < 5; i++) { // 身後水痕
+          const yy = (i - 2) * k * 0.52, len = k * (1.9 + (i * 37 % 3) * 0.7);
+          ctx.strokeStyle = i % 2 ? 'rgba(90,200,255,0.4)' : 'rgba(220,250,255,0.5)'; ctx.lineWidth = k * 0.16;
+          ctx.beginPath(); ctx.moveTo(cx - k * 0.2, yy); ctx.lineTo(cx - k * 0.2 - len, yy * 1.2); ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(20,90,200,0.5)'; ctx.lineWidth = k * 0.7; ctx.beginPath(); ctx.arc(cx, 0, rad * 0.9, -a0, a0); ctx.stroke();
+        ctx.strokeStyle = 'rgba(60,190,255,0.75)'; ctx.lineWidth = k * 0.34; ctx.beginPath(); ctx.arc(cx, 0, rad, -a0 + 0.04, a0 - 0.04); ctx.stroke();
+        ctx.restore();
+        ctx.strokeStyle = '#f2ffff'; ctx.lineWidth = Math.max(3, k * 0.1); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, 0, rad * 1.04, -a0 + 0.1, a0 - 0.1); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; // 翻滾的浪花泡沫
+        for (let i = 0; i < 9; i++) {
+          const a = -a0 + 0.15 + (i / 8) * (a0 * 2 - 0.3), j = Math.sin(t * 9 + i * 1.9) * 0.12;
+          ctx.beginPath(); ctx.arc(cx + Math.cos(a) * rad * (1.08 + j), Math.sin(a) * rad * (1.08 + j), Math.max(2, k * (0.1 + 0.05 * Math.sin(t * 7 + i))), 0, U.TAU); ctx.fill();
+        }
       } else if (p.kind === 'crow') {
         // 鼬的烏鴉：展翅的漆黑烏鴉剪影（翅膀隨時間拍動）、拖一道暗紅殘影、眼睛一點紅光
         const fl = Math.sin(t * 24 + p.x * 0.05) * 0.5 + 0.5, k = p.r / 22;

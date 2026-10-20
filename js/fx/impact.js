@@ -127,4 +127,29 @@
       } else fx.shake(3 * Math.min(k, 1.6));
     },
   });
+
+  // 波賽頓「荒海に降る神雷」：動畫分鏡＝從高空落下、藏著星芒的藍色槍雨，砸起一整面沙塵。每次判定放一輪（連續放就是槍雨）
+  BD.defineEffect('tridentrain', {
+    name: '神雷落槍', category: '砸地',
+    desc: '由高空落下的槍雨：數十條白藍槍光由斜上方貫穿到落點範圍內的各處，每一支槍落地都炸出小圈震波與星芒火花、揚起沙塵與水花，場上微閃；連續施放就是遮天蓋地的槍雨。適合跳起連刺、天降連射、落雷般的連續刺擊。',
+    params: { radius: 150 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), V = BD.vrng, r = (o.radius || 150) * 0.85, n = fx.budget(Math.round(5 * k));
+      for (let i = 0; i < n; i++) {
+        const a = V() * Math.PI * 2, d = Math.sqrt(V()) * r, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d * 0.9, hh = 380 + 120 * V();
+        fx.after(V() * 0.07, () => {
+          fx.streak(px - 12, py - hh, px, py, 5, E.glow, 0.16, true);
+          fx.streak(px - 12, py - hh, px, py, 2, '#ffffff', 0.13, true);
+          fx.after(0.06, () => {
+            fx.ring(px, py, 3, 26 + 14 * V(), 0.2, E.core, 2.5);
+            fx.sparkle(px, py, E.core, 4, 240, -Math.PI / 2, 2.4);
+            if (i % 2 === 0) { fx.smoke(px, py, E.smoke, 1, 16); fx.crack(px, py, 26, E.decal, 2.5, E.crack, 3); }
+          });
+        });
+      }
+      fx.flashAt(x, y, r * 0.9, E.glow, 0.1);
+      fx.motes(x, y, E, Math.round(3 * k), r * 0.7, 160);
+      fx.shake(Math.min(7, 3 * k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

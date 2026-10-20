@@ -19,6 +19,7 @@
   BD.defineElement('cosmos', { rim: '#1a0636', debris: '#3a2450', name: '星海', core: '#f3e8ff', glow: '#9b5cff', particle: '#d6b8ff', smoke: 'rgba(40,20,70,0.5)', decal: 'rgba(30,10,50,0.45)', crack: '#b07bff', extra: 'motes' });
   BD.defineElement('blackfire', { rim: '#000000', debris: '#0c0408', name: '黑炎', core: '#ffffff', glow: '#b3123c', particle: '#06020a', smoke: 'rgba(4,0,8,0.7)', decal: 'rgba(4,0,8,0.62)', crack: '#d81c4a', extra: 'embers' });
   BD.defineElement('dragon', { rim: '#12000a', debris: '#3a1018', name: '龍屬性', core: '#ffd9df', glow: '#d0143c', particle: '#2a0812', smoke: 'rgba(40,4,16,0.62)', decal: 'rgba(40,0,10,0.5)', crack: '#ff2a55', extra: 'crackle' });
+  BD.defineElement('ocean', { rim: '#0a2f8a', debris: '#2c6a96', name: '大海', core: '#f2ffff', glow: '#35b6ff', particle: '#a8ecff', smoke: 'rgba(110,185,230,0.36)', decal: 'rgba(8,40,80,0.4)', crack: '#8fe6ff', extra: 'bubbles' });
   BD.defineElement('arcane', { rim: '#3a1a7a', debris: '#6a3a8a', name: '秘法', core: '#f6e8ff', glow: '#c77dff', particle: '#e0b8ff', smoke: 'rgba(120,60,170,0.35)', decal: 'rgba(60,20,90,0.3)', crack: '#d9a0ff', extra: 'runes' });
 })(typeof window !== 'undefined' ? window : globalThis);
 (function (G) {
@@ -27,7 +28,7 @@
   const KIND_EL = { fire: 'fire', flame: 'fire', lava: 'fire', meteor: 'fire', magma: 'fire',
     ice: 'ice', blizzard: 'ice', mine: 'ice', frost: 'ice',
     acid: 'poison', poison: 'poison', swarm: 'poison', egg: 'poison', spider: 'poison',
-    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow', crow: 'umbra', blackfire: 'blackfire', magatama: 'fire', rock: 'physical' };
+    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow', crow: 'umbra', blackfire: 'blackfire', magatama: 'fire', rock: 'physical', tidewave: 'ocean', tide: 'ocean' };
   BD.KIND_EL = KIND_EL;
   BD.kindElement = function (kind, fallback) { return KIND_EL[kind] || fallback || 'physical'; };
 })(typeof window !== 'undefined' ? window : globalThis);

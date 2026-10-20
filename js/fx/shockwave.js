@@ -78,4 +78,30 @@
       fx.shake(Math.min(20, 12 * Math.min(k, 1.6)));
     },
   });
+
+  // 波賽頓入場的一踏（原作：他腳一踏、海水就向兩側分開，讓他走上場而不濕）：水環向外炸開、水柱沿環噴起、中心是乾的
+  BD.defineEffect('waterstomp', {
+    name: '分海踏', category: '震波',
+    desc: '一腳踏下、海水向兩側分開：腳下炸出雙層震波與一圈向外迸開的水幕，沿環噴起一根根水柱與水花，中心留下一圈被推開的乾地與裂痕，氣泡與水霧彌漫。適合踐踏、分海、地震神的震地。',
+    params: { radius: 160 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), V = BD.vrng, r = o.radius || 160, n = fx.budget(Math.round(10 * k));
+      fx.flashAt(x, y, r * 0.6, E.core, 0.12);
+      fx.shock(x, y, 8, r, o.heavy ? 0.55 : 0.4, E.glow, 12 * Math.min(1.5, k), E.core);
+      fx.after(0.07, () => fx.shock(x, y, 8, r * 0.7, 0.34, '#ffffff', 5, '#ffffff'));
+      for (let i = 0; i < n; i++) { // 水柱沿環噴起
+        const a = i / n * Math.PI * 2 + V() * 0.2;
+        fx.after(0.03 + 0.012 * i, () => {
+          const px = x + Math.cos(a) * r * 0.82, py = y + Math.sin(a) * r * 0.82;
+          fx.pillar(px, py, 14 + 10 * V(), E.glow, 0.35);
+          fx.sparkle(px, py, E.core, 3, 260, -Math.PI / 2, 1.6);
+          fx.motes(px, py, E, 1, 10, 120);
+        });
+      }
+      fx.crack(x, y, r * 0.7, E.decal, 7, E.crack, Math.round(6 + 3 * k));
+      fx.decal(x, y, r * 0.5, E.decal, 7);
+      fx.smoke(x, y, E.smoke, 5, r * 0.6);
+      fx.shake(Math.min(14, 8 * Math.min(k, 1.6)));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

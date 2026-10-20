@@ -147,6 +147,16 @@
     name: '萬手無雙', tags: ['buff'], stacking: 'refresh',
     modifiers: { speedMul: 1.08, dmgTakenMul: 0.95 },
   });
+  // ── 暴君之怒（波賽頓 trait 'tyrant'）：被雜魚碰到而動怒——傷害與速度短暫提升 ──
+  BD.defineStatus('tyrantwrath', {
+    name: '暴君之怒', tags: ['buff'], stacking: 'refresh', defaultDur: 5,
+    modifiers: { dmgDealtMul: 1.15, speedMul: 1.1 },
+  });
+  // ── 神中之神（波賽頓二階段常駐）：認真起來的海神，快到連千手都讀不到——移動更快、挨得更少、出手更重 ──
+  BD.defineStatus('godofgods', {
+    name: '神中之神', tags: ['buff'], stacking: 'refresh',
+    modifiers: { speedMul: 1.06, dmgTakenMul: 0.92, dmgDealtMul: 1.06 },
+  });
   // ── 龍封（恐暴龍的龍息）：龍屬性能量侵蝕身體——造成的傷害降低 15%（原作：龍封力使武器屬性失效）──
   BD.defineStatus('dragonblight', {
     name: '龍封', tags: ['debuff'], stacking: 'refresh', defaultDur: 6, visual: 'dragonblight',

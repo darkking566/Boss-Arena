@@ -31,6 +31,7 @@ const ALLOW_MISS = new Set([
   'yujiro:xiaoli',  // 消力：架式期間需受攻擊才會反擊；假人不攻擊
   'itachi:sharingan', // 寫輪眼見切 / 八咫鏡：架式期間需受攻擊才會觸發反擊；假人不攻擊
   'kojiro:senju',   // 千手無雙 / 萬手無雙：架式期間需受攻擊才會觸發反斬；假人不攻擊
+  'poseidon:parry_tide', // 撥浪・後之先：架式期間需受攻擊才會觸發反擊；假人不攻擊
   'ronin:mikiri',  // 見切：架式期間需受攻擊才會觸發反斬；假人不攻擊
   'watcher:parry',  // 匕首彈反：架式期間需受攻擊才會觸發反斬；假人不攻擊
   'witch:mines',    // 霜凍地雷：陷阱散布於兩者之間，假人站立不動不會踩中

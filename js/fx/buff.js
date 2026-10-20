@@ -597,4 +597,39 @@
       });
     },
   });
+
+  // 波賽頓二階段轉場：被叫「雜魚」的小次郎讀穿了一切，神中之神認真起來。圖片依據＝動畫設定圖：手臂上金色的尖刺環（發光的金色刻痕）、藍色大海
+  BD.defineEffect('godofgods', {
+    name: '神中之神', category: '增益',
+    desc: '海神認真起來：life 秒內深藍暗幕籠罩，一根根水柱在身旁沖天而起、水環一圈圈向腳下收攏，二頭肌上的金色尖刺環一閃一閃越來越亮、地面隨每一踏震動；時間到全屏白閃，金白光柱貫穿，藍金雙層震波與水幕炸開、水花與氣泡四散，浮出「GOD of GODS」與「神中之神」。適合海神 / 水神的變身（phase2.transFx）。',
+    params: { life: 2.0 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.5, o.k), V = BD.vrng, TAU = Math.PI * 2, src = o.src || null, r = src && src.r ? src.r : 34, life = o.life || 2.0;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.veil(life + 1.2, 0.62, '#020a20');
+      fx.glow(x, y, r * 2.6, E.glow, life, 0.5, 0.4, src);
+      for (let t = 0, n = 0; t < life; t += 0.12, n++) fx.after(t, () => {
+        const [cx, cy] = pos(), q = t / life, a = V() * TAU, d = r * (1.6 + 1.8 * V());
+        fx.pillar(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 10 + 14 * V(), E.glow, 0.5);              // 水柱沖天
+        fx.ring(cx, cy, r * (4 - 2.6 * q), r * 0.9, 0.24, n % 2 ? E.core : E.glow, 3);                 // 水環向腳下收攏
+        for (const s of [-1, 1]) { const ax = cx + Math.cos((src ? src.face : 0) + s * 1.55) * r * 0.85, ay = cy + Math.sin((src ? src.face : 0) + s * 1.55) * r * 0.85; fx.sparkle(ax, ay, '#ffd86a', 2 + Math.round(3 * q), 220, (src ? src.face : 0) + s * 1.55, 1.2); } // 手臂上的金色尖刺環
+        if (n % 4 === 0) fx.shake(2 + 6 * q);
+      });
+      fx.after(life, () => {
+        const [cx, cy] = pos();
+        fx.flash('#ffffff', 0.75);
+        fx.pillar(cx, cy, r * 1.5, '#ffe9a0', 0.8);
+        fx.shock(cx, cy, r, r * 10, 0.85, E.glow, 13 * k, E.core);
+        fx.after(0.08, () => fx.shock(cx, cy, r, r * 6, 0.6, '#ffd86a', 6, '#fff6d0'));
+        for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; fx.streak(cx, cy, cx + Math.cos(a) * r * 5, cy + Math.sin(a) * r * 5, 5, i % 2 ? E.glow : '#ffd86a', 0.35, true); }
+        fx.glow(cx, cy, r * 4, E.glow, 1.1, 0.8, 0.3, src);
+        fx.sparkle(cx, cy, E.core, fx.budget(32), 480);
+        fx.motes(cx, cy, E, 26, r * 3, 260);
+        fx.text(cx, cy - r - 78, 'GOD of GODS', '#ffe9a0', 38);
+        fx.text(cx, cy - r - 36, '神中之神', '#e8fbff', 34);
+        fx.crack(cx, cy, r * 3.2, E.decal, 10, E.crack, 9);
+        fx.shake(Math.min(24, 17 * k));
+      });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

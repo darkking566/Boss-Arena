@@ -340,4 +340,42 @@
       fx.shake(Math.min(24, 15 * k));
     },
   });
+
+  // 波賽頓大招「四十日四十夜的大洪水」。圖片依據＝動畫分鏡：從四面八方同時刺來、快到殘影連成一座半球形光之圓頂（數不清的波賽頓），圓頂內是被沖刷的黃沙
+  BD.defineEffect('deluge', {
+    name: '四十日四十夜的大洪水', category: '大招',
+    desc: '全方位的連刺風暴：場地沉入深藍暗幕，圓形範圍的邊緣同時亮起一圈圈殘影光點（數不清的波賽頓）、無數白藍槍光從圓頂各處向中心收束，雙層水幕震波與三圈光環撐起半球形的光之圓頂，氣泡與水霧四散，全屏白閃，浮出「大洪水」與「四十日四十夜」。適合範圍極大、全方向連刺的終極奧義（落點為圓形判定中心）。',
+    params: { radius: 330 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), V = BD.vrng, TAU = Math.PI * 2, R = o.radius || 330, N = 30;
+      fx.veil(1.3, 0.6, '#020c24');
+      fx.flash(E.glow, 0.4);
+      fx.glow(x, y, R * 1.15, E.glow, 1.1, 0.32, 0.15);
+      for (let ring = 0; ring < 3; ring++) { // 殘影光點：外、中、內三圈
+        const rr = R * (1 - ring * 0.22);
+        for (let i = 0; i < N - ring * 6; i++) {
+          const a = i / (N - ring * 6) * TAU + ring * 0.2;
+          fx.after(i * 0.01 + ring * 0.05, () => {
+            const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+            fx.glow(px, py, 22 - ring * 4, E.core, 0.5, 0.8, 0.3);
+            fx.streak(px, py, x + Math.cos(a) * rr * 0.15, y + Math.sin(a) * rr * 0.15, 3 - ring * 0.5, i % 2 ? E.core : E.glow, 0.28, true); // 槍光向中心收束
+          });
+        }
+      }
+      for (let i = 0; i < 3; i++) fx.after(0.08 + i * 0.09, () => fx.ring(x, y, R * (1.05 - i * 0.12), R * (0.86 - i * 0.12), 0.5, i % 2 ? '#ffffff' : E.glow, 4)); // 圓頂外殼
+      fx.shock(x, y, R * 0.2, R * 1.05, 0.65, E.glow, 12 * k, E.core);
+      fx.after(0.12, () => fx.shock(x, y, R * 0.1, R * 0.7, 0.5, '#ffffff', 6, '#ffffff'));
+      fx.decal(x, y, R * 0.9, E.decal, 12);
+      fx.crack(x, y, R * 0.8, E.decal, 9, E.crack, 8);
+      fx.motes(x, y, E, 22, R * 0.8, 260);
+      fx.smoke(x, y, E.smoke, 8, R * 0.7);
+      fx.sparkle(x, y, E.core, fx.budget(Math.round(24 * k)), 500, -Math.PI / 2, 3);
+      fx.after(0.3, () => {
+        fx.flash('#ffffff', 0.45);
+        fx.text(x, y - R * 0.18, '大洪水', '#e8fbff', 64);
+        fx.text(x, y + R * 0.1, '四十日四十夜', E.core, 26);
+      });
+      fx.shake(Math.min(26, 16 * k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

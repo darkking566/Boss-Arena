@@ -3,6 +3,7 @@
 //   counter：見切 / 彈反——架式（do:'counter'）期間被 Boss 直接攻擊時，閃到背後反斬
 //   echo：影分身追斬——二階段每記斬擊 / 衝刺在 0.3 秒後由影子以 40% 威力重複
 //   learn：一看就會（範馬勇次郎）——同一招每被他「看過」一次，下次的傷害與架勢傷害降低 12%（最多 36%）
+//   tyrant：大海暴君（波賽頓）——每挨 4 下動怒（傷害與速度短暫提升）
 //   reflect：神虛視（亞當）——見切架式（counter 動作帶 reflect:true）看穿對手出招時，把整招複製成自己的反擊；二階段過載、將死時死立不倒
 (function (G) {
   const BD = G.BD, K = BD.K;
@@ -34,12 +35,13 @@
 
   function echo(w, b, s, a) {
     const copy = Object.assign({}, s);
-    K.addTele(w, b, null, copy, 0.3, { detached: true, color: '#a070ff' });
+    const col = b.def.echoColor || '#a070ff'; // 殘影的顏色（波賽頓的海藍殘影等）
+    K.addTele(w, b, null, copy, 0.3, { detached: true, color: col });
     w.later(0.3, () => {
       if (b.state === 'dead') return;
       w.applyArea(b, copy, { dmg: a.dmg * 0.4, posture: (a.posture || 0) * 0.4, kb: (a.kb || 0) * 0.4 });
       const P = BD.parseFx(a.fx), isLine = P && (P.id === 'thrust' || P.id === 'cross');
-      K.hitFx(w, b, copy, isLine ? 'cross' : 'slash', { color: '#b48cff' });
+      K.hitFx(w, b, copy, isLine ? 'cross' : 'slash', { color: b.def.echoColor || '#b48cff' });
     });
   }
   BD.defineTrait('echo', {
@@ -56,6 +58,19 @@
       w.fx.text(b.x, b.y - b.r - 30, '太開心了！', '#ffd36a', 22);
       BD.spawnFx(w, 'awaken', b.x, b.y, { src: b, el: 'holy' });
       w.log(b, '越挨打越興奮——肌肉又膨脹了一圈！');
+      return null; // 只計數，不攔截傷害
+    },
+  });
+
+  // ── tyrant：大海暴君（波賽頓）——原作神極易動怒（連瀏海被削都要親自出手）：每挨 4 下（非持續傷害）就「動怒」，短時間傷害與速度提升 ──
+  BD.defineTrait('tyrant', {
+    interceptDamage(w, b, src, p) {
+      if (p.dot || !src || BD.hasStatus(b, 'tyrantwrath') || BD.getMod(b, 'invuln')) return null;
+      if ((b._wrath = (b._wrath || 0) + 1) < 4) return null;
+      b._wrath = 0; BD.applyStatus(b, 'tyrantwrath', {}, w);
+      w.fx.text(b.x, b.y - b.r - 30, '雜魚！', '#ffe27a', 26);
+      BD.spawnFx(w, 'pressure', b.x, b.y, { src: b, el: 'ocean' });
+      w.log(b, '被雜魚碰到了——海神動怒！');
       return null; // 只計數，不攔截傷害
     },
   });

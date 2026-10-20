@@ -202,6 +202,59 @@
       });
     },
   });
+  // 波賽頓「怒れる波濤」：動畫分鏡＝一記接一記的槍突，每一突都是白藍放射線炸開的浪頭（scale ≥ 1.3 的收尾突帶書法字「怒濤」）
+  BD.defineEffect('amphitrite', {
+    name: '怒濤連刺', category: '突刺',
+    desc: '荒海巨浪般的一記快突：白熱槍光貫穿到終點、前方推出一道弧形浪頭、由施放者向前放射的白藍速度線、尖端炸開浪花與火花；scale ≥ 1.3 的收尾一突再加暗藍暗幕、全屏白閃、震波與書法字「怒濤」。適合一連串的快速突刺（每一突各放一次）。',
+    params: { len: 380, width: 70 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), V = BD.vrng, ang = o.angle || 0, len = o.len || 380, w = o.width || 70;
+      const c = Math.cos(ang), s = Math.sin(ang), nx = -s, ny = c, tx = x + c * len, ty = y + s * len;
+      fx.beam(x, y, tx, ty, w * 0.5 * k, E.glow, 0.24, E.core);
+      fx.beam(x, y, tx, ty, Math.max(3, w * 0.14), '#ffffff', 0.2, '#ffffff');
+      fx.slash(x, y, ang, 0.7, len * 0.92, E.glow, 14 * k, 0.28, { core: E.core, trail: 2 }); // 前方的浪頭
+      for (let i = 0; i < 8; i++) { // 放射速度線
+        const l = (V() - 0.5) * w * 1.7, a0 = 0.05 + 0.2 * V(), a1 = 0.75 + 0.35 * V();
+        fx.streak(x + c * len * a0 + nx * l * 0.3, y + s * len * a0 + ny * l * 0.3, x + c * len * a1 + nx * l, y + s * len * a1 + ny * l, 2 + 2 * V(), i % 2 ? E.core : E.glow, 0.2 + 0.1 * V(), true);
+      }
+      fx.flashAt(tx, ty, 24 + 16 * k, E.core, 0.14);
+      fx.shock(tx, ty, 6, w * 0.9, 0.3, E.glow, 4, E.core);
+      fx.sparkle(tx, ty, E.core, fx.budget(Math.round(8 * k)), 380, ang, 0.9);
+      fx.motes(tx, ty, E, Math.round(5 * k), 24, 160);
+      if ((o.scale || 1) >= 1.3) {
+        fx.veil(0.45, 0.4, '#02081a'); fx.flash(E.glow, 0.3);
+        fx.shock(x, y, 12, len * 0.8, 0.5, E.glow, 8, E.core);
+        fx.text(x + c * len * 0.5, y + s * len * 0.5 - 44, '怒濤', '#e8fbff', 46);
+      }
+      fx.shake(Math.min(9, 2.5 * k), ang);
+    },
+  });
+
+  // 波賽頓三叉槍：三根槍齒各自貫穿（中央一根最長）、槍身周圍纏著螺旋水流、尖端浪花炸開
+  BD.defineEffect('triprong', {
+    name: '三叉穿刺', category: '突刺',
+    desc: '三叉槍的一記貫穿：三道平行的白藍槍光（中央最長、兩側齒尖帶倒鉤弧）、沿槍身纏繞的螺旋水流與氣泡、尖端炸開浪花與三叉形的閃光。適合三叉戟 / 多齒長槍的單點重刺。',
+    params: { len: 450, width: 56 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = Math.min(1.6, o.k), ang = o.angle || 0, len = o.len || 450, w = o.width || 56, sp = w * 0.62;
+      const c = Math.cos(ang), s = Math.sin(ang), nx = -s, ny = c, tx = x + c * len, ty = y + s * len;
+      for (const side of [-1, 0, 1]) { // 三根槍齒：兩側略短
+        const L = side ? len * 0.9 : len, ex = x + c * L + nx * side * sp, ey = y + s * L + ny * side * sp;
+        fx.beam(x + nx * side * sp * 0.3, y + ny * side * sp * 0.3, ex, ey, (side ? 9 : 15) * Math.min(1.4, k), E.glow, 0.26, E.core);
+        fx.beam(x + nx * side * sp * 0.3, y + ny * side * sp * 0.3, ex, ey, 3, '#ffffff', 0.2, '#ffffff');
+        if (side) fx.slash(ex - c * 26, ey - s * 26, ang + side * 0.9, 1.2, 30, E.core, 5, 0.22); // 倒鉤
+      }
+      for (let i = 0; i < 12; i++) { // 螺旋水流
+        const t = (i + 0.5) / 12, a = t * 9, l = Math.sin(a) * w * 0.5;
+        fx.after(t * 0.1, () => { fx.glow(x + c * len * t + nx * l, y + s * len * t + ny * l, 10, E.particle, 0.2, 0.7, 0.4); if (i % 3 === 0) fx.motes(x + c * len * t, y + s * len * t, E, 1, 10, 80); });
+      }
+      fx.flashAt(tx, ty, 30 + 16 * k, E.core, 0.15);
+      fx.shock(tx, ty, 6, w * 1.2, 0.32, E.glow, 5, E.core);
+      for (const side of [-1, 0, 1]) fx.sparkle(tx + nx * side * sp, ty + ny * side * sp, E.core, fx.budget(5), 360, ang + side * 0.35, 0.5);
+      fx.shake(Math.min(10, 3 * k), ang);
+    },
+  });
+
   BD.defineEffect('totsuka', {
     name: '十拳劍', category: '突刺',
     desc: '須佐能乎揮下十拳劍的巨斬：場地一暗，三道蒼紫的巨大月牙斬氣（內芯白熱）接連朝前方滾出，沿著斬線留下一道白熱劍痕，地面沿線裂開，一圈圈震波推向終點；終點三圈光環向內收束（被吸進酒壺）並浮出「封」字。適合封印、巨劍劈砍、一刀兩斷的靈劍。',

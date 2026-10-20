@@ -14,7 +14,7 @@
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
     radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
-    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）
+    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）、'tyrant'（大海暴君：每挨 4 下動怒，短時間傷害與速度提升，見 docs/bosses/poseidon.md；`echo` 的殘影顏色可用 `def.echoColor` 指定）
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,
           feint: 0.1, delay: 0.3, retreat: 0.1, punish: 0.6, nervous: 0.1, patience: 0.3 },
     phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, line: '二階段台詞', aura: 'fire', fxEl: 'fire',
@@ -159,6 +159,8 @@ BD.defineStatus('burn', {
 | `jhorage` | 暴怒 | buff | 承受傷害 ×0.92、造成傷害 ×1.08（恐暴龍二階段常駐；造型膨脹泛紅）|
 | `dragonblight` | 龍封 | debuff | 造成傷害 ×0.85，預設 6 秒（恐暴龍的龍息）|
 | `manju` | 萬手無雙 | buff | 移動速度 ×1.08、承受傷害 ×0.95（小次郎二階段常駐）|
+| `tyrantwrath` | 暴君之怒 | buff | 造成傷害 ×1.15、速度 ×1.1，預設 5 秒（波賽頓 trait `tyrant`：每挨 4 下動怒）|
+| `godofgods` | 神中之神 | buff | 移動速度 ×1.06、承受傷害 ×0.92、造成傷害 ×1.06（波賽頓二階段常駐）|
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：
