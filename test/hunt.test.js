@@ -144,6 +144,17 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   check(h.startSkill(h.skills.find((x) => x.id === 'k_a1')), '彈刀起手 2'); run(30); const hp2 = h.hp; w.damageBoss(d, h, { dmg: 80 }); check(h.hp < hp2, '超出彈刀時機照常受傷');
 }
 
+// ── 4c. 代理：opts.agent 的主角由 AI 操控，只靠揮刀窗彈刀（與玩家同限制）──
+{
+  const s = Hunt.newSave(); s.loadout.weapon = 'katana';
+  for (const id of ['ronin', 'zed', 'magmus']) {
+    const w = new BD.World(Hunt.buildHero(s, 'heavy'), BD.bossById[id], { seed: 5, pace: 'heavy', hunt: true, agent: true });
+    for (let i = 0; i < 60 * 90 && !w.winner; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); }
+    const h = w.bosses[0];
+    check(h.stats.deflects > 0, '代理 vs ' + id + '：彈開 ' + h.stats.deflects + ' 次，承受 ' + h.stats.taken);
+  }
+}
+
 // ── 5. AI 操控的主角打完整場（每種武器對一位 Boss，確認引擎全程不丟例外、能分出勝負）──
 {
   const bosses = BD.bosses.map((b) => b.id);

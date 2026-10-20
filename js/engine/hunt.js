@@ -217,12 +217,26 @@
   };
 
   // World 以 opts.hunt 啟用：把主角（隊伍 0）的存檔數值套到單位上
-  BD.setupHunt = function (w) {
+  // 代理：AI 操控主角，與玩家受同樣限制——只能在揮刀窗內彈刀（無法格擋的攻擊彈不了），靠看預警 / 投射物，以約 ±0.05 秒的抖動抓時機
+  BD.agentize = function (c) {
+    const ai = c.update.bind(c), jit = new Map();
+    c.update = (dt) => {
+      const b = c.b;
+      if (b.canAct()) for (const th of c.scanThreats()) {
+        if (th.glow) continue;
+        if (!jit.has(th.key)) jit.set(th.key, c.rng.range(-0.05, 0.05));
+        if (th.left <= 0.1 + jit.get(th.key) && b.startSkill(b.pick(0))) return;
+      }
+      ai(dt);
+    };
+  };
+  BD.setupHunt = function (w, opts) {
     const b = w.bosses[0], h = b.def.hunt;
     b.dmgMul = 1 + h.dmg; b.lifesteal = h.lifesteal;
     b.hunt = { hpPotions: h.potions, manaPotions: h.potions, used: 0, baseDmg: b.dmgMul };
     const L = LOGIC[b.def.weapon]; // 武器專屬邏輯（目前只有太刀）
     if (L) { L.init(b); b.hunt.tick = L.tick; b.pick = (i) => L.pick(b, i); }
+    if (opts && opts.agent) BD.agentize(b.controller);
     w.enrageAt = 720; // 挑戰 Boss 不必趕時間
     w.hunt = true;
   };
@@ -239,7 +253,7 @@
       const pr = p.proj, U = BD.U;
       w.fx.text(b.x, b.y - b.r - 30, pr ? '彈開！' : '彈刀！', '#ffffff', 24);
       BD.spawnFx(w, 'parry', b.x, b.y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.08);
-      b.spirit = Math.min(b.maxSpirit, b.spirit + 12); b.hunt.kt.gainAt = w.time; b.stats.deflects = (b.stats.deflects || 0) + 1;
+      if (b.hunt.kt) { b.spirit = Math.min(b.maxSpirit, b.spirit + 12); b.hunt.kt.gainAt = w.time; } b.stats.deflects = (b.stats.deflects || 0) + 1;
       if (pr) { // 依主角面向改變軌跡，換成主角的投射物
         const sp = Math.hypot(pr.vx, pr.vy) * 1.25;
         pr.vx = Math.cos(b.face) * sp; pr.vy = Math.sin(b.face) * sp; pr.team = b.team; pr.owner = b; pr.homing = 0; pr.ret = 0; pr.hitSet = new Set();
