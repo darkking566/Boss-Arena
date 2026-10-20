@@ -45,6 +45,7 @@
       fx.streak(x - 50, y + 50, x + 50, y - 50, 4, E.core, 0.25, true);
       fx.sparkle(x, y, E.core, 16, 320);
       fx.motes(x, y, E, 5, 24, 110);
+      fx.punch(0.035, x, y);
       fx.shake(Math.min(8, 4 * k));
     },
   });
@@ -116,6 +117,7 @@
       fx.ring(x, y, 10, 300, 0.6, '#ffffff', 4);
       fx.shake(Math.min(26, 18 * Math.min(k, 1.5)));
       fx.flash(o.flashColor || E.glow, 0.45);
+      fx.punch(0.06, x, y); fx.grade(E.glow, 0.7, 1.2);
       fx.sparkle(x, y, E.core, 40, 500);
       fx.motes(x, y, E, 30, 60, 220);
       fx.glow(x, y, 160 * Math.min(1.5, k), E.glow, 0.7, 0.6, 0.6, o.src || null);
@@ -281,6 +283,7 @@
       fx.sparkle(x, y, '#ffcc33', 16, 300);
       fx.motes(x, y, E, 5, 24, 110);
       fx.flashAt(x, y, 24, '#ffcc33', 0.14);
+      fx.punch(0.045, x, y); fx.grade('#ffcc33', 0.6, 0.6);
       fx.shake(Math.min(8, 3 * k));
     },
   });

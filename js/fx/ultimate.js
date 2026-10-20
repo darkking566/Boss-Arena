@@ -13,6 +13,7 @@
       const E = o.E, k = o.k, src = o.src || null;
       const r = src && src.r ? src.r : o.radius || 60;
       fx.flash(o.color || E.glow, 0.35);
+      fx.push(0.06, o.life || 1.0, x, y); fx.grade(E.glow, 0.6, (o.life || 1.0) + 0.2); // 起手緩緩推近 + 色調暗角
       fx.shake(Math.min(12, 6 * Math.min(k, 1.6)));
       fx.charge(x, y, r * 3, E.glow, o.life || 1.0, src, Math.round(20 * Math.min(2, k)));
       fx.shock(x, y, r * 4, r, 0.5, E.glow, 10 * Math.min(1.5, k), E.core);
@@ -204,6 +205,7 @@
       const E = o.E, k = o.k, src = o.src || null;
       const r = src && src.r ? src.r : o.radius || 80;
       fx.flash('#fff', 0.6);
+      fx.push(0.12, 1.6, x, y); fx.grade(E.glow, 0.8, 2);
       fx.shake(Math.min(26, 22 * Math.min(k, 1.3)));
       fx.ring(x, y, 10, 260, 1.0, E.glow, 8 * Math.min(1.4, k));
       fx.sparks(x, y, E.core, 60, 520);

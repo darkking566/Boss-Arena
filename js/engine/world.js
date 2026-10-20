@@ -164,6 +164,7 @@
           if (this.time - b.lastDodgeStart < 0.2 && !p.noPerfect) {
             b.stats.perfect++; b.ult = Math.min(100, b.ult + 6); b.sta = Math.min(b.maxSta, b.sta + 10);
             fx.text(b.x, b.y - b.r - 14, '完美閃避', '#7dffb0', 18); this.log(b, '完美閃避！');
+            this.slowmo = Math.max(this.slowmo, 0.25); fx.punch(0.025, b.x, b.y); fx.grade('#7dffb0', 0.5, 0.45);
             if (src && src.def && src.def.learnReset && src._learn) { src._learn = {}; fx.text(src.x, src.y - src.r - 30, '預測被打亂', '#ffb0a0', 20); fx.shock(src.x, src.y, src.r, src.r * 2.6, 0.35, '#9fd8ff', 4, '#ffffff'); fx.sparkle(src.x, src.y, '#cfe8ff', fx.budget(10), 260); } // 千手被超越：學習歸零
           } else fx.text(b.x, b.y - b.r - 10, '閃避', '#ccffdd', 14);
         }
@@ -204,15 +205,14 @@
       if (p.status) applyHitStatuses(this, src, b, p.status);
       const fs = src && (src.isBoss ? src : src.owner); // 二階段霜月魔女：每次命中累積冰凍值
       if (fs && fs.phase === 2 && fs.def.phase2.frostbite && !BD.hasStatus(b, 'frozen')) BD.applyStatus(b, 'frostbite', { stacks: p.dot ? 3 : fs.def.phase2.frostbite, source: fs }, this);
-      b.hurtFlash = 0.12;
       const big = pc ? dmg >= 120 : dmg >= 100;
+      b.hurtFlash = big ? 0.16 : 0.12; b.hurtK = big ? 8 : dmg >= 40 ? 6 : 4; // 重擊整個身形閃白更久更亮
       if (pc) {
         // 沉重：命中凍結
         if (!p.dot && dmg >= pc.hitstop.minDmg) this.freezeF = Math.max(this.freezeF, U.clamp(Math.round(dmg * pc.hitstop.perDmg), pc.hitstop.minF, pc.hitstop.maxF));
-        else if (!p.dot && dmg >= 15) this.hitstop = Math.max(this.hitstop, 0.035); // 輕擊也有一點點頓挫（只暫停實際播放，不改變模擬）
-      } else {
-        if (big) this.hitstop = Math.max(this.hitstop, 0.06);
       }
+      // 頓挫分級（只暫停實際播放，不改變模擬）：輕 → 重 → 毀滅性，一眼分出這下有多重
+      if (!p.dot) this.hitstop = Math.max(this.hitstop, dmg >= 150 ? 0.11 : dmg >= 100 ? 0.08 : dmg >= 40 ? 0.05 : dmg >= 25 ? 0.03 : 0);
       if (!p.dot || dmg >= 20) {
         const atkSrc = src && (src.isBoss ? src : src.owner) || null;
         BD.spawnFx(this, 'impact', b.x, b.y, { src: atkSrc, victim: b, dmg, big, heavyHit: !!pc });
@@ -243,6 +243,7 @@
         if (!downed) BD.applyStatus(b, 'stagger', { dur: 1.5 }, this); // 倒地時不再疊加硬直
         fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
         BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b });
+        this.hitstop = Math.max(this.hitstop, 0.1); this.slowmo = Math.max(this.slowmo, 0.4);
         this.log(b, '架勢崩潰，陷入硬直！', true);
       }
       return 'hit';
@@ -260,7 +261,7 @@
     }
     kill(b) {
       b.cancelSkill(); b.state = 'dead'; b.stateT = 0; b.alive = false;
-      this.winner = b.enemy; this.slowmo = 1.4;
+      this.winner = b.enemy; this.slowmo = 1.4; this.hitstop = Math.max(this.hitstop, 0.25);
       BD.spawnFx(this, 'finale', b.x, b.y, { src: b, color: b.def.color });
       this.banner(b.enemy.name + ' 獲勝！', b.name + ' 倒下了', b.enemy.def.color, 3);
       this.log(b.enemy, '擊敗了 ' + b.name + '！', true);

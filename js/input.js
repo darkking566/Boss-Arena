@@ -4,7 +4,7 @@
   const BD = G.BD, U = BD.U;
   class Input {
     constructor(canvas) {
-      this.keys = new Set(); this.mouse = { sx: 700, sy: 400, get x() { return this.sx + BD.Render.cam.x; }, get y() { return this.sy + BD.Render.cam.y; } }; this.buffer = []; this.canvas = canvas;
+      this.keys = new Set(); this.mouse = { sx: 700, sy: 400, get x() { return BD.Render.worldX(this.sx); }, get y() { return BD.Render.worldY(this.sy); } }; this.buffer = []; this.canvas = canvas;
       this.onKey = null;
       window.addEventListener('keydown', (e) => {
         const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;

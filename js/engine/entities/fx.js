@@ -28,6 +28,8 @@
       this.field = {}; // 麥田被摧毀的格子（格號 → 1）
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
+      this.curDir = null; // 目前特效的震動預設方向（BD.spawnFx 設定）
+      this.punchV = 0; this.pushes = []; this.grades = []; this.zx = null; this.zy = null; // 鏡頭縮放 / 色調（純視覺，隨真實時間更新）
     }
     // 從池中取一個粒子（無則新建）
     takePart() { return this.pool.length ? this.pool.pop() : newPart(); }
@@ -187,6 +189,7 @@
     }
     // 畫面震動：dir（弧度，可省略）為受擊方向——有方向時畫面沿該方向來回擺動，比四面亂抖更扎實
     shake(v, dir) {
+      if (dir == null) dir = this.curDir;
       if (dir != null && v >= this.shakeV * 0.6) this.shakeDir = dir;
       this.shakeV = Math.min(26, Math.max(this.shakeV, v) + v * 0.15);
     }
@@ -208,13 +211,25 @@
     // 場地暗幕：地面與區域變暗、角色 / 預警 / 特效照常明亮（聚光燈感）；淡入淡出由繪圖端處理
     veil(life, a, color) { this.veils.push({ life, max: life, a, color: color || '#000000' }); }
     flash(c, a) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
+    // 鏡頭衝擊縮放：瞬間拉近 v（0.03 ≈ 3%）再快速回彈，圍繞 (x, y) 世界座標
+    punch(v, x, y) { this.punchV = Math.min(0.08, Math.max(this.punchV, v)); this.zx = x; this.zy = y; }
+    // 鏡頭持續推近：life 秒內淡入（0.2 秒）、淡出（最後 40%），推近量 z
+    push(z, life, x, y) { this.pushes.push({ z, life, max: life }); if (this.pushes.length > 4) this.pushes.shift(); this.zx = x; this.zy = y; }
+    // 色調 + 暗角：整個畫面疊上 color 的淡色與四周暗角，a 為強度
+    grade(color, a, life) { this.grades.push({ color, a, life, max: life }); if (this.grades.length > 4) this.grades.shift(); }
+    // 目前鏡頭縮放倍率（繪圖端使用）
+    zoomNow() {
+      let z = this.punchV;
+      for (const p of this.pushes) { const e = Math.min(1, (p.max - p.life) / 0.2, p.life / (p.max * 0.4)); if (e > 0) z = Math.max(z, p.z * e * e * (3 - 2 * e)); }
+      return 1 + z;
+    }
     // 特效內部的延遲（依模擬時間；不使用 w.later，因此不影響世界排程）
-    after(t, fn) { this.timers.push({ t, fn, e: this.curE }); }
+    after(t, fn) { this.timers.push({ t, fn, e: this.curE, d: this.curDir }); }
     update(dt) {
       if (this.timers.length) {
         const due = [];
         for (const tm of this.timers) { tm.t -= dt; if (tm.t <= 0) due.push(tm); }
-        if (due.length) { this.timers = this.timers.filter((tm) => tm.t > 0); for (const tm of due) { this.curE = tm.e; try { tm.fn(); } finally { this.curE = null; } } }
+        if (due.length) { this.timers = this.timers.filter((tm) => tm.t > 0); for (const tm of due) { this.curE = tm.e; this.curDir = tm.d; try { tm.fn(); } finally { this.curE = null; this.curDir = null; } } }
       }
       const parts = this.parts, pool = this.pool;
       for (let i = 0; i < parts.length; i++) {
@@ -245,6 +260,8 @@
       this.shakeT = (this.shakeT || 0) + dt;
       this.shakeV *= Math.exp(-7 * dt); if (this.shakeV < 0.05) { this.shakeV = 0; this.shakeDir = null; }
       this.flashA = Math.max(0, this.flashA - dt * 1.6);
+      this.punchV *= Math.exp(-10 * dt); if (this.punchV < 0.0005) this.punchV = 0;
+      for (const a of [this.pushes, this.grades]) for (let i = a.length - 1; i >= 0; i--) if ((a[i].life -= dt) <= 0) a.splice(i, 1);
     }
   }
   BD.FX = FX;
@@ -284,7 +301,9 @@
     o.heavy = !!w.pace;
     // curE 讓原件（斬擊 / 震波 / 光束）取得元素的對比邊緣色（fx.after 延遲產生的部分也會沿用）
     w.fx.curE = E;
-    try { def.spawn(w.fx, x, y, o); } finally { w.fx.curE = null; }
+    // 斬擊 / 突刺的震動順著揮擊方向，砸地則上下重擊；其餘維持原本的四向抖動
+    w.fx.curDir = def.category === '斬擊' || def.category === '突刺' ? o.angle : def.category === '砸地' ? Math.PI / 2 : null;
+    try { def.spawn(w.fx, x, y, o); } finally { w.fx.curE = null; w.fx.curDir = null; }
     if (BD.leaveScar) BD.leaveScar(w, P.id, def.category, x, y, o);
     return o;
   };

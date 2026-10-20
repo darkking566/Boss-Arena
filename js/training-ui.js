@@ -231,10 +231,10 @@
       if (!w || !w.training || e.button !== 0 || w.training.mode === 'player') return;
       const r = canvas.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const x = (e.clientX - r.left) / r.width * R.W - R.OX + R.cam.x;
-      const y = (e.clientY - r.top) / r.height * R.H - R.OY + R.cam.y;
+      const sx = (e.clientX - r.left) / r.width * R.W - R.OX, sy = (e.clientY - r.top) / r.height * R.H - R.OY;
+      const x = R.worldX(sx), y = R.worldY(sy);
       const A = BD.ARENA;
-      if (x < 0 || y < 0 || x > A.w || y > A.h || x - R.cam.x > R.VW || y - R.cam.y > R.VH) return;
+      if (x < 0 || y < 0 || x > A.w || y > A.h || sx > R.VW || sy > R.VH) return;
       w.training.setHome(x, y);
     });
     return api;

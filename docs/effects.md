@@ -349,6 +349,9 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `shake(v, dir)` | 觸發畫面震動，震度疊加並以指數衰減；給受擊方向 `dir`（弧度）時畫面沿該方向擺動，否則為平滑的雙頻正弦抖動 |
 | `flash(c, a)` | 觸發全螢幕覆蓋閃光與指定不透明度 |
 | `veil(life, a, color)` | 場地暗幕：地面與區域變暗 life 秒（淡入 0.15 秒、最後 0.3 秒淡出），預警、角色與特效仍畫在暗幕之上 |
+| `punch(v, x, y)` | 鏡頭衝擊縮放：瞬間拉近 `v`（0.03 ≈ 3%，上限 8%）後快速回彈，以世界座標 (x, y) 為中心；受擊重擊（≥40 傷害）自動觸發 |
+| `push(z, life, x, y)` | 鏡頭持續推近 `z`，`life` 秒內淡入淡出；大招起手（`ultcast`）與擊殺（`finale`）使用 |
+| `grade(color, a, life)` | 色調 + 暗角：整個競技場疊淡色與四周暗角，`a` 為強度；HUD 不受影響 |
 | `after(t, fn)` | 特效內部專用的延遲排程（依賴模擬時間，不碰 `w.later`，純視覺無副作用） |
 | `part(kind, x, y, vx, vy, life, color, size, drag)` | 產生單一底層粒子（達上限回傳 `null`） |
 | `budget(n)` | 依目前場上粒子佔比動態計算建議發射粒子量 |

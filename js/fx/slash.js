@@ -14,6 +14,7 @@
       const ang = o.angle || 0, arc = o.arc || 1.6;
       const life = o.heavy ? 0.4 : 0.22, width = o.heavy ? 14 : 12;
       fx.slash(x, y, ang, arc, r, E.glow, width, life, { core: E.core, trail: k > 1.3 ? 3 : 2 });
+      fx.ghost(o.src, life * 0.8, E.glow); // 揮刀殘影
       const tipA = ang + arc * 0.5, midA = ang;
       const tipX = x + Math.cos(tipA) * r, tipY = y + Math.sin(tipA) * r;
       fx.sparkle(tipX, tipY, E.core, Math.round(6 * k), 300, tipA + Math.PI / 2, 0.8);
@@ -35,6 +36,7 @@
       const ang = o.angle || 0, arc = o.arc || 1.9;
       const life = o.heavy ? 0.55 : 0.4, width = (o.heavy ? 22 : 18) * Math.min(1.6, k);
       fx.slash(x, y, ang, arc, r, E.glow, width, life, { core: E.core, trail: 3 });
+      fx.ghost(o.src, life * 0.7, E.glow);
       const hx = x + Math.cos(ang) * r * 0.8, hy = y + Math.sin(ang) * r * 0.8;
       fx.crack(hx, hy, r * 0.32, E.decal, o.heavy ? 8 : 6, E.crack, 5);
       fx.flashAt(hx, hy, r * 0.4, E.core, 0.14);

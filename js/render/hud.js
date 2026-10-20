@@ -147,6 +147,21 @@
     c.t = t;
     return c;
   }
+  // 色調 + 暗角（fx.grade）：淡入 0.15 秒、最後 40% 淡出；暗角漸層全程共用一個快取
+  function drawGrade(ctx, w) {
+    const gs = w.fx.grades;
+    for (const g of gs) {
+      const a = g.a * Math.min(1, (g.max - g.life) / 0.15, g.life / (g.max * 0.4));
+      if (a <= 0) continue;
+      ctx.globalAlpha = a * 0.22; ctx.fillStyle = g.color; ctx.fillRect(0, 0, R.VW, R.VH);
+      ctx.globalAlpha = a; ctx.fillStyle = R.grad(ctx, 'gradevig', (c) => {
+        const v = c.createRadialGradient(R.VW / 2, R.VH / 2, R.VH * 0.35, R.VW / 2, R.VH / 2, R.VW * 0.62);
+        v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.7)'); return v;
+      });
+      ctx.fillRect(0, 0, R.VW, R.VH);
+    }
+    ctx.globalAlpha = 1;
+  }
   R.render = function (ctx, w, view) {
     const t = performance.now() / 1000;
     if (R.cacheBeginFrame) R.cacheBeginFrame();
@@ -158,6 +173,10 @@
     // 世界繪圖：裁切在競技場視窗（含邊框 34px）內，並套用鏡頭位移
     const cam = followCamera(w, t);
     ctx.save(); ctx.beginPath(); ctx.rect(-34, -34, R.VW + 68, R.VH + 68); ctx.clip();
+    // 鏡頭縮放（衝擊 punch / 大招與擊殺的推近）：以事件位置為中心，只縮世界，HUD 不動
+    const Z = R.zoom, zn = w.fx.zoomNow();
+    Z.z = zn; Z.fx = w.fx.zx == null ? R.VW / 2 : U.clamp(w.fx.zx - cam.x, 0, R.VW); Z.fy = w.fx.zy == null ? R.VH / 2 : U.clamp(w.fx.zy - cam.y, 0, R.VH);
+    if (zn !== 1) { ctx.translate(Z.fx, Z.fy); ctx.scale(zn, zn); ctx.translate(-Z.fx, -Z.fy); }
     ctx.translate(-cam.x, -cam.y);
     drawArena(ctx, w, t);
     drawReflections(ctx, w, t);
@@ -191,6 +210,7 @@
       ctx.beginPath(); ctx.arc(m.x, m.y, 10, 0, U.TAU); ctx.moveTo(m.x - 15, m.y); ctx.lineTo(m.x + 15, m.y); ctx.moveTo(m.x, m.y - 15); ctx.lineTo(m.x, m.y + 15); ctx.stroke();
     }
     ctx.restore();
+    drawGrade(ctx, w);
     drawBanners(ctx, w);
     drawLog(ctx, w, view);
     ctx.restore();

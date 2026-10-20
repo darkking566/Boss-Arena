@@ -146,6 +146,14 @@
       } else {
         fx.sparks(x, y, sparkCol, nSpark, spd);
       }
+      if (dmg >= 40) { // 重擊：鏡頭瞬間推近 + 沿打擊方向貫穿受擊者的衝擊線
+        fx.punch(Math.min(0.05, 0.008 + dmg / 3500), x, y);
+        if (ang != null) {
+          const c = Math.cos(ang), s = Math.sin(ang), L = vr * (big ? 3.2 : 2.2);
+          fx.streak(x - c * L * 0.3, y - s * L * 0.3, x + c * L, y + s * L, big ? 7 : 4, E.core, 0.14, true);
+          fx.streak(x - c * L * 0.6, y - s * L * 0.6, x + c * L * 1.6, y + s * L * 1.6, 2, '#ffffff', 0.18, true);
+        }
+      }
       if (o.heavyHit) {
         fx.shake(Math.min(24, 3 + dmg / 12), ang);
         if (big) {

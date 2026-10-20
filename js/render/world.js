@@ -710,7 +710,7 @@
       ctx.strokeStyle = `rgba(255,150,80,${Math.max(0, a)})`; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 7, 0, U.TAU); ctx.stroke();
     }
-    if (b.hurtFlash > 0) { ctx.fillStyle = `rgba(255,255,255,${b.hurtFlash * 4})`; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, U.TAU); ctx.fill(); }
+    if (b.hurtFlash > 0) { ctx.fillStyle = `rgba(255,255,255,${Math.min(1, b.hurtFlash * (b.hurtK || 4))})`; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, U.TAU); ctx.fill(); }
     if (BD.hasStatus(b, 'counter')) {
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.lineDashOffset = t * 60;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 16, 0, U.TAU); ctx.stroke(); ctx.setLineDash([]);
