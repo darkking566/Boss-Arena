@@ -403,4 +403,79 @@
       });
     },
   });
+  // ── 鼬：萬花筒覺醒 / 須佐能乎 / 八咫鏡 ──
+  BD.defineEffect('mangekyo', {
+    name: '萬花筒覺醒', category: '增益',
+    desc: '寫輪眼進化的瞬間：life 秒內全場沉入血紅暗幕，三枚勾玉狀的刃光繞著施放者越轉越快、越收越緊，血淚一滴滴墜落，畫面愈震愈烈；時間到時斗笠碎片炸飛、白閃之後炸開雙層震波與沖天紅光柱，三道烏鴉殘影四散。適合開眼、覺醒、覺悟的變身演出（phase2.transFx）。',
+    params: { life: 1.8 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, TAU = Math.PI * 2, src = o.src || null, r = src && src.r ? src.r : 30, life = o.life || 1.8;
+      const pos = () => (src ? [src.x, src.y] : [x, y]);
+      fx.veil(life + 0.9, 0.72, '#14000a');
+      fx.glow(x, y, r * 2.2, '#ff1a3a', life, 0.7, 0.6, src);
+      for (let t = 0, n = 0; t < life; t += 0.06, n++) {
+        fx.after(t, () => {
+          const [cx, cy] = pos(), q = t / life, rr = r * (2.8 - 1.5 * q);
+          for (let i = 0; i < 3; i++) fx.slash(cx, cy, t * (5 + 9 * q) + i * TAU / 3, 0.85, rr, '#ff2a44', 3 + 3 * q, 0.12, { core: '#ffffff' });
+          if (n % 3 === 0) fx.ring(cx, cy, rr * 1.7, rr * 0.55, 0.22, E.glow, 2 + 2 * q);
+          if (n % 4 === 0) fx.sparkle(cx + (V() - 0.5) * r * 0.5, cy, '#d0102a', 2, 90, Math.PI / 2, 0.5); // 血淚
+          fx.shake(1 + 6 * q);
+        });
+      }
+      fx.after(life, () => {
+        const [cx, cy] = pos();
+        fx.flash('#ffffff', 0.7);
+        for (let i = 0; i < 14; i++) fx.debris(cx, cy, '#cdbf9a', 1, 260 + 200 * V(), 3 + 3 * V(), r * 0.3); // 斗笠碎片
+        fx.pillar(cx, cy, r * 1.5, E.glow, 0.7);
+        fx.shock(cx, cy, r, r * 10, 0.85, E.glow, 12 * Math.min(1.5, k), E.core);
+        fx.shock(cx, cy, r, r * 5.5, 0.5, '#ffffff', 5, '#ffffff');
+        for (let i = 0; i < 3; i++) { const a = i * TAU / 3 + V(); fx.streak(cx, cy, cx + Math.cos(a) * r * 6, cy + Math.sin(a) * r * 6, 8, '#0b0810', 0.7, false); }
+        fx.sparkle(cx, cy, E.core, fx.budget(30), 460);
+        fx.text(cx, cy - r - 60, '萬花筒', '#ff3048', 40);
+        fx.crack(cx, cy, r * 3, E.decal, 9, E.crack, 8);
+        fx.shake(Math.min(24, 16 * Math.min(1.5, k)));
+      });
+    },
+  });
+
+  BD.defineEffect('susanoo', {
+    name: '須佐能乎', category: '增益',
+    desc: '查克拉鎧甲的顯現：腳下炸出橘紅光柱與兩圈震波，肋骨狀的弧形刃光一根根從身體兩側伸出、合攏成骨架，赤橘火光與火星往上竄，「須佐能乎」字樣浮現。適合召喚巨大守護靈、鎧甲、護身化身。',
+    params: { radius: 130 },
+    spawn(fx, x, y, o) {
+      const src = o.src || null, r = (src && src.r ? src.r : 30) * 2.4 * Math.min(1.3, o.scale || 1);
+      fx.veil(0.9, 0.45, '#1a0600');
+      fx.flash('#ffb070', 0.35);
+      fx.pillar(x, y, r * 0.8, '#ff7a2a', 0.8);
+      fx.shock(x, y, r * 0.3, r * 2.2, 0.6, '#ff7a2a', 8, '#fff0d0');
+      fx.shock(x, y, r * 0.2, r * 1.4, 0.4, '#ffd29a', 4, '#ffffff');
+      for (let i = 0; i < 6; i++) fx.after(0.05 * i, () => { // 肋骨一根根長出
+        const yy = (i - 2.5) * r * 0.22, rr = r * (1.05 - Math.abs(i - 2.5) * 0.1);
+        fx.slash(x, y + yy, -0.2, 2.6, rr, '#ff9a4a', 4, 0.5, { core: '#ffe9c8' });
+        fx.slash(x, y + yy, Math.PI + 0.2, 2.6, rr, '#ff9a4a', 4, 0.5, { core: '#ffe9c8' });
+      });
+      fx.glow(x, y, r * 1.6, '#ff6a1a', 0.9, 0.7, 0.4, src);
+      fx.embers(x, y, '#ffb070', fx.budget(24), r * 0.9, 220);
+      fx.sparkle(x, y, '#ffe0b0', fx.budget(16), 380, -Math.PI / 2, 2.4);
+      fx.text(x, y - r - 20, '須佐能乎', '#ffb070', 30);
+      fx.shake(7);
+    },
+  });
+
+  BD.defineEffect('yatamirror', {
+    name: '八咫鏡', category: '增益',
+    desc: '須佐能乎的盾「八咫鏡」擋下並彈回攻擊：場地一暗，橘金色的同心光環一圈接一圈由內向外盪開（鏡面波紋），三道旋轉的弧光刻出漩渦紋，中心白熱一閃、火花四濺。適合反射、彈反、絕對防禦（counter 動作的 fx）。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const src = o.src || null, r = src && src.r ? src.r : 30;
+      fx.veil(0.4, 0.4, '#1a0600');
+      fx.flash('#ffb060', 0.3);
+      for (let i = 0; i < 4; i++) fx.after(i * 0.05, () => fx.ring(x, y, r * (0.6 + 0.3 * i), r * (2.4 + i), 0.42, i % 2 ? '#ffd29a' : '#ff7a2a', 5 - i));
+      fx.shock(x, y, r * 0.5, r * 4.5, 0.5, '#ff7a2a', 8, '#fff0d0');
+      fx.glow(x, y, r * 3, '#ff9a4a', 0.45, 0.8, 0.3);
+      for (let i = 0; i < 3; i++) fx.slash(x, y, i * 2.09, 2.2, r * 1.8, '#ffe0a0', 4, 0.38, { core: '#ffffff' });
+      fx.sparkle(x, y, '#fff0d0', fx.budget(18), 460);
+      fx.shake(8);
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

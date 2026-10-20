@@ -273,4 +273,27 @@
       fx.shake(Math.min(30, 20 * Math.min(1.5, k)));
     },
   });
+  BD.defineEffect('tsukuyomi', {
+    name: '月讀', category: '大招',
+    desc: '被拉進月讀的世界：白閃之後全場沉入血紅暗幕，頭頂浮出一輪血紅的月亮（月中三枚黑色勾玉緩緩旋轉），目標被釘上白色十字架；life 秒內每 0.2 秒一道白線貫穿目標、紅火花與震動，最後白光炸開收束。適合幻術、精神攻擊、時間錯亂的酷刑（status 月讀）。',
+    params: { life: 1.6 },
+    spawn(fx, x, y, o) {
+      const V = BD.vrng, TAU = Math.PI * 2, life = o.life || 1.6, my = y - 170;
+      fx.flash('#ffffff', 0.9);
+      fx.veil(life + 0.4, 0.88, '#2a0004');
+      fx.glow(x, my, 190, '#ff1020', life, 0.95, 0.15);
+      fx.glow(x, my, 100, '#ffd0d0', life, 0.9, 0.1);
+      fx.streak(x, y - 95, x, y + 115, 8, '#f2f2f2', life * 0.85, false); // 十字架
+      fx.streak(x - 75, y - 40, x + 75, y - 40, 8, '#f2f2f2', life * 0.85, false);
+      for (let t = 0; t < life; t += 0.07) fx.after(t, () => { for (let i = 0; i < 3; i++) fx.slash(x, my, t * 3 + i * TAU / 3, 0.9, 62, '#1a0004', 7, 0.1); }); // 月中勾玉
+      for (let i = 0, n = Math.floor(life / 0.2); i < n; i++) fx.after(0.12 + i * 0.2, () => {
+        const a = V() * TAU, d = 120;
+        fx.streak(x + Math.cos(a) * d, y + Math.sin(a) * d, x - Math.cos(a) * d, y - Math.sin(a) * d, 6, '#ffffff', 0.18, true);
+        fx.sparkle(x, y, '#ff2a44', fx.budget(8), 320);
+        fx.ring(x, y, 8, 72, 0.2, '#ffffff', 3);
+        fx.shake(4);
+      });
+      fx.after(life, () => { fx.flash('#ffffff', 0.55); fx.shock(x, y, 10, 220, 0.5, '#ff2a44', 8, '#ffffff'); });
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

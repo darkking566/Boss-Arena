@@ -14,7 +14,7 @@
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
     radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
-    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）
+    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,
           feint: 0.1, delay: 0.3, retreat: 0.1, punish: 0.6, nervous: 0.1, patience: 0.3 },
     phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, line: '二階段台詞', aura: 'fire', fxEl: 'fire',
@@ -36,7 +36,7 @@
 
 時間軸 `actions` 的每一項是 `{ do: '<動作>', at: 秒, … }`。可用動作（`js/engine/actions/`）：
 `tele` 預警、`hit` 判定、`dash` 衝刺、`proj` 投射物、`lob` 拋射、`rain` 隕石雨、`zone` 區域、`trap` 陷阱、`erupt` 噴發柱、
-`summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線、
+`summon` 召喚、`blink` 閃現、`circle` 繞圈疾奔、`hide`/`land` 躍起落地、`appear` 背後現身、`counter` 見切架式、`invuln` 無敵、`slashes` 連續斬線、`strain` 萬花筒反噬（鼬：扣 `pct` 最大生命、不致死）、
 `vitalstep` 閃到對手破綻方位（菲歐拉，`js/engine/actions/duelist.js`；`hit` 可加 `vital`）、`shadow` 放出影子 / `swap` 與影子換位 / `shadowstep` 瞬步到目標周圍 / `shadowshuriken`、`shadowslash` 影子同步投射與迴旋斬（劫，`js/engine/actions/shadow.js`；影子存在 `b.shadows`，造型以 `under(ctx, b, t)` 畫出）。
 `strike(at, tele, shape, hit)` = 預警 + 判定；`dashStrike(...)` = 預警 + 衝刺。
 純演出的動作欄位（不影響戰鬥、行為指紋不變）：`blink` 可加 `fx`（閃現特效，預設 `blink`）；`counter` 可加 `fx`（見切成功特效，預設 `parry`）與 `slowmo`（見切成功的慢動作秒數）；`slashes` 與其 `final` 可加 `fx`（例如 `threadcut`：刀痕懸著，等到最後一擊一齊裂開）。
@@ -153,6 +153,9 @@ BD.defineStatus('burn', {
 | `shield` | 護盾 | buff, shield | 吸收傷害（`value` 為剩餘吸收量） |
 | `vulnerable` | 易傷 | debuff | 承受傷害 ×1.25 |
 | `enrage` | 狂暴 | buff | 造成傷害 ×1.3、速度 ×1.2 |
+| `tsukuyomi` | 月讀 | cc, debuff | 綁定 `stun`：無法行動，期間每 0.2 秒承受 11 點傷害（鼬） |
+| `amaterasu` | 天照 | dot, fire, debuff | 每 0.5 秒 11 點（dps 22），預設 4 秒（鼬） |
+| `susanoo` | 須佐能乎 | buff | 承受傷害 ×0.75，造型檔 `under()` 畫出巨大骨架（鼬） |
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：

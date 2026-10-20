@@ -202,4 +202,19 @@
       });
     },
   });
+  BD.defineEffect('totsuka', {
+    name: '十拳劍', category: '突刺',
+    desc: '酒壺中湧出的靈劍刺穿目標：場地微暗，一道粗大的蒼紫光刃自施放者貫穿到終點、內芯白熱，終點三圈光環向內收束（被吸進酒壺），隨後浮出「封」字與震波火花。適合封印、一刺必殺的靈劍。',
+    params: { len: 300 },
+    spawn(fx, x, y, o) {
+      const ang = o.angle || 0, len = o.len || 300, x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
+      fx.veil(0.5, 0.4, '#04020a');
+      fx.beam(x, y, x2, y2, 34, '#8a7aff', 0.35, '#ffffff');
+      fx.beam(x, y, x2, y2, 12, '#e6dcff', 0.45, '#ffffff');
+      fx.flashAt(x2, y2, 100, '#cfc2ff', 0.2);
+      for (let i = 0; i < 3; i++) fx.after(0.1 + i * 0.08, () => fx.ring(x2, y2, 110 - i * 30, 10, 0.28, '#cfc2ff', 4));
+      fx.after(0.4, () => { fx.text(x2, y2 - 40, '封', '#e6dcff', 46); fx.shock(x2, y2, 10, 120, 0.4, '#cfc2ff', 6, '#ffffff'); fx.sparkle(x2, y2, '#e6dcff', fx.budget(14), 360); });
+      fx.shake(8);
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

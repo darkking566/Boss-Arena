@@ -545,7 +545,7 @@
       const arming = z.t < z.delay, life = z.dur + z.delay - z.t, fade = U.clamp(life / 0.6, 0, 1) * U.clamp((z.t - z.delay + 0.3) / 0.3, 0.3, 1);
       ctx.save(); ctx.globalAlpha = fade;
       const col = { lava: ['255,110,30', '255,200,80'], blizzard: ['160,220,255', '240,250,255'], poison: ['120,200,60', '200,255,120'],
-        acid: ['170,230,40', '230,255,120'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'] }[z.kind] || ['255,255,255', '255,255,255'];
+        acid: ['170,230,40', '230,255,120'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
       if (arming) {
         ctx.setLineDash([8, 6]); ctx.strokeStyle = `rgba(${col[1]},0.8)`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (z.t / z.delay), 0, U.TAU); ctx.stroke();
@@ -569,6 +569,16 @@
           const fx0 = z.x + Math.cos(a) * rr, fy0 = z.y + Math.sin(a) * rr;
           ctx.fillStyle = `rgba(255,${150 + i * 20},40,${0.55 * fl})`;
           ctx.beginPath(); ctx.moveTo(fx0 - 7, fy0 + 6); ctx.quadraticCurveTo(fx0, fy0 - 18 * fl, fx0 + 7, fy0 + 6); ctx.closePath(); ctx.fill();
+        }
+      } else if (z.kind === 'blackfire') {
+        // 天照：墨黑火舌配暗紅邊（火舌大小隨半徑），地面是一片焦黑
+        const k = z.r / 60;
+        ctx.fillStyle = 'rgba(4,0,8,0.38)'; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * 0.9, 0, U.TAU); ctx.fill();
+        for (let i = 0; i < 12; i++) {
+          const a = i * 2.4 + z.seed, rr = z.r * (0.12 + 0.72 * ((i * 37 % 10) / 10)), fl = 0.55 + 0.45 * Math.sin(t * 13 + i * 2 + z.seed);
+          const fx0 = z.x + Math.cos(a) * rr, fy0 = z.y + Math.sin(a) * rr, w0 = 11 * k, h0 = 40 * k * fl;
+          ctx.fillStyle = `rgba(6,2,10,${0.92 * fl})`; ctx.strokeStyle = `rgba(255,48,96,${0.85 * fl})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(fx0 - w0, fy0 + 8 * k); ctx.quadraticCurveTo(fx0 - w0 * 0.3, fy0 - h0 * 0.6, fx0 + 2 * k, fy0 - h0); ctx.quadraticCurveTo(fx0 + w0 * 0.5, fy0 - h0 * 0.3, fx0 + w0, fy0 + 8 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
         }
       } else if (z.kind === 'caltrops') {
         ctx.fillStyle = '#ddd';
@@ -791,6 +801,25 @@
           ctx.beginPath(); ctx.arc(b.x, b.y, r + 14, 0, U.TAU); ctx.stroke(); ctx.restore();
           break;
         }
+        case 'tsukuyomi': {
+          // 月讀：身上一圈暗紅光環與三枚旋轉的勾玉（被拉進月讀世界）
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(t * 3);
+          ctx.strokeStyle = `rgba(255,48,72,${0.55 + 0.25 * Math.sin(t * 12)})`; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(0, 0, r + 16, 0, U.TAU); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,48,72,0.9)';
+          for (let i = 0; i < 3; i++) { const an = i * U.TAU / 3; ctx.beginPath(); ctx.arc(Math.cos(an) * (r + 16), Math.sin(an) * (r + 16), 5, 0, U.TAU); ctx.fill(); ctx.beginPath(); ctx.arc(Math.cos(an + 0.35) * (r + 16), Math.sin(an + 0.35) * (r + 16), 2.5, 0, U.TAU); ctx.fill(); }
+          ctx.restore();
+          break;
+        }
+        case 'amaterasu': {
+          // 天照：黑炎纏身——墨黑的火舌配暗紅邊
+          for (let i = 0; i < 5; i++) {
+            const a = i * 1.26 + t * 0.7, fl = 0.55 + 0.45 * Math.sin(t * 15 + i * 2.3), fx0 = b.x + Math.cos(a) * r * 0.85, fy0 = b.y + Math.sin(a) * r * 0.85;
+            ctx.fillStyle = `rgba(6,2,10,${0.8 * fl})`; ctx.strokeStyle = `rgba(216,28,74,${0.7 * fl})`; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(fx0 - 7, fy0 + 6); ctx.quadraticCurveTo(fx0 - 2, fy0 - 20 * fl, fx0 + 1, fy0 - 26 * fl); ctx.quadraticCurveTo(fx0 + 4, fy0 - 8, fx0 + 7, fy0 + 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
+          break;
+        }
         case 'enrage': {
           const p = 0.5 + 0.5 * Math.sin(t * 8), rr = r + 20 + p * 8, r0 = r * 0.8;
           // 漸層快取於每個 (r, rr) 組合（內外半徑皆依 p 變動）；R.grad 以世界座標建立漸層
@@ -885,6 +914,26 @@
         ctx.beginPath(); ctx.arc(cx, 0, rad * 0.97, -a0 + 0.14, a0 - 0.14); ctx.stroke();
         ctx.fillStyle = '#ffffff';
         for (const s of [-1, 1]) { const tx = cx + Math.cos(a0) * rad, ty = s * Math.sin(a0) * rad; ctx.beginPath(); ctx.arc(tx, ty, Math.max(3, k * 0.06), 0, U.TAU); ctx.fill(); }
+      } else if (p.kind === 'crow') {
+        // 鼬的烏鴉：展翅的漆黑烏鴉剪影（翅膀隨時間拍動）、拖一道暗紅殘影、眼睛一點紅光
+        const fl = Math.sin(t * 24 + p.x * 0.05) * 0.5 + 0.5, k = p.r / 22;
+        ctx.strokeStyle = 'rgba(179,18,60,0.4)'; ctx.lineWidth = 7 * k; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-8 * k, 0); ctx.lineTo(-44 * k, 0); ctx.stroke();
+        ctx.fillStyle = '#0b0810';
+        ctx.beginPath(); ctx.moveTo(14 * k, 0); ctx.lineTo(-2 * k, 4 * k); ctx.lineTo(-12 * k, 0); ctx.lineTo(-2 * k, -4 * k); ctx.closePath(); ctx.fill(); // 身體
+        for (const s of [-1, 1]) { // 翅膀
+          ctx.beginPath(); ctx.moveTo(2 * k, s * 2 * k); ctx.quadraticCurveTo(-4 * k, s * (14 + 12 * fl) * k, -16 * k, s * (10 + 14 * fl) * k); ctx.lineTo(-8 * k, s * 3 * k); ctx.closePath(); ctx.fill();
+        }
+        ctx.fillStyle = '#ff3048'; ctx.fillRect(10 * k, -1.5 * k, 2.5 * k, 2.5 * k);
+      } else if (p.kind === 'magatama') {
+        // 須佐能乎的八尺瓊勾玉：橘紅發光的巨大逗點形玉，中心白熱、尾部拖著火光
+        R.blit(ctx, 'proj:magatama:' + p.r, p.r * 5 + 24, p.r * 3 + 24, p.r * 3.4 + 12, p.r * 1.5 + 12, (g) => {
+          g.shadowColor = '#ff7a2a'; g.shadowBlur = 18;
+          g.fillStyle = 'rgba(255,110,40,0.55)'; g.beginPath(); g.moveTo(-p.r * 2.4, 0); g.quadraticCurveTo(-p.r * 1.2, -p.r * 0.5, -p.r * 0.6, 0); g.quadraticCurveTo(-p.r * 1.2, p.r * 0.5, -p.r * 2.4, 0); g.fill(); // 火尾
+          g.fillStyle = '#ff8a3a'; g.beginPath(); g.arc(0, 0, p.r, 0, U.TAU); g.fill();
+          g.shadowBlur = 0; g.fillStyle = '#ffe0b0'; g.beginPath(); g.arc(p.r * 0.1, 0, p.r * 0.5, 0, U.TAU); g.fill();
+          g.strokeStyle = '#ffd29a'; g.lineWidth = 3; g.lineCap = 'round'; g.beginPath(); g.arc(-p.r * 0.2, -p.r * 0.1, p.r * 0.7, 3.4, 5.6); g.stroke(); // 勾玉的弧
+        });
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
           g.shadowColor = '#ff7a1a'; g.shadowBlur = 18; g.lineCap = 'round';

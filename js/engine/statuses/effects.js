@@ -143,4 +143,35 @@
     modifiers: { invuln: true, dmgDealtMul: 1.3, speedMul: 1.15 },
     onRemove(u, st, w) { if (w && !w.winner && u.state !== 'dead' && u.hp <= 1) { u.hp = 0; w.kill(u); } },
   });
+  // ── 月讀（鼬）：與目標眼神交會後拉進自己的世界——無法行動，期間每 0.2 秒承受一記「刺擊」（原作：數日的酷刑只在一瞬間）──
+  BD.defineStatus('tsukuyomi', {
+    name: '月讀', tags: ['cc', 'debuff'], stacking: 'refresh', defaultDur: 1.6, bindState: 'stun', visual: 'tsukuyomi', dps: 55,
+    onApply(u, st, opts, w, isNew) {
+      if (!u.setState) return; // 召喚物沒有狀態機：月讀只對 Boss 有效
+      if (opts.dur) u.setState('stun', opts.dur);
+      if (!isNew) return;
+      st.data = { acc: 0 };
+      if (w) { BD.spawnFx(w, 'tsukuyomi', u.x, u.y, { src: st.source, life: opts.dur || 1.6 }); w.fx.text(u.x, u.y - u.r - 30, '月讀！', '#ff3048', 24); }
+    },
+    onTick(u, st, dt, w) {
+      if (!st.data) return;
+      st.data.acc += dt;
+      while (st.data.acc >= 0.2) { st.data.acc -= 0.2; BD.statusDamage(w, u, st, 11); }
+    },
+  });
+  // ── 天照（鼬）：燒到目標燒盡為止的黑炎，無法撲滅、只能等它燒完；比燃燒更痛、持續更久 ──
+  BD.defineStatus('amaterasu', {
+    name: '天照', tags: ['dot', 'fire', 'debuff'], stacking: 'refresh', defaultDur: 4, dps: 22, visual: 'amaterasu',
+    onApply(u, st) { if (!st.data || typeof st.data.acc !== 'number') st.data = { acc: 0 }; },
+    onTick(u, st, dt, w) {
+      st.data.acc += dt;
+      while (st.data.acc >= 0.5) { st.data.acc -= 0.5; BD.statusDamage(w, u, st, 11); }
+    },
+  });
+  // ── 須佐能乎（鼬）：顯現期間身披查克拉鎧甲、承受傷害 −25%（八咫鏡擋下大半衝擊）──
+  BD.defineStatus('susanoo', {
+    name: '須佐能乎', tags: ['buff'], stacking: 'refresh', defaultDur: 5, visual: 'susanoo',
+    modifiers: { dmgTakenMul: 0.75 },
+    onApply(u, st, opts, w, isNew) { if (isNew && w) BD.spawnFx(w, 'susanoo', u.x, u.y, { src: u }); },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

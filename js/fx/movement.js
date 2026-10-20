@@ -220,4 +220,27 @@
       if (o.heavy) fx.shake(Math.min(8, 3 * k));
     },
   });
+  BD.defineEffect('crowburst', {
+    name: '烏鴉分身', category: '位移',
+    desc: '化作一群烏鴉四散：起點炸出放射狀的漆黑羽翼拖影與羽毛、濃黑煙霧與擴散光環，終點收束出一圈紅光與落羽，起終點之間拖出一道紅色殘影。適合替身、遁走、烏鴉分身（blink 動作的 fx、crowsub 特性）。',
+    params: {},
+    spawn(fx, x, y, o) {
+      const E = o.E, V = BD.vrng, TAU = Math.PI * 2, tx = o.toX != null ? o.toX : x, ty = o.toY != null ? o.toY : y;
+      fx.glow(x, y, 70, '#ff2a44', 0.25, 0.5, 0.4);
+      for (let i = 0; i < 16; i++) {
+        const a = i / 16 * TAU + V() * 0.3, len = 90 + V() * 110;
+        fx.streak(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len, 3 + V() * 3, i % 3 ? '#0b0810' : E.glow, 0.45 + V() * 0.25, false);
+      }
+      fx.debris(x, y, '#14101a', fx.budget(14), 320, 2.5, 28);
+      fx.smoke(x, y, 'rgba(8,4,12,0.65)', fx.budget(10), 50);
+      fx.ring(x, y, 10, 90, 0.35, E.glow, 3);
+      fx.after(0.12, () => {
+        fx.ring(tx, ty, 70, 8, 0.25, E.glow, 3);
+        fx.sparkle(tx, ty, E.core, fx.budget(10), 300);
+        fx.debris(tx, ty, '#14101a', fx.budget(8), 220, 2.5, 20);
+        fx.streak(x, y, tx, ty, 6, E.glow, 0.3, true);
+      });
+      fx.shake(2);
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

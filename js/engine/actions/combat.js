@@ -50,6 +50,13 @@
 
   BD.defineAction('invuln', (w, b, inst, a) => { BD.applyStatus(b, 'invuln', { dur: a.dur }, w); });
 
+  // 萬花筒反噬（鼬）：施放萬花筒招式損耗眼力與體力——扣最大生命的 a.pct（不會因此倒下）
+  BD.defineAction('strain', (w, b, inst, a) => {
+    b.hp = Math.max(1, b.hp - b.maxHp * a.pct);
+    w.fx.text(b.x + 30, b.y - b.r - 8, '血淚', '#ff3048', 16);
+    w.fx.sparkle(b.x, b.y - 4, '#d0102a', 5, 120, -Math.PI / 2, 1.2);
+  });
+
   // 斬線可指定 fx（例如 threadcut）：此時傳入 hold＝距離最後一擊的秒數，讓刀痕等到最後一齊裂開
   BD.defineAction('slashes', (w, b, inst, a) => {
     const endT = a.n * a.interval + 0.1 + a.final.tele;

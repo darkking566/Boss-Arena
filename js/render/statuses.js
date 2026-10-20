@@ -47,6 +47,9 @@
   R.defineStatusIcon('ecstasy', { glyph: '喜', color: '#ffd36a' });
   R.defineStatusIcon('adamas', { glyph: '剛', color: '#b07bff' });
   R.defineStatusIcon('ogreback', { glyph: '鬼', color: '#ff4a33' });
+  R.defineStatusIcon('tsukuyomi', { glyph: '月', color: '#ff3048' });
+  R.defineStatusIcon('amaterasu', { glyph: '照', color: '#b3123c' });
+  R.defineStatusIcon('susanoo', { glyph: '佐', color: '#ff8a3a' });
 
   // ─────────────────────── HUD 狀態列 ───────────────────────
   function roundRect(ctx, x, y, w, h, r) {

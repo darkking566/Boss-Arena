@@ -17,6 +17,7 @@
   BD.defineElement('blood', { rim: '#3a0008', debris: '#7a0a18', name: '血', core: '#ffd0d0', glow: '#d0102a', particle: '#9a0a1c', smoke: 'rgba(110,0,15,0.5)', decal: 'rgba(100,0,12,0.5)', crack: '#ff2a40', extra: 'drips' });
   BD.defineElement('replica', { rim: '#5a0a24', debris: '#8a2a48', name: '神虛視', core: '#fff0f4', glow: '#ff4f7e', particle: '#ffa0bc', smoke: 'rgba(255,120,150,0.3)', decal: 'rgba(120,20,50,0.3)', crack: '#ff6f95', extra: 'runes' });
   BD.defineElement('cosmos', { rim: '#1a0636', debris: '#3a2450', name: '星海', core: '#f3e8ff', glow: '#9b5cff', particle: '#d6b8ff', smoke: 'rgba(40,20,70,0.5)', decal: 'rgba(30,10,50,0.45)', crack: '#b07bff', extra: 'motes' });
+  BD.defineElement('blackfire', { rim: '#000000', debris: '#0c0408', name: '黑炎', core: '#ffffff', glow: '#b3123c', particle: '#06020a', smoke: 'rgba(4,0,8,0.7)', decal: 'rgba(4,0,8,0.62)', crack: '#d81c4a', extra: 'embers' });
   BD.defineElement('arcane', { rim: '#3a1a7a', debris: '#6a3a8a', name: '秘法', core: '#f6e8ff', glow: '#c77dff', particle: '#e0b8ff', smoke: 'rgba(120,60,170,0.35)', decal: 'rgba(60,20,90,0.3)', crack: '#d9a0ff', extra: 'runes' });
 })(typeof window !== 'undefined' ? window : globalThis);
 (function (G) {
@@ -25,7 +26,7 @@
   const KIND_EL = { fire: 'fire', flame: 'fire', lava: 'fire', meteor: 'fire', magma: 'fire',
     ice: 'ice', blizzard: 'ice', mine: 'ice', frost: 'ice',
     acid: 'poison', poison: 'poison', swarm: 'poison', egg: 'poison', spider: 'poison',
-    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow' };
+    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow', crow: 'umbra', blackfire: 'blackfire', magatama: 'fire' };
   BD.KIND_EL = KIND_EL;
   BD.kindElement = function (kind, fallback) { return KIND_EL[kind] || fallback || 'physical'; };
 })(typeof window !== 'undefined' ? window : globalThis);

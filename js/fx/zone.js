@@ -62,4 +62,25 @@
       fx.shake(Math.min(6, 2 * k));
     },
   });
+  BD.defineEffect('amaterasu', {
+    name: '天照', category: '區域',
+    desc: '燒到燒盡為止的黑色火焰：落點一閃白光後，墨黑濃煙與暗紅火星從地面竄起，暗紅光柱與震波推開，地面留下焦黑的大片印記與暗紅裂痕。適合黑炎、無法撲滅的火、神罰（hit / erupt 的 fx，搭配元素 blackfire）。',
+    params: { radius: 100 },
+    spawn(fx, x, y, o) {
+      const E = o.E, k = o.k, V = BD.vrng, TAU = Math.PI * 2, r = (o.radius || 100) * Math.min(1.5, o.scale || 1);
+      fx.flashAt(x, y, r * 1.4, '#ffffff', 0.12);
+      fx.pillar(x, y, r * 0.7, E.glow, 0.7);
+      fx.shock(x, y, r * 0.2, r * 1.2, 0.5, E.glow, 8, E.core);
+      fx.smoke(x, y, 'rgba(2,0,6,0.85)', fx.budget(14), r * 0.8);
+      for (let i = 0; i < 6; i++) fx.after(i * 0.06, () => {
+        const a = V() * TAU, d = V() * r * 0.8, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d;
+        fx.smoke(px, py, 'rgba(2,0,6,0.8)', 3, r * 0.25);
+        fx.embers(px, py, E.glow, 3, r * 0.3, 150);
+      });
+      fx.decal(x, y, r, E.decal, 10);
+      fx.crack(x, y, r * 0.9, E.decal, 6, E.crack, 5);
+      fx.sparkle(x, y, E.glow, fx.budget(12), 300, -Math.PI / 2, 1.6);
+      fx.shake(6 * Math.min(1.4, k));
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

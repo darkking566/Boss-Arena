@@ -111,6 +111,22 @@
     },
   });
 
+  // ── crowsub：烏鴉分身（鼬）——原作他常以烏鴉分身代替本體挨打：每 14 秒一次，被直接攻擊命中時換成一群烏鴉四散，本體出現在後方 ──
+  const CROWSUB_GAP = 14;
+  BD.defineTrait('crowsub', {
+    interceptDamage(w, b, src, p) {
+      if (!src || !src.isBoss || p.dot || w.time - (b._crowAt == null ? -99 : b._crowAt) < CROWSUB_GAP || (b.state !== 'idle' && b.state !== 'skill')) return null;
+      if (BD.getMod(b, 'invuln')) return null;
+      b._crowAt = w.time;
+      const a = BD.U.angTo(src, b), [x, y] = K.clampPt(b.x + Math.cos(a) * 190, b.y + Math.sin(a) * 190, b.r + 10);
+      BD.spawnFx(w, 'crowburst', b.x, b.y, { src: b, toX: x, toY: y });
+      b.x = x; b.y = y; w.confine(b); b.face = BD.U.angTo(b, src);
+      w.fx.text(b.x, b.y - b.r - 30, '烏鴉分身！', '#ff6a7d', 24); w.hitstop = 0.08;
+      w.log(b, '被打中的只是烏鴉分身——真身已在後方！', true);
+      return 'dodged';
+    },
+  });
+
   // ── learn：一看就會（勇次郎）——原作他看一眼就能學會任何招式（郭海皇的消力）：同一招每施放一次（多段算一次）就被他「看過」一次，之後再被這招打中，傷害與架勢傷害各降 12%、最多 36% ──
   BD.defineTrait('learn', {
     interceptDamage(w, b, src, p) {
