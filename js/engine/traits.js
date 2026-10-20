@@ -122,6 +122,8 @@
       BD.spawnFx(w, 'crowburst', b.x, b.y, { src: b, toX: x, toY: y });
       b.x = x; b.y = y; w.confine(b); b.face = BD.U.angTo(b, src);
       w.fx.text(b.x, b.y - b.r - 30, '烏鴉分身！', '#ff6a7d', 24); w.hitstop = 0.08;
+      BD.spawnProj(w, b, b, b.face, { n: 1, speed: 700, r: 22, dmg: 30, posture: 8, kb: 90, life: 1.2, homing: 3.5, kind: 'crow' }); // 替身的烏鴉群反撲：扇形 5 隻追蹤烏鴉
+      for (const d of [-0.5, -0.25, 0.25, 0.5]) BD.spawnProj(w, b, b, b.face + d, { n: 1, speed: 700, r: 22, dmg: 30, posture: 8, kb: 90, life: 1.2, homing: 3.5, kind: 'crow' });
       w.log(b, '被打中的只是烏鴉分身——真身已在後方！', true);
       return 'dodged';
     },

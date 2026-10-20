@@ -143,34 +143,51 @@
     modifiers: { invuln: true, dmgDealtMul: 1.3, speedMul: 1.15 },
     onRemove(u, st, w) { if (w && !w.winner && u.state !== 'dead' && u.hp <= 1) { u.hp = 0; w.kill(u); } },
   });
-  // ── 月讀（鼬）：與目標眼神交會後拉進自己的世界——無法行動，期間每 0.2 秒承受一記「刺擊」（原作：數日的酷刑只在一瞬間）──
+  // ── 月讀（鼬）：與目標眼神交會後拉進自己的世界——無法行動、承受傷害 +25%，期間每 0.2 秒挨一記刺擊（一般傷害，會跳數字），結束時再補一記重擊（原作：數日的酷刑只在一瞬間）──
+  // 不綁定 stun 狀態：bindState 的狀態不會 tick；stun 由 onApply 設定、與本狀態同長
   BD.defineStatus('tsukuyomi', {
-    name: '月讀', tags: ['cc', 'debuff'], stacking: 'refresh', defaultDur: 1.6, bindState: 'stun', visual: 'tsukuyomi', dps: 55,
+    name: '月讀', tags: ['cc', 'debuff'], stacking: 'refresh', defaultDur: 2.2, visual: 'tsukuyomi', dps: 100,
+    modifiers: { dmgTakenMul: 1.25 },
     onApply(u, st, opts, w, isNew) {
       if (!u.setState) return; // 召喚物沒有狀態機：月讀只對 Boss 有效
-      if (opts.dur) u.setState('stun', opts.dur);
+      u.setState('stun', opts.dur || 2.2);
       if (!isNew) return;
       st.data = { acc: 0 };
-      if (w) { BD.spawnFx(w, 'tsukuyomi', u.x, u.y, { src: st.source, life: opts.dur || 1.6 }); w.fx.text(u.x, u.y - u.r - 30, '月讀！', '#ff3048', 24); }
+      if (w) { BD.spawnFx(w, 'tsukuyomi', u.x, u.y, { src: st.source, life: opts.dur || 2.2 }); w.fx.text(u.x, u.y - u.r - 30, '月讀！', '#ff3048', 26); }
     },
     onTick(u, st, dt, w) {
-      if (!st.data) return;
+      if (!st.data || !w || u.state === 'dead') return;
       st.data.acc += dt;
-      while (st.data.acc >= 0.2) { st.data.acc -= 0.2; BD.statusDamage(w, u, st, 11); }
+      while (st.data.acc >= 0.2) {
+        st.data.acc -= 0.2;
+        w.damageUnit(st.source || null, u, { dmg: 20, posture: 3, unblockable: true, undodgeable: true, noPerfect: true, ignoreIframe: true, statusDmg: st.id });
+        BD.spawnFx(w, 'slash', u.x, u.y, { src: st.source, angle: BD.vrng() * Math.PI * 2, radius: 90, el: 'umbra' });
+      }
+    },
+    onRemove(u, st, w, reason) {
+      if (reason !== 'expire' || !w || !st.data || u.state === 'dead') return;
+      w.damageUnit(st.source || null, u, { dmg: 70, posture: 20, unblockable: true, undodgeable: true, noPerfect: true, ignoreIframe: true, statusDmg: st.id });
+      BD.spawnFx(w, 'crowburst', u.x, u.y, { src: st.source });
     },
   });
-  // ── 天照（鼬）：燒到目標燒盡為止的黑炎，無法撲滅、只能等它燒完；比燃燒更痛、持續更久 ──
+  // ── 天照（鼬）：永遠無法撲滅的黑炎——不會自行熄滅（只有施術者倒下才停止），每被黑炎燒到一次疊一層（最多 5 層），每層每秒 6 點 ──
   BD.defineStatus('amaterasu', {
-    name: '天照', tags: ['dot', 'fire', 'debuff'], stacking: 'refresh', defaultDur: 4, dps: 22, visual: 'amaterasu',
-    onApply(u, st) { if (!st.data || typeof st.data.acc !== 'number') st.data = { acc: 0 }; },
+    name: '天照', tags: ['dot', 'fire', 'debuff'], stacking: 'stack', maxStacks: 5, visual: 'amaterasu',
+    dps: function (u, st) { return 6 * st.stacks; },
+    onApply(u, st, opts, w, isNew) {
+      st.rem = Infinity;
+      if (!st.data || typeof st.data.acc !== 'number') st.data = { acc: 0 };
+      if (isNew && w) w.fx.text(u.x, u.y - u.r - 30, '天照！', '#d81c4a', 22);
+    },
     onTick(u, st, dt, w) {
+      if (!st.data || (st.source && st.source.state === 'dead')) return;
       st.data.acc += dt;
-      while (st.data.acc >= 0.5) { st.data.acc -= 0.5; BD.statusDamage(w, u, st, 11); }
+      while (st.data.acc >= 0.5) { st.data.acc -= 0.5; BD.statusDamage(w, u, st, 3 * st.stacks); }
     },
   });
   // ── 須佐能乎（鼬）：顯現期間身披查克拉鎧甲、承受傷害 −25%（八咫鏡擋下大半衝擊）──
   BD.defineStatus('susanoo', {
-    name: '須佐能乎', tags: ['buff'], stacking: 'refresh', defaultDur: 5, visual: 'susanoo',
+    name: '須佐能乎', tags: ['buff'], stacking: 'refresh', defaultDur: 16, visual: 'susanoo',
     modifiers: { dmgTakenMul: 0.75 },
     onApply(u, st, opts, w, isNew) { if (isNew && w) BD.spawnFx(w, 'susanoo', u.x, u.y, { src: u }); },
   });

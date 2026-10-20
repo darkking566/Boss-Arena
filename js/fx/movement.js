@@ -222,25 +222,30 @@
   });
   BD.defineEffect('crowburst', {
     name: '烏鴉分身', category: '位移',
-    desc: '化作一群烏鴉四散：起點炸出放射狀的漆黑羽翼拖影與羽毛、濃黑煙霧與擴散光環，終點收束出一圈紅光與落羽，起終點之間拖出一道紅色殘影。適合替身、遁走、烏鴉分身（blink 動作的 fx、crowsub 特性）。',
+    desc: '化作一大群烏鴉四散：起點炸出兩層放射狀的漆黑羽翼拖影（外層長、內層短）與滿天羽毛、濃黑煙霧與擴散光環，一群烏鴉沿著起終點之間拖成一條漆黑的飛行軌跡，終點收束出紅光與落羽。適合替身、遁走、烏鴉分身（blink 動作的 fx、crowsub 特性、月讀結束）。',
     params: {},
     spawn(fx, x, y, o) {
       const E = o.E, V = BD.vrng, TAU = Math.PI * 2, tx = o.toX != null ? o.toX : x, ty = o.toY != null ? o.toY : y;
-      fx.glow(x, y, 70, '#ff2a44', 0.25, 0.5, 0.4);
-      for (let i = 0; i < 16; i++) {
-        const a = i / 16 * TAU + V() * 0.3, len = 90 + V() * 110;
-        fx.streak(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len, 3 + V() * 3, i % 3 ? '#0b0810' : E.glow, 0.45 + V() * 0.25, false);
+      fx.glow(x, y, 90, '#ff2a44', 0.3, 0.55, 0.4);
+      for (let i = 0; i < 26; i++) {
+        const a = i / 26 * TAU + V() * 0.25, len = (i % 2 ? 80 : 150) + V() * 130;
+        fx.streak(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len, 3 + V() * 4, i % 4 ? '#0b0810' : E.glow, 0.5 + V() * 0.3, false);
       }
-      fx.debris(x, y, '#14101a', fx.budget(14), 320, 2.5, 28);
-      fx.smoke(x, y, 'rgba(8,4,12,0.65)', fx.budget(10), 50);
-      fx.ring(x, y, 10, 90, 0.35, E.glow, 3);
+      fx.debris(x, y, '#14101a', fx.budget(22), 380, 2.5, 34);
+      fx.smoke(x, y, 'rgba(8,4,12,0.7)', fx.budget(14), 60);
+      fx.ring(x, y, 10, 110, 0.38, E.glow, 3);
+      const dx = tx - x, dy = ty - y, L = Math.hypot(dx, dy);
+      if (L > 30) for (let i = 0; i < 8; i++) { // 一群烏鴉沿路飛過
+        const off = (i - 3.5) * 14, nx = -dy / L * off, ny = dx / L * off;
+        fx.streak(x + nx, y + ny, tx + nx, ty + ny, 4 + V() * 3, '#0b0810', 0.3 + V() * 0.15, false);
+      }
       fx.after(0.12, () => {
-        fx.ring(tx, ty, 70, 8, 0.25, E.glow, 3);
-        fx.sparkle(tx, ty, E.core, fx.budget(10), 300);
-        fx.debris(tx, ty, '#14101a', fx.budget(8), 220, 2.5, 20);
+        fx.ring(tx, ty, 80, 8, 0.28, E.glow, 3);
+        fx.sparkle(tx, ty, E.core, fx.budget(12), 320);
+        fx.debris(tx, ty, '#14101a', fx.budget(12), 240, 2.5, 24);
         fx.streak(x, y, tx, ty, 6, E.glow, 0.3, true);
       });
-      fx.shake(2);
+      fx.shake(3);
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

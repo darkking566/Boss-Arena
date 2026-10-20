@@ -153,9 +153,9 @@ BD.defineStatus('burn', {
 | `shield` | 護盾 | buff, shield | 吸收傷害（`value` 為剩餘吸收量） |
 | `vulnerable` | 易傷 | debuff | 承受傷害 ×1.25 |
 | `enrage` | 狂暴 | buff | 造成傷害 ×1.3、速度 ×1.2 |
-| `tsukuyomi` | 月讀 | cc, debuff | 綁定 `stun`：無法行動，期間每 0.2 秒承受 11 點傷害（鼬） |
-| `amaterasu` | 天照 | dot, fire, debuff | 每 0.5 秒 11 點（dps 22），預設 4 秒（鼬） |
-| `susanoo` | 須佐能乎 | buff | 承受傷害 ×0.75，造型檔 `under()` 畫出巨大骨架（鼬） |
+| `tsukuyomi` | 月讀 | cc, debuff | 無法行動（onApply 設定 stun）、承受傷害 ×1.25，期間每 0.2 秒 20 點刺擊、結束再補 70 點（鼬；注意：綁定 `bindState` 的狀態不會 tick，需要持續效果的控制狀態不要綁） |
+| `amaterasu` | 天照 | dot, fire, debuff | 永不熄滅（無期限）、可疊 5 層，每層每秒 6 點（鼬） |
+| `susanoo` | 須佐能乎 | buff | 承受傷害 ×0.75，預設 16 秒；造型檔 `under()` 畫出約 6 倍大的巨人（鼬） |
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：

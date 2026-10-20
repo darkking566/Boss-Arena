@@ -9,13 +9,14 @@
   const cone = (r, deg) => ({ shape: 'cone', r, arc: deg * D });
 
   // 月讀：與目標眼神交會（長條預警＝視線）；命中拉進月讀世界，無法行動並承受連續刺擊
-  const gaze = (tele, len, w, dur) => [{ do: 'strain', at: 0.05, pct: 0.008 },
-    ...strike(0.1 + tele, tele, rect(len, w), { dmg: 40, posture: 20, kb: 0, status: { id: 'tsukuyomi', dur } })];
+  const gaze = (tele, len, w, dur, crows) => [{ do: 'strain', at: 0.05, pct: 0.008 },
+    ...strike(0.1 + tele, tele, rect(len, w), { dmg: 60, posture: 20, kb: 0, status: { id: 'tsukuyomi', dur } }),
+    { do: 'proj', at: 0.3 + tele, n: crows, spread: 0.5, speed: 640, r: 22, dmg: 24, posture: 8, kb: 60, life: 1.4, homing: 4, kind: 'crow' }];
   // 天照：鎖定目標腳下，落點先炸一記黑炎、再留下燒灼的黑炎地面
   const blackfire = (tele, r, dmg, zoneDps, zoneDur) => [{ do: 'strain', at: 0.05, pct: 0.008 },
     { do: 'tele', at: 0.1, dur: tele, shape: 'circle', r, anchor: 'target', setMark: 'A', follow: true, lockBefore: 0.3 },
-    { do: 'zone', at: 0.1 + tele - 0.3, pattern: 'at', r, dur: zoneDur, dps: zoneDps, kind: 'blackfire', delay: 0.3, status: { id: 'amaterasu', dur: 2 } },
-    { do: 'hit', at: 0.1 + tele, shape: 'circle', r, anchor: 'mark', mark: 'A', dmg, posture: 26, kb: 120, fx: { id: 'amaterasu', el: 'blackfire' }, status: { id: 'amaterasu', dur: 4 } }];
+    { do: 'zone', at: 0.1 + tele - 0.3, pattern: 'at', r, dur: zoneDur, dps: zoneDps, kind: 'blackfire', delay: 0.3, status: { id: 'amaterasu' } },
+    { do: 'hit', at: 0.1 + tele, shape: 'circle', r, anchor: 'mark', mark: 'A', dmg, posture: 26, kb: 120, fx: { id: 'amaterasu', el: 'blackfire' }, status: { id: 'amaterasu' } }];
 
   const itachi = {
     id: 'itachi', name: '宇智波鼬', title: '寫輪眼之鼬', archetype: '幻術與火遁的天才忍者',
@@ -79,10 +80,14 @@
       { id: 'crow_clone', name: '烏鴉分身', short: '烏鴉', tags: ['escape', 'ranged'], range: [0, 240], cd: 8, cost: 16, recovery: 0.4,
         actions: [{ do: 'blink', at: 0.1, to: 'away', dist: 300, fx: 'crowburst' },
           { do: 'tele', at: 0.3, dur: 0.35, shape: 'cone', r: 640, arc: 50 * D, follow: true },
-          { do: 'proj', at: 0.65, n: 5, spread: 0.55, speed: 720, r: 22, dmg: 28, posture: 10, kb: 90, life: 1.0, kind: 'crow' }],
+          { do: 'proj', at: 0.65, n: 5, spread: 0.55, speed: 720, r: 22, dmg: 28, posture: 10, kb: 90, life: 1.3, homing: 3.2, kind: 'crow' }],
         actions2: [{ do: 'blink', at: 0.1, to: 'away', dist: 320, fx: 'crowburst' },
           { do: 'tele', at: 0.3, dur: 0.32, shape: 'cone', r: 680, arc: 70 * D, follow: true },
-          { do: 'proj', at: 0.62, n: 7, spread: 0.8, speed: 760, r: 22, dmg: 30, posture: 10, kb: 90, life: 1.0, kind: 'crow' }] },
+          { do: 'proj', at: 0.62, n: 7, spread: 0.8, speed: 760, r: 22, dmg: 30, posture: 10, kb: 90, life: 1.3, homing: 3.2, kind: 'crow' }] },
+      // 烏鴉風暴：烏鴉群從天空俯衝落在目標周圍一片區域（落點預警），二階段每隻烏鴉帶著天照的黑炎
+      { id: 'crow_storm', name: '烏鴉風暴', short: '風暴', tags: ['ranged', 'aoe'], range: [120, 640], cd: 9, cost: 22, track: 7, recovery: 0.6,
+        actions: [{ do: 'rain', at: 0.3, n: 12, dur: 1.1, area: 260, r: 70, flight: 0.7, dmg: 40, posture: 14, kb: 160, kind: 'crow' }],
+        actions2: [{ do: 'rain', at: 0.3, n: 18, dur: 1.3, area: 300, r: 75, flight: 0.7, dmg: 44, posture: 16, kb: 180, kind: 'crow', status: { id: 'amaterasu' } }] },
       // 瞬身之術：閃到對手背後、一記擒拿般的掌擊（鼬的身手連暗部都追不上）
       { id: 'flicker', name: '瞬身・背後擒拿', short: '瞬身', tags: ['gap', 'melee'], range: [120, 520], cd: 5.5, cost: 18, track: 8, recovery: 0.5,
         actions: [{ do: 'blink', at: 0.1, to: 'behind', dist: 70, fx: 'blink' },
@@ -90,9 +95,9 @@
         actions2: [{ do: 'blink', at: 0.1, to: 'behind', dist: 70, fx: 'crowburst' },
           ...strike(0.46, 0.28, rect(150, 52), { dmg: 84, posture: 38, kb: 280, fx: 'thrust' })] },
       // 月讀：與目標眼神交會、拉進自己的世界，數日的酷刑只在一瞬間（長條預警＝視線，翻滾可躲；命中後無法行動並承受連續刺擊）
-      { id: 'tsukuyomi', name: '月讀', short: '月讀', tags: ['ranged', 'zone'], range: [120, 440], cd: 11, cost: 26, track: 7, recovery: 0.55,
-        actions: gaze(1.0, 440, 90, 1.5),
-        actions2: gaze(0.9, 480, 100, 1.8) },
+      { id: 'tsukuyomi', name: '月讀', short: '月讀', tags: ['ranged', 'zone'], range: [120, 480], cd: 11, cost: 26, track: 7, recovery: 0.55,
+        actions: gaze(1.0, 480, 110, 2.2, 6),
+        actions2: gaze(0.9, 540, 120, 2.6, 9) },
       // 寫輪眼見切（原作：能看穿動作預測攻擊）：一階段看穿後反斬；二階段須佐能乎的八咫鏡把攻擊彈回去
       { id: 'sharingan', name: '寫輪眼・見切', short: '見切', tags: ['counter', 'defensive'], range: [0, 320], cd: 7, cost: 10, track: 8, recovery: 0.45,
         actions: [{ do: 'counter', at: 0, dur: 0.9, dmg: 125, posture: 55, fx: 'parry', slowmo: 0.3 }],
@@ -104,24 +109,29 @@
       // 二階段：天照——黑炎燒到燒盡為止，落點先炸一記再留下燃燒的黑炎地面（不可撲滅、只能走出去）
       { id: 'amaterasu', name: '天照', short: '天照', phase: 2, tags: ['ranged', 'zone'], range: [120, 560], cd: 10, cost: 30, track: 6, recovery: 0.6,
         actions: blackfire(0.95, 105, 78, 28, 4.5) },
+      // 二階段：須佐能乎・顯現——骨架巨人拔地而起、持續 16 秒（之後各須佐能乎招式都會重新刷新）（承受傷害 −25%），並由八咫鏡先擋下 150 點傷害
+      { id: 'susanoo_form', name: '須佐能乎・顯現', short: '顯現', phase: 2, tags: ['defensive'], range: [0, 900], cd: 24, cost: 20, track: 6, recovery: 0.6,
+        actions: [{ do: 'strain', at: 0.05, pct: 0.01 }, { do: 'status', at: 0.3, id: 'susanoo' }, { do: 'status', at: 0.3, id: 'shield', value: 150 }] },
       // 二階段：須佐能乎・八尺瓊勾玉——須佐能乎顯現、朝目標拋出一排巨大的勾玉
       { id: 'yasaka', name: '須佐能乎・八尺瓊勾玉', short: '勾玉', phase: 2, tags: ['ranged'], range: [180, 820], cd: 8, cost: 24, track: 6, recovery: 0.65,
-        actions: [{ do: 'status', at: 0.05, id: 'susanoo', dur: 3.4 }, { do: 'strain', at: 0.1, pct: 0.008 },
+        actions: [{ do: 'status', at: 0.05, id: 'susanoo' }, { do: 'strain', at: 0.1, pct: 0.008 },
           { do: 'tele', at: 0.2, dur: 0.75, shape: 'rect', len: 820, w: 150, follow: true },
           { do: 'proj', at: 0.95, n: 5, spread: 0.22, speed: 780, r: 34, dmg: 62, posture: 22, kb: 200, life: 1.1, kind: 'magatama' }] },
       // 二階段：須佐能乎・十拳劍——酒壺中湧出的靈劍刺穿目標，被刺中者被封印（定身 + 易傷）
       { id: 'totsuka', name: '須佐能乎・十拳劍', short: '十拳', phase: 2, tags: ['melee', 'zone'], range: [0, 380], cd: 9, cost: 28, track: 6, recovery: 0.75,
-        actions: [{ do: 'status', at: 0.05, id: 'susanoo', dur: 3.2 }, { do: 'strain', at: 0.1, pct: 0.008 },
+        actions: [{ do: 'status', at: 0.05, id: 'susanoo' }, { do: 'strain', at: 0.1, pct: 0.008 },
           ...strike(1.05, 1.0, rect(380, 130), { dmg: 125, posture: 60, kb: 320, fx: 'totsuka', status: [{ id: 'root', dur: 1.2 }, { id: 'vulnerable', dur: 4 }] })] },
     ],
     // 大招：鼬在對手面前同時動用三種瞳術——月讀拖進幻境、天照的黑炎沿著視線一路燒過去；二階段再以須佐能乎揮出十拳劍的巨斬
     ultimate: { id: 'ult', name: '月讀・天照', name2: '月讀・天照・須佐能乎', ult: true, range: [0, 900], track: 0, recovery: 0.8,
       actions: [{ do: 'strain', at: 0.05, pct: 0.02 },
-        ...strike(1.3, 1.2, rect(900, 150), { dmg: 60, posture: 30, kb: 0, status: { id: 'tsukuyomi', dur: 1.8 } }),
-        { do: 'erupt', at: 1.45, n: 6, interval: 0.14, start: 90, step: 120, r: 85, dmg: 62, posture: 24, kb: 100, fx: 'amaterasu', fxEl: 'blackfire', status: { id: 'amaterasu', dur: 3 } }],
-      actions2: [{ do: 'status', at: 0.05, id: 'susanoo', dur: 4.6 }, { do: 'strain', at: 0.1, pct: 0.03 },
-        ...strike(1.2, 1.1, rect(1000, 160), { dmg: 70, posture: 34, kb: 0, status: { id: 'tsukuyomi', dur: 1.8 } }),
-        { do: 'erupt', at: 1.35, n: 8, interval: 0.12, start: 90, step: 115, r: 90, dmg: 66, posture: 24, kb: 100, fx: 'amaterasu', fxEl: 'blackfire', status: { id: 'amaterasu', dur: 3 } },
+        ...strike(1.3, 1.2, rect(900, 150), { dmg: 60, posture: 30, kb: 0, status: { id: 'tsukuyomi', dur: 2.4 } }),
+        { do: 'proj', at: 0.5, n: 8, spread: 0.45, speed: 640, r: 22, dmg: 24, posture: 8, kb: 60, life: 1.6, homing: 4, kind: 'crow' },
+        { do: 'erupt', at: 1.45, n: 6, interval: 0.14, start: 90, step: 120, r: 85, dmg: 62, posture: 24, kb: 100, fx: 'amaterasu', fxEl: 'blackfire', status: { id: 'amaterasu' } }],
+      actions2: [{ do: 'status', at: 0.05, id: 'susanoo' }, { do: 'strain', at: 0.1, pct: 0.03 },
+        ...strike(1.2, 1.1, rect(1000, 160), { dmg: 70, posture: 34, kb: 0, status: { id: 'tsukuyomi', dur: 2.8 } }),
+        { do: 'proj', at: 0.5, n: 12, spread: 0.4, speed: 660, r: 22, dmg: 26, posture: 8, kb: 60, life: 1.6, homing: 4, kind: 'crow' },
+        { do: 'erupt', at: 1.35, n: 8, interval: 0.12, start: 90, step: 115, r: 90, dmg: 66, posture: 24, kb: 100, fx: 'amaterasu', fxEl: 'blackfire', status: { id: 'amaterasu' } },
         ...strike(2.9, 1.0, rect(1100, 210), { dmg: 190, posture: 80, kb: 450, fx: 'totsuka', status: [{ id: 'root', dur: 1.0 }, { id: 'vulnerable', dur: 4 }] })],
       desc: '與目標眼神交會，把對方拖進月讀的幻境（命中後無法行動）；黑炎天照沿著視線一路燒過去。二階段須佐能乎顯現，最後以十拳劍的巨斬橫貫全場，將對手封印（定身 + 易傷）。' },
   };

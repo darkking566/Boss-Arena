@@ -204,17 +204,28 @@
   });
   BD.defineEffect('totsuka', {
     name: '十拳劍', category: '突刺',
-    desc: '酒壺中湧出的靈劍刺穿目標：場地微暗，一道粗大的蒼紫光刃自施放者貫穿到終點、內芯白熱，終點三圈光環向內收束（被吸進酒壺），隨後浮出「封」字與震波火花。適合封印、一刺必殺的靈劍。',
+    desc: '須佐能乎揮下十拳劍的巨斬：場地一暗，三道蒼紫的巨大月牙斬氣（內芯白熱）接連朝前方滾出，沿著斬線留下一道白熱劍痕，地面沿線裂開，一圈圈震波推向終點；終點三圈光環向內收束（被吸進酒壺）並浮出「封」字。適合封印、巨劍劈砍、一刀兩斷的靈劍。',
     params: { len: 300 },
     spawn(fx, x, y, o) {
-      const ang = o.angle || 0, len = o.len || 300, x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
-      fx.veil(0.5, 0.4, '#04020a');
-      fx.beam(x, y, x2, y2, 34, '#8a7aff', 0.35, '#ffffff');
-      fx.beam(x, y, x2, y2, 12, '#e6dcff', 0.45, '#ffffff');
-      fx.flashAt(x2, y2, 100, '#cfc2ff', 0.2);
-      for (let i = 0; i < 3; i++) fx.after(0.1 + i * 0.08, () => fx.ring(x2, y2, 110 - i * 30, 10, 0.28, '#cfc2ff', 4));
-      fx.after(0.4, () => { fx.text(x2, y2 - 40, '封', '#e6dcff', 46); fx.shock(x2, y2, 10, 120, 0.4, '#cfc2ff', 6, '#ffffff'); fx.sparkle(x2, y2, '#e6dcff', fx.budget(14), 360); });
-      fx.shake(8);
+      const V = BD.vrng, ang = o.angle || 0, len = o.len || 300, c = Math.cos(ang), s = Math.sin(ang), x2 = x + c * len, y2 = y + s * len;
+      fx.veil(0.7, 0.6, '#04020a');
+      fx.flash('#cfc2ff', 0.35);
+      for (let i = 0; i < 4; i++) fx.after(i * 0.05, () => { // 月牙斬氣一波波滾出（半徑隨波次推遠）
+        const rr = len * (0.38 + 0.2 * i);
+        fx.slash(x, y, ang, 2.1 - 0.3 * i, rr, '#8a7aff', 46 - 6 * i, 0.45, { core: '#ffffff', trail: 3 });
+        fx.slash(x, y, ang, 1.9 - 0.3 * i, rr, '#e6dcff', 16, 0.38, { core: '#ffffff' });
+      });
+      fx.beam(x, y, x2, y2, 16, '#e6dcff', 0.45, '#ffffff'); // 劍痕
+      for (let i = 1; i <= 5; i++) fx.after(0.03 * i, () => { // 沿線地裂與震波
+        const q = i / 5, px = x + c * len * q, py = y + s * len * q;
+        fx.crack(px, py, 70, 'rgba(10,0,30,0.5)', 6, '#a89cff', 5);
+        fx.shock(px, py, 8, 70 + 30 * q, 0.35, '#cfc2ff', 5, '#ffffff');
+        fx.sparkle(px, py, '#e6dcff', fx.budget(6), 300, ang + Math.PI / 2, 2.6);
+      });
+      fx.flashAt(x2, y2, 110, '#cfc2ff', 0.2);
+      for (let i = 0; i < 3; i++) fx.after(0.18 + i * 0.08, () => fx.ring(x2, y2, 120 - i * 32, 10, 0.3, '#cfc2ff', 4)); // 封印收束
+      fx.after(0.5, () => { fx.text(x2, y2 - 44, '封', '#e6dcff', 50); fx.shock(x2, y2, 10, 130, 0.45, '#cfc2ff', 6, '#ffffff'); fx.sparkle(x2, y2, '#e6dcff', fx.budget(14), 380); });
+      fx.shake(12);
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

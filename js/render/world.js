@@ -926,13 +926,26 @@
         }
         ctx.fillStyle = '#ff3048'; ctx.fillRect(10 * k, -1.5 * k, 2.5 * k, 2.5 * k);
       } else if (p.kind === 'magatama') {
-        // 須佐能乎的八尺瓊勾玉：橘紅發光的巨大逗點形玉，中心白熱、尾部拖著火光
-        R.blit(ctx, 'proj:magatama:' + p.r, p.r * 5 + 24, p.r * 3 + 24, p.r * 3.4 + 12, p.r * 1.5 + 12, (g) => {
-          g.shadowColor = '#ff7a2a'; g.shadowBlur = 18;
-          g.fillStyle = 'rgba(255,110,40,0.55)'; g.beginPath(); g.moveTo(-p.r * 2.4, 0); g.quadraticCurveTo(-p.r * 1.2, -p.r * 0.5, -p.r * 0.6, 0); g.quadraticCurveTo(-p.r * 1.2, p.r * 0.5, -p.r * 2.4, 0); g.fill(); // 火尾
-          g.fillStyle = '#ff8a3a'; g.beginPath(); g.arc(0, 0, p.r, 0, U.TAU); g.fill();
-          g.shadowBlur = 0; g.fillStyle = '#ffe0b0'; g.beginPath(); g.arc(p.r * 0.1, 0, p.r * 0.5, 0, U.TAU); g.fill();
-          g.strokeStyle = '#ffd29a'; g.lineWidth = 3; g.lineCap = 'round'; g.beginPath(); g.arc(-p.r * 0.2, -p.r * 0.1, p.r * 0.7, 3.4, 5.6); g.stroke(); // 勾玉的弧
+        // 須佐能乎的八尺瓊勾玉：逗點形的發光玉（頭圓、尾彎曲收尖、頭上一個孔），邊飛邊旋轉，後方拖著火尾與光暈
+        const r = p.r;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,' + (110 + i * 25) + ',40,' + (0.3 - i * 0.08) + ')'; ctx.lineWidth = r * (1.5 - i * 0.4); ctx.beginPath(); ctx.moveTo(-r * 0.6, 0); ctx.lineTo(-r * (3 + i * 1.3), Math.sin(t * 14 + i) * r * 0.25); ctx.stroke(); }
+        ctx.restore();
+        ctx.rotate(t * 6 + p.x * 0.01);
+        R.blit(ctx, 'proj:magatama2:' + r, r * 5.4 + 28, r * 5.4 + 28, r * 2.7 + 14, r * 2.7 + 14, (g) => {
+          g.shadowColor = '#ff7a2a'; g.shadowBlur = 22;
+          const gr = g.createRadialGradient(r * 0.15, r * 0.25, r * 0.1, 0, 0, r * 1.3);
+          gr.addColorStop(0, '#fff4cc'); gr.addColorStop(0.45, '#ffb04a'); gr.addColorStop(1, '#c8300a');
+          g.fillStyle = gr; g.strokeStyle = '#ffd9a0'; g.lineWidth = 2.5;
+          g.beginPath(); g.moveTo(-r * 0.35, -r * 2.2);
+          g.bezierCurveTo(r * 0.55, -r * 1.7, r * 1.05, -r * 0.95, r * 0.98, 0);
+          g.arc(0, 0, r * 0.98, 0, Math.PI, false);
+          g.bezierCurveTo(-r * 1.08, -r * 0.9, -r * 0.95, -r * 1.75, -r * 0.35, -r * 2.2);
+          g.closePath(); g.fill(); g.stroke();
+          g.shadowBlur = 0;
+          g.fillStyle = 'rgba(90,10,0,0.9)'; g.strokeStyle = '#ffe9b8'; g.lineWidth = 1.8; g.beginPath(); g.arc(-r * 0.05, -r * 0.1, r * 0.24, 0, U.TAU); g.fill(); g.stroke(); // 穿孔
+          g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 2.2; g.beginPath(); g.arc(0, 0, r * 0.7, 2.2, 3.5); g.stroke(); // 高光
+          g.strokeStyle = 'rgba(200,50,10,0.6)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(-r * 0.45, -r * 1.9); g.quadraticCurveTo(r * 0.4, -r * 1.1, r * 0.55, -r * 0.1); g.stroke(); // 玉面紋路
         });
       } else if (p.kind === 'flame') {
         R.blit(ctx, 'proj:flame:' + p.r, p.r * 3.2 + 24, p.r * 2 + 24, p.r * 2.6 + 12, p.r + 12, (g) => {
@@ -969,6 +982,15 @@
       if (l.sky) { x = U.lerp(l.x0, l.x1, k); y = U.lerp(l.y0, l.y1, k); h = 0; }
       else { x = U.lerp(l.x0, l.x1, k); y = U.lerp(l.y0, l.y1, k); h = Math.sin(Math.PI * k) * 160; }
       ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(l.sky ? l.x1 : x, l.sky ? l.y1 : y, 10 * (l.sky ? k : 1), 6 * (l.sky ? k : 1), 0, 0, U.TAU); ctx.fill();
+      if (l.kind === 'crow') { // 烏鴉風暴：展翅的烏鴉從高空俯衝向落點，尾後一道暗紅殘影
+        const an = Math.atan2(l.y1 - l.y0, l.x1 - l.x0), fl = Math.sin(t * 26 + l.x0) * 0.5 + 0.5, kk = 1.7;
+        ctx.save(); ctx.translate(x, y - h); ctx.rotate(an);
+        ctx.strokeStyle = 'rgba(179,18,60,0.45)'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-8 * kk, 0); ctx.lineTo(-56 * kk, 0); ctx.stroke();
+        ctx.fillStyle = '#0b0810'; ctx.beginPath(); ctx.moveTo(14 * kk, 0); ctx.lineTo(-2 * kk, 4 * kk); ctx.lineTo(-12 * kk, 0); ctx.lineTo(-2 * kk, -4 * kk); ctx.closePath(); ctx.fill();
+        for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(2 * kk, sd * kk); ctx.quadraticCurveTo(-4 * kk, sd * (14 + 12 * fl) * kk, -16 * kk, sd * (10 + 14 * fl) * kk); ctx.lineTo(-8 * kk, sd * 3 * kk); ctx.closePath(); ctx.fill(); }
+        ctx.fillStyle = '#ff3048'; ctx.fillRect(10 * kk, -1.5 * kk, 2.5 * kk, 2.5 * kk);
+        ctx.restore(); continue;
+      }
       const col = l.kind === 'acid' ? '#b6ff5c' : l.kind === 'egg' ? '#d9e8b0' : '#ff8a3a';
       const cr = l.sky ? 14 : 10;
       // 發光球：以顏色 + 半徑快取（含陰影），於 (x, y-h) 繪製
