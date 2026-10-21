@@ -14,8 +14,8 @@
     if (!a) return null;
     if (a.do === 'dash') return inst.skill.ult ? 'lance' : 'pounce';
     if (a.shape === 'cone') return 'sweep';
-    if (a.shape === 'rect') return id === 'tiankui_lite' || inst.skill.ult ? 'cleave' : id === 'hammer_parry' ? 'guard' : 'thrust';
-    return id === 'unbroken' ? 'raise' : 'whirl';
+    if (a.shape === 'rect') return id === 'rift_cut' || inst.skill.ult ? 'cleave' : id === 'godcut' ? 'guard' : 'thrust';
+    return id === 'proud_laugh' ? 'raise' : 'whirl';
   }
   const ease = (u) => 1 - (1 - u) * (1 - u);
   // 重用物件：ga 角度、tx 握點前後位移、fs 戟長縮放（高舉時透視縮短）、s0 / sa 戟弧殘影起點與透明度、gl 戟刃蓄力光、bl 戟刃伸長
@@ -126,7 +126,7 @@
       else if (o.horseK > 0) {
         ctx.save(); ctx.translate(-r * 7 * (1 - o.horseK), 0); ctx.globalAlpha *= o.horseK; drawHorse(ctx, r, t, 1 - o.horseK); ctx.restore();
       }
-      // 斷腿不退：狂怒期間全身赤紅氣焰
+      // 斷腿傲立：狂怒期間全身赤紅氣焰
       if (o.statuses && BD.hasStatus(o, 'enrage')) {
         const a = 0.35 + 0.2 * Math.sin(t * 12);
         ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -182,14 +182,14 @@
 
         // 雙肩紫色菱形魚鱗刺青（原作標誌）：裁切在軀幹內，只畫兩肩帶
         g.save(); g.clip();
-        g.strokeStyle = 'rgba(112, 56, 168, 0.85)';
-        g.lineWidth = 1.4;
-        const step = r * 0.14;
+        g.strokeStyle = 'rgba(96, 48, 150, 0.7)';
+        g.lineWidth = 1.2;
+        const step = r * 0.2;
         for (const side of [-1, 1]) {
           g.beginPath();
-          for (let k = -6; k <= 6; k++) {
-            g.moveTo(-r * 0.5 + k * step, side * r * 0.3); g.lineTo(r * 0.5 + k * step, side * r * 0.9);
-            g.moveTo(r * 0.5 + k * step, side * r * 0.3); g.lineTo(-r * 0.5 + k * step, side * r * 0.9);
+          for (let k = -4; k <= 4; k++) {
+            g.moveTo(-r * 0.2 + k * step, side * r * 0.5); g.lineTo(r * 0.3 + k * step, side * r * 0.9);
+            g.moveTo(r * 0.3 + k * step, side * r * 0.5); g.lineTo(-r * 0.2 + k * step, side * r * 0.9);
           }
           g.stroke();
         }
@@ -234,9 +234,9 @@
       const hairSway = Math.sin(t * 4) * r * 0.12;
       ctx.fillStyle = '#0c0f1c';
       ctx.beginPath();
-      ctx.moveTo(r * 0.1, -r * 0.4);
-      ctx.quadraticCurveTo(-r * 0.9, -r * 0.6 + hairSway, -r * 1.3, hairSway);
-      ctx.quadraticCurveTo(-r * 0.9, r * 0.6 + hairSway, r * 0.1, r * 0.4);
+      ctx.moveTo(r * 0.1, -r * 0.3);
+      ctx.quadraticCurveTo(-r * 0.5, -r * 0.35 + hairSway, -r * 1.1, hairSway);
+      ctx.quadraticCurveTo(-r * 0.5, r * 0.35 + hairSway, r * 0.1, r * 0.3);
       ctx.closePath();
       ctx.fill();
       ctx.fillStyle = '#1e1412';
