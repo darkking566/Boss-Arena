@@ -130,10 +130,10 @@
       if (o.statuses && BD.hasStatus(o, 'enrage')) {
         const a = 0.35 + 0.2 * Math.sin(t * 12);
         ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = hexA('#ff2b38', a * 0.5); ctx.beginPath(); ctx.arc(0, 0, r * 1.25, 0, U.TAU); ctx.fill();
+        ctx.fillStyle = hexA('#d83ad8', a * 0.5); ctx.beginPath(); ctx.arc(0, 0, r * 1.25, 0, U.TAU); ctx.fill(); // 原作洋紅鬥氣
         for (let i = 0; i < 6; i++) {
           const ang = i / 6 * U.TAU + t * 2, fl = 0.5 + 0.5 * Math.sin(t * 18 + i * 2.1);
-          ctx.fillStyle = hexA('#ff5040', a * fl);
+          ctx.fillStyle = hexA('#f060e8', a * fl);
           ctx.beginPath(); ctx.arc(Math.cos(ang) * r * 0.95, Math.sin(ang) * r * 0.95, r * (0.12 + 0.1 * fl), 0, U.TAU); ctx.fill();
         }
         ctx.restore();
@@ -141,7 +141,7 @@
 
       // 2. 赤紅戰袍披風（隨時間與動作起伏飄揚）
       const capeSway = Math.sin(t * 5) * 0.15;
-      ctx.fillStyle = p2 ? '#7a0a14' : '#a81622';
+      ctx.fillStyle = p2 ? '#0a0e1c' : '#161c36'; // 原作為深藍黑長披風
       ctx.beginPath();
       ctx.moveTo(-r * 0.2, -r * 0.8);
       for (let i = 1; i <= 5; i++) {
@@ -180,6 +180,21 @@
         g.lineWidth = 2;
         g.stroke();
 
+        // 雙肩紫色菱形魚鱗刺青（原作標誌）：裁切在軀幹內，只畫兩肩帶
+        g.save(); g.clip();
+        g.strokeStyle = 'rgba(112, 56, 168, 0.85)';
+        g.lineWidth = 1.4;
+        const step = r * 0.14;
+        for (const side of [-1, 1]) {
+          g.beginPath();
+          for (let k = -6; k <= 6; k++) {
+            g.moveTo(-r * 0.5 + k * step, side * r * 0.3); g.lineTo(r * 0.5 + k * step, side * r * 0.9);
+            g.moveTo(r * 0.5 + k * step, side * r * 0.3); g.lineTo(-r * 0.5 + k * step, side * r * 0.9);
+          }
+          g.stroke();
+        }
+        g.restore();
+
         // 胸肌與腹肌陰影線條
         g.strokeStyle = 'rgba(110, 50, 25, 0.55)';
         g.lineWidth = 2;
@@ -187,8 +202,8 @@
         g.beginPath(); g.arc(r * 0.18, -r * 0.26, r * 0.22, 0.4, 2.7); g.stroke();
         g.beginPath(); g.arc(r * 0.18, r * 0.26, r * 0.22, -2.7, -0.4); g.stroke();
 
-        // 腰腹黑紅戰甲裙
-        g.fillStyle = '#221115';
+        // 腰腹白燈籠褲 + 金邊（原作赤足白褲）
+        g.fillStyle = '#e8e4dc';
         g.beginPath();
         g.moveTo(-r * 0.15, -r * 0.65);
         g.lineTo(-r * 0.5, -r * 0.55);
@@ -200,7 +215,7 @@
         g.lineWidth = 2;
         g.stroke();
 
-        // 獅蠻金帶扣
+        // 獅蠻金帶扣：金環嵌青藍寶玉
         g.fillStyle = '#f0c030';
         g.beginPath();
         g.arc(-r * 0.15, 0, r * 0.18, 0, U.TAU);
@@ -208,9 +223,22 @@
         g.strokeStyle = '#8a6010';
         g.lineWidth = 1.5;
         g.stroke();
+        g.fillStyle = '#1f8fb0';
+        g.beginPath();
+        g.arc(-r * 0.15, 0, r * 0.09, 0, U.TAU);
+        g.fill();
       });
 
       // 4. 頭部金冠與兩道標誌性長雉翎（隨身姿大幅飄逸）
+      // 披散黑長髮
+      const hairSway = Math.sin(t * 4) * r * 0.12;
+      ctx.fillStyle = '#0c0f1c';
+      ctx.beginPath();
+      ctx.moveTo(r * 0.1, -r * 0.4);
+      ctx.quadraticCurveTo(-r * 0.9, -r * 0.6 + hairSway, -r * 1.3, hairSway);
+      ctx.quadraticCurveTo(-r * 0.9, r * 0.6 + hairSway, r * 0.1, r * 0.4);
+      ctx.closePath();
+      ctx.fill();
       ctx.fillStyle = '#1e1412';
       ctx.beginPath();
       ctx.arc(r * 0.12, 0, r * 0.36, 0, U.TAU);
