@@ -294,8 +294,10 @@
       let nd = null;
       for (const tm of v.dmgTimes) if (tm > inst.t - 1e-6) { nd = tm; break; }
       const trackOk = sk.sweep ? inst.t < v.activeEnd : (nd !== null && nd - inst.t > 0.2);
-      if (sk.track && trackOk && !BD.hasStatus(this, 'hidden')) {
-        this.face = U.rotateToward(this.face, U.angTo(this, tgt), sk.track * (this.phase === 2 ? 1.15 : 1) * dt);
+      // 衝刺衝過頭後：面向差太大時無視鎖定窗並加速補轉，否則後續斬擊會劈空
+      const reaim = inst.reaim && nd !== null && Math.abs(U.angDiff(this.face, U.angTo(this, tgt))) > 0.25;
+      if (sk.track && (trackOk || reaim) && !BD.hasStatus(this, 'hidden')) {
+        this.face = U.rotateToward(this.face, U.angTo(this, tgt), sk.track * (this.phase === 2 ? 1.15 : 1) * (reaim ? 3 : 1) * dt);
       }
       // 沉重・讀習慣的踏步追擊：起手中對手早滾 → 邊蓄邊追（light 不會設定 inst.chaseWind）
       if (inst.chaseWind && inst.t < v.windup && !inst.dash && U.dist(this, tgt) > inst.chaseStop) { const a = U.angTo(this, tgt); return [Math.cos(a) * spd * inst.chaseWind, Math.sin(a) * spd * inst.chaseWind]; }
@@ -312,7 +314,7 @@
           }
         }
         if (d.trail) BD.dropTrail(w, this, d);
-        if (d.t >= d.dur) { inst.dash = null; this.vx *= 0.15; this.vy *= 0.15; }
+        if (d.t >= d.dur) { inst.dash = null; inst.reaim = true; this.vx *= 0.15; this.vy *= 0.15; }
       } else if (inst.circle) {
         const c = inst.circle; c.t += dt;
         const k = Math.min(1, c.t / c.dur), a = c.a0 + c.dir * k * U.TAU, rr = U.lerp(c.d0, c.r, Math.min(1, c.t / 0.25));

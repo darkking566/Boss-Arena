@@ -467,7 +467,8 @@
       const shielded = BD.statusesByTag(e, 'shield').length > 0;
       const win = this.punishWindow();
       const ult = b.ultimate;
-      if (b.ult >= 100 && d >= ult.range[0] && d <= ult.range[1] && (win > 0.5 || rng() < 0.05)) {
+      // 大招多半不追蹤：面向沒對準（例如剛衝過頭）就先等轉身，不然整招劈空
+      if (b.ult >= 100 && d >= ult.range[0] && d <= ult.range[1] && Math.abs(U.angDiff(b.face, U.angTo(b, e))) < 0.5 && (win > 0.5 || rng() < 0.05)) {
         if (b.startSkill(ult)) { this.afterAttack(); return; }
       }
       const SH = p.shadow, hunt = !!SH && SH.execute > 0 && e.hp <= e.maxHp * 0.5 && (b._contemptT || 0) <= w.time; // 滅魂劫就緒

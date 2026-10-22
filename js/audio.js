@@ -217,14 +217,16 @@
         }
       }
       else if (b.def && b.def.id === 'mihawk') {
-        // 二階段拔刀：HP 50% 佩服對手決心，拔出黑刀「夜」
-        if (b.phase === 2 && !seenP2.has(b)) {
+        // 二階段轉變開始：HP 50% 進入 transition，畫面慢動作、橫幅出現「你的眼神很有趣……」
+        if ((b.state === 'transition' || b.phase === 2) && !seenP2.has(b)) {
           seenP2.add(b);
-          play('draw', 0.95);        // 拔刀出鞘清脆破空
-          play('swordWhoosh', 0.85); // 黑刀「夜」巨刃劃開氣流
-          play('bladeScrape', 0.7);  // 刀刃離鞘金屬摩擦
-          play('buff', 0.75);        // 世界第一大劍豪氣場爆發
-          play('shockwave', 0.6);    // 劍壓微鳴震動
+          play('bladeScrape', 0.85); // 伸手扣住背後黑刀「夜」刀柄金屬刮擦
+          play('buff', 0.85);        // 見聞色與無上劍豪氣場爆發
+          play('shockwave', 0.65);   // 戰場低頻劍壓微震
+          setTimeout(() => {
+            play('draw', 0.95);      // 黑刀「夜」出鞘清脆鳴響！
+            play('swordWhoosh', 0.85);
+          }, 450);
         }
         const curInst = b.inst;
         const prevInst = lastSkill.get(b);
@@ -947,7 +949,14 @@
       }
       // 鷹眼米霍克（世界第一大劍豪）專屬音效
       else if (isMihawk) {
-        if (id === 'parry') {
+        if (id === 'awaken') {
+          play('shockwave', 0.95);    // 二階段轉變完成：黑刀「夜」完全解放出鞘，劍壓狂湧！
+          play('slashHeavy', 0.95);   // 凌厲揮刃撕裂氣流
+          play('swordWhoosh', 0.85);
+          play('mikiriRing', 0.8);    // 名刀金屬清脆共振
+          play('buff', 0.75);
+        }
+        else if (id === 'parry') {
           play('mikiriClang', 0.95);  // 撥擋：刀尖撥開攻擊，清脆見切彈刀
           play('mikiriRing', 0.85);   // 金屬共鳴清鳴
           play('block', 0.7);

@@ -937,18 +937,34 @@
         ctx.fillStyle = '#15161c'; ctx.beginPath(); ctx.arc(0, 0, R * 0.2, 0, U.TAU); ctx.fill();
         if (big) { ctx.strokeStyle = 'rgba(255,75,92,0.7)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R * 0.42, 0, U.TAU); ctx.stroke(); }
       } else if (p.kind === 'airslash') {
-        // 米霍克的飛斬：大型月牙斬（弧口朝飛行方向）。深紅外暈 + 粗紅弦 + 白熱刃緣，後方拖三道殘光，弧尖各一點星芒
-        const k = p.r, cx = -k * 0.9, rad = k * 1.35, a0 = 1.2;
-        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-        ctx.strokeStyle = 'rgba(168,35,46,0.35)'; ctx.lineWidth = k * 0.5;
-        for (const o of [-0.55, 0, 0.55]) { ctx.beginPath(); ctx.moveTo(cx - k * 0.2, o * k); ctx.lineTo(cx - k * (2.2 + (o ? 0.4 : 1.0)), o * k * 1.15); ctx.stroke(); }
-        ctx.strokeStyle = 'rgba(200,40,60,0.5)'; ctx.lineWidth = k * 0.38; ctx.beginPath(); ctx.arc(cx, 0, rad * 1.08, -a0, a0); ctx.stroke();
-        ctx.strokeStyle = 'rgba(255,90,110,0.8)'; ctx.lineWidth = k * 0.14; ctx.beginPath(); ctx.arc(cx, 0, rad, -a0 + 0.08, a0 - 0.08); ctx.stroke();
+        // 米霍克的飛斬：兩端尖細的實心月牙（弧凸朝飛行方向）。由內而外三層：深紅外暈、紅色刃身、白熱內芯與前緣亮線；
+        // 身後三道漸縮的殘影月牙、自兩尖角拖出的細長刃風，以及隨時間閃動的星點
+        const k = p.r, pulse = 0.85 + 0.15 * Math.sin(t * 30 + p.r);
+        const path = (sx, sy) => {
+          ctx.beginPath(); ctx.moveTo(-0.55 * k * sx, -1.35 * k * sy);
+          ctx.bezierCurveTo(1.2 * k * sx, -1.0 * k * sy, 1.2 * k * sx, 1.0 * k * sy, -0.55 * k * sx, 1.35 * k * sy);
+          ctx.bezierCurveTo(0.55 * k * sx, 0.7 * k * sy, 0.55 * k * sx, -0.7 * k * sy, -0.55 * k * sx, -1.35 * k * sy);
+          ctx.closePath();
+        };
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        for (let i = 3; i >= 1; i--) { // 殘影月牙
+          ctx.save(); ctx.translate(-k * 0.75 * i, 0); ctx.fillStyle = 'rgba(190,35,55,' + (0.22 - i * 0.05) + ')'; path(1 - i * 0.08, 1 - i * 0.05); ctx.fill(); ctx.restore();
+        }
+        for (const sd of [-1, 1]) { // 兩尖角拖出的刃風
+          const g = ctx.createLinearGradient(-0.55 * k, 0, -k * 4, 0); g.addColorStop(0, 'rgba(255,110,130,0.7)'); g.addColorStop(1, 'rgba(255,110,130,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-0.5 * k, sd * 1.3 * k); ctx.lineTo(-k * 4, sd * 1.05 * k); ctx.lineTo(-0.7 * k, sd * 1.45 * k); ctx.closePath(); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(160,25,45,0.4)'; ctx.strokeStyle = 'rgba(200,40,60,0.35)'; ctx.lineWidth = k * 0.45; path(1.12, 1.08); ctx.fill(); ctx.stroke(); // 外暈
+        ctx.fillStyle = 'rgba(255,70,95,' + 0.85 * pulse + ')'; path(1, 1); ctx.fill(); // 刃身
+        ctx.fillStyle = 'rgba(255,215,222,0.9)'; path(0.8, 0.88); ctx.fill(); // 內芯
         ctx.restore();
-        ctx.strokeStyle = '#fff4f6'; ctx.lineWidth = Math.max(4, k * 0.07); ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.arc(cx, 0, rad * 0.97, -a0 + 0.14, a0 - 0.14); ctx.stroke();
-        ctx.fillStyle = '#ffffff';
-        for (const s of [-1, 1]) { const tx = cx + Math.cos(a0) * rad, ty = s * Math.sin(a0) * rad; ctx.beginPath(); ctx.arc(tx, ty, Math.max(3, k * 0.06), 0, U.TAU); ctx.fill(); }
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(2.5, k * 0.07); ctx.lineCap = 'round'; // 前緣白熱亮線
+        ctx.beginPath(); ctx.moveTo(-0.5 * k, -1.28 * k); ctx.bezierCurveTo(1.15 * k, -0.95 * k, 1.15 * k, 0.95 * k, -0.5 * k, 1.28 * k); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; // 星點：兩尖角與前緣頂點
+        for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(-0.55 * k, sd * 1.35 * k, Math.max(2.5, k * 0.07), 0, U.TAU); ctx.fill(); }
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        for (let i = 0; i < 4; i++) { const ph = (t * 2.2 + i * 0.27) % 1; ctx.beginPath(); ctx.arc(-k * (0.4 + 2.2 * ph), (i % 2 ? 1 : -1) * k * (0.3 + 0.9 * ((i * 0.37) % 1)), Math.max(1.5, k * 0.04) * (1 - ph), 0, U.TAU); ctx.fill(); }
+        ctx.restore();
       } else if (p.kind === 'swordghost') {
         // 以發射序號 p.seq 決定劍豪造型（同一輪 5 道各不相同、飛行中不變臉）。小次郎的歷代劍豪幻影（動畫：一排前人劍豪在速度線中疾奔）：青白發光的奔跑人影，依個體換笠 / 白髮 / 髻 / 長髮，刀向前、身後拖長長的速度線
         const k = p.r / 42 * 1.7, who = p.seq % 5, run =Math.sin(t * 26 + who * 1.7);
