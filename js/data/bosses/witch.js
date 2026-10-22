@@ -2,7 +2,7 @@
 // Boss 資料：霜月魔女（純資料：數值、AI 個性、技能時間軸、二階段與大招）
 (function (G) {
   const BD = G.BD, { D, strike, dashStrike } = BD.DataKit;
-  const shot = (at, o) => Object.assign({ do: 'proj', at, n: 1, speed: 560, r: 9, dmg: 44, posture: 10, life: 2.2, kind: 'ice' }, o || {});
+  const shot = (at, o) => Object.assign({ do: 'proj', at, n: 1, speed: 560, r: 9, dmg: 44, posture: 10, life: 2.2, kind: 'ice', deflect: true }, o || {});
   const witch = {
     id: 'witch', name: '霜月魔女', title: '永凍之眼', archetype: '風箏型法師',
     desc: '永遠保持距離，以冰錐、冰槍、地雷與哨兵消耗對手；被貼身時冰爆擊退並閃現脫離。',

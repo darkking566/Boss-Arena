@@ -17,10 +17,10 @@
     desc: '王下七武海、世界第一大劍豪。一階段只用胸前的十字小刀，從容撥開所有攻擊；對手撐到半血，他才佩服地拔出黑刀「夜」，揮出能斬開艦隊的飛斬。',
     color: '#c9a24a', color2: '#16121a', glow: '#e8c860', style: 'mihawk',
     radius: 31, maxHp: 1950, speed: 245, turn: 8, mass: 0.9, fxEl: 'physical', hurt: 'flesh',
-    traits: ['counter'],
+    traits: ['counter', 'clash'], clash: { style: 'blade', proj: true },
     stamina: { max: 100, regen: 34 }, posture: 115, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [150, 290], aggression: 0.45, dodge: 0.7, precision: 0.92, reaction: 0.17, strafe: 0.6, walk: 0.8,
-      feint: 0.2, delay: 0.3, retreat: 0.1, punish: 0.9, nervous: 0.02, patience: 0.85, read: 0.8, counter: 0.65,
+      feint: 0.2, delay: 0.3, retreat: 0.1, punish: 0.9, nervous: 0.02, patience: 0.85, read: 0.8, counter: 0.65, clash: 0.7, // 對撞傾向（js/engine/ai.js）
       hawk: true, // 鎖定感知（js/engine/ai.js）：沒鎖定先用鷹眼 / 指尖斬 / 撥擋，鎖定後欺身獵殺
       // 連段（僅沉重）：小刀連刺接貫胸、鷹眼鎖定後獵殺、後撤拉開再鎖定、居合接沉艦、三連月牙接居合
       combos: [
@@ -75,7 +75,7 @@
         actions: [{ do: 'counter', at: 0, dur: 0.9, dmg: 135, posture: 60, name: '撥擋・反刺', fx: 'parry', slowmo: 0.3, status: LOCK(4), self: 'poise' }],
         actions2: [{ do: 'counter', at: 0, dur: 0.9, dmg: 165, posture: 75, name: '撥擋・反斬', fx: 'parry', slowmo: 0.3, status: LOCK(5), self: 'poise' }] },
       // 小刀貫穿索隆胸口的一刺
-      { id: 'pierce', name: '貫胸一刺', short: '貫胸', tags: ['gap'], range: [90, 330], cd: 5.5, cost: 18, track: 8, recovery: 0.55,
+      { id: 'pierce', name: '貫胸一刺', short: '貫胸', tags: ['gap'], clash: 'light', range: [90, 330], cd: 5.5, cost: 18, track: 8, recovery: 0.55,
         actions: dashStrike(0.4, 0.38, 280, 44, 0.12, { dmg: 82, posture: 40, kb: 200, fx: 'thrust' }),
         actions2: dashStrike(0.36, 0.34, 340, 52, 0.12, { dmg: 100, posture: 48, kb: 260, fx: 'thrust' }) },
       // 見聞色與銳利視力：遠距離鎖定、釘在原地的精準一斬

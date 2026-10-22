@@ -5,7 +5,7 @@
   const BD = G.BD, R = BD.Render, FONT = R.FONT, hexA = R.hexA;
 
   const MODE_ZH = { strafe: '繞行', approach: '接近', retreat: '後撤', hold: '保持', reposition: '重新定位', stalk: '徘徊' };
-  const PLAN_ZH = { dodge: '翻滾', counter: '見切' };
+  const PLAN_ZH = { dodge: '翻滾', counter: '見切', clash: '對撞' };
   const KIND_ZH = { tele: '預警', proj: '投射物', dash: '突進', glow: '蓄力' };
   const DO_ZH = { extend: '延伸', delay: '延遲', switch: '換招', stop: '停止', cut: '中斷' };
   const pct = (v) => Math.round((v || 0) * 100);

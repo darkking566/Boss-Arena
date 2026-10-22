@@ -55,7 +55,7 @@
     phase2: { speedMul: 1.18, dmgMul: 1.28, cdMul: 0.8, line: '熔核覺醒——萬物皆將化為灰燼！', aura: 'fire', fxEl: 'fire', transFx: { id: 'shellburst', el: 'fire' },
       note: '重錘變四連、衝撞後追加砸地、震波三圈、火山彈 5 發並留下熔岩，解鎖「熔岩噴發柱」' },
     skills: [
-      { id: 'combo', name: '重錘三連', short: '重錘', tags: ['melee'], range: [0, 196], cd: 3.2, cost: 26, track: 5, creep: 0.25, recovery: 0.85,
+      { id: 'combo', name: '重錘三連', short: '重錘', tags: ['melee'], clash: 'heavy', range: [0, 196], cd: 3.2, cost: 26, track: 5, creep: 0.25, recovery: 0.85,
         actions: mCombo,
         actions2: [...mCombo, ...strike(2.15, 0.45, { shape: 'circle', r: 210, off: 42 },
           { dmg: 130, posture: 45, kb: 420, fx: 'slam', zone: { kind: 'lava', r: 84, dur: 4, dps: 28 } })] },

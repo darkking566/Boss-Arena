@@ -145,6 +145,8 @@
           if (pl.type === 'counter') {
             const sk = b.available().find((s) => (s.tags || []).includes('counter'));
             if (sk) b.startSkill(sk, { quiet: true });
+          } else if (pl.type === 'clash') {
+            if (this.stillThreat(pl.th)) b.startSkill(pl.sk, { quiet: true });
           } else if (pl.type === 'swap') {
             const sk = b.available().find((s) => (s.tags || []).includes('swapdodge'));
             if (sk && this.stillThreat(pl.th)) b.startSkill(sk, { quiet: true });
@@ -384,6 +386,11 @@
       } else if (p.counter && th.kind === 'tele' && th.melee && th.left > 0.2 && th.left < 1.0) {
         const sk = b.available().find((s) => (s.tags || []).includes('counter'));
         if (sk && b.skillReady(sk) && rng() < p.counter) { this.plan = { type: 'counter', t: Math.max(0, th.left - 0.55), th }; return; }
+      }
+      // 對撞：看準近身攻擊，搶在落下前揮出快速近戰，讓兩招撞在一起（需要 clash 特性）
+      if (p.clash && th.kind === 'tele' && th.melee && th.left > 0.15 && th.left < 1.1 && b.def.clash) {
+        const d = U.dist(b, this.e) - this.e.r * 0.6, sk = b.available().find((s) => BD.skillClash(s) && (s.tags || []).includes('fast') && s.range && d <= s.range[1] && b.skillReady(s));
+        if (sk && rng() < p.clash) { this.plan = { type: 'clash', t: Math.max(0, th.left - 0.25), th, sk }; return; }
       }
       // 換影閃避（劫）：近戰預警落下前與影子互換位置——影子必須在這個預警範圍外
       if (p.shadow && p.shadow.swapDodge && th.kind === 'tele' && th.melee && th.left > 0.15 && th.left < 0.9) {

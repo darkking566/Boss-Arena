@@ -14,7 +14,7 @@
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
     radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
-    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）、'tyrant'（大海暴君：每挨 4 下動怒，短時間傷害與速度提升，見 docs/bosses/poseidon.md；`echo` 的殘影顏色可用 `def.echoColor` 指定）
+    traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）、'clash'（對撞：見下方「對撞」一節）、'tyrant'（大海暴君：每挨 4 下動怒，短時間傷害與速度提升，見 docs/bosses/poseidon.md；`echo` 的殘影顏色可用 `def.echoColor` 指定）
     ai: { prefRange: [80, 200], aggression: 0.7, dodge: 0.5, precision: 0.6, reaction: 0.25, strafe: 0.6, walk: 0.7,
           feint: 0.1, delay: 0.3, retreat: 0.1, punish: 0.6, nervous: 0.1, patience: 0.3 },
     phase2: { speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, line: '二階段台詞', aura: 'fire', fxEl: 'fire',
@@ -245,3 +245,12 @@ combos: [
 - `npm run test:training` 會自動讓所有已註冊 Boss 的一／二階段每招技能與大招對假人施放並驗證傷害（若新招式確實無法命中靜止目標，如見切反擊或特殊陷阱，才可加進 `test/training.test.js` 的 `ALLOW_MISS` 名單並附上繁中原因註解）。
 - 可在訓練場用假人確認無法閃避的招式（假人本來就不會翻滾，主要用來看預警外觀與傷害）。
 
+## 對撞（clash）
+
+兩邊都在揮擊時互相撞開（刀刀對撞）；不需要專屬架式，與 `counter` 見切並存。實作在 `js/engine/traits.js`，測試 `npm run test:clash`。
+
+- **角色能力**：`traits` 加 `'clash'`，並寫 `clash: { style: 'blade', proj: true }`。沒有 `clash` 的角色不會主動對撞，但他的招式仍可被別人撞開。`style` 只留給演出，`proj` 表示揮擊中可把 `deflect` 投射物彈偏。
+- **技能等級**（`skill.clash`）：`'light'` 輕擊、`'heavy'` 重擊（壓過 light，同級互撞）、`false` 不能被撞。不寫時由 `tags` 推導：有 `melee` 且沒有 `aoe` / `zone` → light；其餘（含 `gap`、大招、`unblockable` 的判定）→ 不能。突進類想能對撞就明寫 `clash: 'light'`。
+- **投射物**：`proj` 動作加 `deflect: true`，揮擊中的 `clash.proj` 角色可彈偏它；沒標的（例如米霍克的飛斬）照常命中。
+- **結果**：同級 → 雙方無傷害、招式中斷、各吃 20 架勢；較高級壓斷較低級（較低級吃 35 架勢，高級方這一擊仍命中）。兩次對撞至少間隔 0.8 秒。
+- **AI**：`ai.clash`（0–1）= 看準近身預警後搶在落下前揮出快速近戰（`tags` 含 `fast`）的機率。

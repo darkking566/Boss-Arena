@@ -34,6 +34,53 @@
     },
   });
 
+  // ── clash：對撞（菲歐拉、米霍克）——兩邊都在揮擊時互相撞開；資料以 clash: { style, proj } 宣告能力（style 只影響演出）──
+  // 技能的對撞等級：skill.clash（'light' | 'heavy' | false）優先，否則近戰且非 aoe / zone 預設 light；大招不能對撞
+  const CLASH_LV = { light: 1, heavy: 2 };
+  BD.skillClash = (s) => {
+    if (!s || s.ult) return 0;
+    if (s.clash !== undefined) return CLASH_LV[s.clash] || 0;
+    const t = s.tags || [];
+    return t.includes('melee') && !t.includes('aoe') && !t.includes('zone') ? 1 : 0;
+  };
+  const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
+  const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
+  function bump(w, u, o, post) { // u 被 o 撞開：後退、吃架勢（不會直接崩潰）、招式中斷
+    const an = BD.U.angTo(o, u), k = 320 / u.def.mass;
+    u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
+    u.posture = Math.min(u.maxPosture - 1, u.posture + post); u.postureDelay = 1.4;
+    u.setState('recover', 0.35);
+  }
+  function clash(w, b, a, lb, la) {
+    w._clashAt = w.time;
+    b.stats.clashes = (b.stats.clashes || 0) + 1; a.stats.clashes = (a.stats.clashes || 0) + 1;
+    const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
+    w.fx.text(x, y - 36, '對撞！', '#ffffff', 26);
+    BD.spawnFx(w, 'parry', x, y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.1);
+    w.log(b, '與 ' + a.name + ' 的招式對撞！', true);
+    if (la >= lb) bump(w, b, a, la > lb ? 35 : 20);
+    if (la <= lb) bump(w, a, b, la < lb ? 35 : 20);
+  }
+  // 能對撞的角色：近戰揮擊中被另一個近戰揮擊打中 → 對撞（等級高的壓過低的，同級互撞）；clash.proj 的角色揮擊中可把 deflect 投射物彈偏
+  BD.defineTrait('clash', {
+    interceptDamage(w, b, src, p) {
+      if (p.dot || p.unblockable || !src || !swinging(b) || !BD.skillClash(b.inst.skill)) return null;
+      const pr = p.proj;
+      if (pr) {
+        if (!pr.deflect || !b.def.clash.proj) return null;
+        const h = Math.atan2(pr.vy, pr.vx), n = h + (BD.U.angDiff(h, BD.U.angTo(pr, b)) > 0 ? -1 : 1) * 0.9, sp = Math.hypot(pr.vx, pr.vy);
+        pr.vx = Math.cos(n) * sp; pr.vy = Math.sin(n) * sp; pr.homing = 0;
+        w.fx.text(b.x, b.y - b.r - 30, '彈開！', '#ffffff', 24); BD.spawnFx(w, 'parry', b.x, b.y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.06);
+        return 'deflected';
+      }
+      if (!src.isBoss || !src.inst || w.time - (w._clashAt == null ? -9 : w._clashAt) < CLASH_GAP) return null;
+      const lb = BD.skillClash(b.inst.skill), la = BD.skillClash(src.inst.skill);
+      if (!la) return null;
+      clash(w, b, src, lb, la);
+      return la > lb ? null : 'countered'; // 對方等級較高：自己的揮擊被壓斷，但這一擊仍然命中
+    },
+  });
+
   function echo(w, b, s, a) {
     const copy = Object.assign({}, s);
     const col = b.def.echoColor || '#a070ff'; // 殘影的顏色（波賽頓的海藍殘影等）

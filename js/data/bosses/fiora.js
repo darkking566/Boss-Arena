@@ -12,10 +12,11 @@
     desc: '德瑪西亞勞倫特家的無雙劍姬。以刺劍追逐對手防禦的破綻：從破綻方位刺中會追加真實傷害並回復體力；招架成功擋下進攻後的反刺命中會使對手暈眩；終極挑戰讓四個破綻同時暴露。',
     color: '#d4a94a', color2: '#f4f1ee', glow: '#e0527a', style: 'fiora',
     radius: 26, maxHp: 1350, speed: 265, turn: 10, mass: 0.8, fxEl: 'holy', hurt: 'flesh',
-    traits: ['duelist', 'counter'],
+    traits: ['duelist', 'counter', 'clash'], clash: { style: 'blade', proj: true },
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [90, 230], aggression: 0.7, dodge: 0.55, precision: 0.85, reaction: 0.2, strafe: 0.9, walk: 0.5,
       feint: 0.3, delay: 0.3, retreat: 0.15, punish: 0.8, nervous: 0.05, patience: 0.5, read: 0.7,
+      clash: 0.8, // 對撞傾向（js/engine/ai.js）
       duel: true, // 破綻感知（js/engine/ai.js）
       // 連段（僅沉重）：移形接劍術、劍術接連刺、交叉步接劍術、破綻連鎖接連刺
       combos: [
@@ -47,7 +48,7 @@
       note: '劍姬認真起來：移形之體追加第三段突刺、劍術多一記收尾刺、招架反擊更強、交叉步多一記追刺、破綻連鎖多連一段；決鬥之舞追加傷害 3% → 4%，且對手身上對向多出第二個破綻；終極挑戰刺得更快' },
     skills: [
       // 原作 Q：衝向目標突刺，再施放可再來一次（第二段會閃到破綻方位）
-      { id: 'lunge', name: '移形之體', short: '移形', tags: ['gap', 'fast'], range: [100, 420], cd: 4.5, cost: 16, track: 8, recovery: 0.4,
+      { id: 'lunge', name: '移形之體', short: '移形', tags: ['gap', 'fast'], clash: 'light', range: [100, 420], cd: 4.5, cost: 16, track: 8, recovery: 0.4,
         actions: [...dashStrike(0.4, 0.34, 300, 60, 0.14, { dmg: 48, posture: 14, kb: 120, fx: 'thrust' }),
           { do: 'vitalstep', at: 0.82, dist: 110 },
           ...strike(1.02, 0.2, thrust(170, 55), { dmg: 62, posture: 18, kb: 160, fx: 'thrust', vital: true })],
