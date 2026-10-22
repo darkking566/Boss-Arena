@@ -112,26 +112,12 @@
       { id: 'screech_bite', name: '嘶吼噬咬', short: '噬咬', phase: 2, tags: ['melee'], range: [0, 190], cd: 6.5, cost: 24, track: 7, recovery: 0.65,
         actions: [{ do: 'hit', at: 0.25, shape: 'circle', r: 85, dmg: 0, posture: 12, kb: 160, fx: { id: 'bloodroar', ...MASS } },
           ...strike(0.95, 0.6, { shape: 'circle', r: 150, off: 60 }, { dmg: 182, posture: 55, kb: 420, fx: { id: 'bigslam', scale: 0.8, ...MASS } })] },
-      // —— 非揮戟的招式（遊戲化演繹，非原作招式）——
-      // 灰燼焚地：螺旋劍灼亮，腳下燃起餘燼地帶，逼對手離開近身距離
-      { id: 'ember_ground', name: '灰燼焚地', short: '焚地', tags: ['zone', 'defensive'], range: [0, 300], cd: 11, cost: 20, recovery: 0.55,
-        actions: [{ do: 'zone', at: 0.5, kind: 'fire', pattern: 'self', n: 1, r: 235, dur: 5, dps: 26, delay: 0.7 }],
-        actions2: [{ do: 'zone', at: 0.45, kind: 'fire', pattern: 'self', n: 1, r: 270, dur: 6, dps: 30, delay: 0.6 }] },
-      // 審判立戟：審判者的見切架式，近戰攻擊被擋下後反斬
+      // 審判立戟：審判者的見切架式，近戰攻擊被擋下後反斬（本作改編，非原作招式）
       { id: 'judge_stance', name: '審判立戟', short: '立戟', tags: ['counter', 'defensive'], range: [0, 210], cd: 8, cost: 14, track: 8, recovery: 0.5,
         actions: [{ do: 'counter', at: 0, dur: 0.65, dmg: 175, posture: 60, name: '審判・反斬', fx: 'parry', slowmo: 0.25 },
           ...strike(0.9, 0.22, { shape: 'cone', r: 200, arc: 130 * D }, { dmg: 95, posture: 30, kb: 340, fx: 'slash' })],
         actions2: [{ do: 'counter', at: 0, dur: 0.65, dmg: 195, posture: 70, name: '審判・反斬', fx: 'parry', slowmo: 0.25 },
           ...strike(0.88, 0.2, { shape: 'cone', r: 230, arc: 140 * D }, { dmg: 105, posture: 34, kb: 380, fx: 'slash' })] },
-      // 人之膿觸手：地面接連竄出黑色觸手，第二波會重新瞄準
-      { id: 'pus_tendrils', name: '膿之觸手', short: '觸手', phase: 2, tags: ['aoe', 'zone'], range: [120, 800], cd: 8, cost: 26, track: 6, recovery: 0.7,
-        actions: [{ do: 'tele', at: 0.1, dur: 0.7, shape: 'rect', len: 820, w: 110, follow: true },
-          { do: 'erupt', at: 0.8, n: 6, start: 110, step: 125, interval: 0.09, r: 70, dmg: 95, posture: 25, kb: 320, fx: 'erupt', fxEl: 'shadow' },
-          { do: 'tele', at: 1.15, dur: 0.6, shape: 'rect', len: 820, w: 110, follow: true },
-          { do: 'erupt', at: 1.75, n: 6, start: 110, step: 125, interval: 0.09, r: 70, dmg: 95, posture: 25, kb: 320, fx: 'erupt', fxEl: 'shadow' }] },
-      // 人之膿吐息：三發黑膿彈扇形噴出（遠距離手段）
-      { id: 'pus_spit', name: '膿彈噴吐', short: '膿彈', phase: 2, tags: ['ranged'], range: [200, 750], cd: 6.5, cost: 22, track: 7, recovery: 0.6,
-        actions: [{ do: 'proj', at: 0.6, n: 3, spread: 0.3, speed: 540, r: 24, dmg: 68, posture: 18, kb: 240, life: 2.4, kind: 'watcher' }] },
     ],
     ultimate: {
       id: 'ult', name: '英雄突擊', name2: '英雄突擊・人之膿吞噬', ult: true, range: [0, 900], track: 4, recovery: 1.0,
