@@ -168,6 +168,14 @@
         play('shockwave', 0.6);
         play('poison', 0.4); // 蒸騰熱氣
       }
+      else if (o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id === 'shoulder_tackle') {
+        play('hitHeavy', 0.8); // 崩架肩撞：沉重鐵甲鈍擊撞擊聲
+        play('dash', 0.5);
+      }
+      else if (o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id === 'gundyr_kick') {
+        play('slamThud', 0.85); // 審判鐵腿：重裝鐵靴破空悶擊
+        play('swing', 0.5);
+      }
       else if (TERRAIN[id]) play(TERRAIN[id], 0.5);
       else if (id === 'posturebreak') play('stun', 0.7);
       else if (id === 'parry') play('block', 0.6);
