@@ -145,6 +145,9 @@
           if (pl.type === 'counter') {
             const sk = b.available().find((s) => (s.tags || []).includes('counter'));
             if (sk) b.startSkill(sk, { quiet: true });
+          } else if (pl.type === 'swap') {
+            const sk = b.available().find((s) => (s.tags || []).includes('swapdodge'));
+            if (sk && this.stillThreat(pl.th)) b.startSkill(sk, { quiet: true });
           } else if (this.stillThreat(pl.th)) {
             if (this.p.feat && this.p.feat.smartDodge) b.tryDodge(this.chooseEscape(pl.th, 'roll'));
             else b.tryDodge(this.avoidMines(this.escapeAng(pl.th) + this.rng.range(-0.25, 0.25)));
@@ -382,6 +385,13 @@
         const sk = b.available().find((s) => (s.tags || []).includes('counter'));
         if (sk && b.skillReady(sk) && rng() < p.counter) { this.plan = { type: 'counter', t: Math.max(0, th.left - 0.55), th }; return; }
       }
+      // 換影閃避（劫）：近戰預警落下前與影子互換位置——影子必須在這個預警範圍外
+      if (p.shadow && p.shadow.swapDodge && th.kind === 'tele' && th.melee && th.left > 0.15 && th.left < 0.9) {
+        const sk = b.available().find((s) => (s.tags || []).includes('swapdodge')), sh = BD.liveShadows(this.w, b), s = sh[sh.length - 1];
+        if (sk && s && b.skillReady(sk) && !U.hitShape(th.ref.shape, { x: s.x, y: s.y, r: b.r + 8 }) && rng() < p.shadow.swapDodge) {
+          this.plan = { type: 'swap', t: Math.max(0, th.left - 0.3), th }; return;
+        }
+      }
       let pr = p.dodge * (b.sta / b.maxSta < 0.3 ? 0.6 : 1) * (th.big ? 1.2 : 1);
       if (H && this.model && this.w.time < this.baitUntil && th.melee) pr += 0.25;
       if (th.kind === 'tele' && th.ref.shape.kind === 'except') pr = Math.max(pr, 0.7);
@@ -460,7 +470,12 @@
       if (b.ult >= 100 && d >= ult.range[0] && d <= ult.range[1] && (win > 0.5 || rng() < 0.05)) {
         if (b.startSkill(ult)) { this.afterAttack(); return; }
       }
+      const SH = p.shadow, hunt = !!SH && SH.execute > 0 && e.hp <= e.maxHp * 0.5 && (b._contemptT || 0) <= w.time; // 滅魂劫就緒
+      this.markKite = !!SH && !!SH.markKite && BD.hasStatus(e, 'deathmark');
+      if (this.markKite && this.mode !== 'stalk' && this.mode !== 'retreat') { this.mode = 'stalk'; this.modeT = 0.6; } // 印記期間拉開距離
+      this.hunt = hunt;
       let chance = p.aggression * 0.2 + Math.min(0.55, (w.time - this.lastAttack) * 0.05 * (1 - p.patience * 0.6));
+      if (hunt) chance += SH.execute;
       if (win > 0) chance += p.punish * 0.85;
       else if (e.isWindingUp()) chance *= 0.25 + p.aggression * 0.5;
       else if (e.state === 'idle' && e.sta > e.maxSta * 0.6 && d < mx * 1.2) chance *= 1 - p.patience * 0.55; // 耐心：等對手先出手
@@ -532,7 +547,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         if (c.phase != null && c.phase !== b.phase) continue;
         if ((this.comboCd && this.comboCd[c.id] || 0) > this.w.time) continue;
         const op = b.skills.find((s) => s.id === c.steps[0].skill);
-        if (!op || !b.available().includes(op) || !b.skillReady(op)) continue;
+        if (!op || !b.available().includes(op) || !b.skillReady(op) || !b.shadowOk(op)) continue;
         // 連段體力預算：整串開銷 + 原本要放的技能不得透支過多（避免體力見底）
         if (this.combo.planCost(c, F.cdGate) + (sk ? sk.cost || 0 : 0) > b.sta + b.maxSta * 0.3) continue;
         const rg = c.range || op.range;
@@ -548,7 +563,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
       const owned = this.w.minions.filter((m) => m.team === b.team).length;
       let best = null, bs = 0;
       for (const s of b.available()) {
-        if (!b.skillReady(s)) continue;
+        if (!b.skillReady(s) || !b.shadowOk(s)) continue;
         if (d < s.range[0] || d > s.range[1]) continue;
         if (s.summonCap && this.w.minions.filter((m) => m.alive && m.owner === b && m.kind === s.summonKind).length >= s.summonCap) continue;
         const tg = s.tags || [], v = b.phase === 2 ? s.v2 : s.v1;
@@ -560,6 +575,10 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         if (tg.includes('trap') || tg.includes('zone')) sc *= 0.85;
         if (tg.includes('ranged')) sc *= p.kiter ? 1.4 : 0.9;
         if (tg.includes('counter')) sc *= (e.isWindingUp() || d < 170) ? 0.9 * (p.counter || 0) : 0.15;
+        if ((s.tags || []).includes('swapdodge')) continue; // 反應式技能：只由閃避計畫施放
+        if (s.shadowMul && b.shadows && b.shadows.length) sc *= s.shadowMul; // 影子在場：影子會同步施放的招式更划算
+        if (this.hunt && s.execMul) sc *= s.execMul;                        // 滅魂劫就緒：偏好普攻類
+        if (this.markKite) sc *= tg.includes('ranged') ? 2 : tg.includes('melee') ? 0.4 : 1;
         if (s.phase === 2) sc *= 1.3;
         if (win > 0) { sc *= v.windup <= win + 0.25 ? 2.6 : 0.4; if (tg.includes('fast')) sc *= 1.5; if (tg.includes('counter') || tg.includes('escape')) sc *= 0.05; }
         if (sc > bs) { bs = sc; best = s; }
@@ -630,6 +649,9 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
             vx = ux * rad + tx; vy = uy * rad + ty; spd = p.walk * 0.6; break;
           }
           default: { // strafe
+            // 夾擊（劫）：繞圈方向朝「影子的對側」，讓本體與影子把對手夾在中間
+            const sh = p.shadow && p.shadow.pincer && b.shadows && b.shadows.length ? b.shadows[b.shadows.length - 1] : null;
+            if (sh && this.flipCd <= 0) { const dd = U.angDiff(U.angTo(e, b), U.angTo(e, sh) + Math.PI); if (Math.abs(dd) > 0.5) this.strafeDir = dd > 0 ? -1 : 1; }
             const rad = (d < mn ? -0.8 : d > mx ? 0.7 : 0) + wob;
             vx = ux * rad + tx; vy = uy * rad + ty; spd = p.walk * (0.8 + p.strafe * 0.3);
           }

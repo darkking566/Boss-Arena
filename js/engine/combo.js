@@ -42,7 +42,7 @@
 
   // 減少後的冷卻門檻：技能可用、體力足夠、剩餘冷卻 <= cd * cdGate
   BD.comboReady = function (b, skill, cdGate, costMul) {
-    if (!skill || !b.available().includes(skill)) return false;
+    if (!skill || !b.available().includes(skill) || !b.shadowOk(skill)) return false;
     if (b.sta < (skill.cost || 0) * (costMul == null ? 1 : costMul)) return false;
     return (b.cds[skill.id] || 0) <= (skill.cd || 0) * (cdGate == null ? 1 : cdGate);
   };

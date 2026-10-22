@@ -1,7 +1,8 @@
 'use strict';
 // Boss 資料：劫（《英雄聯盟》影流之主）：影分身（W）讓諸刃（Q）、鬼斬（E）同步施放，可與影子換位；被動「影忍法・滅魂劫」（Contempt for the Weak）；大招「禁奧義！瞬獄影殺陣」
 // 新增招式：風魔手裏劍（迴旋巨型手裏劍，proj.ret）、千影亂舞（shadowstep 連續瞬步斬）
-// 影子機制在 js/engine/actions/shadow.js；考據見 docs/bosses/zed.md
+// 重製：影子是場上資源——「分身」只負責放影子（needShadow / noShadow 決定 AI 何時能用），換位拆成「換影突襲」與反應式「換影」（tag swapdodge，AI 以換位代替翻滾）
+// 影子機制在 js/engine/actions/shadow.js；AI 的影子感知見 ai.shadow（js/engine/ai.js）；考據見 docs/bosses/zed.md
 (function (G) {
   const BD = G.BD, { D, strike } = BD.DataKit;
   const cone = { shape: 'cone', r: 112, arc: 115 * D };
@@ -50,16 +51,21 @@
     radius: 28, maxHp: 2150, speed: 245, turn: 9, mass: 0.85, fxEl: 'umbra', hurt: 'shadow',
     traits: ['contempt'], // 影忍法・滅魂劫（js/engine/actions/shadow.js）
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
-    ai: { prefRange: [110, 320], aggression: 0.68, dodge: 0.6, precision: 0.85, reaction: 0.18, strafe: 0.85, walk: 0.55,
-      feint: 0.2, delay: 0.25, retreat: 0.15, punish: 0.85, nervous: 0.05, patience: 0.5, read: 0.7,
-      // 連段（僅沉重）：W 進場接 E、普攻接 Q、E 接普攻、三角殺陣收尾
+    ai: { prefRange: [130, 340], aggression: 0.68, dodge: 0.6, precision: 0.85, reaction: 0.18, strafe: 0.9, walk: 0.55,
+      feint: 0.2, delay: 0.25, retreat: 0.2, punish: 0.85, nervous: 0.05, patience: 0.5, read: 0.7,
+      // 影子感知（js/engine/ai.js）：swapDodge＝近戰預警時以「換影」代替翻滾的機率；pincer＝繞圈時走到影子的對側夾擊；
+      // execute＝對手半血以下且滅魂劫就緒時追擊的出手意願；markKite＝死亡印記期間拉開距離、以遠程累積傷害等待引爆
+      shadow: { swapDodge: 0.7, pincer: true, execute: 0.15, markKite: true },
+      // 連段（僅沉重）：分身接鬼斬 / 換影突襲收尾、普攻接 Q、E 接普攻、三角殺陣收尾
       combos: [
-        { id: 'we', name: '分身・鬼斬', weight: 1.3, steps: [
+        { id: 'we', name: '分身・鬼斬・諸刃', weight: 1.4, steps: [
           { skill: 'living_shadow' },
-          { skill: 'shadow_slash', cancel: 0.35, branch: [
-            { when: { dist: [0, 150] }, do: 'extend' },
-            { when: { dist: [140, 720] }, do: 'switch', skill: 'razor_shuriken' },
-            { do: 'stop' }] }] },
+          { skill: 'shadow_slash', cancel: 0.3, branch: [
+            { when: { dist: [170, 720], rolled: false }, chance: 0.55, do: 'switch', skill: 'shadow_swap' },
+            { do: 'extend' }] },
+          { skill: 'razor_shuriken', cancel: 0.3, branch: [
+            { when: { dist: [0, 130] }, do: 'switch', skill: 'blade_flurry' },
+            { do: 'extend' }] }] },
         { id: 'aaq', name: '腕刃・諸刃', steps: [
           { skill: 'blade_flurry' },
           { skill: 'razor_shuriken', cancel: 0.3, branch: [
@@ -81,24 +87,33 @@
       ] },
     phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.8, fxEl: 'umbra', transFx: { id: 'shadowrise', el: 'umbra' },
       line: '看不見的刀刃，才是最致命的。',
-      note: '影之匣的力量完全解放：影子存在更久、影子諸刃傷害提高、分身換位後追加鬼斬、鬼斬範圍擴大；滅魂劫提升為 8% 最大生命；解鎖「影奧義！三角殺陣」；瞬獄影殺陣引爆比例 45% → 60%，並在結束時換回影子位置' },
+      note: '影之匣的力量完全解放：分身一次放出兩道影子且存在更久、諸刃連發兩輪且影子諸刃傷害提高、換影突襲改為鬼斬、換影後原位的影子反斬、腕刃連擊增為三擊、鬼斬範圍擴大；滅魂劫提升為 8% 最大生命；解鎖「影奧義！三角殺陣」；瞬獄影殺陣引爆比例 45% → 60%，並在結束時換回影子位置' },
     skills: [
-      { id: 'razor_shuriken', name: '影奧義！諸刃', short: '諸刃', tags: ['ranged', 'fast'], range: [140, 720], cd: 3.6, cost: 14, track: 8, recovery: 0.35,
+      { id: 'razor_shuriken', name: '影奧義！諸刃', short: '諸刃', tags: ['ranged', 'fast'], range: [140, 720], cd: 3.6, cost: 14, track: 8, recovery: 0.35, shadowMul: 1.5,
         actions: shuriken(0.36, 0.34, 56, 34),
-        actions2: shuriken(0.34, 0.32, 60, 48) },
-      // 原作 W：影子衝出 → 再施放換位；改編為換位後立即一記腕刃
-      { id: 'living_shadow', name: '影奧義！分身', short: '分身', tags: ['gap'], range: [160, 560], cd: 6.5, cost: 18, track: 9, recovery: 0.45,
-        actions: [{ do: 'shadow', at: 0.12, to: 'target', dist: 420, life: 4.5 }, { do: 'swap', at: 0.42 },
-          ...strike(0.72, 0.28, cone, { dmg: 85, posture: 30, kb: 220, fx: 'slash', contempt: true })],
-        actions2: [{ do: 'shadow', at: 0.12, to: 'target', dist: 440, life: 6.5 }, { do: 'swap', at: 0.4 },
-          ...slash(0.68, 0.26, 150, 80)] },
-      { id: 'shadow_slash', name: '影奧義！鬼斬', short: '鬼斬', tags: ['melee', 'aoe', 'fast'], range: [0, 150], cd: 3.2, cost: 16, track: 6, recovery: 0.4,
+        actions2: [...shuriken(0.34, 0.32, 60, 48), ...shuriken(1.0, 0.26, 52, 40)] },
+      // 原作 W：影子衝出並存在 4.5 秒——重製後只負責放影子（場上沒有影子時 AI 才會用），收招短、可塞進對手的破綻；二階段一次放兩道（本體前方 + 側後）
+      { id: 'living_shadow', name: '影奧義！分身', short: '分身', tags: ['gap'], range: [160, 560], cd: 5, cost: 14, track: 9, recovery: 0.3, noShadow: true, weight: 1.6,
+        actions: [{ do: 'shadow', at: 0.12, to: 'target', dist: 420, life: 6 }],
+        actions2: [{ do: 'shadow', at: 0.12, to: 'target', dist: 440, life: 8 }, { do: 'shadow', at: 0.3, to: 'flank', dist: 250, life: 8 }] },
+      // 原作 W 再施放：與影子換位，換到對手面前立即一記腕刃（二階段改鬼斬）
+      { id: 'shadow_swap', name: '影奧義！換影突襲', short: '突襲', tags: ['gap', 'melee'], range: [100, 640], cd: 6, cost: 16, track: 9, recovery: 0.4, needShadow: true, weight: 1.5,
+        actions: [{ do: 'swap', at: 0.1 }, ...strike(0.46, 0.26, cone, { dmg: 85, posture: 30, kb: 220, fx: 'slash', contempt: true })],
+        actions2: [{ do: 'swap', at: 0.1 }, ...slash(0.42, 0.24, 150, 80)] },
+      // 反應式換位（AI 專用，tag swapdodge 不進一般選招）：預警落下前與影子互換位置——躲掉近戰；二階段原地的影子順勢反斬攻擊者
+      { id: 'shadow_flicker', name: '影奧義！換影', short: '換影', tags: ['swapdodge'], range: [0, 900], cd: 6, cost: 10, recovery: 0.2, needShadow: true,
+        actions: [{ do: 'swap', at: 0.06 }],
+        actions2: [{ do: 'swap', at: 0.06 }, { do: 'shadowslash', at: 0.12, dur: 0.3, r: 135, dmg: 70, posture: 22, kb: 160, status: { id: 'slow', dur: 1.5 } }] },
+      { id: 'shadow_slash', name: '影奧義！鬼斬', short: '鬼斬', tags: ['melee', 'aoe', 'fast'], range: [0, 150], cd: 3.2, cost: 16, track: 6, recovery: 0.4, shadowMul: 1.5,
         actions: slash(0.32, 0.26, 135, 75),
         actions2: slash(0.3, 0.24, 150, 78) },
       // 普攻（腕刃）＋被動「影忍法・滅魂劫」（Contempt for the Weak）
-      { id: 'blade_flurry', name: '腕刃連擊', short: '腕刃', tags: ['melee', 'fast'], range: [0, 115], cd: 2.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4,
+      { id: 'blade_flurry', name: '腕刃連擊', short: '腕刃', tags: ['melee', 'fast'], range: [0, 115], cd: 2.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4, execMul: 1.8,
         actions: [...strike(0.24, 0.2, cone, { dmg: 45, posture: 14, kb: 90, fx: 'slash', contempt: true }),
-          ...strike(0.5, 0.2, cone, { dmg: 50, posture: 16, kb: 160, fx: 'slash', contempt: true })] },
+          ...strike(0.5, 0.2, cone, { dmg: 50, posture: 16, kb: 160, fx: 'slash', contempt: true })],
+        actions2: [...strike(0.22, 0.18, cone, { dmg: 45, posture: 14, kb: 90, fx: 'slash', contempt: true }),
+          ...strike(0.46, 0.18, cone, { dmg: 50, posture: 16, kb: 110, fx: 'slash', contempt: true }),
+          ...strike(0.74, 0.2, cone, { dmg: 58, posture: 18, kb: 200, fx: 'slash', contempt: true })] },
       // 原作經典連招 W → E → Q：影子貼近目標先鬼斬，接著本體與影子一齊擲出諸刃
       { id: 'shadow_combo', name: '影流連殺', short: '連殺', tags: ['gap'], range: [180, 480], cd: 9, cost: 26, track: 8, recovery: 0.55,
         actions: [{ do: 'shadow', at: 0.1, to: 'target', dist: 400, life: 4.5 }, { do: 'shadowslash', at: 0.22, dur: 0.3, r: 135, dmg: 75, posture: 22, kb: 160, status: { id: 'slow', dur: 1.5 } },
@@ -114,7 +129,7 @@
         actions: windmill(0.7, 66, 640, 0.8),
         actions2: windmill(0.6, 72, 720, 0.85) },
       // 改編：連續瞬步到目標四周，每到一處就是一記快斬，最後落下大迴旋（殘影相接的華麗連段）
-      { id: 'shadow_dance', name: '影奧義！千影亂舞', short: '亂舞', tags: ['gap', 'melee'], range: [100, 420], cd: 12, cost: 30, track: 6, recovery: 0.7,
+      { id: 'shadow_dance', name: '影奧義！千影亂舞', short: '亂舞', tags: ['gap', 'melee'], range: [100, 420], cd: 12, cost: 30, track: 6, recovery: 0.7, execMul: 1.5,
         actions: dance([2.2, -2.2, Math.PI, 1.0], 0.36, 42, 95),
         actions2: dance([2.2, -2.2, Math.PI, 1.0, -1.0], 0.32, 45, 105) },
       // 改編：W 影與 R 影把目標夾在三角形中央——三把諸刃交會，再換位到影子身邊鬼斬

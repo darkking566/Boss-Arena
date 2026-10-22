@@ -62,6 +62,11 @@
     }
     speed() { return BD.scaleMod(this, 'speedMul', this.def.speed * this.speedMul) * BD.terrainSpeedMul(this); }
     canAct() { return this.state === 'idle' && this.world.intro <= 0 && !this.world.over && BD.getMod(this, 'canAct'); }
+    // 影子條件（劫）：needShadow＝場上要有影子才能用、noShadow＝已有影子就不再放；只供 AI 選招 / 連段判斷，手動施放不受限
+    shadowOk(s) {
+      if (!s.needShadow && !s.noShadow) return true;
+      return (BD.liveShadows(this.world, this).length > 0) === !!s.needShadow;
+    }
     skillReady(s) {
       if (s.ult) return this.ult >= 100;
       if (s.res) return (this.cds[s.id] || 0) <= 0 && this[s.res] >= (s.cost || 0); // 獵魂：res 指向 mana / spirit 等資源池
