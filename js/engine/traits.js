@@ -45,9 +45,12 @@
   };
   const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
   const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
-  function bump(w, u, o, post, kb) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
+  function shove(u, o, kb) { // 沿兩人連線推 u：kb > 0 遠離 o、< 0 朝向 o
     const an = BD.U.angTo(o, u), k = kb / u.def.mass;
     u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
+  }
+  function bump(w, u, o, post, kb) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
+    shove(u, o, kb);
     u.posture += post; u.postureDelay = 1.4;
     u.setState('recover', 0.35);
     w.checkPostureBreak(u, false);
@@ -70,7 +73,12 @@
     for (let i = 1; i < n; i++) at.push(at[i - 1] + tempo * r.range(0.6, 1.4));
     const hold = at[n - 1] + 0.35;
     for (const [u, o] of [[a, b], [b, a]]) { u.setState('recover', hold); u.face = BD.U.angTo(u, o); }
-    const hit = () => { for (const u of [a, b]) { u.posture += 7; u.postureDelay = 1.4; w.checkPostureBreak(u, false); } };
+    let dir = r() < 0.5 ? 1 : -1;
+    const hit = () => { // 兩人被同向推動一小段，每下換向：邊撞邊微微前後晃動
+      const k = r.range(60, 110) * dir; dir = -dir;
+      shove(a, b, k); shove(b, a, -k);
+      for (const u of [a, b]) { u.posture += 7; u.postureDelay = 1.4; w.checkPostureBreak(u, false); }
+    };
     hit();
     for (let i = 1; i < n; i++) {
       w.later(at[i], () => {
