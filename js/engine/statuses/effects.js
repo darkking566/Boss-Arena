@@ -121,6 +121,11 @@
     name: '狂暴', tags: ['buff'], stacking: 'refresh', defaultDur: 8,
     modifiers: { dmgDealtMul: 1.3, speedMul: 1.2 },
   });
+  // ── 決鬥節奏（菲歐拉）：從破綻方位命中後短暫加速（原作破綻的移速加成）──
+  BD.defineStatus('dueltempo', {
+    name: '決鬥節奏', tags: ['buff'], stacking: 'refresh', defaultDur: 2.5,
+    modifiers: { speedMul: 1.2 },
+  });
   // ── 鬥神狂喜（宙斯一階段 trait 'battlelust'）：挨打挨到興奮，肌肉再膨脹一圈 ──
   BD.defineStatus('ecstasy', {
     name: '鬥神狂喜', tags: ['buff'], stacking: 'refresh', defaultDur: 5,

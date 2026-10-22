@@ -1,6 +1,7 @@
 'use strict';
 // Boss 資料：菲歐拉（《英雄聯盟》德瑪西亞的無雙劍姬）：被動「決鬥之舞」從對手的破綻方位命中會追加真實傷害並回復；
 // 移形之體（Q 兩段突刺）、招架（W 架式反擊）、劍術（E 兩連刺，首擊緩速）、大招「終極挑戰」四個破綻全開
+// 重製：AI 看得見破綻（ai.duel）——繞向破綻方位、不在方位時優先用會閃到破綻的招；從破綻命中得「決鬥節奏」加速；二階段對向多一個破綻；新增「破綻連鎖」，交叉步改為兩階段皆可用
 // 破綻機制在 js/engine/actions/duelist.js；考據見 docs/bosses/fiora.md
 (function (G) {
   const BD = G.BD, { strike, dashStrike } = BD.DataKit;
@@ -15,7 +16,8 @@
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [90, 230], aggression: 0.7, dodge: 0.55, precision: 0.85, reaction: 0.2, strafe: 0.9, walk: 0.5,
       feint: 0.3, delay: 0.3, retreat: 0.15, punish: 0.8, nervous: 0.05, patience: 0.5, read: 0.7,
-      // 連段（僅沉重）：移形接劍術、劍術接連刺、交叉步接劍術
+      duel: true, // 破綻感知（js/engine/ai.js）
+      // 連段（僅沉重）：移形接劍術、劍術接連刺、交叉步接劍術、破綻連鎖接連刺
       combos: [
         { id: 'qe', name: '移形・劍術', weight: 1.3, steps: [
           { skill: 'lunge' },
@@ -29,7 +31,12 @@
             { when: { landed: true, dist: [0, 130] }, do: 'extend' },
             { when: { rolled: true, dist: [100, 400] }, chance: 0.6, do: 'switch', skill: 'lunge' },
             { do: 'stop' }] }] },
-        { id: 'xe', name: '交叉・劍術', phase: 2, weight: 1.2, steps: [
+        { id: 'vc', name: '破綻連鎖・連刺', weight: 1.2, steps: [
+          { skill: 'vital_chain' },
+          { skill: 'flurry', cancel: 0.3, branch: [
+            { when: { dist: [0, 130] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'xe', name: '交叉・劍術', weight: 1.2, steps: [
           { skill: 'crossstep' },
           { skill: 'bladework', cancel: 0.3, branch: [
             { when: { dist: [0, 170] }, do: 'extend' },
@@ -37,7 +44,7 @@
       ] },
     phase2: { speedMul: 1.12, dmgMul: 1.15, cdMul: 0.8, fxEl: 'holy',
       line: '決鬥，才剛開始。',
-      note: '劍姬認真起來：移形之體追加第三段突刺、劍術多一記收尾刺、招架反擊更強；決鬥之舞追加傷害 3% → 4%；解鎖「交叉步」；終極挑戰刺得更快' },
+      note: '劍姬認真起來：移形之體追加第三段突刺、劍術多一記收尾刺、招架反擊更強、交叉步多一記追刺、破綻連鎖多連一段；決鬥之舞追加傷害 3% → 4%，且對手身上對向多出第二個破綻；終極挑戰刺得更快' },
     skills: [
       // 原作 Q：衝向目標突刺，再施放可再來一次（第二段會閃到破綻方位）
       { id: 'lunge', name: '移形之體', short: '移形', tags: ['gap', 'fast'], range: [100, 420], cd: 4.5, cost: 16, track: 8, recovery: 0.4,
@@ -73,11 +80,22 @@
           { do: 'dash', at: 0.9, dir: 'back', dist: 200, dur: 0.2 }],
         actions2: [...dashStrike(0.45, 0.4, 520, 60, 0.15, { dmg: 80, posture: 24, kb: 240, fx: 'thrust' }),
           { do: 'dash', at: 0.85, dir: 'back', dist: 220, dur: 0.2 }] },
-      // 改編：交叉步——側身閃過後從破綻方位刺出（二階段）
-      { id: 'crossstep', name: '交叉步', short: '交叉', phase: 2, tags: ['gap', 'defensive'], range: [80, 300], cd: 8, cost: 18, track: 6, recovery: 0.45,
+      // 改編：交叉步——側身閃過後從破綻方位刺出（二階段多一記追刺）
+      { id: 'crossstep', name: '交叉步', short: '交叉', tags: ['gap', 'defensive'], range: [80, 300], cd: 8, cost: 18, track: 6, recovery: 0.45,
         actions: [{ do: 'dash', at: 0.05, dir: 'side', dist: 170, dur: 0.18, iframe: true },
           { do: 'vitalstep', at: 0.35, dist: 100 },
-          ...strike(0.55, 0.2, thrust(180, 55), { dmg: 70, posture: 20, kb: 200, fx: 'thrust', vital: true })] },
+          ...strike(0.55, 0.2, thrust(180, 55), { dmg: 70, posture: 20, kb: 200, fx: 'thrust', vital: true })],
+        actions2: [{ do: 'dash', at: 0.05, dir: 'side', dist: 170, dur: 0.18, iframe: true },
+          { do: 'vitalstep', at: 0.32, dist: 100 },
+          ...strike(0.5, 0.18, thrust(180, 55), { dmg: 70, posture: 20, kb: 200, fx: 'thrust', vital: true }),
+          ...strike(0.76, 0.18, thrust(180, 55), { dmg: 52, posture: 14, kb: 140, fx: 'thrust' })] },
+      // 改編：破綻連鎖——每次從破綻命中都會換新方位，下一步瞬步就追著新破綻刺（二階段多連一段）
+      { id: 'vital_chain', name: '破綻連鎖', short: '連鎖', tags: ['gap', 'melee'], range: [80, 360], cd: 7.5, cost: 22, track: 6, recovery: 0.5,
+        actions: [{ do: 'vitalstep', at: 0.25, dist: 100 }, ...strike(0.45, 0.18, thrust(175, 55), { dmg: 54, posture: 16, kb: 140, fx: 'thrust', vital: true }),
+          { do: 'vitalstep', at: 0.8, dist: 100 }, ...strike(1.0, 0.18, thrust(175, 55), { dmg: 62, posture: 18, kb: 170, fx: 'thrust', vital: true })],
+        actions2: [{ do: 'vitalstep', at: 0.22, dist: 100 }, ...strike(0.4, 0.16, thrust(175, 55), { dmg: 54, posture: 16, kb: 140, fx: 'thrust', vital: true }),
+          { do: 'vitalstep', at: 0.7, dist: 100 }, ...strike(0.88, 0.16, thrust(175, 55), { dmg: 58, posture: 16, kb: 150, fx: 'thrust', vital: true }),
+          { do: 'vitalstep', at: 1.18, dist: 100 }, ...strike(1.36, 0.18, thrust(185, 55), { dmg: 68, posture: 20, kb: 200, fx: 'thrust', vital: true })] },
     ],
     // 原作 R：鎖定敵方英雄並暴露四個破綻，每擊破一個就造成最大生命比例真實傷害；改編為從四個方位連續刺中
     ultimate: { id: 'ult', name: '終極挑戰', ult: true, range: [0, 600], track: 0, recovery: 0.6,

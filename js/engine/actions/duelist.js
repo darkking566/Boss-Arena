@@ -42,12 +42,15 @@
       const e = b.enemy;
       if (!a.vital || !e || e.state === 'dead' || e.hurtFlash < 0.12 || !U.hitShape(s, e)) return;
       const v = vitalOf(w, b), u = b._ult;
-      if (a.vital !== 'all' && Math.abs(U.angDiff(U.angTo(e, b), v.ang)) > 0.8) return;
+      const at = U.angTo(e, b);
+      // 二階段：對向再多一個破綻（v.ang + π）
+      if (a.vital !== 'all' && Math.abs(U.angDiff(at, v.ang)) > 0.8 && !(b.phase === 2 && Math.abs(U.angDiff(at, v.ang + Math.PI)) <= 0.8)) return;
       const pct = (b.phase === 2 ? 0.04 : 0.03) * (a.vital === 'all' ? 0.8 : 1);
       w.damageUnit(b, e, { dmg: e.maxHp * pct / (b.dmgMul || 1), posture: 10, unblockable: true, noPerfect: true });
       b.hp = Math.min(b.maxHp, b.hp + b.maxHp * 0.015);
       w.fx.text(e.x, e.y - e.r - 40, '破綻！', '#ffe27a', 20);
       BD.spawnFx(w, 'projhit', e.x, e.y, { src: b, el: 'holy', angle: U.angTo(b, e) });
+      BD.applyStatus(b, 'dueltempo', { dur: 2.5, source: b }, w);
       if (a.vital !== 'all') { b._vital = { ang: w.rng.range(0, U.TAU), t0: w.time }; return; }
       if (u) { // 擊破的是第幾個破綻（本體所在方位最接近的那個）
         u.hit[Math.round(U.angDiff(v.ang, U.angTo(e, b)) / (Math.PI / 2) + 4) % 4] = true;

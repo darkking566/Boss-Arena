@@ -326,6 +326,8 @@
         if (c.t >= c.dur) { inst.circle = null; this.vx = this.vy = 0; }
       } else if (sk.creep && inst.t < v.activeEnd) {
         res = [Math.cos(this.face) * spd * sk.creep, Math.sin(this.face) * spd * sk.creep];
+      } else if (this.def.pace && this.def.pace.recoveryMove && inst.t >= v.activeEnd && !(sk.tags || []).includes('counter') && BD.getMod(this, 'canMove')) {
+        res = [this.moveX * spd * this.def.pace.recoveryMove, this.moveY * spd * this.def.pace.recoveryMove]; // 敏捷型：收招尾段就開始走位（AI 的移動意圖），不站著發呆
       }
       while (inst.idx < v.actions.length && v.actions[inst.idx].at <= inst.t) {
         BD.runAction(w, this, inst, v.actions[inst.idx++]);

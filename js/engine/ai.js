@@ -474,6 +474,12 @@
       this.markKite = !!SH && !!SH.markKite && BD.hasStatus(e, 'deathmark');
       if (this.markKite && this.mode !== 'stalk' && this.mode !== 'retreat') { this.mode = 'stalk'; this.modeT = 0.6; } // 印記期間拉開距離
       this.hunt = hunt;
+      this.duelAng = null; this.duelArc = null;
+      if (p.duel) { // 目前最近的破綻方位（二階段有對向兩個）與本體是否已在其內
+        const v = BD.vitalOf(w, b), at = U.angTo(e, b), a2 = v.ang + Math.PI;
+        this.duelAng = b.phase === 2 && Math.abs(U.angDiff(at, a2)) < Math.abs(U.angDiff(at, v.ang)) ? a2 : v.ang;
+        this.duelArc = Math.abs(U.angDiff(at, this.duelAng)) <= 0.8;
+      }
       let chance = p.aggression * 0.2 + Math.min(0.55, (w.time - this.lastAttack) * 0.05 * (1 - p.patience * 0.6));
       if (hunt) chance += SH.execute;
       if (win > 0) chance += p.punish * 0.85;
@@ -579,6 +585,10 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         if (s.shadowMul && b.shadows && b.shadows.length) sc *= s.shadowMul; // 影子在場：影子會同步施放的招式更划算
         if (this.hunt && s.execMul) sc *= s.execMul;                        // 滅魂劫就緒：偏好普攻類
         if (this.markKite) sc *= tg.includes('ranged') ? 2 : tg.includes('melee') ? 0.4 : 1;
+        if (this.duelArc != null && !tg.includes('counter')) { // 破綻感知（菲歐拉）：在破綻方位內偏好會刺出破綻的招，不在則偏好會閃到破綻方位的招
+          const acts = (b.phase === 2 && s.actions2 || s.actions), vit = acts.some((a) => a.vital), stp = acts.some((a) => a.do === 'vitalstep');
+          sc *= this.duelArc ? (vit ? 1.5 : 1) : stp ? 1.7 : vit ? 0.75 : 1;
+        }
         if (s.phase === 2) sc *= 1.3;
         if (win > 0) { sc *= v.windup <= win + 0.25 ? 2.6 : 0.4; if (tg.includes('fast')) sc *= 1.5; if (tg.includes('counter') || tg.includes('escape')) sc *= 0.05; }
         if (sc > bs) { bs = sc; best = s; }
@@ -592,7 +602,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
       if (staR < 0.3) this.mode = r < 0.55 + p.retreat * 0.4 ? 'retreat' : 'strafe';
       else if (d > mx * 1.2) this.mode = r < 0.55 + p.aggression * 0.4 ? 'approach' : 'strafe';
       else if (d < mn * 0.8) this.mode = r < 0.25 + p.retreat ? 'retreat' : r < 0.85 ? 'strafe' : 'hold';
-      else this.mode = r < p.patience * 0.45 ? 'hold' : r < 0.88 ? 'strafe' : 'approach';
+      else this.mode = r < (p.duel ? 0 : p.patience * 0.45) ? 'hold' : r < 0.88 ? 'strafe' : 'approach';
       if (p.stalk && staR >= 0.3 && d < mx * 2.2 && d > mn * 0.8 && rng() < p.stalk) this.mode = 'stalk';
       const A = BD.ARENA, edge = Math.min(b.x, b.y, A.w - b.x, A.h - b.y), em = 120 + Math.max(0, b.r - 40) * 1.5; // 巨型 Boss 離牆更早轉向
       if (edge < em && rng() < 0.55) {
@@ -652,6 +662,8 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
             // 夾擊（劫）：繞圈方向朝「影子的對側」，讓本體與影子把對手夾在中間
             const sh = p.shadow && p.shadow.pincer && b.shadows && b.shadows.length ? b.shadows[b.shadows.length - 1] : null;
             if (sh && this.flipCd <= 0) { const dd = U.angDiff(U.angTo(e, b), U.angTo(e, sh) + Math.PI); if (Math.abs(dd) > 0.5) this.strafeDir = dd > 0 ? -1 : 1; }
+            // 繞向破綻（菲歐拉）：繞圈方向朝最近的破綻方位
+            if (this.duelAng != null && this.flipCd <= 0) { const dd = U.angDiff(U.angTo(e, b), this.duelAng); if (Math.abs(dd) > 0.5) this.strafeDir = dd > 0 ? -1 : 1; }
             const rad = (d < mn ? -0.8 : d > mx ? 0.7 : 0) + wob;
             vx = ux * rad + tx; vy = uy * rad + ty; spd = p.walk * (0.8 + p.strafe * 0.3);
           }
