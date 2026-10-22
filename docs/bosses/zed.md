@@ -86,3 +86,27 @@ AI 設定 `ai.shadow`（`js/engine/ai.js`）：
 | 影奧義！千影亂舞 | 每次瞬步蹲伏落地並留下 X 斬與小環 → 腕刃快斬的扇形光痕；終式連轉兩圈，擴散環與地裂紋 |
 | 影奧義！三角殺陣（二階段） | 結印放兩道影子後，本體與兩影子以虛線連成三角形、三頂點各拉紅線匯向目標 → 擲諸刃、換位煙爆、鬼斬迴旋 |
 | 禁奧義！瞬獄影殺陣 | 結印後化為暗影：拖著黑煙的紅光沿路徑掠向目標背後 → 現身時煙爆與六角星符環（死亡印記）→ 鬼斬迴旋、擲諸刃、腕刃突刺 |
+
+---
+
+## 8. 音效設計（SFX）
+
+音效邏輯位於 `js/audio.js`（僅瀏覽器 `data-browser`，純音效不影響戰鬥與隨機種子）。
+支援 `mc_set`（Minecraft 原生風格 OGG 音效組）與 `raw`（Pixabay 寫實 MP3 音效組）。
+
+| 技能 | 一階段音效 | 二階段音效 | 音效設計說明 |
+|---|---|---|---|
+| **影奧義！諸刃** (`razor_shuriken`) | 諸刃手裏劍投擲破空 `throwWhoosh` + 射出尖嘯 `shoot` | 兩輪諸刃接連高速擲出 `throwWhoosh` + `shoot` × 2 | 還原暗影諸刃出手尖銳破空感，影子同步齊射時交錯呼嘯貫穿 |
+| **影奧義！分身** (`living_shadow`) | 暗影疾射 `throwWhoosh` + 暗影遁出 `shadowTeleport` + 氣浪 `dash` | 雙影齊出：本體前方與側後各自疾射遁出 `shadowTeleport` + `throwWhoosh` × 2 | 影子自本體剝離呼嘯穿梭，落地暗影聚攏 |
+| **影奧義！換影突襲** (`shadow_swap`) | 移形換位 `shadowTeleport` + 掠影 `dash` + 突襲刺斬 `slashHeavy` + `swordWhoosh` | 換位瞬移 `shadowTeleport` + 貼身大鬼斬 `slashHeavy` + `shockwave` + `swordWhoosh` | 與影子瞬間互換位置後銜接突擊；二階段換位直接接大鬼斬迴旋爆發 |
+| **影奧義！換影** (`shadow_flicker`) | 瞬息移形換影 `shadowTeleport` + 靈動破空 `dash` | 換影瞬移 + 原地影子反斬 `shadowTeleport` + `slash` + `swordWhoosh` | 反應式規避近戰的極限換位；二階段原地殘影回馬反手切開攻擊者 |
+| **影奧義！鬼斬** (`shadow_slash`) | 雙臂腕刃 360° 迴旋斬 `slashHeavy` + 高速撕裂破空 `swordWhoosh` + 暗影刃風 `shockwave` | 範圍擴大暴風迴旋 `slashHeavy` + `swordWhoosh` + `shockwave` | 本體與所有影子同時張臂旋轉，重現金屬刀刃高速切裂空氣的沉重與凌厲感；影子命中附帶緩速 |
+| **腕刃連擊** (`blade_flurry`) | 左右腕刃交替疾刺 `swordWhoosh` + `slash` | 三連斬終結重切 `slashHeavy` + `swordWhoosh` | 前臂外側金屬腕刃刺砍連擊；末式重斬大弧下劈入肉 |
+| **被動「影忍法・滅魂劫」** (`contempt`) | 斬殺血牙咬碎 `fangSnap` + 致命撕裂 `slashHeavy` + 入骨重創 `hitHeavy` + 割肉 `hitFlesh` | 同一階段（傷害由 6% 提升至 8% 最大生命） | 普攻命中半血以下目標時的標誌性處決重擊，給予極具衝擊力的入骨咬碎與破肉爆裂聲 |
+| **影流連殺** (`shadow_combo`) | 分身疾射 `throwWhoosh` + 影子貼身鬼斬 `whirl` + 雙諸刃齊射 `shuriken` | 分身疾射 + 強化鬼斬 + 雙諸刃穿透 | W → E → Q 原作經典連招，流暢串聯暗影疾馳、迴旋刃風與雙手裏劍穿透 |
+| **影遁** (`shadow_retreat`) | 影子後置 `livingshadow` + 拒敵鬼斬 `whirl` + 換影拉開 `shadowswap` + 遠處諸刃回馬槍 `shuriken` | 同一階段 | 逃脫反打的招牌身法：退守換位拉開距離，遠處補一手冷酷手裏劍 |
+| **影奧義！風魔手裏劍** (`windmill`) | 取下手裏劍旋刃蓄力 `swordWhoosh` + `maceAir`；巨型風魔手裏劍離手呼嘯 `maceAir` + `tridentThrow` + `swordWhoosh`；折返飛回 `tridentReturn` + `swordWhoosh` + `shockwave` | 同一階段 | 劫背負的招牌巨型手裏劍擲出與迴旋折返，重現沉重武器高速旋轉破空的震懾感 |
+| **影奧義！千影亂舞** (`shadow_dance`) | 4 方位連續瞬步快斬 `shadowTeleport` + `dash` + `slash` + `swordWhoosh`；正面終結大迴旋 `slashHeavy` + `shockwave` + `slamHeavy` | 5 方位連續瞬步快斬；正面終結大迴旋爆發 | 鬼魅般在目標周圍多方位穿梭殘影快斬，最後正面落下大迴旋震地終結 |
+| **影奧義！三角殺陣** (`shadow_triangle`) | （二階段限定） | 雙翼包夾展開 `livingshadow` + `ambSnow`；三把諸刃交會齊射 `shuriken`；換影突襲 `shadowswap`；三位一體大鬼斬 `slashHeavy` + `shockwave` | 二階段核心大陣，雙影三角夾擊、三枚諸刃交會、換位鬼斬清場 |
+| **禁奧義！瞬獄影殺陣** (`ult`) | 原地留影 + 化身暗影疾掠 `shadowTeleport` + `ambSnow` + `dash`；目標身後突現亮刃 `shadowTeleport` + `draw`；刻下死亡印記心跳倒數 `heartbeat`（每跳愈快愈急促）；三連打擊（鬼斬、諸刃、腕刃）；3 秒到期大引爆 `fangSnap` + `slashHeavy` + `shockwave` + `slamHeavy` + `death` | 增加結束時換回原地影子 `shadowswap`；印記引爆比例由 45% 升至 60% | 原作大招 R 的靈魂重現：遁影瞬步、死神耳語、心跳倒數計時、終結瞬間天崩地裂的全場暗影爆發 |
+| **二階段轉場** (`phase2`) | 暗影狂潮炸裂 `shadowTeleport` + 衝擊波 `shockwave` + 腕刃歸位 `sheath` + 禁忌力量 `buff` | 「看不見的刀刃，才是最致命的。」 | 影之匣完全解放的暗影噴湧與肅殺音效 |

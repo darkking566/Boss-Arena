@@ -27,10 +27,23 @@
       const ox = dir == null ? x : x + Math.cos(dir) * vr * 0.3, oy = dir == null ? y : y + Math.sin(dir) * vr * 0.3;
       const pick = (a) => a[(V() * a.length) | 0];
       const ang = (spread) => (dir == null || V() < 0.15 ? V() * TAU : dir + (V() - 0.5) * spread);
+      // 液滴落地點與 stalk 物理一致（z0=4、g=1100，著地後滑行 0.35v/6）；落地才在地面留下永久血點
+      const splat = (px, py, vx, vy, vz, a, w, col) => {
+        const t = (vz + Math.sqrt(vz * vz + 8800)) / 1100, sl = 1 + 0.35 / 6 / t;
+        fx.after(t, () => {
+          const sx = px + vx * t * sl, sy = py + vy * t * sl;
+          if (BD.pondAt && (BD.pondAt(sx, sy) || BD.biomeAt(sx).id === 'lake')) return;
+          const r = 1.2 + w * 0.7, ca = Math.cos(a), sa = Math.sin(a);
+          fx.scars.push({ k: 'splat', x: sx, y: sy, a, r, c: col, al: 0.6, age: 0, sat: Array.from({ length: (V() * 3) | 0 }, () => [ca * r * (1.5 + V() * 2.5) + (V() - 0.5) * r, sa * r * (1.5 + V() * 2.5) + (V() - 0.5) * r, r * (0.2 + V() * 0.25)]) });
+          if (fx.scars.length > SCAR_CAP) fx.scars.shift();
+        });
+      };
       const spray = (n, spd, spread) => {
         for (let i = 0; i < n; i++) {
           const a = ang(spread), s = spd * (0.3 + V() * 0.7);
-          fx.stalk(ox, oy, Math.cos(a) * s, Math.sin(a) * s, 140 + V() * 320, a, 0, 5 + V() * 8 * sk, 3 + V() * 2.5, pick(m.drops), 1.6 + V() * 1.2);
+          const vz = 140 + V() * 320, w = 1.3 + V() * V() * 4, col = pick(m.drops), vx = Math.cos(a) * s, vy = Math.sin(a) * s;
+          fx.stalk(ox, oy, vx, vy, vz, a, 0, 0, w, col, 1.1 + V() * 0.9, true); // 液滴：大小偏小、少數大顆
+          if (m.scar && (w > 3.2 || V() < 0.12)) splat(ox, oy, vx, vy, vz, a, w, col); // 只讓較大的液滴留痕，避免擠掉其他痕跡
         }
       };
       const n = Math.min(90, Math.round((10 + 18 * k) * m.amt)), spd = 240 + 160 * sk;

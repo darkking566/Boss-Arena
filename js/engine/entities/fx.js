@@ -160,7 +160,7 @@
     // 大型柔軟塵團（沙塵 / 雪沫 / 麥屑）：半徑由 r0 擴到 r1、緩慢飄散；tint 為繪圖端的預烘焙色票（'sand' | 'snow' | 'wheat'）
     puff(x, y, vx, vy, r0, r1, life, tint, al) { this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al }); if (this.puffs.length > PUFF_CAP) this.puffs.shift(); }
     // 飛濺的長條 / 團塊（麥稈、麥粒、雪塊）：帶高度 z 的拋物線，落地後滑行並漸隱；len 為長度、w 為線寬
-    stalk(x, y, vx, vy, vz, rot, vr, len, w, col, life) { if (this.stalks.length >= STALK_CAP) return; this.stalks.push({ x, y, z: 4, vx, vy, vz, rot, vr, len, w, col, life, max: life }); }
+    stalk(x, y, vx, vy, vz, rot, vr, len, w, col, life, drop) { if (this.stalks.length >= STALK_CAP) return; this.stalks.push({ x, y, z: 4, vx, vy, vz, rot, vr, len, w, col, life, max: life, drop }); }
     // 腳印：kind 'snow'（深雪、留很久）/ 'desert'（淺、很快被風吹平）
     print(x, y, a, r, kind) { const life = kind === 'snow' ? 40 : 9; this.prints.push({ x, y, a, r, kind, life, max: life }); if (this.prints.length > PRINT_CAP) this.prints.shift(); }
     // 衝擊風圈：麥浪沿圈擴散（繪圖端用來讓麥叢向外傾倒）

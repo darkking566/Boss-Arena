@@ -156,13 +156,29 @@
   // 地面痕跡：圓形舊痕直接填圓；segs 為程序化裂地（每個 decal 的段落一次路徑批次描繪）
   // 裂縫先以暗色描繪，glow 存在時再以 additive 細線疊一層（前 40% 生命強烈，之後冷卻熄滅）
   // 永久戰鬥痕跡（js/fx/scars.js）：畫在地面痕跡之下；餘燼（glow）在 4 秒內冷卻
-  function blob(ctx, s, k) { // 以 pts 為半徑倍率的圓滑不規則塊
-    const n = s.pts.length, P = (i) => { i %= n; const a = s.rot + i / n * U.TAU, rr = s.r * k * s.pts[i]; return [s.x + Math.cos(a) * rr, s.y + Math.sin(a) * rr * 0.85]; };
+  function blob(ctx, s, k, pts) { // 以 pts（預設 s.pts）為半徑倍率的圓滑不規則塊
+    pts = pts || s.pts; const n = pts.length, P = (i) => { i %= n; const a = s.rot + i / n * U.TAU, rr = s.r * k * pts[i]; return [s.x + Math.cos(a) * rr, s.y + Math.sin(a) * rr * 0.85]; };
     let p0 = P(n - 1), p1 = P(0);
     ctx.beginPath(); ctx.moveTo((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2);
     for (let i = 0; i < n; i++) { p0 = P(i); p1 = P(i + 1); ctx.quadraticCurveTo(p0[0], p0[1], (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2); }
     ctx.closePath();
   }
+  // 劍痕的路徑（唇緣 / 本體 / 深核 / 裂紋）只在第一次繪製時建立並快取
+  const GASH = new WeakMap();
+  function gashPaths(s) {
+    let r = GASH.get(s); if (r) return r;
+    r = { lip: new Path2D(), body: new Path2D(), core: new Path2D(), cracks: new Path2D() };
+    const poly = (path, pts, fl, fr) => { // fl / fr：沿中線往左 / 右邊緣取的比例（可逐點由深度決定）
+      const e = (p, f, side) => [p[4] + (p[side] - p[4]) * f(p), p[5] + (p[side + 1] - p[5]) * f(p)];
+      pts.forEach((p, i) => { const q = e(p, fl, 0); i ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1]); });
+      for (let i = pts.length - 1; i >= 0; i--) { const q = e(pts[i], fr, 2); path.lineTo(q[0], q[1]); }
+      path.closePath();
+    };
+    for (const pts of s.strokes) { poly(r.lip, pts, () => 1.7, () => 1.7); poly(r.body, pts, () => 1, () => 1); poly(r.core, pts, (p) => 0.75 * p[6], (p) => 0.75 * p[6]); }
+    for (const [x, y, dx, dy, b] of s.chips) { r.cracks.moveTo(x, y); r.cracks.lineTo(x + dx, y + dy); if (b) r.cracks.lineTo(x + dx * 1.3 + dy * 0.3, y + dy * 1.3 - dx * 0.3); }
+    GASH.set(s, r); return r;
+  }
+  const SOFT = 0.5; // 暗色痕跡的整體淡化係數，避免滿場黑壓壓蓋住技能特效
   function drawScars(ctx, w) {
     const scars = w.fx.scars;
     if (!scars || !scars.length) return;
@@ -171,32 +187,36 @@
       if (s.k === 'rock' || s.k === 'ice') continue; // 水面上的痕跡由 drawSurfaceScars 畫在倒影之上
       const hot = s.glow && s.age < 4 ? 1 - s.age / 4 : 0;
       if (s.k === 'blot') {
-        const al = s.al || 1;
-        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.32 * al; blob(ctx, s, 1.3); ctx.fill();
-        ctx.fillStyle = s.c; ctx.globalAlpha = 0.55 * al; blob(ctx, s, 1); ctx.fill();
-        ctx.globalAlpha = 0.4 * al; blob(ctx, s, 0.55); ctx.fill();
+        const al = s.al || 1, A = al * SOFT;
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.3 * A; blob(ctx, s, 1.3); ctx.fill();
+        ctx.fillStyle = s.c; ctx.globalAlpha = 0.55 * A; blob(ctx, s, 1); ctx.fill();
+        if (s.pts2) { ctx.globalAlpha = 0.4 * A; blob(ctx, { x: s.x + s.off[0], y: s.y + s.off[1], r: s.r, rot: s.rot2 }, 0.58, s.pts2); ctx.fill(); }
+        if (s.sat) {
+          ctx.globalAlpha = 0.5 * A; ctx.beginPath();
+          for (const [a, d, sr] of s.sat) { const px = s.x + Math.cos(a) * d, py = s.y + Math.sin(a) * d * 0.85; ctx.moveTo(px + sr, py); ctx.arc(px, py, sr, 0, U.TAU); }
+          for (const [a, d] of s.tails) { const ca = Math.cos(a), sa = Math.sin(a) * 0.85, w = s.r * 0.07; ctx.moveTo(s.x + ca * s.r * 0.8 - sa * w, s.y + sa * s.r * 0.8 + ca * w); ctx.lineTo(s.x + ca * d, s.y + sa * d); ctx.lineTo(s.x + ca * s.r * 0.8 + sa * w, s.y + sa * s.r * 0.8 - ca * w); }
+          ctx.fill();
+        }
         if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = s.glow; ctx.globalAlpha = hot * 0.5; blob(ctx, s, 0.7); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
       } else if (s.k === 'pit') {
+        const r = s.r;
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.28; blob(ctx, s, 1.28, s.lip); ctx.fill(); // 被擠開的土
         ctx.fillStyle = s.c; ctx.globalAlpha = 0.5; blob(ctx, s, 1); ctx.fill();
-        ctx.strokeStyle = s.c2; ctx.lineWidth = Math.max(2, s.r * 0.14); ctx.globalAlpha = 0.5; blob(ctx, s, 1.08); ctx.stroke();
-        ctx.strokeStyle = s.c; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6; ctx.beginPath();
-        for (const [a, len] of s.cr) { ctx.moveTo(s.x + Math.cos(a) * s.r, s.y + Math.sin(a) * s.r * 0.85); ctx.lineTo(s.x + Math.cos(a) * len, s.y + Math.sin(a) * len * 0.85); }
+        const q = { x: s.x - r * 0.1, y: s.y - r * 0.12, r, rot: s.rot + 1 }; // 深坑偏向受光的反側，看起來有深度
+        ctx.globalAlpha = 0.45; blob(ctx, q, 0.62, s.inner); ctx.fill(); ctx.globalAlpha = 0.35; blob(ctx, q, 0.34, s.inner); ctx.fill();
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.5; ctx.beginPath();
+        for (const [a, d, sz] of s.lumps) { const px = s.x + Math.cos(a) * d, py = s.y + Math.sin(a) * d * 0.85; ctx.moveTo(px + sz, py); ctx.arc(px, py, sz, 0, U.TAU); }
+        ctx.fill();
+        ctx.strokeStyle = s.c; ctx.lineWidth = 1.2; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.5; ctx.beginPath();
+        for (const pl of s.cr) { ctx.moveTo(s.x + pl[0][0], s.y + pl[0][1]); for (let i = 1; i < pl.length; i++) ctx.lineTo(s.x + pl[i][0], s.y + pl[i][1]); }
         ctx.stroke();
       } else if (s.k === 'gash') {
-        const ca = Math.cos(s.a), sa = Math.sin(s.a), al = s.al;
-        if (s.arc) { // 弧形劍痕：三層由寬到窄疊出中段較深
-          for (const [f, m, c, a] of [[1, 2.4, s.c2, 0.28], [1, 1.2, s.c, 0.7], [0.6, 1.8, s.c, 0.5]]) {
-            ctx.strokeStyle = c; ctx.globalAlpha = a * al; ctx.lineWidth = s.wd * m;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.len, s.a - s.arc * f / 2, s.a + s.arc * f / 2); ctx.stroke();
-          }
-          if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = s.glow; ctx.globalAlpha = hot * 0.6; ctx.lineWidth = s.wd * 0.7; ctx.beginPath(); ctx.arc(s.x, s.y, s.len, s.a - s.arc / 2, s.a + s.arc / 2); ctx.stroke(); ctx.globalCompositeOperation = 'source-over'; }
-        } else { // 直線劍痕：兩端尖、中段最寬的細長刀口
-          const ex = s.x + ca * s.len, ey = s.y + sa * s.len, mx = (s.x + ex) / 2, my = (s.y + ey) / 2, nx = -sa * s.wd * 2, ny = ca * s.wd * 2;
-          ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.quadraticCurveTo(mx + nx, my + ny, ex, ey); ctx.quadraticCurveTo(mx - nx, my - ny, s.x, s.y);
-          ctx.fillStyle = s.c; ctx.globalAlpha = 0.78 * al; ctx.fill();
-          ctx.strokeStyle = s.c2; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.5 * al; ctx.stroke();
-          if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = s.glow; ctx.globalAlpha = hot * 0.6; ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
-        }
+        const al = s.al, gp = gashPaths(s);
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.3 * al * SOFT; ctx.fill(gp.lip);
+        ctx.fillStyle = s.c; ctx.globalAlpha = 0.62 * al * SOFT; ctx.fill(gp.body);
+        ctx.globalAlpha = 0.5 * al * SOFT; ctx.fill(gp.core);
+        ctx.strokeStyle = s.c2; ctx.lineWidth = 1; ctx.globalAlpha = 0.45 * al * SOFT; ctx.stroke(gp.cracks);
+        if (hot) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = s.glow; ctx.globalAlpha = hot * 0.55; ctx.fill(gp.core); ctx.globalCompositeOperation = 'source-over'; }
       } else if (s.k === 'stump') {
         ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.globalAlpha = 1; ctx.beginPath(); ctx.ellipse(s.x + 3, s.y + 5, s.r * 0.95, s.r * 0.8, 0, 0, U.TAU); ctx.fill();
         ctx.fillStyle = '#5a3d22'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 0.78, 0, U.TAU); ctx.fill();
@@ -242,6 +262,18 @@
     ctx.lineCap = 'round';
     for (const s of fx.stalks) {
       const dx = Math.cos(s.rot) * s.len / 2, dy = Math.sin(s.rot) * s.len / 2, y = s.y - s.z;
+      if (s.drop) { // 液滴：飛行時是順著速度拉長的水滴，落地後攤成貼地的扁形血點（不是圓頭膠囊）
+        const f = Math.min(1, s.life / s.max * 2.2), r = s.w / 2;
+        ctx.fillStyle = s.col;
+        if (s.z > 0) {
+          const vy = s.vy - s.vz, sp = Math.hypot(s.vx, vy) || 1, L = Math.min(18, sp * 0.03) + r, ux = s.vx / sp, uy = vy / sp;
+          ctx.globalAlpha = f; ctx.beginPath(); ctx.arc(s.x, y, r, 0, U.TAU); ctx.moveTo(s.x - uy * r, y + ux * r); ctx.lineTo(s.x - ux * L, y - uy * L); ctx.lineTo(s.x + uy * r, y - ux * r); ctx.fill();
+        } else {
+          ctx.globalAlpha = f * 0.8; ctx.beginPath(); ctx.ellipse(s.x, s.y, r * 1.5, r * 0.8, s.rot, 0, U.TAU); ctx.fill();
+          ctx.globalAlpha = f * 0.55; ctx.beginPath(); ctx.arc(s.x + Math.cos(s.rot) * r * 2, s.y + Math.sin(s.rot) * r * 2, r * 0.4, 0, U.TAU); ctx.fill();
+        }
+        continue;
+      }
       ctx.globalAlpha = Math.min(1, s.life / s.max * 2.2); ctx.strokeStyle = s.col; ctx.lineWidth = s.w;
       ctx.beginPath(); ctx.moveTo(s.x - dx, y - dy); ctx.lineTo(s.x + dx, y + dy); ctx.stroke();
     }

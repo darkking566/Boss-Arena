@@ -19,6 +19,11 @@
   };
   const GROUND = { desert: { c: '#6d5632', c2: '#e3d3a0' }, snow: { c: '#8aa3bf', c2: '#ffffff' }, wheat: { c: '#4a3618', c2: '#caa24c' } };
   const LEAF = ['#5f9e3c', '#3f7a2c', '#8bc34a', '#9b6b3c'];
+  // 粗糙輪廓：n 個半徑倍率 = 低頻起伏（大尺度的歪斜）＋逐點抖動，amp 越大越不規則
+  const rough = (n, amp) => {
+    const ph = [V() * TAU, V() * TAU, V() * TAU];
+    return Array.from({ length: n }, (_, i) => { const t = i / n * TAU; return clamp(1 - amp * 0.5 + amp * (0.5 * Math.sin(ph[0] + t * 2) + 0.3 * Math.sin(ph[1] + t * 3) + 0.2 * Math.sin(ph[2] + t * 5)) * 0.8 + (V() - 0.5) * amp * 0.5, 0.3, 1.4); });
+  };
   const jag = (n, lo) => Array.from({ length: n }, () => lo + V() * (1 - lo));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -28,11 +33,47 @@
     const P = o.el === 'physical' && ground ? ground : PAL[o.el] || PAL.physical;
     const a = o.angle || 0, r = o.radius, k = o.k;
     const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
-    const gash = (gx, gy, ga, len, wd, arc, al) => add({ k: 'gash', x: gx, y: gy, a: ga, len, wd, arc, al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
-    const blot = (bx, by, br, al) => add({ k: 'blot', x: bx, y: by, r: br, rot: V() * TAU, pts: jag(12, 0.6), al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
+    // 劍痕：不規則的裂口。沿路取樣，寬度（尖端收窄＋起伏）、深度（深淺不一的暗核）、左右邊緣與中線偏移各自抖動；
+    // 長痕會斷成數段，沿邊緣另有細裂紋與碎屑。每點 = [左x,左y,右x,右y,中x,中y,深度]
+    const gash = (gx, gy, ga, len, wd, arc, al) => {
+      wd *= 1.6; // 變寬後起伏才看得出來
+      const total = arc ? len * arc : len, ph = [V() * TAU, V() * TAU, V() * TAU], cut = [];
+      for (let u = 0; u < 0.98;) { const u1 = total < 80 ? 1 : Math.min(1, u + 0.25 + V() * 0.6); cut.push([u, u1]); u = u1 + 0.03 + V() * 0.07; }
+      const strokes = [], chips = [];
+      for (const [u0, u1] of cut) {
+        const n = clamp(Math.round(total * (u1 - u0) / 7), 5, 34), pts = [];
+        for (let i = 0; i <= n; i++) {
+          const t = i / n, u = u0 + (u1 - u0) * t, env = Math.pow(Math.sin(Math.PI * t), 0.65);
+          const wob = 0.65 + 0.35 * (Math.sin(ph[0] + u * 9) * 0.6 + Math.sin(ph[1] + u * 23) * 0.4);
+          const w = wd * (0.35 + 1.15 * wob + (V() - 0.5) * 0.35) * env, d = clamp(env * (0.45 + 0.55 * Math.sin(ph[2] + u * 11) ** 2 + (V() - 0.5) * 0.3), 0.08, 1);
+          const j = (Math.sin(ph[0] * 2 + u * 6) * 0.5 + (V() - 0.5) * 0.4) * wd, wl = w * (0.5 + (V() - 0.5) * 0.7), wr = w * (0.5 + (V() - 0.5) * 0.7);
+          const ang = ga + (arc ? (u - 0.5) * arc : 0), nx = arc ? Math.cos(ang) : -Math.sin(ga), ny = arc ? Math.sin(ang) : Math.cos(ga);
+          const bx = arc ? gx + Math.cos(ang) * len : gx + Math.cos(ga) * len * u, by = arc ? gy + Math.sin(ang) * len : gy + Math.sin(ga) * len * u;
+          const cx = bx + nx * j, cy = by + ny * j;
+          pts.push([cx + nx * wl, cy + ny * wl, cx - nx * wr, cy - ny * wr, cx, cy, d]);
+          if (i > 0 && i < n && V() < 0.16) { const s = V() < 0.5 ? 1 : -1, a2 = Math.atan2(ny, nx) + (V() - 0.5) * 1.2, L = (3 + V() * 9) * (0.6 + wd * 0.12);
+            chips.push([cx + nx * s * w * 0.5, cy + ny * s * w * 0.5, Math.cos(a2) * s * L, Math.sin(a2) * s * L, V() < 0.5 ? 1 : 0]); }
+        }
+        strokes.push(pts);
+      }
+      add({ k: 'gash', strokes, chips, al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
+    };
+    const blot = (bx, by, br, al) => add({ k: 'blot', x: bx, y: by, r: br, rot: V() * TAU, pts: rough(14, 0.7), pts2: rough(10, 0.6), rot2: V() * TAU, off: [(V() - 0.5) * br * 0.3, (V() - 0.5) * br * 0.3],
+      sat: Array.from({ length: 2 + ((V() * 4) | 0) }, () => [V() * TAU, br * (1.05 + V() * 0.8), br * (0.05 + V() * 0.1)]), // 外圍濺點
+      tails: Array.from({ length: (V() * 3) | 0 }, () => [V() * TAU, br * (1.1 + V() * 0.7)]), al: al || 1, c: P.c, c2: P.c2, glow: P.glow });
     const surf = (kind, sr) => add({ k: kind, x, y, r: sr, rot: V() * TAU, pts: jag(12, 0.65), cr: Array.from({ length: 6 + ((V() * 3) | 0) }, () => [V() * TAU, sr * (0.4 + V() * 0.7)]) });
-    const pit = (px, py, pr) => add({ k: 'pit', x: px, y: py, r: pr, rot: V() * TAU, pts: jag(10, 0.8), c: D.c, c2: D.c2,
-      cr: Array.from({ length: 5 + ((V() * 3) | 0) }, () => [V() * TAU, pr * (1.2 + V() * 0.7)]) });
+    // 坑洞：粗糙外緣、偏向一側的深坑、被翻起的土塊、帶分叉的鋸齒裂紋
+    const crack = (a, d, len, depth) => {
+      const pts = [[Math.cos(a) * d, Math.sin(a) * d * 0.85]], kids = [];
+      for (let i = 0; i < 3 + ((V() * 3) | 0); i++) {
+        a += (V() - 0.5) * 1; d += len * (0.6 + V() * 0.6); pts.push([Math.cos(a) * d, Math.sin(a) * d * 0.85]);
+        if (depth && i === 1 && V() < 0.5) kids.push(crack(a + (V() < 0.5 ? 0.7 : -0.7), d, len * 0.7, 0));
+      }
+      return [pts, ...kids.flat()];
+    };
+    const pit = (px, py, pr) => add({ k: 'pit', x: px, y: py, r: pr, rot: V() * TAU, pts: rough(20, 0.5), inner: rough(16, 0.45), lip: rough(18, 0.6), c: D.c, c2: D.c2,
+      lumps: Array.from({ length: 6 + ((V() * 6) | 0) }, () => [V() * TAU, pr * (1.05 + V() * 0.4), 1.2 + V() * 2.8]),
+      cr: Array.from({ length: 3 + ((V() * 4) | 0) }, () => crack(V() * TAU, pr * 0.85, pr * (0.15 + V() * 0.2), 1)).flat() });
     const litter = (n, spread) => add({ k: 'litter', x, y, bits: Array.from({ length: n }, () => [(V() - 0.5) * 2 * spread, (V() - 0.5) * 2 * spread, V() * TAU, 2 + V() * 2.5, LEAF[(V() * LEAF.length) | 0]]) });
 
     if (BD.biomeAt(x).id === 'lake') { // 湖面：只有 lakesplash 會留下水面上的痕跡

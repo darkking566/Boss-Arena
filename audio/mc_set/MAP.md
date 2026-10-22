@@ -149,3 +149,30 @@
 | shoot | crossbow_shoot1.ogg | Item/Crossbow shoot1.ogg |
 | shoot | crossbow_shoot2.ogg | Item/Crossbow shoot2.ogg |
 | shoot | crossbow_shoot3.ogg | Item/Crossbow shoot3.ogg |
+| bladeScrape | grindstone1.ogg | Block\Grindstone use1.ogg |
+| bladeScrape | grindstone2.ogg | Block\Grindstone use2.ogg |
+| bladeScrape | grindstone3.ogg | Block\Grindstone use3.ogg |
+| swordWhoosh | sword_whoosh1.ogg | Event server\Event server\Sword whoosh1.ogg |
+| swordWhoosh | sword_whoosh2.ogg | Event server\Event server\Sword whoosh2.ogg |
+| swordWhoosh | sword_whoosh3.ogg | Event server\Event server\Sword whoosh3.ogg |
+| swordWhoosh | sword_whoosh4.ogg | Event server\Event server\Sword whoosh4.ogg |
+| maceAir | mace_smash_air1.ogg | Item\Item\Mace smash air1.ogg |
+| maceAir | mace_smash_air2.ogg | Item\Item\Mace smash air2.ogg |
+| maceAir | mace_smash_air3.ogg | Item\Item\Mace smash air3.ogg |
+| tridentThrow | trident_throw1.ogg | Item\Item\Trident throw1.ogg |
+| tridentThrow | trident_throw2.ogg | Item\Item\Trident throw2.ogg |
+| tridentReturn | trident_return1.ogg | Item\Item\Trident return1.ogg |
+| tridentReturn | trident_return2.ogg | Item\Item\Trident return2.ogg |
+| tridentReturn | trident_return3.ogg | Item\Item\Trident return3.ogg |
+| anvilDestroy | anvil_destroy.ogg | Block\Block\Anvil destroy.ogg |
+| throwWhoosh | throw_whoosh1.ogg | Event server\Event server\Throw whoosh1.ogg |
+| throwWhoosh | throw_whoosh2.ogg | Event server\Event server\Throw whoosh2.ogg |
+| throwWhoosh | throw_whoosh3.ogg | Event server\Event server\Throw whoosh3.ogg |
+| throwWhoosh | throw_whoosh4.ogg | Event server\Event server\Throw whoosh4.ogg |
+| heartbeat | heartbeat1.ogg | Mob\Mob\Warden heartbeat1.ogg |
+| heartbeat | heartbeat2.ogg | Mob\Mob\Warden heartbeat2.ogg |
+| heartbeat | heartbeat3.ogg | Mob\Mob\Warden heartbeat3.ogg |
+| heartbeat | heartbeat4.ogg | Mob\Mob\Warden heartbeat4.ogg |
+| shadowTeleport | shadow_teleport1.ogg | Entity\Teleport1.ogg |
+| shadowTeleport | shadow_teleport2.ogg | Entity\Teleport2.ogg |
+| fangSnap | evoker_fangs.ogg | Mob\Mob\Evoker fangs.ogg |
