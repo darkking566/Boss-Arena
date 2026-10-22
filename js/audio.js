@@ -119,6 +119,8 @@
   const dmMap = new WeakMap();
   const seenRet = new WeakSet();
   const seenHeal = new WeakSet();
+  const seenP2 = new WeakSet();
+  const seenLock = new WeakSet();
   function tick(w, dt) {
     const g = MAP_SFX[BD.ARENA.map]; if (!g || w.over) return;
     if (ambW !== w) { ambW = w; ambT = 2 + V() * 3; }
@@ -214,6 +216,64 @@
           }
         }
       }
+      else if (b.def && b.def.id === 'mihawk') {
+        // 二階段拔刀：HP 50% 佩服對手決心，拔出黑刀「夜」
+        if (b.phase === 2 && !seenP2.has(b)) {
+          seenP2.add(b);
+          play('draw', 0.95);        // 拔刀出鞘清脆破空
+          play('swordWhoosh', 0.85); // 黑刀「夜」巨刃劃開氣流
+          play('bladeScrape', 0.7);  // 刀刃離鞘金屬摩擦
+          play('buff', 0.75);        // 世界第一大劍豪氣場爆發
+          play('shockwave', 0.6);    // 劍壓微鳴震動
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          const isP2 = b.phase === 2;
+          if (sid === 'parry') {
+            play('draw', isP2 ? 0.7 : 0.6);         // 撥擋架式：橫架小刀 / 黑刀
+            play('swordWhoosh', 0.45);
+          } else if (sid === 'glare') {
+            play('bell', 0.65);                     // 鷹眼鎖定：見聞色凝神清鳴
+            play('click', 0.6);                     // 準星鎖定提示
+            play('buff', 0.5);
+          } else if (sid === 'wave') {
+            play('maceAir', 0.85);                  // 飛斬：夜高高舉起蓄勢大破空
+            play('swordWhoosh', 0.75);
+          } else if (sid === 'fleet') {
+            play('bladeScrape', 0.75);              // 一斬沉艦：大範圍橫揮蓄力壓低身形
+            play('maceAir', 0.8);
+          } else if (sid === 'iai') {
+            play('draw', 0.85);                     // 居合・夜：拔刀術壓低身軀扣刀待發
+            play('swordWhoosh', 0.5);
+          } else if (sid === 'fan') {
+            play('swordWhoosh', 0.7);               // 三連月牙：快速揮刀蓄勢
+            play('throwWhoosh', 0.6);
+          } else if (sid === 'star') {
+            play('dash', 0.65);                     // 黑刀・荒星：騰空躍起起步
+            play('maceAir', 0.6);
+          } else if (sid === 'ult') {
+            play('ultCast', 0.95);                  // 世界第一大劍豪：終極蓄力豪氣爆發
+            play('draw', 0.85);                     // 夜橫斬起手亮刃
+            play('shockwave', 0.7);                 // 劍氣席捲全場
+            play('maceAir', 0.75);
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+        // 追蹤「鷹眼鎖定」狀態（對手身上出現金色準星瞬間）
+        const e = b.enemy;
+        const hl = e && e.statuses && BD.getStatus(e, 'hawklock');
+        if (hl && hl.rem > 0 && e.hp > 0 && e.state !== 'dead') {
+          if (!seenLock.has(hl)) {
+            seenLock.add(hl);
+            play('click', 0.7);      // 準星精準咬住
+            play('mikiriRing', 0.6); // 金色光環鎖定音
+          }
+        }
+      }
       // 死亡印記（瞬獄影殺陣）心跳倒數音效：隨倒數時間加速跳動
       const dm = b.statuses && b.statuses.find((s) => s.id === 'deathmark');
       if (dm && dm.rem > 0 && b.hp > 0 && b.state !== 'dead') {
@@ -267,7 +327,43 @@
         play('throwWhoosh', 0.65);   // 諸刃手裏劍投擲破空
         play('shoot', 0.4);
       } else if (kind === 'airslash') {
-        play('swing', 0.35);
+        const isMihawk = !!(owner && owner.def && owner.def.id === 'mihawk');
+        if (isMihawk) {
+          const sid = owner.inst && owner.inst.skill && owner.inst.skill.id;
+          const isP2 = owner.phase === 2;
+          if (sid === 'wave') {
+            play('shockwave', 0.85);    // 飛斬：巨大的貫穿月牙斬破空裂地
+            play('tridentThrow', 0.85);
+            play('swordWhoosh', 0.8);
+            play('maceAir', 0.75);
+          } else if (sid === 'fleet') {
+            play('shockwave', 0.8);     // 一斬沉艦：沉重劍氣飛向遠方
+            play('maceAir', 0.8);
+            play('swordWhoosh', 0.75);
+          } else if (sid === 'fan') {
+            play('swordWhoosh', 0.75);  // 三連月牙：扇形飛斬群與中央大斬
+            play('throwWhoosh', 0.7);
+            if (a.r >= 85) play('shockwave', 0.65); // 中央大斬追加音爆
+          } else if (sid === 'star') {
+            play('throwWhoosh', 0.7);   // 荒星：放射狀星芒月牙斬
+            play('swordWhoosh', 0.6);
+          } else if (sid === 'ult') {
+            play('swordWhoosh', 0.8);   // 世界第一大劍豪：扇形月牙斬群
+            play('shockwave', 0.7);
+            play('maceAir', 0.65);
+          } else if (sid === 'flick') {
+            play('throwWhoosh', 0.75);  // 指尖斬：刀尖隔空彈出，快準銳利
+            play('swordWhoosh', 0.6);
+            play('shoot', 0.4);
+          } else if (sid === 'backstep') {
+            play('throwWhoosh', 0.7);   // 從容後撤：後退時順手送出一道飛斬
+            play('swordWhoosh', 0.6);
+          } else {
+            play(isP2 ? 'swordWhoosh' : 'swing', 0.5);
+          }
+        } else {
+          play('swing', 0.35);
+        }
       }
     },
     fx(id, category, o) {
@@ -276,6 +372,7 @@
       const isThor = !!(wDef && wDef.id === 'thor');
       const isZed = !!(wDef && wDef.id === 'zed');
       const isFiora = !!(wDef && wDef.id === 'fiora');
+      const isMihawk = !!(wDef && wDef.id === 'mihawk');
       const wSid = o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id;
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
@@ -846,6 +943,141 @@
         else if (id === 'stance') {
           play('draw', 0.6);           // 招架架式
           play('swordWhoosh', 0.45);
+        }
+      }
+      // 鷹眼米霍克（世界第一大劍豪）專屬音效
+      else if (isMihawk) {
+        if (id === 'parry') {
+          play('mikiriClang', 0.95);  // 撥擋：刀尖撥開攻擊，清脆見切彈刀
+          play('mikiriRing', 0.85);   // 金屬共鳴清鳴
+          play('block', 0.7);
+          if (isP2) {
+            play('slashHeavy', 0.95); // 撥擋・反斬：黑刀反手一刀兩斷
+            play('shockwave', 0.7);
+            play('swordWhoosh', 0.8);
+          } else {
+            play('crit', 0.9);        // 撥擋・反刺：小刀精準貫胸
+            play('slashHeavy', 0.8);
+            play('swordWhoosh', 0.7);
+          }
+        }
+        else if (wSid === 'knife') {
+          if (id === 'thrust') {
+            // 一階段小刀連刺
+            const d = o.dmg || 0;
+            if (d >= 45) {
+              play('slashHeavy', 0.75); // 第三段貫通重刺
+              play('swordWhoosh', 0.7);
+              play('crit', 0.65);
+            } else {
+              play('swordWhoosh', 0.55); // 前兩記快速刺擊
+              play('slash', 0.5);
+              play('crit', 0.45);
+            }
+          } else if (id === 'slash') {
+            // 二階段黑刀兩段橫斬
+            const d = o.dmg || 0;
+            if (d >= 70) {
+              play('slashHeavy', 0.95); // 第二段豪邁重橫斬
+              play('swordWhoosh', 0.85);
+              play('shockwave', 0.6);
+              play('maceAir', 0.7);
+            } else {
+              play('slashHeavy', 0.85); // 第一段夜橫斬
+              play('swordWhoosh', 0.8);
+              play('maceAir', 0.6);
+            }
+          }
+        }
+        else if (wSid === 'pierce') {
+          if (id === 'dash' || id === 'slashline') {
+            play('dash', 0.65);
+            play('swordWhoosh', 0.6);
+          } else if (id === 'thrust') {
+            if (isP2) {
+              play('slashHeavy', 0.95); // 二階段黑刀貫胸重刺
+              play('crit', 0.9);
+              play('shockwave', 0.65);
+              play('maceAir', 0.7);
+            } else {
+              play('slashHeavy', 0.85); // 一階段小刀貫穿胸口的一刺
+              play('crit', 0.9);
+              play('swordWhoosh', 0.75);
+            }
+          }
+        }
+        else if (wSid === 'glare') {
+          if (id === 'cross') {
+            play('shockwave', 0.85);   // 二階段十字裂空大斬
+            play('slashHeavy', 0.9);
+            play('swordWhoosh', 0.85);
+            play('mikiriRing', 0.75);
+          } else if (id === 'thrust') {
+            play('slashHeavy', 0.85);  // 一階段遠距離精準穿刺
+            play('swordWhoosh', 0.8);
+            play('crit', 0.8);
+            play('mikiriRing', 0.65);
+          }
+        }
+        else if (wSid === 'backstep') {
+          if (id === 'dash') {
+            play('dash', 0.55);        // 從容後撤滑步
+            play('swordWhoosh', 0.45);
+          }
+        }
+        else if (wSid === 'fleet') {
+          if (id === 'cleave') {
+            play('shockwave', 1.0);    // 一斬沉艦：斬斷艦隊大橫揮，毀天滅地音爆！
+            play('slashHeavy', 1.0);
+            play('maceAir', 0.95);
+            play('slamHeavy', 0.8);
+          }
+        }
+        else if (wSid === 'iai') {
+          if (id === 'slashline' || id === 'dash') {
+            play('draw', 0.95);        // 居合・夜：拔刀出鞘一閃清鳴
+            play('bladeScrape', 0.75);
+            play('dash', 0.75);
+          } else if (id === 'cross') {
+            play('slashHeavy', 0.95);  // 居合出鞘貫穿致命一斬
+            play('shockwave', 0.85);
+            play('crit', 0.85);
+          } else if (id === 'slash') {
+            play('slashHeavy', 0.85);  // 反手大弧斬
+            play('swordWhoosh', 0.8);
+            play('maceAir', 0.65);
+          }
+        }
+        else if (wSid === 'star') {
+          if (id === 'leap') {
+            play('dash', 0.75);        // 黑刀・荒星：躍起昇空
+            play('swordWhoosh', 0.7);
+            play('maceAir', 0.65);
+          } else if (id === 'bigslam') {
+            play('slamHeavy', 1.0);    // 荒星天降落地重砸崩碎大地
+            play('slamThud', 0.95);
+            play('shockwave', 0.9);
+            play('explodeMid', 0.75);
+          } else if (id === 'slashline' || id === 'dash') {
+            play('dash', 0.65);
+            play('swordWhoosh', 0.7);
+          } else if (id === 'thrust') {
+            play('slashHeavy', 0.9);   // 終結貫穿突斬
+            play('crit', 0.85);
+            play('shockwave', 0.65);
+          }
+        }
+        else if (wSid === 'ult') {
+          if (id === 'slashline' || id === 'dash') {
+            play('dash', 0.8);
+            play('swordWhoosh', 0.85);
+          } else if (id === 'cross') {
+            play('shockwave', 1.0);    // 世界第一大劍豪：橫貫全場巨斬／身後貫穿終結
+            play('slashHeavy', 1.0);
+            play('maceAir', 0.95);
+            play('slamHeavy', 0.85);
+            play('explodeBig', 0.75);
+          }
         }
       }
       else if (id === 'thunderwake') { play('buff', 0.6); play('lightning', 0.6); }
