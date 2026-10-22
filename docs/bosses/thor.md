@@ -76,3 +76,44 @@
 - 依設定圖 [A1]：紅色長髮（俯視下披散在背後）、寬肩、半裸肌肉、白色斜肩帶、棕色皮帶、金色紋路。
 - 雅恩格利佩爾：深色鐵手套包覆前臂（一階段）；二階段手套消失、前臂纏繞電弧。
 - 妙爾尼爾：**巨大長方塊槌頭（灰白＋金色脈絡＋深色端蓋）＋短握柄**；二階段槌頭龜裂透出熔紅、隨心跳脈動，周圍電弧閃爍。
+
+---
+
+## 6. 音效設計（SFX）
+
+音效邏輯位於 `js/audio.js`（僅瀏覽器 `data-browser`，純音效不影響戰鬥與隨機種子）。
+支援 `mc_set`（Minecraft 原生風格 OGG 音效組）與 `raw`（Pixabay 寫實 MP3 音效組）。
+為重現北歐最強雷神的千鈞神力與神器妙爾尼爾的厚重打擊感，新增重槌破空（`maceAir`）、三叉戟迴旋折返（`tridentReturn`）、投擲（`tridentThrow`）與鐵砧粉碎（`anvilDestroy`，對應鐵手套碎裂）。
+
+| 技能 | 一階段音效 | 二階段雷電音效 | 音效設計說明 |
+|---|---|---|---|
+| **雷槌橫掃** (`hammer_sweep`) | 妙爾尼爾巨槌撕裂空氣 `maceAir` + 沉重揮斬 `slashHeavy` + 鈍擊破空 `slamHeavy` | 巨槌破空 `maceAir` + 沉重揮擊 `slashHeavy` + 雙重雷霆呼嘯 `lightning` | 還原比人身還巨大的戰槌橫向掃擊的恐怖壓迫，二階段正反兩掃追加雷光迸發 |
+| **雷槌砸地** (`hammer_slam`) | 妙爾尼爾千鈞過頂砸地 `slamHeavy`（重槌砸地）+ 鐵砧地裂重擊 `slamThud` + 震波擴散 `shockwave` | 過頂砸地 `slamHeavy` + `slamThud` + 狂暴雷霆 `lightning` + 震波 `shockwave`；0.88s 擴散雷爆環 `nova` 引爆 `shockwave` + `lightning` + `explodeMid` | 巨槌過頂轟擊地面；二階段在砸地點炸開外擴雷爆環二次震盪 |
+| **雅恩格利佩爾・格擋** (`jarngreipr_guard`) | 神鐵手套硬抗神兵清脆金屬彈刀 `mikiriClang` + 盾牌阻擋 `block` + 鐵砧實心悶震 `slamThud`；0.25s 後反手反槌重砸 `slamHeavy` + 重擊肉體 `hitHeavy`；0.9s 追擊砸地 `slamHeavy` + `slamThud` | （二階段手套已碎，此招消失） | 原作「號稱能擋下任何攻擊的究極防禦」，右手手套硬接方天戟反手爆扣 |
+| **屠巨一振** (`giant_felling`) | 毀滅級大蓄力橫掃 `maceAir` + `slashHeavy` + 音爆震波 `shockwave` + 大地重擊 `slamHeavy`；1.15s 外圈衝擊環 `shockwave` + 飛沙走石揚塵 `stepSand` + `slamThud` | 神雷撕裂大橫揮 `maceAir` + `slashHeavy` + `shockwave` + 蒼天落雷 `lightning`；1.08s 雷霆衝擊環爆散 `shockwave` + `lightning` + `explodeMid` | 原作「66 名巨人每人一振即斃」壯舉，長蓄力超大扇形一振吹飛全場沙土 |
+| **雷神威壓** (`divine_pressure`) | 神威展開低鳴 `buff` + 窒息陰風 `ambSnow`；0.32s 三圈光環收攏地面震裂 `shockwave` + `slamThud` | 神威低鳴 `buff` + 陰風 `ambSnow`；0.32s 光環收束地面震裂帶雷 `shockwave` + `slamThud` + `lightning` | 令人畏懼的北歐最強神之威壓，嚇退對手並於周身凝結護盾 |
+| **雷槌三連** (`hammer_chain`) | 前兩記重掃連續破空 `maceAir` + `slashHeavy`；第 3 記故意延遲的過頂砸地 `slamHeavy` + `slamThud` + 震波 `shockwave` | 前兩記重掃帶雷電呼嘯 `maceAir` + `slashHeavy` + `lightning`；第 3 記過頂雷爆大砸地 `slamHeavy` + `slamThud` + `lightning` + 爆破 `explodeMid` + `shockwave` | 魂系大開大合三連誘滾節奏，延遲過頂下砸引爆地裂 |
+| **雷槌迴旋擲** (`mjolnir_throw`) | （二階段限定） | 起手投擲破空 `tridentThrow` + `maceAir`；去程直線雷光呼嘯 `lightning` + `shockwave` + `swordWhoosh`；1.4s 迴旋折返穿透 `tridentReturn` + `lightning` + `shockwave` + `explodeMid` | 覺醒雷槌投出後如迴力鏢折返，去程雷霆貫通、回程呼嘯折返雙段判定 |
+| **雷光瞬身** (`thunder_step`) | （二階段限定） | 化作一道閃電瞬移 `boltblink`（`lightning` + `teleport` + `dash`）；閃至對手背後過頂驚雷重砸 `slamHeavy` + `slamThud` + `lightning` | 動畫第 1 話的瞬間移動，化作鋸齒閃電出現在身後雷霆重砸 |
+| **雷霆萬鈞** (`thunder_rampage`) | （二階段限定） | 一列 7 道天降落雷連環貫穿轟炸（每道 `lightning` + `slamHeavy` + `shockwave`） | 雷光充滿空間，蒼雷如瀑布般從天際連環灌下 |
+| **鬥神之雷槌 / 覺醒雷槌・蓋爾羅德** (`ult`) | 起手後仰雷纏手套蓄力 `ultCast` + `lightning` + `buff`；1.7s 正前方天崩地裂毀滅巨砸 `slamHeavy` + `slamThud` + `explodeBig` + `shockwave` + `lightning`；1.85s 震波環吹飛沙土 `shockwave` + `stepSand` | 起手雷槌脈動蓄力 `ultCast` + `lightning` + 狂戰士笑意 `roarMid`；1.1s ①全力擲出 `tridentThrow` + `lightning` + `shockwave` + `slashHeavy`；2.0s ②回程無法閃避迴旋撕裂長空 `tridentReturn` + `lightning` + `shockwave` + `explodeMid`；2.1s ③接槌騰空躍起 `dash` + `shockwave` + `maceAir`；3.3s 接槌累積離心力極限躍砸落點 `slamHeavy` + `slamThud` + `explodeBig` + `shockwave` + `lightning`；3.45s 萬雷轟頂地裂環 `lightning` + `explodeBig` + `shockwave` | 一階段一擊屠盡 66 名巨人的鬥神一擊；二階段原作擊敗呂布的最強必殺蓋爾羅德，三段結構（擲出 → 迴旋 → 接槌離心力躍砸）頂級震撼 |
+| **二階段轉場（雷槌覺醒）** (`phase2`) | （一階段轉二階段血量 50% 觸發） | 0s 暗幕降臨電弧聚束 `buff` + `lightning`；1.0s 鐵手套雅恩格利佩爾碎裂粉碎 `anvilDestroy` + `shieldBreak` + 蒼雷貫頂神力覺醒 `lightning` + 狂暴大爆發 `explodeBig` + 全場震波 `shockwave` + 大地震顫 `slamHeavy` + 狂戰士怒號 `roarMid` | 「……醒了嗎，貪睡的傢伙。別太快死了。」鐵手套碎裂、妙爾尼爾覺醒脈動、雷霆迸發的史詩轉場 |
+
+## 6. 逐招動畫（js/render/styles/thor.js）
+純繪圖（不碰戰鬥）。每個出手節拍（非 ring 的 hit / erupt / blink）一組關鍵值：`key: [引（蓄滿）, 擊, 起始, 收招, 擊後衰減起點]`，
+驅動槌角 `ha`、舉高 `lift`、雙手 `both`、軀幹扭轉 `rot`、前衝 `fwd`、蹲伏 `sq`、落地重壓 `big`、槌頭蓄力光 `gl`。擊後 0.25s 保留「擊」姿態並與下一手蓄力混合，連段不跳格。
+格擋、威壓抖動、擲槌 / 接槌為 `special()` 特例；被打斷時回到待機姿態。槌頭蓄力光：二階段雷藍帶電弧，一階段僅淡白金。
+
+| 技能 | 動畫重點 |
+|---|---|
+| 雷槌橫掃 | 轉腰把槌拖到右後蓄滿 → 橫掃到左側，扇形光痕；二階段雷弧，後接反手掃回 |
+| 雷槌砸地 | 雙手舉槌過頂（槌頭放大）→ 砸落、落地重壓，震波環與地裂紋；二階段加地面雷弧 |
+| 雅恩格利佩爾・格擋（一階段） | 鐵手套前舉護身、身前見切光弧 → 收手蓄勢 → 反砸、震波與裂紋 |
+| 屠巨一振 | 腳下符環收縮、光點匯入，身軀大幅扭轉蓄到極限 → 一路橫掃出大扇形光痕與裂紋 |
+| 雷神威壓 | 身軀壓低、光點與縮環收束，身軀顫動 → 挺身咆哮，雙層震波環外擴 |
+| 雷槌三連 | 兩記快掃（正手、反手）→ 蓄滿力、顫動的延遲重砸，落點震波與裂紋 |
+| 雷槌迴旋擲（二階段） | 後拉蓄力 → 脫手擲出（速度線）→ 目送 → 伸手迎槌 → 接槌後坐、環與地面雷弧 |
+| 雷光瞬身（二階段） | 蹲伏聚雷、地面雷弧與縮環 → 閃現（落點迸雷環）→ 舉槌砸落 |
+| 雷霆萬鈞（二階段） | 槌高舉聚雷 → 槌指向前方，落雷期間維持姿態；每根雷柱落點留下焦痕與環 |
+| 鬥神之雷槌 | 上身後仰到幾乎倒地、雷纏左臂、符環收束 → 起身反動砸下，震波、裂紋與吹散的沙土 |
+| 覺醒雷槌・蓋爾羅德 | 後拉蓄力 → 擲出 → 目送 → 接槌（環與雷弧）→ 蹲身躍起 → 落地重壓、大震波與雷弧 |
