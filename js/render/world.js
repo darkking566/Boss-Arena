@@ -39,7 +39,7 @@
     const A = BD.ARENA;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     // 生態區底色：橫向漸層，交界處各留 120px 的柔和過渡
-    const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], lake: ['#d99a78', '#b98aa0'], swamp: ['#3d4a30', '#2a3626'] };
+    const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], lake: ['#d99a78', '#b98aa0'], swamp: ['#3d4a30', '#2a3626'], white: ['#ffffff'], dark: ['#000000'] };
     const lg = g.createLinearGradient(0, 0, A.w, 0);
     A.biomes.forEach((b, i) => {
       const c = GROUND[b.id][0], pad = 120;
@@ -53,7 +53,7 @@
     }
     g.lineWidth = 1.5; g.lineCap = 'round';
     for (const b of A.biomes) {
-      if (b.id === 'lake') continue;
+      if (b.id === 'lake' || GROUND[b.id].length < 2) continue; // 湖面與純白 / 純黑：只有底色
       const x0 = b.x0 + 70, x1 = b.x1 - 70, area = (x1 - x0) * A.h / 1.23e6, X = () => x0 + rnd() * (x1 - x0), dark = GROUND[b.id][1];
       for (let i = 0, n = Math.round(260 * area); i < n; i++) {
         g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : 'rgba(150,190,90,0.5)';
@@ -97,8 +97,9 @@
         g.fillStyle = 'rgba(80,130,60,0.9)'; g.beginPath(); g.ellipse(lx, ly, 9 + rnd() * 5, 6 + rnd() * 3, rnd() * 3, 0, U.TAU); g.fill();
       }
     }
+    if (GROUND[A.biomes[0].id].length < 2) return; // 純白 / 純黑不加暗角
     // 暗角
-    const v = g.createRadialGradient(A.w / 2, A.h / 2, A.h * 0.4, A.w / 2, A.h / 2, A.w * 0.62);
+    const v =g.createRadialGradient(A.w / 2, A.h / 2, A.h * 0.4, A.w / 2, A.h / 2, A.w * 0.62);
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)');
     g.fillStyle = v; g.fillRect(0, 0, A.w, A.h);
   }
@@ -1264,6 +1265,37 @@
     }
     ctx.globalAlpha = 1;
   }
+  // 純黑場地：技能的光源（光暈、光柱、光束、火 / 雷 / 毒區域）在地面上投出柔和的加亮光池；只畫視覺，不影響戰鬥
+  const ZONE_LIGHT = { lava: '#ff6e1e', fire: '#ff5014', blackfire: '#d81c4a', blizzard: '#a0dcff', poison: '#78c83c', acid: '#aae628' };
+  function drawLights(ctx, w) {
+    if (BD.ARENA.biomes[0].id !== 'dark') return;
+    const fx = w.fx;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (const g of fx.glows) {
+      const k = g.life / g.max;
+      if (k <= 0 || g.inv) continue;
+      const f = g.follow, x = f ? f.x : g.x, y = f ? f.y : g.y;
+      ctx.globalAlpha = Math.min(1, g.a * k * 0.5);
+      blitGlow(ctx, '', g.r * (1 + g.grow * (1 - k)) * 2.6, g.color, x, y);
+    }
+    for (const p of fx.pillars) {
+      ctx.globalAlpha = 0.5 * p.life / p.max;
+      blitGlow(ctx, '', p.r * 3, p.color || '#ff7a28', p.x, p.y);
+    }
+    ctx.lineCap = 'round';
+    for (const b of fx.beams) {
+      const k = b.life / b.max;
+      ctx.strokeStyle = hexA(b.core || b.color, k * 0.25); ctx.lineWidth = b.w * 4;
+      ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+    }
+    for (const z of w.zones) {
+      const c = ZONE_LIGHT[z.kind];
+      if (!c || z.t < z.delay) continue;
+      ctx.globalAlpha = 0.45 * U.clamp((z.dur + z.delay - z.t) / 0.6, 0, 1);
+      blitGlow(ctx, '', z.r * 1.5, c, z.x, z.y);
+    }
+    ctx.restore();
+  }
   function drawGhosts(ctx, w, t) {
     const fx = w.fx;
     if (!fx || !fx.ghosts.length) return;
@@ -1468,6 +1500,6 @@
     ctx.globalAlpha = 1;
   }
 
-  Object.assign(R.draw, { arena: drawArena, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections, wheat: drawWheat,
+  Object.assign(R.draw, { arena: drawArena, lights: drawLights, decals: drawDecals, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections, wheat: drawWheat,
     minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, veil: drawVeil, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, star });
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -2,7 +2,7 @@
 // HUD 與整體繪製流程：雙方面板、計時、橫幅、戰鬥紀錄、R.render 主繪製、選角肖像
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA, TEAM = R.TEAM, FONT = R.FONT;
-  const { arena: drawArena, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections, wheat: drawWheat,
+  const { arena: drawArena, lights: drawLights, zones: drawZones, traps: drawTraps, telegraphs: drawTelegraphs, pillars: drawPillars, reflections: drawReflections, wheat: drawWheat,
     minions: drawMinions, boss: drawBoss, ghosts: drawGhosts, projectiles: drawProjectiles, lobs: drawLobs, fx: drawFx, texts: drawTexts, veil: drawVeil } = R.draw;
   // ─────────────────────── HUD ───────────────────────
   function bar(ctx, x, y, w, h, frac, color, bg, rtl, trail) {
@@ -179,6 +179,7 @@
     if (zn !== 1) { ctx.translate(Z.fx, Z.fy); ctx.scale(zn, zn); ctx.translate(-Z.fx, -Z.fy); }
     ctx.translate(-cam.x, -cam.y);
     drawArena(ctx, w, t);
+    drawLights(ctx, w);
     drawReflections(ctx, w, t);
     drawWheat(ctx, w, t);
     drawZones(ctx, w, t);

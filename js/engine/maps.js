@@ -14,6 +14,8 @@
     { id: 'snow', name: '雪地', icon: '❄', biome: 'snow', colors: ['#f2f7fc', '#b4c7da'], desc: '深雪：略微減速、行走留下腳印（久久不散），招式炸開大片雪霧與雪塊。' },
     { id: 'lake', name: '淺水湖泊', icon: '🌊', biome: 'lake', colors: ['#f0c27a', '#33618f'],
       desc: '夕陽下平靜如鏡的淺水：角色與倒影一起戰鬥，攻擊濺起大片水花；火焰蒸發成水氣、熔岩凝固成岩石、冰霜凍結水面、雷電沿水面竄走、毒與血在水中暈開。' },
+    { id: 'white', name: '純白', icon: '⬜', biome: 'white', colors: ['#ffffff', '#e8e8e8'], desc: '一片純白的空地，沒有任何互動效果。' },
+    { id: 'dark', name: '純黑', icon: '⬛', biome: 'dark', colors: ['#1a1a1a', '#000000'], desc: '一片純黑的空地，沒有互動效果；火焰、雷電、光柱等技能的光源會照亮周圍的地面。' },
   ];
   BD.mapById = {}; for (const m of BD.MAPS) BD.mapById[m.id] = m;
   BD.DEFAULT_MAP = 'desert';

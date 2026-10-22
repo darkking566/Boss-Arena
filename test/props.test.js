@@ -44,7 +44,7 @@ const solo = (i) => { const [x, y] = BD.ARENA.trees[i]; BD.ARENA.pillars = BD.AR
   ok(BD.ARENA.pillars.length === N, '新的一場重置回完整樹木');
   const d = mk();
   ok(BD.ARENA.map === 'desert' && BD.ARENA.pillars.length === 0 && BD.ARENA.ponds.length === 0 && BD.biomeAt(d.bosses[0].x).id === 'desert', '預設地圖是沙漠：沒有樹也沒有水池');
-  ok(BD.MAPS.length === 6 && BD.MAPS.every((m) => mk(m.id) && BD.ARENA.map === m.id && BD.ARENA.biomes.length === 1 && BD.ARENA.biomes[0].id === m.biome), '六張地圖各自一個生態區，依選擇切換');
+  ok(BD.MAPS.length === 8 && BD.MAPS.every((m) => mk(m.id) && BD.ARENA.map === m.id && BD.ARENA.biomes.length === 1 && BD.ARENA.biomes[0].id === m.biome), '八張地圖各自一個生態區，依選擇切換');
   ok(mk('nope') && BD.ARENA.map === BD.DEFAULT_MAP, '未知地圖退回預設地圖');
   const w = mk('swamp');
   ok(BD.ARENA.ponds.length >= 4 && BD.ARENA.ponds.every((q) => Math.hypot(q.x - w.bosses[0].x, q.y - w.bosses[0].y) > q.rx + 80 && Math.hypot(q.x - w.bosses[1].x, q.y - w.bosses[1].y) > q.rx + 80), '沼澤地圖有多個水池，出生點不在水中');
