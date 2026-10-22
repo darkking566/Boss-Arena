@@ -28,6 +28,9 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
   ok(w.damageBoss(a, b, { dmg: 50, posture: 10 }) === 'countered' && b.hp === hp, '同級應對撞、無傷害');
   ok(a.state === 'recover' && b.state === 'recover' && a.posture > 0 && b.posture > 0, '雙方都被撞開並吃架勢');
   ok((a.stats.clashes | 0) === 1, '應記錄對撞次數');
+  for (let i = 0; i < 60; i++) w.step(STEP); // 同級對撞會連拚：一秒內共 3–4 下
+  ok(a.stats.clashes >= 3 && a.stats.clashes <= 4, `同級對撞應連拚 3–4 下（實際 ${a.stats.clashes}）`);
+  for (let i = 0; i < 60; i++) w.step(STEP);
   // 間隔內不再對撞
   b.startSkill(sk(b, 'knife'), { force: true }); b.inst.t = 0.2; a.startSkill(sk(a, 'bladework'), { force: true });
   ok(w.damageBoss(a, b, { dmg: 50, posture: 10 }) === 'hit', '對撞間隔內應正常受傷');

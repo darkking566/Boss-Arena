@@ -45,22 +45,39 @@
   };
   const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
   const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
-  function bump(w, u, o, post) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
-    const an = BD.U.angTo(o, u), k = 320 / u.def.mass;
+  const RALLY_BEAT = 0.2; // 同級對撞的連拚：每一下的間隔
+  function bump(w, u, o, post, kb) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
+    const an = BD.U.angTo(o, u), k = kb / u.def.mass;
     u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
     u.posture += post; u.postureDelay = 1.4;
     u.setState('recover', 0.35);
     w.checkPostureBreak(u, false);
   }
-  function clash(w, b, a, lb, la) {
+  function spark(w, b, a, first) { // 一下刀刃相撞：特效 + 計數
     w._clashAt = w.time;
     b.stats.clashes = (b.stats.clashes || 0) + 1; a.stats.clashes = (a.stats.clashes || 0) + 1;
     const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
-    w.fx.text(x, y - 36, '對撞！', '#ffffff', 26);
-    BD.spawnFx(w, 'parry', x, y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.1);
-    w.log(b, '與 ' + a.name + ' 的招式對撞！', true);
-    if (la >= lb) bump(w, b, a, la > lb ? 35 : 20);
-    if (la <= lb) bump(w, a, b, la < lb ? 35 : 20);
+    if (first) { w.fx.text(x, y - 36, '對撞！', '#ffffff', 26); w.log(b, '與 ' + a.name + ' 的招式對撞！', true); }
+    BD.spawnFx(w, 'parry', x, y, { src: b }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : 0.05);
+  }
+  function clash(w, b, a, lb, la) {
+    spark(w, b, a, true);
+    if (la !== lb) { // 重擊壓輕擊：較低級的被撞開
+      if (la > lb) bump(w, b, a, 35, 320); else bump(w, a, b, 35, 320);
+      return;
+    }
+    // 同級：雙方鎖在原地連拚 3–4 下（約一秒內），每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
+    const n = 3 + (w.rng() < 0.5 ? 1 : 0), hold = (n - 1) * RALLY_BEAT + 0.35;
+    for (const [u, o] of [[a, b], [b, a]]) { u.setState('recover', hold); u.face = BD.U.angTo(u, o); }
+    const hit = () => { for (const u of [a, b]) { u.posture += 8; u.postureDelay = 1.4; w.checkPostureBreak(u, false); } };
+    hit();
+    for (let i = 1; i < n; i++) {
+      w.later(i * RALLY_BEAT, () => {
+        if (a.state !== 'recover' || b.state !== 'recover') return;
+        spark(w, b, a, false); hit();
+        if (i === n - 1) { bump(w, b, a, 0, 320); bump(w, a, b, 0, 320); }
+      });
+    }
   }
   // 能對撞的角色：近戰揮擊中被另一個近戰揮擊打中 → 對撞（等級高的壓過低的，同級互撞）；clash.proj 的角色揮擊中可把 deflect 投射物彈偏
   BD.defineTrait('clash', {
