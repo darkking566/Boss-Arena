@@ -12,6 +12,7 @@
       explodeMid: ['explosion_mid'], explodeBig: ['explosion_big'], shockwave: ['shockwave'], slamHeavy: ['slam_heavy'], slamThud: ['slam_thud'],
       roarMid: ['roar_mid'], roarBig: ['roar_big'], death: ['death'], fire: ['fire'], ice: ['ice'], lightning: ['lightning'],
       dash: ['dash_whoosh'], teleport: ['teleport'], buff: ['buff_up'], projHit: ['proj_hit'], ultCast: ['magic_cast'], poison: ['poison'], victory: ['victory'],
+      horseNeigh: ['roar_mid'], horseGallop: ['slam_thud'], shieldBreak: ['hit_armor'],
     } },
     mc_set: { ext: '.ogg', files: {
       slashHeavy: ['sweep_attack1', 'sweep_attack2', 'sweep_attack3'], slash: ['sweep_attack4', 'sweep_attack5'], swing: ['sweep_attack6', 'sweep_attack7'],
@@ -37,6 +38,9 @@
       click: ['click_stereo'],
       shoot: ['crossbow_shoot1', 'crossbow_shoot2', 'crossbow_shoot3'],
       draw: ['draw'], sheath: ['sheath'], mikiriClang: ['mikiri_clang'], mikiriRing: ['mikiri_ring'],
+      horseNeigh: ['horse_angry'],
+      horseGallop: ['horse_gallop1', 'horse_gallop2', 'horse_gallop3', 'horse_gallop4'],
+      shieldBreak: ['brittle_ice_break1', 'brittle_ice_break2', 'brittle_ice_break3', 'brittle_ice_break4', 'brittle_ice_break5', 'brittle_ice_break6'],
       stepSand: ['sand_dig1', 'sand_dig2', 'sand_dig3', 'sand_dig4'],
       stepSnow: ['powder_snow_step1', 'powder_snow_step2', 'powder_snow_step3', 'powder_snow_step4', 'powder_snow_step5', 'powder_snow_step6', 'powder_snow_step7', 'powder_snow_step8', 'powder_snow_step9', 'powder_snow_step10'],
       stepGrass: ['grass_dig1', 'grass_dig2', 'grass_dig3', 'grass_dig4'],
@@ -52,9 +56,9 @@
   };
   if (!SET) return;
   const BD = G.BD, V = BD.vrng, DIR = 'audio/' + SET + '/', EXT = SETS[SET].ext, FILES = SETS[SET].files;
-  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.8, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: LONG, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1 };
+  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.8, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: LONG, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1 };
   // 音檔常帶很長的尾巴（蓄力 7 秒、砸地 6.6 秒…），超過上限就淡出截斷；未列出者播完整檔
-  const MAXLEN = { mikiriRing: 1.5, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2 };
+  const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2 };
   const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath'];
   const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'mangekyo', 'susanoo', 'godofgods'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow'];
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
@@ -98,7 +102,14 @@
       const p = pos.get(b) || { x: b.x, y: b.y, d: 0 }; pos.set(b, p);
       const d = Math.hypot(b.x - p.x, b.y - p.y); p.x = b.x; p.y = b.y;
       if (b.hp <= 0 || d > JUMP) { p.d = 0; continue; }
-      if ((p.d += d) >= STRIDE) { p.d = 0; play(g[0], Math.min(0.3, 0.12 + (b.r || 30) / 400)); }
+      if ((p.d += d) >= STRIDE) {
+        p.d = 0;
+        if (b.phase === 2 && b.def && b.def.id === 'lubu') {
+          play('horseGallop', 0.4); // 呂布二階段騎赤兔馬時，走路腳步聲轉為戰馬鐵蹄聲
+        } else {
+          play(g[0], Math.min(0.3, 0.12 + (b.r || 30) / 400));
+        }
+      }
     }
   }
 
@@ -133,6 +144,30 @@
       else if (id === 'shadowrise') play('sheath', 0.7); // 二階段：收刀入鞘
       else if (id === 'nightfall') play('ambSnow', 0.5); // 百鬼夜斬：夜幕陰風（只在開頭一次）
       else if (id === 'threadcut') { if (o.scale >= 1.5) play('shockwave', 0.8); } // 只有最後的十字斬響，中間的刀線靜音
+      else if (id === 'pojun') {
+        play('slamThud', 0.9);   // 鐵砧巨響：方天畫戟硬接雷神巨力
+        play('hitHeavy', 0.85);  // 重金屬交擊震盪
+        play('block', 0.7);
+        setTimeout(() => { play('slashHeavy', 0.9); play('hitFlesh', 0.85); }, (o.delay || 0.2) * 1000); // 反手切開神血
+      }
+      else if (id === 'skyrend') {
+        play('shockwave', 1.0);  // sonic_boom 裂空音爆！
+        play('slamHeavy', 0.85); // 大地崩解
+        setTimeout(() => { play('explodeBig', 0.6); play('shockwave', 0.6); }, 250); // 沿線裂隙連鎖爆破
+      }
+      else if (id === 'warsteed') {
+        play('horseNeigh', 0.95); // 赤兔長嘶破陣
+        setTimeout(() => { play('horseGallop', 0.7); }, 220); // 鐵蹄踏地
+      }
+      else if (id === 'hoofcharge') {
+        play('horseGallop', 0.75); // 戰馬奔騰衝刺
+        play('dash', 0.4);
+      }
+      else if (id === 'bloodroar') {
+        play(o.k >= 1.5 ? 'roarBig' : 'roarMid', 0.85);
+        play('shockwave', 0.6);
+        play('poison', 0.4); // 蒸騰熱氣
+      }
       else if (TERRAIN[id]) play(TERRAIN[id], 0.5);
       else if (id === 'posturebreak') play('stun', 0.7);
       else if (id === 'parry') play('block', 0.6);
@@ -146,7 +181,13 @@
       else if (BUFF.includes(id)) play('buff', 0.5);
       else if (category === '位移') play(TELE.includes(id) ? 'teleport' : 'dash', 0.45);
       else if (id === 'projhit' || id === 'projwall') play('projHit', id === 'projhit' ? 0.5 : 0.3);
-      else if (category === '斬擊' || category === '突刺') { const d = o.dmg || 0; play(d >= 80 ? 'slashHeavy' : d >= 30 ? 'slash' : 'swing', 0.3 + Math.min(0.4, d / 250)); }
+      else if (category === '斬擊' || category === '突刺') {
+        const d = o.dmg || 0;
+        play(d >= 80 ? 'slashHeavy' : d >= 30 ? 'slash' : 'swing', 0.3 + Math.min(0.4, d / 250));
+        if (o.status && (o.status.id === 'vulnerable' || (Array.isArray(o.status) && o.status.some(x => x.id === 'vulnerable')))) {
+          play('shieldBreak', 0.65); // 破盾突：女武神破甲崩裂音效
+        }
+      }
     },
   };
   G.document.addEventListener('click', e => { if (e.target.closest && e.target.closest('button, .card, .mapcard')) play('click', 0.4); });
