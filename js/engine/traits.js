@@ -45,7 +45,6 @@
   };
   const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
   const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
-  const RALLY_BEAT = 0.2; // 同級對撞的連拚：每一下的間隔
   function bump(w, u, o, post, kb) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
     const an = BD.U.angTo(o, u), k = kb / u.def.mass;
     u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
@@ -66,13 +65,15 @@
       if (la > lb) bump(w, b, a, 35, 320); else bump(w, a, b, 35, 320);
       return;
     }
-    // 同級：雙方鎖在原地連拚 3–4 下（約一秒內），每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
-    const n = 3 + (w.rng() < 0.5 ? 1 : 0), hold = (n - 1) * RALLY_BEAT + 0.35;
+    // 同級：雙方鎖在原地連拚 2–6 下，這一串用快 / 中 / 慢其中一種節奏、每下再各自抖動；每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
+    const r = w.rng, n = [2, 2, 3, 3, 3, 4, 4, 5, 6][Math.floor(r() * 9)], tempo = r.range(0.09, 0.3), at = [0];
+    for (let i = 1; i < n; i++) at.push(at[i - 1] + tempo * r.range(0.6, 1.4));
+    const hold = at[n - 1] + 0.35;
     for (const [u, o] of [[a, b], [b, a]]) { u.setState('recover', hold); u.face = BD.U.angTo(u, o); }
-    const hit = () => { for (const u of [a, b]) { u.posture += 8; u.postureDelay = 1.4; w.checkPostureBreak(u, false); } };
+    const hit = () => { for (const u of [a, b]) { u.posture += 7; u.postureDelay = 1.4; w.checkPostureBreak(u, false); } };
     hit();
     for (let i = 1; i < n; i++) {
-      w.later(i * RALLY_BEAT, () => {
+      w.later(at[i], () => {
         if (a.state !== 'recover' || b.state !== 'recover') return;
         spark(w, b, a, false); hit();
         if (i === n - 1) { bump(w, b, a, 0, 320); bump(w, a, b, 0, 320); }
