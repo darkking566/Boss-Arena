@@ -474,6 +474,7 @@
       this.markKite = !!SH && !!SH.markKite && BD.hasStatus(e, 'deathmark');
       if (this.markKite && this.mode !== 'stalk' && this.mode !== 'retreat') { this.mode = 'stalk'; this.modeT = 0.6; } // 印記期間拉開距離
       this.hunt = hunt;
+      this.locked = !!p.hawk && BD.hasStatus(e, 'hawklock'); // 鎖定感知（米霍克）：對手被鷹眼鎖定時改為欺身獵殺
       this.duelAng = null; this.duelArc = null;
       if (p.duel) { // 目前最近的破綻方位（二階段有對向兩個）與本體是否已在其內
         const v = BD.vitalOf(w, b), at = U.angTo(e, b), a2 = v.ang + Math.PI;
@@ -482,6 +483,7 @@
       }
       let chance = p.aggression * 0.2 + Math.min(0.55, (w.time - this.lastAttack) * 0.05 * (1 - p.patience * 0.6));
       if (hunt) chance += SH.execute;
+      if (this.locked) chance += 0.3 + (BD.hasStatus(b, 'poise') ? 0.2 : 0);
       if (win > 0) chance += p.punish * 0.85;
       else if (e.isWindingUp()) chance *= 0.25 + p.aggression * 0.5;
       else if (e.state === 'idle' && e.sta > e.maxSta * 0.6 && d < mx * 1.2) chance *= 1 - p.patience * 0.55; // 耐心：等對手先出手
@@ -589,6 +591,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
           const acts = (b.phase === 2 && s.actions2 || s.actions), vit = acts.some((a) => a.vital), stp = acts.some((a) => a.do === 'vitalstep');
           sc *= this.duelArc ? (vit ? 1.5 : 1) : stp ? 1.7 : vit ? 0.75 : 1;
         }
+        if (p.hawk) sc *= this.locked ? (tg.includes('melee') || tg.includes('gap') ? 1.6 : tg.includes('lock') ? 0.3 : 1) : tg.includes('lock') ? 2.2 : tg.includes('melee') ? 0.7 : 1; // 沒鎖定先鎖定，鎖定後近戰獵殺
         if (s.phase === 2) sc *= 1.3;
         if (win > 0) { sc *= v.windup <= win + 0.25 ? 2.6 : 0.4; if (tg.includes('fast')) sc *= 1.5; if (tg.includes('counter') || tg.includes('escape')) sc *= 0.05; }
         if (sc > bs) { bs = sc; best = s; }
@@ -603,7 +606,8 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
       else if (d > mx * 1.2) this.mode = r < 0.55 + p.aggression * 0.4 ? 'approach' : 'strafe';
       else if (d < mn * 0.8) this.mode = r < 0.25 + p.retreat ? 'retreat' : r < 0.85 ? 'strafe' : 'hold';
       else this.mode = r < (p.duel ? 0 : p.patience * 0.45) ? 'hold' : r < 0.88 ? 'strafe' : 'approach';
-      if (p.stalk && staR >= 0.3 && d < mx * 2.2 && d > mn * 0.8 && rng() < p.stalk) this.mode = 'stalk';
+      if (p.hawk && this.locked && staR >= 0.3 && d > mn && rng() < 0.7) this.mode = 'approach'; // 鎖定後欺身
+      else if (p.stalk && staR >= 0.3 && d < mx * 2.2 && d > mn * 0.8 && rng() < p.stalk) this.mode = 'stalk';
       const A = BD.ARENA, edge = Math.min(b.x, b.y, A.w - b.x, A.h - b.y), em = 120 + Math.max(0, b.r - 40) * 1.5; // 巨型 Boss 離牆更早轉向
       if (edge < em && rng() < 0.55) {
         this.mode = 'reposition';

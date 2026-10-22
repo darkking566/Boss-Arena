@@ -126,6 +126,15 @@
     name: '決鬥節奏', tags: ['buff'], stacking: 'refresh', defaultDur: 2.5,
     modifiers: { speedMul: 1.2 },
   });
+  // ── 鷹眼鎖定 / 從容（米霍克）：被鷹眼盯上的對手受傷增加；撥擋成功的米霍克從容地加速加傷 ──
+  BD.defineStatus('hawklock', {
+    name: '鷹眼鎖定', tags: ['debuff'], stacking: 'refresh', defaultDur: 5,
+    modifiers: { dmgTakenMul: 1.18 },
+  });
+  BD.defineStatus('poise', {
+    name: '從容', tags: ['buff'], stacking: 'refresh', defaultDur: 3,
+    modifiers: { speedMul: 1.15, dmgDealtMul: 1.2 },
+  });
   // ── 鬥神狂喜（宙斯一階段 trait 'battlelust'）：挨打挨到興奮，肌肉再膨脹一圈 ──
   BD.defineStatus('ecstasy', {
     name: '鬥神狂喜', tags: ['buff'], stacking: 'refresh', defaultDur: 5,

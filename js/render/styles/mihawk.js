@@ -1,6 +1,7 @@
 'use strict';
 // Boss 造型：鷹眼米霍克（俯視）：黑底紅襯長外套、寬簷羽飾帽、V 字鬢角與金色鷹眼、胸前金色十字吊墜（小刀）；
 // 一階段右手持十字小刀、背上斜背著未出鞘的夜；二階段（HP 50%）夜握在手中，黑色刀身泛暗紅微光。
+// under()：被「鷹眼鎖定」的對手身上畫出金色準星（四道缺口環 + 十字線，隨剩餘時間收束）。
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA;
   const TRIG = { hit: 1, proj: 1, dash: 1 };
@@ -44,7 +45,18 @@
     ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(r * 0.25, 0); ctx.lineTo(0, 0); ctx.stroke();
   }
 
+  function lockOn(ctx, b, t) {
+    const e = b.enemy, st = e && e.statuses && BD.getStatus(e, 'hawklock');
+    if (!st || e.state === 'dead') return;
+    const k = Math.min(1, st.rem / 1.2), rr = e.r + 26 + (1 - k) * 8;
+    ctx.save(); ctx.translate(e.x, e.y); ctx.globalAlpha *= 0.35 + 0.65 * k;
+    ctx.strokeStyle = hexA('#e8c860', 0.9); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.rotate(t * 0.8);
+    for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.arc(0, 0, rr, -0.5, 0.5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(rr + 4, 0); ctx.lineTo(rr + 14, 0); ctx.stroke(); }
+    ctx.restore();
+  }
+
   R.defineBossStyle('mihawk', {
+    under: lockOn,
     body(ctx, o, t, { def, r }) {
       const shade = !!o.shade, p2 = o.phase === 2, P = pose(o, t);
       const tag = r + ':' + (shade ? 's' : 'b');

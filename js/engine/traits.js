@@ -15,6 +15,7 @@
     BD.spawnFx(w, p.fx || 'parry', b.x, b.y, { src: b }); w.hitstop = 0.12;
     if (p.slowmo) w.slowmo = Math.max(w.slowmo, p.slowmo); // 純演出：慢動作只影響實際播放速度
     w.log(b, (p.name ? '彈反成功，' : '見切成功，') + '看穿了 ' + attacker.name + ' 的攻擊！', true);
+    if (p.self) BD.applyStatus(b, p.self, { source: b }, w); // 見切成功後的自身增益（米霍克「從容」）
     if (!b._riposte) {
       b._riposte = BD.prepSkill({ id: 'riposte', name: p.name || '見切・反斬', track: 20, recovery: 0.35,
         actions: [{ do: 'blink', at: 0.06, to: 'behind', dist: 60 },
