@@ -33,6 +33,18 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
   ok(w.damageBoss(a, b, { dmg: 50, posture: 10 }) === 'hit', '對撞間隔內應正常受傷');
 }
 
+// ── 2b. 架勢滿了對撞也會崩潰；普攻無冷卻、無消耗 ──
+{
+  const [w, a, b] = mk('fiora', 'mihawk');
+  const sta = a.sta;
+  ok(a.startSkill(sk(a, 'basic')) && a.cds.basic === 0 && a.sta === sta, '普攻應無冷卻、無體力消耗');
+  a.cancelSkill(); a.state = 'idle';
+  a.startSkill(sk(a, 'bladework'), { force: true }); b.startSkill(sk(b, 'knife'), { force: true });
+  a.inst.t = 0.2; b.inst.t = 0.2; b.posture = b.maxPosture - 5;
+  w.damageBoss(a, b, { dmg: 50, posture: 10 });
+  ok(b.stats.breaks === 1 && BD.hasStatus(b, 'stagger'), '對撞累積到上限應架勢崩潰');
+}
+
 // ── 3. 不在揮擊中、或對方招式不能對撞 → 照常受傷 ──
 {
   const [w, a, b] = mk('fiora', 'mihawk');

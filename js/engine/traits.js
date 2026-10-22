@@ -45,11 +45,12 @@
   };
   const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
   const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
-  function bump(w, u, o, post) { // u 被 o 撞開：後退、吃架勢（不會直接崩潰）、招式中斷
+  function bump(w, u, o, post) { // u 被 o 撞開：後退、吃架勢（滿了就崩潰）、招式中斷
     const an = BD.U.angTo(o, u), k = 320 / u.def.mass;
     u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
-    u.posture = Math.min(u.maxPosture - 1, u.posture + post); u.postureDelay = 1.4;
+    u.posture += post; u.postureDelay = 1.4;
     u.setState('recover', 0.35);
+    w.checkPostureBreak(u, false);
   }
   function clash(w, b, a, lb, la) {
     w._clashAt = w.time;

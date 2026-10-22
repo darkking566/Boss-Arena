@@ -238,15 +238,19 @@
         }
       }
       if (p.freeze && b.state !== 'transition' && !downed) BD.applyStatus(b, 'frozen', { dur: p.freeze }, this);
+      this.checkPostureBreak(b, downed);
+      return 'hit';
+    }
+    // 架勢滿了就崩潰（受傷或對撞累積都走這裡）
+    checkPostureBreak(b, downed) {
       if (b.posture >= b.maxPosture && b.state !== 'transition') {
         b.posture = 0; b.stats.breaks++;
         if (!downed) BD.applyStatus(b, 'stagger', { dur: 1.5 }, this); // 倒地時不再疊加硬直
-        fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
+        this.fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
         BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b });
         this.hitstop = Math.max(this.hitstop, 0.1); this.slowmo = Math.max(this.slowmo, 0.4);
         this.log(b, '架勢崩潰，陷入硬直！', true);
       }
-      return 'hit';
     }
     roar(b) {
       const e = b.enemy;

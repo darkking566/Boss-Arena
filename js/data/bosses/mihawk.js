@@ -20,7 +20,7 @@
     traits: ['counter', 'clash'], clash: { style: 'blade', proj: true },
     stamina: { max: 100, regen: 34 }, posture: 115, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [150, 290], aggression: 0.45, dodge: 0.7, precision: 0.92, reaction: 0.17, strafe: 0.6, walk: 0.8,
-      feint: 0.2, delay: 0.3, retreat: 0.1, punish: 0.9, nervous: 0.02, patience: 0.85, read: 0.8, counter: 0.65, clash: 0.7, // 對撞傾向（js/engine/ai.js）
+      feint: 0.2, delay: 0.3, retreat: 0.1, punish: 0.9, nervous: 0.02, patience: 0.85, read: 0.8, counter: 0.65, clash: 0.7, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
       hawk: true, // 鎖定感知（js/engine/ai.js）：沒鎖定先用鷹眼 / 指尖斬 / 撥擋，鎖定後欺身獵殺
       // 連段（僅沉重）：小刀連刺接貫胸、鷹眼鎖定後獵殺、後撤拉開再鎖定、居合接沉艦、三連月牙接居合
       combos: [
@@ -64,6 +64,9 @@
       note: '佩服對手，拔出黑刀「夜」：所有近戰招式改用大刀，射程更長，鷹眼鎖定更久；解鎖「居合・夜」「飛斬」「三連月牙」「一斬沉艦」「荒星」；大招更寬更快' },
     skills: [
       // 輕鬆接下三刀流後反刺：小刀連刺（二階段換成夜的橫斬）
+      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 170], cd: 0, cost: 0, track: 9, recovery: 0.3,
+        actions: strike(0.18, 0.14, rect(150, 36), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) },
       { id: 'knife', name: '小刀連刺', short: '小刀', tags: ['melee', 'fast'], range: [0, 130], cd: 2.4, cost: 12, track: 9, creep: 0.3, recovery: 0.4,
         actions: [...strike(0.22, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),
           ...strike(0.42, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),

@@ -17,7 +17,7 @@ const styles = R.bossStyles ? Object.keys(R.bossStyles) : [...R.drawBossBody.toS
 const minionStyles = R.minionStyles ? Object.keys(R.minionStyles) : minionKinds;
 const traits = BD.traits || null;
 const bosses = BD.bosses || BD.BOSSES;
-const TAGS = new Set(['swapdodge', 'lock', 'melee', 'gap', 'aoe', 'ranged', 'zone', 'fast', 'defensive', 'escape', 'trap', 'summon', 'counter']);
+const TAGS = new Set(['swapdodge', 'lock', 'melee', 'gap', 'aoe', 'ranged', 'zone', 'fast', 'defensive', 'escape', 'trap', 'summon', 'counter', 'basic']);
 const AI_PROB = ['aggression', 'dodge', 'precision', 'reaction', 'strafe', 'walk', 'feint', 'delay', 'retreat', 'punish', 'nervous', 'patience', 'read', 'counter', 'resetFlip'];
 const AURAS = new Set(['fire', 'flame', 'frost', 'poison', 'shadow']);
 const NEEDS_DUR = new Set(['tele', 'dash', 'counter', 'circle', 'invuln', 'rain']);
@@ -68,7 +68,7 @@ for (const def of bosses) {
     const S = `${W} skill ${s.id}`;
     if (sids.has(s.id) || s.id === 'ult' || s.id === 'riposte') err(S, '技能 id 重複或使用保留字'); sids.add(s.id);
     if (!s.name || !s.short) err(S, '缺少 name / short');
-    if (!inR(s.cd, 0.5, 60)) err(S, `cd ${s.cd} 不合理`);
+    if (!inR(s.cd, (s.tags || []).includes('basic') ? 0 : 0.5, 60)) err(S, `cd ${s.cd} 不合理`);
     if (!inR(s.cost || 0, 0, 100)) err(S, `cost ${s.cost} 不合理`);
     if (s.cost > def.stamina.max) err(S, 'cost 超過體力上限');
     checkRange(S, s.range);

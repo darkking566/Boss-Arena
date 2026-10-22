@@ -389,7 +389,7 @@
       }
       // 對撞：看準近身攻擊，搶在落下前揮出快速近戰，讓兩招撞在一起（需要 clash 特性）
       if (p.clash && th.kind === 'tele' && th.melee && th.left > 0.15 && th.left < 1.1 && b.def.clash) {
-        const d = U.dist(b, this.e) - this.e.r * 0.6, sk = b.available().find((s) => BD.skillClash(s) && (s.tags || []).includes('fast') && s.range && d <= s.range[1] && b.skillReady(s));
+        const d = U.dist(b, this.e) - this.e.r * 0.6, fits = (s) => BD.skillClash(s) && (s.tags || []).includes('fast') && s.range && d <= s.range[1] && b.skillReady(s), av = b.available(), sk = av.find((s) => (s.tags || []).includes('basic') && fits(s)) || av.find(fits); // 普攻優先：永遠可用
         if (sk && rng() < p.clash) { this.plan = { type: 'clash', t: Math.max(0, th.left - 0.25), th, sk }; return; }
       }
       // 換影閃避（劫）：近戰預警落下前與影子互換位置——影子必須在這個預警範圍外
@@ -502,6 +502,9 @@
       if (p.midWait && win <= 0 && d > mn * 0.8 && d < mx * 1.8) chance *= 1 - p.midWait;
       if (p.feat && p.feat.habit && win <= 0.25 && this.baitRoll(d, 0.25)) return; // 讀習慣：誘使早滾的對手先翻滾（每次思考的機率）
       if (rng() >= chance) {
+        // 普攻填空窗：技能沒出手、對手在普攻射程內，就揮一下（ai.basic = 每次思考的機率）
+        const ba = p.basic && b.available().find((s) => (s.tags || []).includes('basic') && b.skillReady(s) && d >= s.range[0] && d <= s.range[1]);
+        if (ba && rng() < p.basic && b.startSkill(ba, { quiet: true })) { this.afterAttack(); return; }
         if (d > mx * 1.3 && this.mode !== 'approach' && rng() < p.aggression * 0.3) { this.mode = 'approach'; this.modeT = rng.range(0.8, 1.6); }
         return;
       }

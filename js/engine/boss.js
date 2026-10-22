@@ -93,7 +93,7 @@
       if (!skill.ult && !opts.force) {
         if (skill.res) this[skill.res] -= skill.cost || 0;
         else { this.sta -= (skill.cost || 0) * (opts.costMul != null ? opts.costMul : 1); this.staDelay = 0.9; }
-        this.cds[skill.id] = (skill.cd || 1) * this.cdMul;
+        this.cds[skill.id] = (skill.cd == null ? 1 : skill.cd) * this.cdMul;
       }
       this.stats.skills++;
       this.stats.uses[skill.id] = (this.stats.uses[skill.id] || 0) + 1;

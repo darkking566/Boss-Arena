@@ -16,7 +16,7 @@
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [90, 230], aggression: 0.7, dodge: 0.55, precision: 0.85, reaction: 0.2, strafe: 0.9, walk: 0.5,
       feint: 0.3, delay: 0.3, retreat: 0.15, punish: 0.8, nervous: 0.05, patience: 0.5, read: 0.7,
-      clash: 0.8, // 對撞傾向（js/engine/ai.js）
+      clash: 0.8, basic: 0.6, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
       duel: true, // 破綻感知（js/engine/ai.js）
       // 連段（僅沉重）：移形接劍術、劍術接連刺、交叉步接劍術、破綻連鎖接連刺
       combos: [
@@ -63,6 +63,9 @@
           ...strike(0.9, 0.22, thrust(190, 55), { dmg: 70, posture: 24, kb: 220, fx: 'thrust', vital: true })],
         actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3, status: { id: 'stun', dur: 1.6 } },
           ...strike(0.9, 0.2, thrust(200, 55), { dmg: 78, posture: 26, kb: 240, fx: 'thrust', vital: true })] },
+      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 180], cd: 0, cost: 0, track: 9, recovery: 0.3,
+        actions: strike(0.18, 0.14, thrust(160, 44), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) },
       // 原作 E：連續兩擊，第一擊緩速、第二擊強力（原作必定暴擊）
       { id: 'bladework', name: '劍術', short: '劍術', tags: ['melee', 'fast'], range: [0, 160], cd: 3.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4,
         actions: [...strike(0.24, 0.2, thrust(150, 50), { dmg: 40, posture: 12, kb: 90, fx: 'thrust', status: { id: 'slow', dur: 1.2 } }),
