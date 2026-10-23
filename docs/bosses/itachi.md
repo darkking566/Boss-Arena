@@ -68,3 +68,21 @@
 ## 6. 技能特效（`js/fx/itachi.js`）
 每個技能一組專屬演出（對照見 `docs/effects.md` 特效一覽）：苦無 `kunaislash` / `kunaistab`、手裏劍 `shurikenfan`、豪火球 `gokakyu`、烏鴉 `crowvolley`（出手）/ `crowfall`（風暴落點）、瞬身 `shunshin` + `palmgrab`、月讀 `sharingancharge` + `gazeline`、見切 `sharinganwatch`、一戳 `foreheadpoke`、天照 `amaterasumark`（預警）+ `amaterasubloom`（落點）、勾玉 `susanoocharge` + `magatamafan`。
 引擎小改：`proj` 動作支援 `fx`（出手演出）、`rain` / `lob` 支援 `fx` / `fxEl`（落點演出，預設仍為 `explode`）。純視覺，指紋不變。
+
+## 7. 音效設計（SFX，`js/audio.js`）
+宇智波鼬所有技能、投射物、狀態與轉場之音效補全（瀏覽器端 `BD.sfx`）：
+- **二階段轉場（萬花筒覺醒）**：HP 50% 脫下斗笠進入二階段，先響起血淚滴落與沉重心跳、萬花筒開眼清鳴；1.8 秒後斗笠碎裂炸飛（`wood`）、雙層震波轟散（`shockwave`）、地面龜裂震盪（`slamHeavy`）。
+- **苦無連擊**：俐落拔刀架式，前兩記劃破氣流揮擊（`slash`），第三段貫穿重刺（`kunaistab` / `slashHeavy` + `crit`）；二階段附著火遁查克拉（`fire`）。
+- **手裏劍術**：暗器破空出手（`throwWhoosh` + `shoot`），巨大四刃風車手裏劍破空高旋（`swordWhoosh`）；二階段追加火焰強化呼嘯。
+- **火遁・豪火球之術**：胸前結印（`click`）、深吸氣蓄熱（`draw` + `maceAir`），接著巨浪般的滔天烈焰向前噴湧翻滾（`gokakyu` / `fire` + `explodeMid` + `shockwave`）。
+- **烏鴉分身 / 烏鴉替身**：替身遁走、漆黑羽翼拖影炸散（`crowburst` / `shadowTeleport` + `throwWhoosh` + `wood`），撲翼掠空的群鴉反撲（`crow` / `throwWhoosh` + `dash`）。
+- **烏鴉風暴**：漫天群鴉遮天蔽日、陰風尖嘯（`ambSnow`），群鴉自高空俯衝轟炸大地（`crowfall` / `slamThud`），二階段帶天照黑炎轟炸爆裂。
+- **瞬身・背後擒拿**：落葉與白煙極速移形換位（`shunshin` / `teleport` + `dash`），背後貼身一記重重掌擊（`palmgrab` / `hitHeavy` + `slamThud` + `shockwave`）。
+- **月讀**：長條預警交會、眼神鎖定（`sharingancharge` / `bell` + `heartbeat` + `ambSnow`）；貫穿視線爆發（`gazeline`）；拉入月讀血黑暗幕世界（`tsukuyomi` / 喪鐘清鳴 + 死寂陰風 + 精神心跳重壓）；幻境受刑期間連續白刃穿刺酷刑。
+- **寫輪眼・見切**：橫架反擊架式，一階段看穿攻擊彈刀反斬（`sharinganwatch` / `mikiriClang` + `mikiriRing` + `slashHeavy`）；二階段八咫鏡同心圓絕對神盾波紋反彈（`yatamirror` / 神聖金屬交鳴 + 彈反衝擊波）。
+- **額頭一戳・下次吧**：兩指輕點探出，額頭清脆一響（`foreheadpoke` / `click` + `shieldBreak` + `bell`），推散架勢破防並響起溫柔羈絆清鳴。
+- **天照**：右眼目光聚焦流血淚（`amaterasumark` / `heartbeat` + `fire` + `click`）；焦點處黑炎憑空暴烈燃起（`amaterasubloom` / `explodeMid` + `fire` + `poison` 灼蝕滋滋聲）；身上帶天照狀態持續傳出黑炎燃燒聲。
+- **須佐能乎・顯現**：骨架巨人拔地而起、神威氣浪震天（`susanoo` / `ultCast` + `slamHeavy` + `shockwave` + `fire` + 骨架金屬摩擦感）。
+- **須佐能乎・八尺瓊勾玉**：右臂巨力高揚蓄勢（`susanoocharge`），三串巨大的勾玉橘金旋轉呼嘯甩出（`magatamafan` + `magatama` / `tridentThrow` + `maceAir` + `shockwave`）。
+- **須佐能乎・十拳劍**：十拳靈劍自酒壺拔出摩擦金屬巨響（`bladeScrape` + `maceAir`），擎天巨刃撕裂全場橫貫劈落（`totsuka` / `slashHeavy` + `shockwave` + `slamHeavy` + `ultCast`）；0.5 秒後「封」字浮現、酒壺收束徹底封印（`bell` + `mikiriRing` + `teleport`）。
+- **大招「月讀・天照・須佐能乎」**：三大萬花筒終極瞳術全開，神威降臨、月讀喪鐘清鳴、漫天群鴉、天照連鎖爆破與最後十拳巨劍全屏封印巨斬。

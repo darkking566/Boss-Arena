@@ -538,6 +538,114 @@
           lastSkill.delete(b);
         }
       }
+      else if (b.def && b.def.id === 'itachi') {
+        // 二階段轉變開始：HP 50% 進入 transition，脫下斗笠、萬花筒寫輪眼全開
+        if ((b.state === 'transition' || b.phase === 2) && !seenItachiP2.has(b)) {
+          seenItachiP2.add(b);
+          play('heartbeat', 0.95);       // 萬花筒開眼：心跳沉重一震
+          play('bell', 0.9);            // 血瞳清鳴
+          play('buff', 0.85);           // 暗黑查克拉狂湧
+          play('ambSnow', 0.7);         // 血紅暗幕降臨陰風
+          setTimeout(() => {
+            if (b.hp > 0 && b.state !== 'dead') {
+              play('wood', 0.95);       // 斗笠粉碎炸飛！
+              play('shockwave', 0.95);  // 雙層震波狂湧！
+              play('slamHeavy', 0.9);   // 氣場震碎地面
+              play('swordWhoosh', 0.85);// 烏鴉殘影掠過
+            }
+          }, 1800);
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          const isP2 = b.phase === 2;
+          if (sid === 'kunai') {
+            play('draw', isP2 ? 0.7 : 0.6);        // 苦無連擊：俐落拔刀架式
+            play('swordWhoosh', 0.55);
+            if (isP2) play('fire', 0.65);          // 二階段火焰查克拉附著
+          } else if (sid === 'shuriken') {
+            play('throwWhoosh', 0.8);              // 手裏劍術：苦無與精準手裏劍破空出手
+            play('shoot', 0.5);
+            if (isP2) play('fire', 0.65);
+          } else if (sid === 'fireball') {
+            play('click', 0.7);                    // 火遁・豪火球之術：指尖極速結印
+            play('draw', 0.65);                    // 胸腔深吸氣
+            play('maceAir', 0.7);                  // 空氣回流
+            play('fire', 0.8);                     // 高熱火遁蓄勢
+          } else if (sid === 'crow_clone') {
+            play('shadowTeleport', 0.85);          // 烏鴉分身：替身遁走、群鴉四散
+            play('throwWhoosh', 0.8);
+            play('wood', 0.55);
+          } else if (sid === 'crow_storm') {
+            play('ambSnow', 0.8);                  // 烏鴉風暴：漫天群鴉遮天蔽日
+            play('throwWhoosh', 0.85);
+            play('shockwave', 0.7);
+            if (isP2) play('fire', 0.75);          // 二階段黑炎狂風
+          } else if (sid === 'flicker') {
+            play('teleport', 0.85);                // 瞬身・背後擒拿：極速瞬身
+            play('dash', 0.75);
+            play('throwWhoosh', 0.6);
+          } else if (sid === 'tsukuyomi') {
+            play('bell', 0.95);                    // 月讀：眼神交會、精神世界鐘鳴
+            play('heartbeat', 0.9);                // 心跳凝固
+            play('buff', 0.8);
+            play('ambSnow', 0.7);                  // 虛無暗幕
+          } else if (sid === 'sharingan') {
+            play('draw', 0.75);                    // 寫輪眼・見切：橫架架式
+            play('bell', 0.75);                    // 洞悉之眼清鳴
+            if (isP2) {
+              play('mikiriRing', 0.8);             // 八咫鏡・反映：神盾同心圓共振
+              play('buff', 0.7);
+            } else {
+              play('swordWhoosh', 0.5);
+            }
+          } else if (sid === 'poke') {
+            play('swordWhoosh', 0.65);             // 額頭一戳・下次吧：兩指輕點探出破空
+            play('swing', 0.55);
+          } else if (sid === 'amaterasu') {
+            play('heartbeat', 0.9);                // 天照：右眼流血、焦點黑炎無中生有
+            play('fire', 0.85);
+            play('click', 0.75);                   // 焦點鎖定
+            play('shockwave', 0.65);
+          } else if (sid === 'susanoo_form') {
+            play('ultCast', 0.95);                 // 須佐能乎・顯現：骨架巨人拔地而起！
+            play('slamHeavy', 0.9);
+            play('shockwave', 0.85);
+            play('buff', 0.8);
+          } else if (sid === 'yasaka') {
+            play('maceAir', 0.9);                  // 須佐能乎・八尺瓊勾玉：巨臂揮動、勾玉高速自旋蓄勢
+            play('buff', 0.8);
+            play('tridentThrow', 0.75);
+          } else if (sid === 'totsuka') {
+            play('bladeScrape', 0.9);              // 須佐能乎・十拳劍：靈劍自酒壺拔出摩擦金屬巨響
+            play('maceAir', 0.9);                  // 擎天巨劍高高舉起
+            play('shockwave', 0.75);
+            play('buff', 0.7);
+          } else if (sid === 'ult') {
+            play('ultCast', 1.0);                  // 大招：三大萬花筒瞳術全開！
+            play('bell', 0.95);
+            play('heartbeat', 0.9);
+            play('ambSnow', 0.85);
+            play('shockwave', 0.8);
+            if (isP2) play('slamHeavy', 0.85);
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+        // 追蹤對手身上的「天照」黑炎燃燒狀態：永不熄滅的黑炎嘶嘶炙烤聲
+        const e = b.enemy;
+        const am = e && e.statuses && BD.getStatus(e, 'amaterasu');
+        if (am && am.stacks > 0 && e.hp > 0 && e.state !== 'dead') {
+          const nextAm = amMap.get(e) || 0;
+          if (w.time >= nextAm) {
+            amMap.set(e, w.time + 0.65);
+            play('fire', 0.65);
+            play('poison', 0.5);
+          }
+        }
+      }
       // 死亡印記（瞬獄影殺陣）心跳倒數音效：隨倒數時間加速跳動
       const dm = b.statuses && b.statuses.find((s) => s.id === 'deathmark');
       if (dm && dm.rem > 0 && b.hp > 0 && b.state !== 'dead') {
@@ -587,9 +695,19 @@
         play('maceAir', 0.9);        // 風魔手裏劍：巨型迴旋武器離手沉重破空
         play('tridentThrow', 0.85);
         play('swordWhoosh', 0.75);
+      } else if (kind === 'crow') {
+        play('throwWhoosh', 0.65);   // 烏鴉群撲翼掠空
+        play('dash', 0.45);
+      } else if (kind === 'magatama') {
+        play('tridentThrow', 0.9);   // 八尺瓊勾玉：巨型神玉破空投擲呼嘯
+        play('maceAir', 0.85);
+        play('shockwave', 0.75);
       } else if (kind === 'kunai' || kind === 'shuriken' || kind === 'arrow') {
-        play('throwWhoosh', 0.65);   // 諸刃手裏劍投擲破空
+        const isItachi = !!(owner && owner.def && owner.def.id === 'itachi');
+        const isItachiP2 = isItachi && owner.phase === 2;
+        play('throwWhoosh', 0.65);   // 諸刃手裏劍 / 苦無投擲破空
         play('shoot', 0.4);
+        if (isItachiP2) play('fire', 0.55); // 二階段火遁包覆苦無／手裏劍
       } else if (kind === 'airslash') {
         const isMihawk = !!(owner && owner.def && owner.def.id === 'mihawk');
         if (isMihawk) {
@@ -640,6 +758,7 @@
       const isAdam = !!(wDef && wDef.id === 'adam');
       const isZeus = !!(wDef && wDef.id === 'zeus');
       const isYujiro = !!(wDef && wDef.id === 'yujiro');
+      const isItachi = !!(wDef && wDef.id === 'itachi');
       const wSid = o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id;
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
@@ -1896,6 +2015,193 @@
         }
         else if (id === 'dash') {
           play('dash', 0.65); play('bladeScrape', 0.5);
+        }
+      }
+      // 宇智波鼬專屬音效
+      else if (isItachi) {
+        if (id === 'mangekyo') {
+          play('heartbeat', 0.95);       // 萬花筒覺醒：血淚滴落、勾玉收緊心跳
+          play('bell', 0.9);             // 萬花筒清鳴開眼
+          play('buff', 0.85);            // 暗黑查克拉湧出
+          play('ambSnow', 0.7);          // 血紅暗幕陰風
+          setTimeout(() => {
+            play('wood', 0.95);          // 斗笠粉碎炸飛！
+            play('shockwave', 0.95);     // 雙層震波狂湧！
+            play('slamHeavy', 0.9);      // 氣勢壓碎地面
+            play('swordWhoosh', 0.85);   // 烏鴉殘影掠過
+          }, (o.life || 1.8) * 1000);
+        }
+        else if (id === 'susanoo') {
+          play('ultCast', 0.95);         // 須佐能乎：查克拉骨架暴拔升騰！
+          play('slamHeavy', 0.9);        // 踏裂大地
+          play('shockwave', 0.85);       // 神威震波
+          play('fire', 0.8);             // 赤紅烈火奔流
+          play('bladeScrape', 0.75);     // 骨架合攏金屬感
+        }
+        else if (id === 'susanoocharge') {
+          play('maceAir', 0.85);         // 須佐能乎蓄勢：肋骨骨架光環蓄力
+          play('bladeScrape', 0.8);      // 查克拉金屬摩擦
+          play('buff', 0.75);
+          play('shockwave', 0.65);
+        }
+        else if (id === 'yatamirror') {
+          play('mikiriClang', 1.0);      // 八咫鏡・反映：絕對神盾同心圓反彈！
+          play('mikiriRing', 0.95);      // 鏡面波紋神聖共振清鳴
+          play('shockwave', 0.9);        // 彈反震波推開
+          play('buff', 0.8);
+          play('slashHeavy', 0.85);      // 反傷重創
+        }
+        else if (id === 'sharinganwatch') {
+          play('mikiriClang', 0.95);     // 寫輪眼・見切：看穿反擊彈刀！
+          play('mikiriRing', 0.9);       // 洞悉清鳴
+          play('slashHeavy', 0.85);      // 反手斬擊
+          play('swordWhoosh', 0.8);
+        }
+        else if (id === 'sharingancharge') {
+          play('bell', 0.85);            // 寫輪眼凝視：月讀前場地暗下一圈
+          play('heartbeat', 0.8);        // 精神收束心跳
+          play('buff', 0.7);
+          play('ambSnow', 0.6);
+        }
+        else if (id === 'gazeline') {
+          play('bell', 0.95);            // 月讀視線：眼神交會血紅光束貫穿！
+          play('heartbeat', 0.9);        // 精神重擊
+          play('ambSnow', 0.85);         // 幻術抽離現實
+          play('shockwave', 0.8);
+          play('teleport', 0.75);
+        }
+        else if (id === 'tsukuyomi') {
+          play('bell', 1.0);             // 月讀世界：拉入血紅暗幕、釘上十字架！
+          play('ambSnow', 0.9);          // 幻術世界死寂陰風
+          play('heartbeat', 0.9);        // 精神重壓心跳
+          play('teleport', 0.8);
+        }
+        else if (id === 'amaterasumark') {
+          play('heartbeat', 0.85);       // 天照鎖定：黑炎降臨前寫輪眼預警焦點
+          play('fire', 0.75);            // 虛無火舌滋滋作響
+          play('click', 0.7);            // 視線鎖死
+          play('buff', 0.6);
+        }
+        else if (id === 'amaterasubloom' || id === 'amaterasu') {
+          play('explodeMid', 0.95);      // 天照・黑炎綻放：落點黑炎憑空爆裂！
+          play('fire', 0.95);            // 不滅之火狂暴灼燒
+          play('shockwave', 0.85);       // 黑炎震波
+          play('poison', 0.75);          // 燒盡為止的腐蝕滋滋聲
+        }
+        else if (id === 'gokakyu' || id === 'flamethrow') {
+          play('fire', 0.95);            // 火遁・豪火球之術：滔天烈焰向前噴湧翻滾！
+          play('explodeMid', 0.85);      // 火球前緣爆破
+          play('shockwave', 0.8);        // 灼熱氣浪衝擊
+          play('maceAir', 0.7);          // 空氣撕裂
+        }
+        else if (id === 'kunaislash') {
+          play(isP2 ? 'slashHeavy' : 'slash', isP2 ? 0.75 : 0.65); // 苦無連斬：銀白弧度
+          play('swordWhoosh', 0.55);
+          if (isP2 || o.el === 'fire') play('fire', 0.65);
+        }
+        else if (id === 'kunaistab') {
+          play('slashHeavy', isP2 ? 0.85 : 0.75); // 苦無突刺：直刺貫通
+          play('crit', 0.75);
+          play('swordWhoosh', 0.65);
+          if (isP2 || o.el === 'fire') play('fire', 0.7);
+        }
+        else if (id === 'shurikenfan') {
+          play('throwWhoosh', 0.8);      // 手裏劍扇射：暗器破空疾射
+          play('shoot', 0.5);
+          if ((o.scale || 1) >= 1.2) play('swordWhoosh', 0.7); // 巨大四刃風車手裏劍
+          if (isP2 || o.el === 'fire') play('fire', 0.6);
+        }
+        else if (id === 'crowvolley') {
+          play('throwWhoosh', 0.75);     // 烏鴉齊飛：袖口振翅衝出
+          play('dash', 0.55);
+          play('shadowTeleport', 0.5);
+        }
+        else if (id === 'crowfall') {
+          play('slamThud', 0.75);        // 烏鴉俯衝：從天而降砸在落點
+          play('throwWhoosh', 0.7);
+          if (o.el === 'blackfire' || isP2) {
+            play('explodeMid', 0.85);    // 附帶天照黑炎的群鴉轟炸
+            play('fire', 0.75);
+          }
+        }
+        else if (id === 'crowburst') {
+          play('shadowTeleport', 0.85);  // 烏鴉分身／烏鴉替身：漆黑羽翼拖影炸散遁走
+          play('throwWhoosh', 0.8);      // 漫天落羽撲擊破空
+          play('wood', 0.55);            // 替身混淆
+          play('dash', 0.5);
+        }
+        else if (id === 'shunshin') {
+          play('teleport', 0.85);        // 瞬身之術：落葉白煙極速位移
+          play('dash', 0.75);
+          play('throwWhoosh', 0.6);
+        }
+        else if (id === 'palmgrab') {
+          play('hitHeavy', 0.85);        // 擒拿掌擊：背後貼身重重一印！
+          play('slamThud', 0.8);
+          play('shockwave', 0.7);
+          play('throwWhoosh', 0.6);
+        }
+        else if (id === 'foreheadpoke' || wSid === 'poke') {
+          play('click', 0.9);            // 額頭一戳・下次吧：「下次吧，佐助。」額頭清脆一響！
+          play('shieldBreak', 0.9);      // 破防崩解、架勢全散！
+          play('bell', 0.75);            // 親情羈絆清鳴
+        }
+        else if (id === 'magatamafan') {
+          play('tridentThrow', 0.9);     // 八尺瓊勾玉：勾玉扇形甩出、橘金呼嘯
+          play('maceAir', 0.85);
+          play('shockwave', 0.8);
+          play('buff', 0.7);
+        }
+        else if (id === 'totsuka') {
+          play('slashHeavy', 1.0);       // 須佐能乎・十拳劍：四道蒼紫月牙斬氣滾出、裂地巨斬！
+          play('shockwave', 1.0);        // 貫通音爆
+          play('slamHeavy', 0.95);       // 大地碎裂
+          play('ultCast', 0.9);          // 封印靈劍神威
+          setTimeout(() => {
+            play('bell', 0.95);          // 封印收束：「封」字浮現、吸入酒壺清鳴！
+            play('mikiriRing', 0.85);
+            play('teleport', 0.8);
+          }, 500);
+        }
+        else if (id === 'parry') {
+          play('mikiriClang', 0.95);     // 寫輪眼見切：看穿反擊彈刀！
+          play('mikiriRing', 0.85);
+          play('slashHeavy', 0.9);
+          play('swordWhoosh', 0.8);
+        }
+        else if (wSid === 'flicker') {
+          play('hitHeavy', 0.85);        // 瞬身掌擊命中
+          play('slamThud', 0.8);
+          play('shockwave', 0.7);
+        }
+        else if (wSid === 'kunai') {
+          if (id === 'thrust') {
+            play(isP2 ? 'slashHeavy' : 'slash', 0.8);
+            play('crit', 0.75);
+            play('swordWhoosh', 0.65);
+            if (isP2) play('fire', 0.75);
+          } else {
+            play('slash', 0.7);
+            play('swordWhoosh', 0.6);
+            if (isP2) play('fire', 0.65);
+          }
+        }
+        else if (id === 'slash') {
+          if (o.el === 'umbra') {
+            play('crit', 0.75);          // 月讀幻境中的連續白線穿刺酷刑！
+            play('slash', 0.65);
+            play('heartbeat', 0.7);
+          } else {
+            play(isP2 ? 'slashHeavy' : 'slash', 0.75);
+            play('swordWhoosh', 0.65);
+            if (isP2) play('fire', 0.65);
+          }
+        }
+        else if (id === 'thrust') {
+          play('slashHeavy', 0.8);
+          play('crit', 0.75);
+          play('throwWhoosh', 0.65);
+          if (isP2) play('fire', 0.7);
         }
       }
       else if (id === 'thunderwake') { play('buff', 0.6); play('lightning', 0.6); }
