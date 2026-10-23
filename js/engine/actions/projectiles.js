@@ -7,7 +7,7 @@
     const s = { kind: 'circle', x, y, r: a.r };
     w.applyArea(src, s, { dmg: a.dmg, posture: a.posture, kb: a.kb, slow: a.slow, root: a.root, status: a.status });
     BD.hitProps(w, src, s, a);
-    BD.spawnFx(w, 'explode', x, y, { src: src, el: BD.kindElement(a.kind, BD.fxElementOf(src)), radius: a.r, dmg: a.dmg });
+    BD.spawnFx(w, a.fx || 'explode', x, y, { src: src, el: a.fxEl || BD.kindElement(a.kind, BD.fxElementOf(src)), radius: a.r, dmg: a.dmg });
     if (a.zone) BD.makeZone(w, src.owner || src, x, y, a.zone);
   }
   function lobOne(w, b, x0, y0, x1, y1, a, sky) {
@@ -18,6 +18,8 @@
   }
 
   BD.defineAction('proj', (w, b, inst, a) => {
+    // 發射演出（純視覺）：fx 以扇形張角 arc、發射數 n 在出手處播放
+    if (a.fx) BD.spawnFx(w, a.fx, b.x, b.y, { src: b, el: a.fxEl, angle: b.face + (a.angOff || 0), arc: (a.spread || 0) * (a.n - 1), n: a.n, speed: a.speed });
     for (let i = 0; i < a.n; i++) {
       let ang;
       if (a.radial) ang = i * U.TAU / a.n + (a.angOff || 0);

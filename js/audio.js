@@ -23,7 +23,7 @@
       crit: ['hit_flesh_slice', 'slash_violent'],
       mikiriClang: ['hit_metal_clash'], mikiriRing: ['hit_metal_clash', 'buff_up'],
       draw: ['swing_small'], sheath: ['slash_2'], bell: ['buff_up'], stun: ['hit_armor'],
-      wood: ['slam_thud', 'hit_armor'], click: ['swing_small'], stepSand: ['slam_thud'],
+      wood: ['slam_thud', 'hit_armor'], click: ['swing_small'], stepSand: ['slam_thud'], shoot: ['swing_small', 'dash_whoosh'],
     } },
     mc_set: { ext: '.ogg', files: {
       slashHeavy: ['sweep_attack1', 'sweep_attack2', 'sweep_attack3'], slash: ['sweep_attack4', 'sweep_attack5'], swing: ['sweep_attack6', 'sweep_attack7'],
@@ -127,6 +127,8 @@
   const seenEcstasy = new WeakSet();
   const seenYujiroP2 = new WeakSet();
   const seenLearn = new WeakSet();
+  const seenItachiP2 = new WeakSet();
+  const amMap = new WeakMap();
   function tick(w, dt) {
     const g = MAP_SFX[BD.ARENA.map]; if (!g || w.over) return;
     if (ambW !== w) { ambW = w; ambT = 2 + V() * 3; }

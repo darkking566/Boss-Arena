@@ -64,3 +64,7 @@
 - 一階段：瞬身・背後苦無（瞬身閃到背後，命中才接苦無）、烏鴉分身・風暴（烏鴉群脫身後落下烏鴉風暴，命中才續）。
 - 二階段：月讀・天照（眼神鎖定後黑炎落在腳下，命中才續）、八尺瓊勾玉・十拳劍。
 - 本次重製把「烏鴉分身・天照」與「天照・烏鴉」換成上述兩串，讓每串開頭都是一個明確的標誌性動作。
+
+## 6. 技能特效（`js/fx/itachi.js`）
+每個技能一組專屬演出（對照見 `docs/effects.md` 特效一覽）：苦無 `kunaislash` / `kunaistab`、手裏劍 `shurikenfan`、豪火球 `gokakyu`、烏鴉 `crowvolley`（出手）/ `crowfall`（風暴落點）、瞬身 `shunshin` + `palmgrab`、月讀 `sharingancharge` + `gazeline`、見切 `sharinganwatch`、一戳 `foreheadpoke`、天照 `amaterasumark`（預警）+ `amaterasubloom`（落點）、勾玉 `susanoocharge` + `magatamafan`。
+引擎小改：`proj` 動作支援 `fx`（出手演出）、`rain` / `lob` 支援 `fx` / `fxEl`（落點演出，預設仍為 `explode`）。純視覺，指紋不變。
