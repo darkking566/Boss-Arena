@@ -23,7 +23,7 @@
       crit: ['hit_flesh_slice', 'slash_violent'],
       mikiriClang: ['hit_metal_clash'], mikiriRing: ['hit_metal_clash', 'buff_up'],
       draw: ['swing_small'], sheath: ['slash_2'], bell: ['buff_up'], stun: ['hit_armor'],
-      wood: ['slam_thud', 'hit_armor'],
+      wood: ['slam_thud', 'hit_armor'], click: ['swing_small'], stepSand: ['slam_thud'],
     } },
     mc_set: { ext: '.ogg', files: {
       slashHeavy: ['sweep_attack1', 'sweep_attack2', 'sweep_attack3'], slash: ['sweep_attack4', 'sweep_attack5'], swing: ['sweep_attack6', 'sweep_attack7'],
@@ -82,7 +82,7 @@
   // 音檔常帶很長的尾巴（蓄力 7 秒、砸地 6.6 秒…），超過上限就淡出截斷；未列出者播完整檔
   const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, bladeScrape: 0.8, swordWhoosh: 0.5, maceAir: 0.6, tridentThrow: 0.8, tridentReturn: 1.2, anvilDestroy: 1.2, throwWhoosh: 0.4, heartbeat: 0.6, shadowTeleport: 0.8, fangSnap: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2 };
   const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath'];
-  const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'gfocroar', 'mangekyo', 'susanoo', 'godofgods', 'sightstance'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow', 'edenblink'];
+  const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'gfocroar', 'mangekyo', 'susanoo', 'godofgods', 'sightstance', 'ogreback'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow', 'edenblink'];
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
   const ROAR = ['roar', 'bloodroar', 'awaken', 'dragonrage'];
   const MAX_VOICES = 12; // 同時發聲上限；同名音效最短間隔見 GAP（預設 0.04 秒）
@@ -125,6 +125,8 @@
   const seenDeathstand = new WeakSet();
   const seenZeusP2 = new WeakSet();
   const seenEcstasy = new WeakSet();
+  const seenYujiroP2 = new WeakSet();
+  const seenLearn = new WeakSet();
   function tick(w, dt) {
     const g = MAP_SFX[BD.ARENA.map]; if (!g || w.over) return;
     if (ambW !== w) { ambW = w; ambT = 2 + V() * 3; }
@@ -442,6 +444,98 @@
           lastSkill.delete(b);
         }
       }
+      else if (b.def && b.def.id === 'yujiro') {
+        // 二階段轉變開始：肌肉撐破上衣，背肌浮出惡鬼面孔
+        if ((b.state === 'transition' || b.phase === 2) && !seenYujiroP2.has(b)) {
+          seenYujiroP2.add(b);
+          play('heartbeat', 0.95);      // 惡鬼面孔甦醒，沉重而恐怖的搏動
+          play('bladeScrape', 0.85);    // 肌肉急遽膨脹骨骼爆響
+          play('buff', 0.8);            // 狂暴氣場升騰
+          setTimeout(() => {
+            if (b.hp > 0 && b.state !== 'dead') {
+              play('shieldBreak', 1.0); // 緊身短袖衫被極限膨脹的背肌生生撐爆炸飛！
+              play('anvilDestroy', 0.9);
+              play('roarBig', 1.0);     // 食人魔惡鬼咆哮！地上最強生物全力解放！
+              play('shockwave', 1.0);   // 赤紅暗幕降臨、雙層震波橫掃整座鬥技場！
+              play('explodeBig', 0.95);
+              play('slamHeavy', 0.9);
+            }
+          }, 1600);
+        }
+        // 一看就會（trait 'learn'）：同一招看過第二次時清脆看破提示
+        if (b._learn) {
+          for (const k in b._learn) {
+            const entry = b._learn[k];
+            if (entry && entry.n >= 2 && !seenLearn.has(entry)) {
+              seenLearn.add(entry);
+              play('click', 0.75);      // 清脆看破：已經看過這招了
+              play('mikiriRing', 0.6);
+            }
+          }
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          const isP2 = b.phase === 2;
+          if (sid === 'finger_flick') {
+            play('click', 0.75);                     // 彈指：拇指扣緊指甲脆響
+            play('throwWhoosh', 0.65);               // 指尖氣旋極速聚集
+          } else if (sid === 'axe_kick') {
+            play('maceAir', 0.9);                    // 踵落：重戰斧高高揚起破空
+            play('swordWhoosh', 0.7);
+          } else if (sid === 'backhand') {
+            play('dash', 0.65);                      // 裏拳：壓低身形旋身起手
+            play('swordWhoosh', 0.6);
+          } else if (sid === 'whip_strike') {
+            play('bladeScrape', 0.75);               // 鞭打：手臂如軟鞭般鬆弛甩動
+            play('swordWhoosh', 0.7);
+          } else if (sid === 'roll_kick') {
+            play('dash', 0.75);                      // 迴旋踢：疾衝滑步貼身起步
+            play('throwWhoosh', 0.65);
+          } else if (sid === 'bite') {
+            play('roarMid', 0.85);                   // 噛みつき：食人魔低沉嗜血嘶吼
+            play('dash', 0.7);
+          } else if (sid === 'bear_hug') {
+            play('buff', 0.8);                       // 熊抱：雙臂肌肉如鐵箍張開環抱
+            play('bladeScrape', 0.7);
+          } else if (sid === 'eardrum') {
+            play('throwWhoosh', 0.75);               // 鼓膜破壞：雙掌左右合抱蓄勢
+            play('dash', 0.55);
+          } else if (sid === 'quake_stop') {
+            play('heartbeat', 0.85);                 // 止震之拳：大地震動前沉重微鳴
+            play('maceAir', 0.85);                   // 右拳高高過頂
+            play('buff', 0.75);
+          } else if (sid === 'xiaoli') {
+            play('buff', 0.7);                       // 消力：郭海皇之消力，身如棉絮放鬆
+            play('swordWhoosh', 0.55);
+          } else if (sid === 'flex') {
+            play('heartbeat', 0.9);                  // 震樓之軀：心臟狂暴鼓動
+            play('bladeScrape', 0.85);               // 渾身筋骨爆鳴摩擦
+          } else if (sid === 'beast_barrage') {
+            play('roarBig', 0.95);                   // 猛獸連擊：鬼背惡鬼猙獰咆哮！
+            play('heartbeat', 0.85);
+          } else if (sid === 'demon_blow') {
+            play('heartbeat', 0.95);                 // 鬼貌一擊：惡魔領域降臨深沉心跳
+            play('bladeScrape', 0.85);               // 骨骼極限蓄力摩擦
+            play('ambSnow', 0.7);                    // 死寂陰風
+            play('buff', 0.8);
+          } else if (sid === 'ult') {
+            if (isP2) {
+              play('roarBig', 1.0);                  // 鬼哭啼：鬼臉扭曲痛哭！惡鬼悲鳴長嘯！
+              play('ultCast', 0.95);                 // 全程無敵惡魔領域
+              play('heartbeat', 0.95);
+            } else {
+              play('shadowTeleport', 0.9);           // 地上最強的一擊：身法快到如瞬間移動
+              play('heartbeat', 0.85);               // 絕對威壓心跳
+              play('buff', 0.8);
+            }
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+      }
       // 死亡印記（瞬獄影殺陣）心跳倒數音效：隨倒數時間加速跳動
       const dm = b.statuses && b.statuses.find((s) => s.id === 'deathmark');
       if (dm && dm.rem > 0 && b.hp > 0 && b.state !== 'dead') {
@@ -543,6 +637,7 @@
       const isMihawk = !!(wDef && wDef.id === 'mihawk');
       const isAdam = !!(wDef && wDef.id === 'adam');
       const isZeus = !!(wDef && wDef.id === 'zeus');
+      const isYujiro = !!(wDef && wDef.id === 'yujiro');
       const wSid = o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id;
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
@@ -1588,6 +1683,217 @@
           play('slamHeavy', 1.0);
           play('slamThud', 0.95);
           play('shockwave', 0.9);
+        }
+      }
+      // 範馬勇次郎（地上最強生物・食人魔）專屬音效
+      else if (isYujiro) {
+        if (id === 'ogreback') {
+          play('buff', 0.85);          // 鬼背解放：暗紅光芒搏動
+          play('heartbeat', 0.9);
+        }
+        else if (id === 'dissolve' || id === 'parry') {
+          play('mikiriClang', 0.95);   // 消力：看一眼就學會郭海皇的卸力，清脆化勁彈刀！
+          play('mikiriRing', 0.85);    // 空靈鐘鳴共振
+          play('buff', 0.7);
+        }
+        else if (wSid === 'riposte') {
+          play('slashHeavy', 0.95);    // 消力・返：借力打力全力反擊！
+          play('slamHeavy', 0.9);
+          play('shockwave', 0.85);
+          play('hitHeavy', 0.8);
+        }
+        else if (id === 'fingerflick' || (wSid === 'finger_flick' && id === 'thrust')) {
+          play('shockwave', isP2 ? 0.95 : 0.85); // 彈指：空氣被彈碎的貫穿音爆！
+          play('throwWhoosh', 0.8);
+          play('slamThud', 0.75);
+          if (isP2 || o.el === 'blood') {
+            play('crit', 0.85);
+            play('slamHeavy', 0.75); // 二階段血色氣彈更狂暴
+          }
+        }
+        else if (id === 'heelstomp' || (wSid === 'axe_kick' && id === 'bigslam')) {
+          play('slamHeavy', 1.0);      // 踵落：戰斧下劈重靴踏碎地面！
+          play('slamThud', 0.95);
+          play('shockwave', 0.85);
+          if (isP2 || o.el === 'blood') play('explodeMid', 0.75);
+        }
+        else if (wSid === 'axe_kick' && id === 'ring') {
+          play('shockwave', 0.85);     // 二階段落地延遲擴散震波
+          play('stepSand', 0.7);
+          play('slamThud', 0.65);
+        }
+        else if (id === 'backfist' || (wSid === 'backhand' && id === 'slash')) {
+          play('slashHeavy', 0.95);    // 裏拳：鐵臂破空沉重撕裂！
+          play('maceAir', 0.85);
+          play('slamThud', 0.8);
+          if (isP2 || (o.scale && o.scale >= 1.2)) {
+            play('shockwave', 0.85);   // 二階段第二記重擊破空音爆
+          }
+        }
+        else if (id === 'whiplash' || (wSid === 'whip_strike' && id === 'slash')) {
+          play('crit', 0.85);          // 鞭打：皮開肉綻的清脆極限抽擊聲！
+          play('slash', 0.75);
+          play('hitFlesh', 0.65);
+          if (isP2 || o.el === 'blood') play('bladeScrape', 0.5);
+        }
+        else if (wSid === 'roll_kick' && id === 'dash') {
+          play('dash', 0.7);           // 貼地疾衝
+          play('bladeScrape', 0.5);
+        }
+        else if (id === 'rollkick' || (wSid === 'roll_kick' && id === 'whirl')) {
+          play('slashHeavy', 0.95);    // 迴旋踢：旋身大橫掃破空！
+          play('maceAir', 0.9);
+          play('shockwave', 0.85);
+          play('slamThud', 0.75);
+        }
+        else if (wSid === 'bite' && id === 'dash') {
+          play('dash', 0.75);          // 食人魔前撲
+        }
+        else if (id === 'fangbite' || (wSid === 'bite' && (id === 'projhit' || id === 'bite'))) {
+          play('fangSnap', 1.0);       // 噛みつき：利齒狠狠咬入碎骨脆響！
+          play('hitFlesh', 0.9);
+          play('crit', 0.85);
+          play('poison', 0.65);        // 鮮血淋漓噴濺
+        }
+        else if (id === 'bearhug' || (wSid === 'bear_hug' && id === 'crushhug')) {
+          const sc = o.scale || 1.0;
+          if (sc >= 1.3) {
+            play('slamHeavy', 1.0);    // 熊抱終結：肋骨折斷粉碎性終結一抱！
+            play('shockwave', 0.95);   // 氣管與肋骨壓爆音爆
+            play('slamThud', 0.9);
+            play('anvilDestroy', 0.85);
+            play('crit', 0.85);
+          } else {
+            play('hitHeavy', 0.85);    // 熊抱收緊：肋骨被一根根壓彎的沉悶撞擊
+            play('bladeScrape', 0.75); // 骨骼相互擠壓摩擦
+            play('hitFlesh', 0.7);
+          }
+        }
+        else if (id === 'eardrum' || (wSid === 'eardrum' && id === 'ring')) {
+          play('mikiriRing', 1.0);     // 鼓膜破壞：震耳欲聾的高頻耳鳴清鳴！
+          play('slamThud', 0.9);       // 雙掌狠拍耳際悶響
+          play('shockwave', 0.85);     // 鼓膜震碎氣爆
+          play('stun', 0.75);
+        }
+        else if (id === 'stillquake' || (wSid === 'quake_stop' && id === 'quakehalt')) {
+          play('slamHeavy', 1.0);      // 止震之拳：千鈞重拳砸穿地面！
+          play('slamThud', 1.0);       // 鐵砧震盪
+          play('shockwave', 1.0);      // 鎮壓地脈的巨型裂地音爆！
+          play('explodeBig', 0.95);
+        }
+        else if (wSid === 'quake_stop' && id === 'ring') {
+          play('shockwave', 0.85);     // 地脈衝擊波外推
+          play('stepSand', 0.75);
+        }
+        else if (id === 'flexpulse' || (wSid === 'flex' && id === 'pressure')) {
+          play('shockwave', 0.95);     // 震樓之軀：整棟建築震顫的低頻衝擊！
+          play('slamHeavy', 0.9);      // 地基巨響
+          play('buff', 0.85);          // 狂暴氣場升騰
+          play('roarMid', 0.8);        // 食人魔獰笑威壓
+        }
+        else if (id === 'beastclaw') {
+          play('slamHeavy', 0.9);      // 猛獸爪影
+          play('shockwave', 0.8);
+          play('crit', 0.75);
+          play('hitHeavy', 0.75);
+        }
+        else if (wSid === 'beast_barrage') {
+          if (id === 'fistrain') {
+            const sc = o.scale || 1.0;
+            if (sc >= 1.3) {
+              play('slamHeavy', 1.0);  // 猛獸連擊終結：狂暴連打終結重拳！
+              play('shockwave', 0.95);
+              play('slamThud', 0.9);
+              play('explodeMid', 0.85);
+              play('crit', 0.85);
+            } else {
+              play('slamHeavy', 0.95); // 首記重拳轟擊
+              play('shockwave', 0.85);
+              play('slamThud', 0.8);
+            }
+          } else if (id === 'projhit') {
+            play('hitHeavy', 0.75);    // 密不透風的高速亂拳
+            play('hitMid', 0.65);
+            play('crit', 0.6);
+            play('throwWhoosh', 0.55);
+          }
+        }
+        else if (id === 'demonface' || (wSid === 'demon_blow' && id === 'nukefist')) {
+          play('slamHeavy', 1.0);      // 鬼貌一擊：惡魔領域的終結一拳！
+          play('explodeBig', 0.95);    // 撼地巨響
+          play('shockwave', 1.0);      // 暴烈裂空音爆
+          play('slamThud', 0.95);
+          play('crit', 0.95);
+        }
+        else if (wSid === 'demon_blow') {
+          if (id === 'pressure') {
+            play('shockwave', 0.85);   // 惡魔領域威壓
+            play('buff', 0.8);
+            play('heartbeat', 0.8);
+          } else if (id === 'dash') {
+            play('dash', 0.85);        // 狂暴野獸撕裂地面疾衝
+            play('shockwave', 0.8);
+          }
+        }
+        else if (id === 'ultfist' || id === 'ogrewail' || (wSid === 'ult' && id === 'nukefist')) {
+          play('slamHeavy', 1.0);      // 地上最強一擊／鬼哭啼終結：把大地打凹下去！
+          play('explodeBig', 1.0);     // 核爆轟鳴
+          play('shockwave', 1.0);      // 全場音爆
+          play('slamThud', 1.0);
+          if (isP2 || id === 'ogrewail') play('death', 0.85); // 惡鬼啼哭餘韻
+        }
+        else if (wSid === 'ult') {
+          if (id === 'appear') {
+            play('teleport', 0.85);    // 身後突現
+            play('shadowTeleport', 0.8);
+          } else if (id === 'pressure') {
+            play('shockwave', 0.9);    // 絕對威壓拖慢
+            play('heartbeat', 0.9);
+            play('buff', 0.8);
+          } else if (id === 'fistrain') {
+            play('slamHeavy', 0.95);   // 鬼哭啼：無盡亂拳首擊
+            play('shockwave', 0.9);
+            play('hitHeavy', 0.85);
+            play('crit', 0.85);
+          } else if (id === 'projhit') {
+            play('hitHeavy', 0.75);    // 鬼哭啼高頻拳雨
+            play('crit', 0.65);
+            play('hitMid', 0.65);
+          } else if (id === 'ring') {
+            play('shockwave', 0.9);    // 全場衝擊波擴散
+            play('stepSand', 0.8);
+          }
+        }
+        // 勇次郎通用動作保底
+        else if (id === 'nukefist') {
+          play('slamHeavy', 1.0); play('explodeBig', 1.0); play('shockwave', 1.0); play('slamThud', 1.0);
+        }
+        else if (id === 'quakehalt') {
+          play('slamHeavy', 1.0); play('slamThud', 1.0); play('shockwave', 1.0); play('explodeBig', 0.95);
+        }
+        else if (id === 'crushhug') {
+          play('slamHeavy', 0.95); play('shockwave', 0.9); play('hitHeavy', 0.85);
+        }
+        else if (id === 'bigslam') {
+          play('slamHeavy', 1.0); play('slamThud', 0.95); play('shockwave', 0.9);
+        }
+        else if (id === 'thrust') {
+          play('shockwave', 0.85); play('throwWhoosh', 0.75); play('crit', 0.7);
+        }
+        else if (id === 'slash') {
+          play('slashHeavy', 0.85); play('maceAir', 0.75);
+        }
+        else if (id === 'whirl') {
+          play('slashHeavy', 0.9); play('maceAir', 0.85); play('shockwave', 0.8);
+        }
+        else if (id === 'ring') {
+          play('shockwave', 0.85); play('stepSand', 0.65);
+        }
+        else if (id === 'pressure') {
+          play('shockwave', 0.9); play('buff', 0.75);
+        }
+        else if (id === 'dash') {
+          play('dash', 0.65); play('bladeScrape', 0.5);
         }
       }
       else if (id === 'thunderwake') { play('buff', 0.6); play('lightning', 0.6); }

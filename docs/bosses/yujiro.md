@@ -68,7 +68,13 @@
 ## 4. 實作位置
 - 資料：`js/data/bosses/yujiro.js`；造型：`js/render/styles/yujiro.js`（全部以程式繪製，未使用任何原作圖片）。
 - trait `learn`：`js/engine/traits.js`；狀態 `ogreback`：`js/engine/statuses/effects.js`；連打小工具 `BD.DataKit.flurry` 由宙斯的資料檔搬到 `js/data/kit.js` 共用。
-- 新特效：`quakehalt`（shockwave.js）、`crushhug`（impact.js）、`ogreback`（buff.js）、`nukefist`（ultimate.js）；其餘重用現有特效（`thrust` / `bigslam` / `slash` / `whirl` / `ring` / `pressure` / `parry` / `fistrain` / `projhit`）。
+- 招式專屬特效（`js/fx/yujiro.js`）：`fingerflick` 彈指、`heelstomp` 踵落、`backfist` 裏拳、`whiplash` 鞭打、`rollkick` 迴旋踢、`fangbite` 噛みつき、`bearhug` 熊抱、`eardrum` 鼓膜、`stillquake` 止震、`dissolve` 消力、`flexpulse` 震樓、`beastclaw` 猛獸連擊、`demonface` 鬼貌一擊、`ultfist` 地上最強的一擊、`ogrewail` 鬼哭啼。
+- 音效設計（`js/audio.js`）：
+  - 專屬換階段音效：二階段肌肉極限膨脹爆響（`bladeScrape` + `heartbeat` + `buff`），1.6 秒後上衣爆碎炸飛（`shieldBreak` + `anvilDestroy`）、食人魔長嘯（`roarBig`）與暗幕雙層震波（`shockwave` + `explodeBig` + `slamHeavy`）。
+  - 起手蓄勢與前搖（`tick`）：彈指扣指蓄勢、踵落重腿揚空、裏拳壓低轉身、鞭打鬆弛甩動、迴旋滑步貼身、噛咬嗜血咆哮、熊抱雙臂大張、鼓膜雙掌合抱、止震心跳蓄力、消力身如棉絮、震樓筋骨爆鳴、猛獸鬼背暴吼、鬼貌惡魔心跳、大招瞬身威壓／鬼哭啼惡鬼痛哭長嘯。
+  - 命中與打擊（`fx`）：彈指空氣爆破、踵落重靴踏碎地面、裏拳沉重撕裂、鞭打皮開肉綻抽擊、迴旋大橫掃破空、噛咬利齒咬骨、熊抱肋骨擠壓與粉碎收尾、鼓膜耳鳴音爆、止震一拳鎮壓地表、消力化勁彈反與全力回擊、震樓建築震顫地基巨響、猛獸拳雨亂打、鬼貌惡魔終結重拳、大招地上最強核爆一拳／鬼哭啼大地打凹。
+  - 特性「一看就會」（`learn`）：同一招看過第二次時清脆看破提示音（`click` + `mikiriRing`）。
+- 其餘沿用既有特效：`ogreback`（buff.js，換階段）、`ring` / `projhit` / `pressure`（蓄力與震環）。
 - 平衡（8 種子、全配對）：輕快約 56%（基礎 HP 2450）、沉重約 47%（`js/data/pace.js` 的 `dmgMul` 1.5）。
 
 ## 5. 來源說法不一或未能確認
