@@ -212,8 +212,8 @@
     },
   });
 
-  // ── crowsub：烏鴉分身（鼬）——原作他常以烏鴉分身代替本體挨打：每 14 秒一次，被直接攻擊命中時換成一群烏鴉四散，本體出現在後方 ──
-  const CROWSUB_GAP = 14;
+  // ── crowsub：烏鴉分身（鼬）——原作他常以烏鴉分身代替本體挨打：每 22 秒一次，被直接攻擊命中時換成一群烏鴉四散，本體出現在後方 ──
+  const CROWSUB_GAP = 22;
   BD.defineTrait('crowsub', {
     interceptDamage(w, b, src, p) {
       if (!src || !src.isBoss || p.dot || w.time - (b._crowAt == null ? -99 : b._crowAt) < CROWSUB_GAP || (b.state !== 'idle' && b.state !== 'skill')) return null;
