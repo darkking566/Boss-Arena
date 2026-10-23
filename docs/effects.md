@@ -229,6 +229,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | **增益** | `charge` | 蓄力 | 光源由暗漸亮向內收束、吸入光點 | combat.js `tele` 自動蓄力光預設 |
 | | `stance` | 架式 | 光環由外向內收束成細環、中心微光 | combat.js `counter` 動作（見切架式） |
 | | `parry` | 見切 | 精準彈反白熱光環盪開、全屏一閃、交叉亮線與火花 | traits.js counter 特性彈反成功（預設） |
+| | `clash` | 對撞 | 雙方代表色弧光與隨機斜度的交叉亮線、接點閃光、垂直刀鋒的兩股火花；首下與最後一下更猛（最後一下有殘影與震波）；傳入 `other`（對手）、`first`、`last` | traits.js clash 特性的每一下對撞 |
 | | `mikiri` | 見切・一閃 | 看穿瞬間場地轉暗、光環收束；delay 秒後背後一記巨大白弧斬 | 影刃武士「見切」成功（counter 動作的 fx） |
 | | `divinesight` | 神虛視 | 看穿並複製招式的瞬間：場地轉暗、金色眼紋光環盪開、三道殘影疊出、八道放射光線 | 亞當「神虛視」複製成功（trait `reflect`，搭配 `replica` 元素）與二階段 `phase2.transFx` |
 | | `gfoc` | 全宇宙之父 | 金光爆環、頭頂「G F O C」字樣、四周飄起音符、三層肌肉膨脹殘影 | 宙斯「全宇宙之父」 |

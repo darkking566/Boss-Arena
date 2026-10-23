@@ -55,16 +55,17 @@
     u.setState('recover', 0.35);
     w.checkPostureBreak(u, false);
   }
-  function spark(w, b, a, first) { // 一下刀刃相撞：特效 + 計數
+  function spark(w, b, a, first, last) { // 一下刀刃相撞：特效 + 計數
     w._clashAt = w.time;
     b.stats.clashes = (b.stats.clashes || 0) + 1; a.stats.clashes = (a.stats.clashes || 0) + 1;
     const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
     if (first) { w.fx.text(x, y - 36, '對撞！', '#ffffff', 26); w.log(b, '與 ' + a.name + ' 的招式對撞！', true); }
-    BD.spawnFx(w, 'parry', x, y, { src: b }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : 0.05);
+    BD.spawnFx(w, 'clash', x, y, { src: b, other: a, first, last }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : 0.05);
   }
   function clash(w, b, a, lb, la) {
-    spark(w, b, a, true);
-    if (la !== lb) { // 重擊壓輕擊：較低級的被撞開
+    const single = la !== lb;
+    spark(w, b, a, true, single);
+    if (single) { // 重擊壓輕擊：較低級的被撞開
       if (la > lb) bump(w, b, a, 35, 320); else bump(w, a, b, 35, 320);
       return;
     }
@@ -83,7 +84,7 @@
     for (let i = 1; i < n; i++) {
       w.later(at[i], () => {
         if (a.state !== 'recover' || b.state !== 'recover') return;
-        spark(w, b, a, false); hit();
+        spark(w, b, a, false, i === n - 1); hit();
         if (i === n - 1) { bump(w, b, a, 0, 320); bump(w, a, b, 0, 320); }
       });
     }

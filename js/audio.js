@@ -1098,6 +1098,7 @@
       else if (TERRAIN[id]) play(TERRAIN[id], 0.5);
       else if (id === 'posturebreak') play('stun', 0.7);
       else if (id === 'parry') play('block', 0.6);
+      else if (id === 'clash') play(o.last ? 'mikiriClang' : 'block', o.last ? 0.8 : 0.55);
       else if (id === 'gore') { if (o.lethal) play('death', 0.8); }
       else if (ROAR.includes(id)) play(o.k >= 1.5 ? 'roarBig' : 'roarMid', 0.7);
       else if (id === 'deathmark') {

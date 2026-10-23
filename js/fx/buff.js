@@ -50,6 +50,36 @@
     },
   });
 
+  BD.defineEffect('clash', {
+    name: '對撞', category: '增益',
+    desc: '刀刃相撞：雙方代表色的兩道弧光與交叉亮線在接點迸開、白熱閃光、垂直刀鋒噴出兩股火花；首下與最後一下更猛，最後一下留下雙方殘影與震波。適合近戰對撞、拚刀。',
+    params: { first: false, last: false },
+    spawn(fx, x, y, o) {
+      const E = o.E, V = BD.vrng, k = Math.min(1.4, o.k), a = o.src, b = o.other, big = o.first || o.last;
+      const th = a && b ? Math.atan2(b.y - a.y, b.x - a.x) : o.angle, R = (big ? 120 : 85) * k;
+      const ca = a ? a.def.glow : E.glow, cb = b ? b.def.glow : E.glow;
+      // 雙方各一道弧光自己那側劈向接點；兩道交叉亮線的斜度每下隨機，連拚才不會每下長一樣
+      const tilt = V.range(0.25, 0.85);
+      fx.slash(x, y, th + Math.PI + V.range(-0.5, 0.5), 1.4, R * 0.8, ca, big ? 12 : 8, 0.2, { core: '#ffffff', trail: 2 });
+      fx.slash(x, y, th + V.range(-0.5, 0.5), 1.4, R * 0.8, cb, big ? 12 : 8, 0.2, { core: '#ffffff', trail: 2 });
+      for (const s of [-1, 1]) {
+        const p = th + Math.PI / 2 + s * tilt, dx = Math.cos(p) * R, dy = Math.sin(p) * R;
+        fx.streak(x - dx, y - dy, x + dx, y + dy, big ? 5 : 3.5, s < 0 ? '#ffffff' : E.core, 0.16, true);
+      }
+      fx.flashAt(x, y, 50 * k, '#ffffff', 0.1);
+      for (const s of [-1, 1]) fx.sparkle(x, y, E.core, Math.round((big ? 12 : 7) * k), 330 + V() * 160, th + Math.PI / 2 * s, 0.9);
+      fx.sparks(x, y, '#ffe8b0', Math.round(6 * k), 220);
+      fx.shake(big ? 5 : 2.5, th);
+      if (big) { fx.ring(x, y, 6, 55 * k, 0.2, '#ffffff', 3); fx.punch(0.02, x, y); }
+      if (o.last) {
+        fx.shock(x, y, 10, 95 * k, 0.3, E.glow, 6, E.core);
+        if (a) fx.ghost(a, 0.3, ca);
+        if (b) fx.ghost(b, 0.3, cb);
+        fx.punch(0.035, x, y); fx.shake(8, th);
+      }
+    },
+  });
+
   BD.defineEffect('mikiri', {
     name: '見切・一閃', category: '增益',
     desc: '看穿攻擊的瞬間：場地瞬間轉暗、白色光環猛然收束、全屏一閃；delay 秒後施放者閃到對手背後，一道巨大的白色弧斬劃開黑暗、刀尖方向爆出火花。適合見切、居合反擊等「先讀後斬」的反擊技。',
