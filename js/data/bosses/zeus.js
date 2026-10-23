@@ -34,12 +34,14 @@
         { id: 'jab_meteor', name: '亞光速→流星', phase: 1, weight: 1.3, steps: [
           { skill: 'light_jab' },
           { skill: 'meteor_jab', cancel: 0.3, branch: [
+            { when: { status: 'ecstasy' }, do: 'extend' },
             { when: { landed: true }, do: 'extend' },
             { when: { dist: [0, 240] }, chance: 0.6, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'meteor_axe', name: '流星藏斧', weight: 1.2, steps: [
           { skill: 'meteor_jab' },
           { skill: 'divine_axe', cancel: 0.4, branch: [
+            { when: { status: 'ecstasy' }, do: 'extend' },
             { when: { dist: [0, 250] }, do: 'extend' },
             { when: { rollDir: ['back'], dist: [250, 520] }, do: 'switch', skill: 'zeus_footwork' },
             { do: 'stop' }] }] },
@@ -48,6 +50,12 @@
           { skill: 'gavel_decree', cancel: 0.35, branch: [
             { when: { landed: true }, do: 'extend' },
             { chance: 0.4, do: 'delay', hold: [0.25, 0.5] },
+            { do: 'stop' }] }] },
+        { id: 'axe_pose', name: '斧後擺姿', phase: 1, weight: 0.8, steps: [
+          { skill: 'divine_axe' },
+          { skill: 'gfoc', cancel: 0.4, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { when: { status: 'ecstasy' }, chance: 0.5, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'adamas_rush', name: '阿陀磨須猛攻', phase: 2, weight: 1.4, steps: [
           { skill: 'true_right' },
@@ -58,6 +66,12 @@
         { id: 'adamas_step', name: '神速步法', phase: 2, weight: 1.1, steps: [
           { skill: 'zeus_footwork' },
           { skill: 'true_right', cancel: 0.35, branch: [
+            { when: { dist: [0, 300] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'star_storm', name: '星海流星', phase: 2, weight: 1.2, steps: [
+          { skill: 'meteor_jab' },
+          { skill: 'true_right', cancel: 0.3, branch: [
+            { when: { landed: true }, do: 'extend' },
             { when: { dist: [0, 300] }, do: 'extend' },
             { do: 'stop' }] }] },
       ],

@@ -28,6 +28,7 @@
 //   sta:number   我的體力比例 >= sta
 //   phase:1|2    目前階段
 //   enemyState:['idle','skill','whiff','knockdown','dodge',...]
+//   status:'<狀態id>'  施法者（自己）身上有該狀態才成立（BD.hasStatus）
 // 若沒有規則成立 → 視同 extend。選定的段落若未就緒（可用 / 體力 / 減少後的冷卻門檻）→ 連段以 stopped 結束。
 (function (G) {
   const BD = G.BD, U = BD.U;
@@ -48,7 +49,7 @@
   };
 
   const ROLL_DIRS = ['left', 'right', 'back', 'through'];
-  const WHEN_KEYS = { landed: 1, rolled: 1, rollDir: 1, dist: 1, sta: 1, phase: 1, enemyState: 1 };
+  const WHEN_KEYS = { landed: 1, rolled: 1, rollDir: 1, dist: 1, sta: 1, phase: 1, enemyState: 1, status: 1 };
 
   // 判定一組 when（st = { landed, rolled, rollDir, dist }；其餘即時讀取）
   BD.evalComboWhen = function (ctl, when, st) {
@@ -61,6 +62,7 @@
     if (when.sta != null && !(b.sta / b.maxSta >= when.sta)) return false;
     if (when.phase != null && b.phase !== when.phase) return false;
     if (when.enemyState != null && [].concat(when.enemyState).indexOf(e.state) < 0) return false;
+    if (when.status != null && !BD.hasStatus(b, when.status)) return false;
     return true;
   };
   BD.COMBO_WHEN_KEYS = WHEN_KEYS;

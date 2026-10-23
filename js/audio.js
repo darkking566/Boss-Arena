@@ -463,6 +463,17 @@
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
       if (e && o.color === e && (id === 'slash' || id === 'cross')) { play('swing', 0.25, 0.7); return; } // 影分身追斬：較輕、較低沉的虛影揮刀
+      if (id === 'clash') { // 放在各角色專屬區塊之前，否則施放者是亞當 / 菲歐拉等時會被攔走而靜音
+        const isFist = (o.src && o.src.def && o.src.def.clash && o.src.def.clash.style === 'fist') ||
+                       (o.other && o.other.def && o.other.def.clash && o.other.def.clash.style === 'fist');
+        if (isFist) {
+          play(o.last ? 'slamHeavy' : 'hitHeavy', o.last ? 0.9 : 0.65);
+          play(o.last ? 'shockwave' : 'slamThud', o.last ? 0.8 : 0.5);
+        } else {
+          play(o.last ? 'mikiriClang' : 'block', o.last ? 0.8 : 0.55);
+        }
+        return;
+      }
       if (id === 'impact') {
         const d = o.dmg || 0, v = o.victim, ht = (v && v.def && v.def.hurt) || 'flesh';
         if (d >= 100) {
@@ -1396,16 +1407,6 @@
       else if (TERRAIN[id]) play(TERRAIN[id], 0.5);
       else if (id === 'posturebreak') play('stun', 0.7);
       else if (id === 'parry') play('block', 0.6);
-      else if (id === 'clash') {
-        const isFist = (o.src && o.src.def && o.src.def.clash && o.src.def.clash.style === 'fist') ||
-                       (o.other && o.other.def && o.other.def.clash && o.other.def.clash.style === 'fist');
-        if (isFist) {
-          play(o.last ? 'slamHeavy' : 'hitHeavy', o.last ? 0.9 : 0.65);
-          play(o.last ? 'shockwave' : 'slamThud', o.last ? 0.8 : 0.5);
-        } else {
-          play(o.last ? 'mikiriClang' : 'block', o.last ? 0.8 : 0.55);
-        }
-      }
       else if (id === 'gore') { if (o.lethal) play('death', 0.8); }
       else if (ROAR.includes(id)) play(o.k >= 1.5 ? 'roarBig' : 'roarMid', 0.7);
       else if (id === 'deathmark') {

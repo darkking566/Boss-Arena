@@ -230,7 +230,8 @@ combos: [
 ```
 
 - `branch` 由上到下判定，第一條 `when` 全部成立且 `chance` 通過者生效，每段只判定一次。沒有規則成立 → 預設技能就緒時 `extend`，否則 `stop`。
-- `when` 可用：`landed`、`rolled`、`rollDir`（`left`/`right`/`back`/`through`，相對自己）、`dist:[a,b]`、`sta`（體力比例下限）、`phase`、`enemyState`。
+- `when` 可用：`landed`、`rolled`、`rollDir`（`left`/`right`/`back`/`through`，相對自己）、`dist:[a,b]`、`sta`（體力比例下限）、`phase`、`enemyState`、`status`（自己身上有該狀態 id，例如宙斯的 `ecstasy`）。
+- 同一串中不要重複同一技能：前一段剛用過，冷卻未就緒，該段會直接 `stopped`。
 - 公平性：後續段落仍需體力（`feat.combo.costMul` 折扣）與冷卻（剩餘冷卻 ≤ `cd × feat.combo.cdGate`），起手後照樣進入完整冷卻；每串結束後有 `comboCd` 秒的連段冷卻。
 - `node test/validate.js` 會檢查：技能存在、二階段 / 僅一階段技能只出現在對應階段的連段、`exits.after` 不超過該技能的傷害時點數、每個階段可用 2~4 串等。
 - 調整參數：`js/data/pace.js` 的 `heavy.ai.feat.combo`；統計：`node test/ai_stats.js heavy`。

@@ -296,7 +296,7 @@ function walkStatusRefs(node, where, found) {
     for (const s of [].concat(node.status)) found.push({ where: `${where}.status`, id: s && s.id, dur: s && s.dur, badShape: !s || typeof s !== 'object' || typeof s.id !== 'string' });
   }
   for (const k in node) {
-    if (k === 'status') continue;
+    if (k === 'status' || k === 'when') continue; // when.status 是連段條件（狀態 id 字串），不是狀態套用
     if (node[k] && typeof node[k] === 'object') walkStatusRefs(node[k], `${where}.${k}`, found);
   }
 }
