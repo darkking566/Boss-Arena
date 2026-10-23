@@ -63,6 +63,7 @@
 - 資料：`js/data/bosses/zeus.js`；造型：`js/render/styles/zeus.js`（全部以程式繪製，未使用任何原作圖片）。
 - trait `battlelust`：`js/engine/traits.js`；狀態 `ecstasy` / `adamas`：`js/engine/statuses/effects.js`；`phase2.status`（二階段常駐狀態）：`js/engine/boss.js` `finishTransition`。
 - 特效：`fistrain`（thrust.js）、`divineaxe`（slash.js）、`timestop`（ultimate.js）、`gfoc` / `adamas`（buff.js）；元素 `cosmos`（elements.js）。
+- 招式專屬特效（`js/fx/zeus.js`）：`zeusjab` 亞光速刺拳、`sunsetrush` 黃昏流星拳、`godaxe` 神之斧幻影、`stepecho` 宙斯步法殘影、`gavelverdict` 審判之槌、`gfocroar` 全宇宙之父、`kronosfist` 時間逆流拳、`adamasfist` 阿陀磨須星海拳、`olympusquake` 眾神震盪（大招終結砸地）；`timestop` 仍作超越時間之拳的蓄力。
 
 - 平衡（8 種子、全配對）：輕快約 57%、沉重約 54%（基礎 HP 2250；沉重 `hpMul` 1.7，見 `js/data/pace.js`）。
 
