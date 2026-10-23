@@ -55,6 +55,11 @@
     u.setState('recover', 0.35);
     w.checkPostureBreak(u, false);
   }
+  // 記下連拚每一下的絕對時間，供繪圖讓刀鋒剛好在火花迸出的瞬間相碰（純視覺：seed 用視覺亂數，不影響戰鬥）
+  function setRally(us, beats, hold) {
+    const seed = BD.vrng() < 0.5 ? 0 : 1;
+    for (const u of us) u._rally = { beats, seed, end: beats[beats.length - 1] + hold };
+  }
   function spark(w, b, a, first, last) { // 一下刀刃相撞：特效 + 計數
     w._clashAt = w.time;
     b.stats.clashes = (b.stats.clashes || 0) + 1; a.stats.clashes = (a.stats.clashes || 0) + 1;
@@ -66,13 +71,16 @@
     const single = la !== lb;
     spark(w, b, a, true, single);
     if (single) { // 重擊壓輕擊：較低級的被撞開
-      if (la > lb) bump(w, b, a, 35, 320); else bump(w, a, b, 35, 320);
+      const lose = la > lb ? b : a;
+      setRally([lose], [w.time], 0.35);
+      bump(w, lose, lose === b ? a : b, 35, 320);
       return;
     }
     // 同級：雙方鎖在原地連拚 2–6 下，這一串用快 / 中 / 慢其中一種節奏、每下再各自抖動；每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
     const r = w.rng, n = [2, 2, 3, 3, 3, 4, 4, 5, 6][Math.floor(r() * 9)], tempo = r.range(0.09, 0.3), at = [0];
     for (let i = 1; i < n; i++) at.push(at[i - 1] + tempo * r.range(0.6, 1.4));
     const hold = at[n - 1] + 0.35;
+    setRally([a, b], at.map((x) => w.time + x), 0.35);
     for (const [u, o] of [[a, b], [b, a]]) { u.setState('recover', hold); u.face = BD.U.angTo(u, o); }
     let dir = r() < 0.5 ? 1 : -1;
     const hit = () => { // 兩人被同向推動一小段，每下換向：邊撞邊微微前後晃動

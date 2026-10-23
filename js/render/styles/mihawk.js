@@ -326,6 +326,15 @@
     ctx.restore();
   }
 
+  // 對撞連拚（R.rally）：刀身對準接點，碰的瞬間（s = 1）刀鋒剛好穿過接點，之後後甩蓄力、加速劈回下一個接點
+  function rallyPose(ry, r, p2) {
+    const L = p2 ? r * 3.4 : r * 1.35, lean = 0.12 * ry.s - 0.05 * (1 - ry.s), c = ry.c - lean * r;
+    const e = lerp(-0.2, U.clamp(((c - 0.72 * L) / r - 0.55) / 0.75, -0.4, 1.5), ry.s);
+    const hx = r * (0.55 + 0.75 * e), hy = r * (0.55 - 0.3 * Math.max(e, 0));
+    A.e = e; A.lean = lean; A.sw = Math.atan2(-hy, c - hx) + ry.off;
+    A.spin = ry.off * 0.2; A.gl = 0.3 + 0.7 * ry.s; A.l = lerp(0.1, -0.4, ry.s); A.sq = 1 - 0.04 * (1 - ry.s);
+  }
+
   R.defineBossStyle('mihawk', {
     under: lockOn,
     hidden: leap,
@@ -337,6 +346,8 @@
       const sid = inst ? inst.skill.id : '';
       for (const k of KEYS) A[k] = DEF[k];
       if (inst) { pace(inst); build(sid); } else A.e = 0.1 + Math.sin(t * 2.5) * 0.04;
+      const ry = !stag && !guard && R.rally(o);
+      if (ry) rallyPose(ry, r, p2);
       if (guard) { A.e = -0.2; A.sw = -1.1; A.l = 0.45; A.gl = 0.35 + 0.2 * Math.sin(t * 8); }
       ctx.save();
       if (!shade) { if (guard) guardfx(ctx, r, t); parried(ctx, o, r, t); }
@@ -378,6 +389,7 @@
       ctx.strokeStyle = shade ? '#050407' : '#241d2a'; ctx.lineWidth = r * 0.3;
       ctx.beginPath(); ctx.moveTo(0, r * 0.6); ctx.lineTo(HX, HY); ctx.stroke();
       ctx.save(); ctx.translate(HX, HY); ctx.rotate(A.sw);
+      if (ry && !shade) R.bladeTrail(ctx, ry, p2 ? r * 3.4 : r * 1.35, p2 ? HOT : HG);
       if (A.gl > 0.05 && !shade) {
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
         ctx.strokeStyle = hexA(p2 ? HOT : HG, 0.5 * A.gl); ctx.lineWidth = 3 + 7 * A.gl; ctx.beginPath(); ctx.moveTo(r * 0.4, 0); ctx.lineTo(p2 ? r * 3.4 : r * 1.35, 0); ctx.stroke();

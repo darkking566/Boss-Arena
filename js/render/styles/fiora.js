@@ -208,6 +208,15 @@
     if (P.le) { const k = U.clamp(1 - P.since / 0.34, 0, 1); if (k > 0) snapfx(ctx, sid, r, P.le, k, tint); }
   }
 
+  // 對撞連拚（R.rally）：劍尖對準接點，碰的瞬間（s = 1）刃身剛好穿過接點，之後後甩蓄力、加速劈回下一個接點
+  function rallyPose(ry, r) {
+    const L = r * 3.2, fwd = 0.1 * ry.s - 0.05 * (1 - ry.s), c = ry.c - fwd * r;
+    const e = lerp(-0.2, U.clamp(((c - 0.68 * L) / r - 0.55) / 0.7, -0.4, 1.3), ry.s);
+    const hx = r * (0.55 + 0.7 * e), hy = r * (0.5 - 0.3 * Math.max(e, 0));
+    A.ext = e; A.fwd = fwd; A.ang = Math.atan2(-hy, c - hx) + ry.off + 0.12 * (1 - e);
+    A.spin = ry.off * 0.2; A.gl = 0.3 + 0.7 * ry.s; A.cape = 0.6 * ry.s; A.off = 0.4 + 0.5 * ry.s; A.sq = 1 - 0.04 * (1 - ry.s);
+  }
+
   function body(ctx, o, t, { def, r }) {
     const shade = !!o.shade, p2 = o.phase === 2;
     const stag = o.state === 'stagger' || o.state === 'stun'; // 被打斷：回到待機姿態
@@ -218,10 +227,12 @@
     A.ext = 0.15 + Math.sin(t * 3) * 0.05;
     P.ne = P.le = null; P.wd = P.sn = P.since = P.done = 0;
     if (inst) { pace(inst); build(sid); }
+    const ry = !stag && !guard && R.rally(o);
+    if (ry) rallyPose(ry, r);
     if (guard) { A.ext = -0.25; A.ang = -1.2; A.gl = Math.max(A.gl, 0.6); A.sq = 0.95; A.fwd = -0.06; }
     ctx.save();
     if (inst && !shade) decor(ctx, sid, o, r, p2, t, guard);
-    if (inst) { ctx.translate(A.fwd * r, 0); if (A.sq !== 1) ctx.scale(A.sq, 1 + (1 - A.sq) * 0.5); }
+    if (inst || ry) { ctx.translate(A.fwd * r, 0); if (A.sq !== 1) ctx.scale(A.sq, 1 + (1 - A.sq) * 0.5); }
     if (A.spin) ctx.rotate(A.spin);
     const tag = r + ':' + (shade ? 's' : 'b');
 
@@ -253,6 +264,7 @@
     ctx.beginPath(); ctx.moveTo(0, r * 0.6); ctx.lineTo(hx, hy); ctx.stroke();
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(-0.12 * (1 - e) + A.ang);
     const L = r * 3.2, W = r * 0.2;
+    if (ry && !shade) R.bladeTrail(ctx, ry, L, p2 ? def.glow : BRIGHT);
     if ((p2 && !shade) || A.gl > 0.05) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(p2 ? def.glow : BRIGHT, (p2 ? 0.5 : 0.35) + 0.4 * A.gl); ctx.lineWidth = 8 + 6 * A.gl; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.restore(); }
     ctx.fillStyle = shade ? '#1a1020' : '#dfe6f2';
     ctx.beginPath(); ctx.moveTo(r * 0.3, -W); ctx.lineTo(L * 0.8, -W * 0.7); ctx.lineTo(L, 0); ctx.lineTo(L * 0.8, W * 0.7); ctx.lineTo(r * 0.3, W); ctx.closePath(); ctx.fill();

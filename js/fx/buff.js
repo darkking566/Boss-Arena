@@ -66,7 +66,7 @@
         const p = th + Math.PI / 2 + s * tilt, dx = Math.cos(p) * R, dy = Math.sin(p) * R;
         fx.streak(x - dx, y - dy, x + dx, y + dy, big ? 5 : 3.5, s < 0 ? '#ffffff' : E.core, 0.16, true);
       }
-      fx.flashAt(x, y, 50 * k, '#ffffff', 0.1);
+      fx.flashAt(x, y, (big ? 34 : 24) * k, '#ffffff', 0.08); // 閃光不能蓋住相碰的刀鋒
       for (const s of [-1, 1]) fx.sparkle(x, y, E.core, Math.round((big ? 12 : 7) * k), 330 + V() * 160, th + Math.PI / 2 * s, 0.9);
       fx.sparks(x, y, '#ffe8b0', Math.round(6 * k), 220);
       fx.shake(big ? 5 : 2.5, th);
