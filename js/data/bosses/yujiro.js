@@ -37,27 +37,45 @@
             { when: { dist: [0, 260] }, do: 'extend' },
             { chance: 0.4, do: 'delay', hold: [0.3, 0.55] },
             { do: 'stop' }] }] },
-        { id: 'whip_back', name: '鞭打・裏拳', weight: 1.2, steps: [
+        { id: 'whip_back', name: '鞭打・裏拳・迴旋踢', weight: 1.3, steps: [
           { skill: 'whip_strike' },
           { skill: 'backhand', cancel: 0.3, branch: [
             { when: { landed: true }, do: 'extend' },
             { when: { dist: [0, 200] }, chance: 0.6, do: 'extend' },
+            { do: 'stop' }] },
+          { skill: 'roll_kick', cancel: 0.3, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'eardrum_hug', name: '鼓膜・熊抱', phase: 1, weight: 1.0, steps: [
+          { skill: 'eardrum' },
+          { skill: 'bear_hug', cancel: 0.3, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { when: { dist: [0, 160] }, chance: 0.5, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'roll_hug', name: '迴旋踢・熊抱', phase: 1, weight: 1.0, steps: [
           { skill: 'roll_kick' },
           { skill: 'bear_hug', cancel: 0.35, branch: [
             { when: { landed: true }, do: 'extend' },
             { do: 'stop' }] }] },
-        { id: 'beast_rush', name: '猛獸連擊', phase: 2, weight: 1.5, steps: [
+        { id: 'flex_quake', name: '震樓・止震', phase: 2, weight: 0.9, steps: [
+          { skill: 'flex' },
+          { skill: 'quake_stop', cancel: 0.4, branch: [
+            { when: { dist: [60, 380] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'beast_rush', name: '猛獸連擊・鬼貌', phase: 2, weight: 1.5, steps: [
           { skill: 'beast_barrage' },
           { skill: 'demon_blow', cancel: 0.4, branch: [
             { when: { dist: [0, 300] }, do: 'extend' },
             { when: { dist: [300, 640] }, do: 'switch', skill: 'finger_flick' },
             { do: 'stop' }] }] },
-        { id: 'ogre_bite', name: '食人魔', phase: 2, weight: 1.1, steps: [
+        { id: 'ogre_feast', name: '食人魔・咬碎', phase: 2, weight: 1.2, steps: [
           { skill: 'bite' },
           { skill: 'bear_hug', cancel: 0.3, branch: [
-            { when: { dist: [0, 160] }, do: 'extend' },
+            { when: { landed: true }, do: 'extend' },
+            { do: 'stop' }] },
+          { skill: 'quake_stop', cancel: 0.3, branch: [
+            { when: { landed: true, dist: [0, 300] }, do: 'extend' },
+            { chance: 0.5, do: 'extend' },
             { do: 'stop' }] }] },
       ],
     },
