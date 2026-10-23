@@ -1,7 +1,7 @@
 'use strict';
 // Boss 資料：宇智波鼬（《火影忍者》）：一階段頭戴斗笠、不願多戰——苦無 / 手裏劍 / 豪火球 / 烏鴉分身 / 月讀，靠寫輪眼見切與烏鴉替身周旋；
 // HP 50% 脫下斗笠、萬花筒寫輪眼全開：解鎖天照 / 須佐能乎（八尺瓊勾玉、十拳劍），見切變為八咫鏡；大招「月讀・天照・須佐能乎」
-// 被動：寫輪眼（見切 trait counter）、烏鴉分身（trait crowsub，每 14 秒替身一次）、萬花筒反噬（strain：用萬花筒招式損耗生命）
+// 被動：寫輪眼（見切 trait counter）、烏鴉分身（trait crowsub，每 22 秒替身一次）、萬花筒反噬（strain：用萬花筒招式損耗生命）
 // 新增機制：狀態 tsukuyomi / amaterasu / susanoo（js/engine/statuses/effects.js）、動作 strain（combat.js）；考據見 docs/bosses/itachi.md
 (function (G) {
   const BD = G.BD, { D, strike } = BD.DataKit;
@@ -27,7 +27,8 @@
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,
     ai: { prefRange: [140, 360], aggression: 0.5, dodge: 0.65, precision: 0.9, reaction: 0.17, strafe: 0.7, walk: 0.7,
       feint: 0.25, delay: 0.3, retreat: 0.2, punish: 0.85, nervous: 0.03, patience: 0.8, read: 0.85, counter: 0.5,
-      // 連段（僅沉重）：苦無接手裏劍、月讀接豪火球；二階段：天照接烏鴉、須佐能乎接十拳劍
+      // 連段（僅沉重）：每階段 4 串。一階段：苦無接手裏劍、月讀接豪火球、瞬身接背後苦無、烏鴉分身接烏鴉風暴；
+      // 二階段：苦無接手裏劍、月讀接豪火球、月讀接天照（眼神鎖定後黑炎落腳）、八尺瓊勾玉接十拳劍
       combos: [
         { id: 'ks', name: '苦無・手裏劍', weight: 1.2, steps: [
           { skill: 'kunai' },
@@ -40,10 +41,20 @@
           { skill: 'fireball', cancel: 0.4, branch: [
             { when: { landed: true }, do: 'extend' },
             { do: 'stop' }] }] },
-        { id: 'am', name: '天照・烏鴉', phase: 2, weight: 1.2, steps: [
-          { skill: 'amaterasu' },
-          { skill: 'crow_clone', cancel: 0.35, branch: [
-            { when: { landed: true, dist: [0, 260] }, do: 'extend' },
+        { id: 'shun', name: '瞬身・背後苦無', phase: 1, weight: 1.2, steps: [
+          { skill: 'flicker' },
+          { skill: 'kunai', cancel: 0.3, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'crowrain', name: '烏鴉分身・風暴', phase: 1, weight: 1.1, steps: [
+          { skill: 'crow_clone' },
+          { skill: 'crow_storm', cancel: 0.35, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'ta', name: '月讀・天照', phase: 2, weight: 1.3, steps: [
+          { skill: 'tsukuyomi' },
+          { skill: 'amaterasu', cancel: 0.4, branch: [
+            { when: { landed: true }, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'su', name: '八尺瓊勾玉・十拳劍', phase: 2, weight: 1.3, steps: [
           { skill: 'yasaka' },
