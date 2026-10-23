@@ -103,6 +103,16 @@
     } else if (sid === 'proud_laugh') A.rot += Math.sin(t * 40) * 0.07 * (P.N >= 0 ? P.wd : P.sn);
   }
 
+  // 對撞連拚（R.rally）：戟對準接點，碰的瞬間（s = 1）戟身剛好穿過接點，之後後甩蓄力、加速劈回下一個接點
+  function rallyPose(rl, r) {
+    for (const k of KEYS) A[k] = DEF[k];
+    A.s0 = 0; A.sa = 0; A.speed = 0; A.guard = 0;
+    A.tx = -0.1; A.fwd = 0.1 * rl.s - 0.05 * (1 - rl.s);
+    const hpx = r * 0.15, hpy = r * 0.6, c = rl.c - A.fwd * r, d = Math.hypot(c - hpx, hpy);
+    A.ga = Math.atan2(-hpy, c - hpx) + rl.off; A.fs = lerp(0.8, U.clamp(d * 1.25 / (r * 3.4), 0.55, 1.1), rl.s);
+    A.rot = rl.off * 0.15; A.gl = 0.3 + 0.7 * rl.s; A.sq = 1 - 0.04 * (1 - rl.s);
+  }
+
   // 地面層（畫在身體底下）：碎裂紋、震波環、速度線、斬擊光帶
   function crack(ctx, x, y, rad, a, col) {
     ctx.strokeStyle = hexA(col, a); ctx.lineWidth = 2.2; ctx.beginPath();
@@ -250,7 +260,9 @@
         special(sid, inst);
         if (A.gl >= 0.95 && p.N >= 0 && p.sw === 0 && !inst.dash) A.rot += Math.sin(t * 45) * 0.025; // 蓄滿力時顫動
       } else if (raise) { A.ga = 0.2; A.fs = 1 - 0.6 * Math.min(1, (o.poseK || 0) / 0.5); }
-      const w = inst || raise ? A : null;
+      const rl = !stag && !inst && !raise && R.rally(o); // rl：對撞連拚的揮刀節奏（R.rally）
+      if (rl) rallyPose(rl, r);
+      const w = inst || raise || rl ? A : null;
       if (w) { decor(ctx, sid, r, p, p2, t); ctx.save(); ctx.translate(w.fwd * r, 0); if (w.big !== 1) ctx.scale(w.big, w.big); if (w.sq !== 1) ctx.scale(w.sq, 1 + (1 - w.sq) * 0.5); }
       // 1. 赤兔馬：二階段坐騎（衝鋒時前傾、狂喜時人立）；換階段時 horseK 0→1 由身後奔入、漸顯
       if (p2) { ctx.save(); drawHorse(ctx, r, t, w ? w.hl : 0); ctx.restore(); }
@@ -430,6 +442,7 @@
       if (fs !== 1) ctx.scale(fs, 1);
 
       const poleLen = r * 3.4;
+      if (rl && !o.shade) R.bladeTrail(ctx, rl, poleLen, p2 ? '#ff2b38' : '#e8f0f8');
       if (w && w.gl > 0.01) {
         // 戟刃蓄力光（天喰 / 赤兔衝鋒 / 各招蓄力）
         ctx.save(); ctx.globalCompositeOperation = 'lighter';

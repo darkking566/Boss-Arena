@@ -8,9 +8,9 @@
     desc: '手持方天畫戟的天下無雙飛將，以狂瀾巨戟與霸道衝殺壓制全場，縱橫沙場只為尋得能全力一戰的宿敵。',
     color: '#c81e2b', color2: '#2b1a1a', glow: '#ff3a3a', style: 'lubu',
     radius: 34, maxHp: 2400, speed: 205, turn: 6, mass: 1.5, fxEl: 'physical', hurt: 'flesh',
-    traits: ['counter'], // 神境逆斬彈反反擊（js/engine/traits.js）
+    traits: ['counter', 'clash'], clash: { style: 'halberd', proj: true }, // 神境逆斬彈反反擊（js/engine/traits.js）
     stamina: { max: 110, regen: 30 }, posture: 170, dodgeCost: 20, dodgeSpeed: 540,
-    ai: {
+    ai: { clash: 0.4, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
       prefRange: [60, 170],
       aggression: 0.85,
       dodge: 0.55,
@@ -66,11 +66,11 @@
       note: '解鎖「人馬一體・赤兔衝鋒」與「斷腿傲立・狂喜」；方天掃範圍擴大並帶擊飛震波，破盾突更迅猛，大招「天喰」追加赤兔馬踐踏衝鋒後降下終極巨劈',
     },
     skills: [
-      { id: 'fangtian_sweep', name: '方天掃', short: '方天掃', tags: ['melee', 'aoe'], range: [0, 185], cd: 3.2, cost: 24, track: 6, creep: 0.3, recovery: 0.55,
+      { id: 'fangtian_sweep', name: '方天掃', short: '方天掃', tags: ['melee', 'aoe'], clash: 'heavy', range: [0, 185], cd: 3.2, cost: 24, track: 6, creep: 0.3, recovery: 0.55,
         actions: strike(0.52, 0.36, { shape: 'cone', r: 185, arc: 150 * D }, { dmg: 105, posture: 35, kb: 440, fx: 'cleave' }),
         actions2: [...strike(0.48, 0.32, { shape: 'cone', r: 205, arc: 160 * D }, { dmg: 115, posture: 40, kb: 480, fx: 'cleave' }),
           ...strike(0.85, 0.28, { shape: 'circle', r: 150 }, { dmg: 65, posture: 20, kb: 350, fx: 'ring' })] },
-      { id: 'randgriz_thrust', name: '蘭蒂格瑞絲・破盾突', short: '破盾突', tags: ['melee', 'fast'], range: [50, 270], cd: 3.6, cost: 22, track: 8, creep: 0.2, recovery: 0.5, // 盾牌破壞者：重削架勢
+      { id: 'randgriz_thrust', name: '蘭蒂格瑞絲・破盾突', short: '破盾突', tags: ['melee', 'fast'], clash: 'heavy', range: [50, 270], cd: 3.6, cost: 22, track: 8, creep: 0.2, recovery: 0.5, // 盾牌破壞者：重削架勢
         actions: strike(0.45, 0.3, { shape: 'rect', len: 270, w: 55 }, { dmg: 100, posture: 95, kb: 260, fx: 'thrust', status: { id: 'vulnerable', dur: 4 } }),
         actions2: strike(0.38, 0.24, { shape: 'rect', len: 300, w: 60 }, { dmg: 115, posture: 110, kb: 300, fx: 'thrust', status: { id: 'vulnerable', dur: 5 } }) },
       { id: 'sky_cleave', name: '凌空怒劈', short: '怒劈', tags: ['gap', 'fast'], range: [90, 390], cd: 4.5, cost: 25, track: 7, recovery: 0.55,
@@ -102,6 +102,9 @@
         actions: [{ do: 'hit', at: 0.2, shape: 'circle', r: 90, dmg: 0, posture: 15, kb: 220, fx: { id: 'bloodroar', el: 'blood' } },
           { do: 'status', at: 0.2, id: 'shield', dur: 4, value: 160 },
           { do: 'status', at: 0.2, id: 'enrage', dur: 4 }] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '戟刺', short: '戟刺', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 220], cd: 0, cost: 0, track: 7, recovery: 0.35,
+        actions: strike(0.22, 0.16, { shape: 'rect', len: 225, w: 60 }, { dmg: 30, posture: 12, kb: 80, fx: 'thrust' }) }
     ],
     ultimate: {
       id: 'ult', name: '天喰', name2: '天喰・赤兔奔騰', ult: true, range: [0, 950], track: 4, recovery: 0.9,

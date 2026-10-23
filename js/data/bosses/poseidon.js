@@ -14,10 +14,11 @@
     desc: '終末的女武神第 3 回戰、神方代表，奧林帕斯十二神中「最恐」的海神，眾神口中的「神中之神」。不群聚、不謀略、不依靠，神生來就是完美的；人類在他眼裡只是雜魚。以三叉槍使出一記接一記快到留下殘影的連刺，大招「四十日四十夜的大洪水」從四面八方同時刺來。',
     color: '#2b4fa8', color2: '#e9edf4', glow: '#5ac8ff', style: 'poseidon',
     radius: 35, maxHp: 1800, speed: 240, turn: 6.5, mass: 1.25, fxEl: 'ocean', hurt: 'flesh',
-    traits: ['counter', 'tyrant', 'echo'], echoColor: '#7fdcff', // counter＝撥浪見切；tyrant＝每挨 4 下動怒；echo＝二階段快到留下殘影、0.3 秒後再刺一次
+    traits: ['counter', 'tyrant', 'echo', 'clash'], clash: { style: 'trident', proj: true }, echoColor: '#7fdcff', // counter＝撥浪見切；tyrant＝每挨 4 下動怒；echo＝二階段快到留下殘影、0.3 秒後再刺一次
     stamina: { max: 110, regen: 30 }, posture: 170, dodgeCost: 18, dodgeSpeed: 560,
     // 原作：他一直站著不動，直到對手踏進槍的距離才出手——偏好遠距、耐心、很少主動逼近
-    ai: { prefRange: [200, 420], aggression: 0.5, dodge: 0.45, precision: 0.85, reaction: 0.2, strafe: 0.4, walk: 0.5,
+    ai: { clash: 0.35, basic: 0.4, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
+      prefRange: [200, 420], aggression: 0.5, dodge: 0.45, precision: 0.85, reaction: 0.2, strafe: 0.4, walk: 0.5,
       feint: 0.05, delay: 0.35, retreat: 0.05, punish: 0.8, nervous: 0.02, patience: 0.85, read: 0.7, counter: 0.5,
       // 連段（僅沉重）：怒濤連刺接三叉穿、神雷落地接踏、巨浪後追刺；二階段殘影突襲、震海後連刺
       combos: [
@@ -79,7 +80,7 @@
           { do: 'land', at: 1.95, mark: 'C' },
           { do: 'hit', at: 1.95, ...dome(215, 'C'), dmg: 125, posture: 44, kb: 480, fx: { id: 'bigslam', scale: 1.25 } }] },
       // 三叉槍本身：三根槍齒同時貫穿（中央最長，兩側略短且各偏一點角度）；二階段連刺兩輪
-      { id: 'trident', name: '三叉穿刺', short: '三叉', tags: ['melee', 'gap'], range: [60, 470], cd: 4.4, cost: 16, track: 8, recovery: 0.55,
+      { id: 'trident', name: '三叉穿刺', short: '三叉', tags: ['melee', 'gap'], clash: 'heavy', range: [60, 470], cd: 4.4, cost: 16, track: 8, recovery: 0.55,
         actions: [...strike(0.5, 0.45, rect(450, 50), { dmg: 58, posture: 20, kb: 200, fx: 'triprong' }),
           ...strike(0.5, 0.45, { ...rect(430, 44), angOff: 0.17 }, { dmg: 46, posture: 14, kb: 140, fx: { id: 'thrust', scale: 0.7 } }),
           ...strike(0.5, 0.45, { ...rect(430, 44), angOff: -0.17 }, { dmg: 46, posture: 14, kb: 140, fx: { id: 'thrust', scale: 0.7 } })],
@@ -117,6 +118,9 @@
         actions: [...strike(0.8, 0.7, { shape: 'circle', r: 170 }, { dmg: 96, posture: 40, kb: 480, fx: { id: 'waterstomp', scale: 1.3 } }),
           { do: 'tele', at: 0.7, dur: 0.7, ...rect(900, 160), follow: true, hitIn: 0.75 },
           { do: 'erupt', at: 1.4, n: 8, start: 140, step: 105, interval: 0.07, r: 85, dmg: 58, posture: 18, kb: 300, fx: 'erupt' }] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '三叉刺', short: '三叉', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 340], cd: 0, cost: 0, track: 7, recovery: 0.35,
+        actions: strike(0.24, 0.16, rect(330, 60), { dmg: 22, posture: 10, kb: 80, fx: 'thrust' }) }
     ],
     // 一階段「四十日四十夜的大洪水」：躍到對手上空、從圓頂的每個方向同時連刺，最後落地一記無法閃避的重砸（走出圓頂範圍才能躲）；
     // 二階段「大洪水・海神全開」：圓頂更大、連刺更密、落地後再追一圈水環

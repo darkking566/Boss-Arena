@@ -45,9 +45,10 @@
     desc: '飲下狼血的不死隊薪王：尖盔藍鋼甲、紅披風，法蘭大劍配格擋匕首。一階段以突刺、上撩、衝斬與躍斬逼近，並呼喚同伴群攻，偶爾冒出敵我不分的紅眼監視者；二階段狼血匯於一身、大劍燃起薪火，招式在地面留下遲一拍的火焰。',
     color: '#c0392b', color2: '#26303f', glow: '#ff9a4a', style: 'watcher',
     radius: 32, maxHp: 2250, speed: 245, turn: 8, mass: 1.0, fxEl: 'physical', hurt: 'flesh',
-    traits: ['counter'], // 匕首彈反（js/engine/traits.js）；同伴 / 紅眼規則見 js/engine/minions/watcher.js
+    traits: ['counter', 'clash'], clash: { style: 'blade', proj: true }, // 匕首彈反（js/engine/traits.js）；同伴 / 紅眼規則見 js/engine/minions/watcher.js
     stamina: { max: 110, regen: 34 }, posture: 120, dodgeCost: 16, dodgeSpeed: 620,
-    ai: { prefRange: [90, 190], aggression: 0.8, dodge: 0.7, precision: 0.75, reaction: 0.2, strafe: 0.7, walk: 0.75,
+    ai: { clash: 0.5, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
+      prefRange: [90, 190], aggression: 0.8, dodge: 0.7, precision: 0.75, reaction: 0.2, strafe: 0.7, walk: 0.75,
       feint: 0.25, delay: 0.45, retreat: 0.15, punish: 0.8, nervous: 0.1, patience: 0.3, read: 0.7, counter: 0.25, resetFlip: 0.35, resetSkill: 'backflip',
       // 連段（僅沉重；格式見 js/engine/combo.js）
       combos: [
@@ -106,6 +107,9 @@
       { id: 'emberswipe', name: '薪火長斬', short: '長斬', phase: 2, tags: ['gap', 'melee'], range: [150, 400], cd: 6, cost: 24, track: 7, recovery: 0.6,
         actions: [...dashStrike(0.5, 0.5, 340, 56, 0.3, { dmg: 84, posture: 32, kb: 260 }, { fx: 'slashline', trail: { kind: 'fire', r: 34, dur: 3, dps: 20, delay: 0.5 } }),
           ...strike(1.2, 0.35, { shape: 'circle', r: 95, off: -85 }, { dmg: 72, posture: 26, kb: 260, fx: 'pillarring', zone: { kind: 'fire', r: 90, dur: 3.5, dps: 24 } })] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '斬擊', short: '斬擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 160], cd: 0, cost: 0, track: 8, recovery: 0.3,
+        actions: strike(0.2, 0.14, { shape: 'cone', r: 135, arc: 100 * D }, { dmg: 26, posture: 8, kb: 60, fx: 'slash' }) }
     ],
     ultimate: { id: 'ult', name: '不死隊連環劍舞', name2: '薪王焚天連斬', ult: true, range: [0, 900], track: 6, recovery: 1.2,
       actions: legion(false), actions2: legion(true),

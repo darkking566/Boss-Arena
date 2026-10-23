@@ -54,7 +54,7 @@
 
   R.defineBossStyle('poseidon', {
     body(ctx, o, t, { r }) {
-      const shade = !!o.shade, p2 = o.phase === 2, wrath = !shade && !!o.statuses && BD.hasStatus(o, 'tyrantwrath'), P = pose(o, t);
+      const shade = !!o.shade, p2 = o.phase === 2, wrath = !shade && !!o.statuses && BD.hasStatus(o, 'tyrantwrath'), P = pose(o, t), rl = !P.guard && R.rally(o); // rl：對撞連拚的揮刀節奏（R.rally）
       const tag = r + ':' + (shade ? 's' : 'b');
       const col = (c) => (shade ? '#000000' : c);
       const sw = Math.sin(t * 3.0 + o.x * 0.01) * (p2 ? 0.28 : 0.15);
@@ -120,7 +120,7 @@
       }
 
       // 手臂與槍：右手（+y）握槍，左手平時垂放、出招 / 見切時扶上槍柄
-      const e = P.guard ? 0.2 : P.ext, ex = Math.max(0, e);
+      const e = P.guard ? 0.2 : rl ? -0.3 + 1.1 * rl.s : P.ext, ex = Math.max(0, e);
       const grow = (base) => 1 + Math.min(1.4, Math.max(0, P.reach * 0.75 / (r * base) - 1)) * ex;
       const spear = P.guard ? r * 2.9 : r * 4.6 * grow(4.6);
       const gx = r * (0.5 + 0.5 * e), gy = P.guard ? 0 : r * (0.62 - 0.45 * ex);
@@ -134,7 +134,8 @@
       };
       const rx = gx, ry = gy, lx = P.guard ? gx + r * 0.9 : r * (0.5 + 0.55 * ex) - ex * 0.1 * r, ly = P.guard ? gy : -r * (0.7 - 0.5 * ex);
       ctx.save(); ctx.translate(rx, ry);
-      ctx.rotate(P.guard ? t * 13 : -0.32 + 0.32 * ex + 0.2 * Math.max(0, -e));
+      ctx.rotate(P.guard ? t * 13 : rl ? Math.atan2(-ry, rl.c - rx) + rl.off : -0.32 + 0.32 * ex + 0.2 * Math.max(0, -e));
+      if (rl && !shade) R.bladeTrail(ctx, rl, spear, '#7fdcff');
       trident(ctx, r, shade, spear, !shade && (p2 || wrath || P.guard), t);
       ctx.restore();
       arm(1, rx, ry, p2 ? 1.28 : 1); arm(-1, lx, ly, 1); // 二階段：右臂肌肉膨脹（原作：「右臂的肌肉變得更粗」）

@@ -38,7 +38,7 @@
 
   R.defineBossStyle('kojiro', {
     body(ctx, o, t, { r }) {
-      const shade = !!o.shade, p2 = o.phase === 2, P = pose(o, t);
+      const shade = !!o.shade, p2 = o.phase === 2, P = pose(o, t), rl = !P.guard && R.rally(o); // rl：對撞連拚的揮刀節奏（R.rally）
       const tag = r + ':' + (shade ? 's' : 'b');
       const col = (c) => (shade ? '#000000' : c);
       const sw = Math.sin(t * 3.4 + o.x * 0.01) * (p2 ? 0.3 : 0.18); // 二階段披肩與髮更狂放地散開
@@ -103,7 +103,7 @@
       });
 
       // 手臂與刀
-      const e = P.guard ? -0.15 : P.ext, ang0 = P.guard ? -0.25 : -0.95 + 1.05 * e;
+      const e = P.guard ? -0.15 : rl ? -0.3 + 1.2 * rl.s : P.ext, ang0 = P.guard ? -0.25 : -0.95 + 1.05 * e;
       // 招式專屬姿勢：虎切＝逆手握刀（刀尖朝後）；燕返し的第二擊＝反向上撩。刀身視覺依招式最遠距離拉長，與判定範圍對齊
       const tori = P.id === 'torakiri', up = P.id === 'tsubame' && P.i >= 1;
       const grow = (base) => tori ? 1 : 1 + Math.min(1.4, Math.max(0, P.reach * 0.75 / (r * base) - 1)) * Math.max(0, e);
@@ -113,12 +113,12 @@
       if (!p2) { // 雙手握物干し竿
         const gx = r * (0.7 + 0.5 * e), gy = r * 0.05;
         arm(1, gx, gy + r * 0.12); arm(-1, gx - r * 0.25, gy - r * 0.12);
-        ctx.save(); ctx.translate(gx, gy); ctx.rotate(tori ? Math.PI - 0.5 - 0.6 * e : up ? -ang0 : ang0); blade(ctx, r, shade, r * 5.4 * grow(5.4), '#a8262e', false); ctx.restore();
+        ctx.save(); ctx.translate(gx, gy); ctx.rotate(rl ? Math.atan2(-gy, rl.c - gx) + rl.off : tori ? Math.PI - 0.5 - 0.6 * e : up ? -ang0 : ang0); if (rl && !shade) R.bladeTrail(ctx, rl, r * 5.4, '#9fd8ff'); blade(ctx, r, shade, r * 5.4 * grow(5.4), '#a8262e', false); ctx.restore();
       } else { // 右手紅柄長刀（+y）、左手紫柄小太刀（-y）
         const ex = P.guard ? -0.1 : e;
         const rx = r * (0.75 + 0.45 * ex), ry = r * 0.55, lx = r * (0.7 + 0.4 * ex), ly = -r * 0.55;
         arm(1, rx, ry); arm(-1, lx, ly);
-        ctx.save(); ctx.translate(rx, ry); ctx.rotate(P.guard ? -0.3 : tori ? Math.PI - 0.5 - 0.6 * ex : up ? 0.8 - 0.95 * ex : -0.8 + 0.95 * ex); blade(ctx, r, shade, r * 4.3 * grow(4.3), '#a8262e', true); ctx.restore();
+        ctx.save(); ctx.translate(rx, ry); ctx.rotate(rl ? Math.atan2(-ry, rl.c - rx) + rl.off : P.guard ? -0.3 : tori ? Math.PI - 0.5 - 0.6 * ex : up ? 0.8 - 0.95 * ex : -0.8 + 0.95 * ex); if (rl && !shade) R.bladeTrail(ctx, rl, r * 4.3, '#ff8c3c'); blade(ctx, r, shade, r * 4.3 * grow(4.3), '#a8262e', true); ctx.restore();
         ctx.save(); ctx.translate(lx, ly); ctx.rotate(P.guard ? 0.45 : 0.9 - 1.0 * ex); blade(ctx, r, shade, r * 3.0, '#6a4aa8', true); ctx.restore();
       }
 

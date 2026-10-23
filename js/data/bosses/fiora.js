@@ -63,9 +63,6 @@
           ...strike(0.9, 0.22, thrust(190, 55), { dmg: 70, posture: 24, kb: 220, fx: 'thrust', vital: true })],
         actions2: [{ do: 'counter', at: 0, dur: 0.7, dmg: 165, posture: 80, name: '招架・反刺', fx: { id: 'parry', el: 'holy' }, slowmo: 0.3, status: { id: 'stun', dur: 1.6 } },
           ...strike(0.9, 0.2, thrust(200, 55), { dmg: 78, posture: 26, kb: 240, fx: 'thrust', vital: true })] },
-      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
-      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 180], cd: 0, cost: 0, track: 9, recovery: 0.3,
-        actions: strike(0.18, 0.14, thrust(160, 44), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) },
       // 原作 E：連續兩擊，第一擊緩速、第二擊強力（原作必定暴擊）
       { id: 'bladework', name: '劍術', short: '劍術', tags: ['melee', 'fast'], range: [0, 160], cd: 3.2, cost: 14, track: 9, creep: 0.3, recovery: 0.4,
         actions: [...strike(0.24, 0.2, thrust(150, 50), { dmg: 40, posture: 12, kb: 90, fx: 'thrust', status: { id: 'slow', dur: 1.2 } }),
@@ -100,6 +97,9 @@
         actions2: [{ do: 'vitalstep', at: 0.22, dist: 100 }, ...strike(0.4, 0.16, thrust(175, 55), { dmg: 54, posture: 16, kb: 140, fx: 'thrust', vital: true }),
           { do: 'vitalstep', at: 0.7, dist: 100 }, ...strike(0.88, 0.16, thrust(175, 55), { dmg: 58, posture: 16, kb: 150, fx: 'thrust', vital: true }),
           { do: 'vitalstep', at: 1.18, dist: 100 }, ...strike(1.36, 0.18, thrust(185, 55), { dmg: 68, posture: 20, kb: 200, fx: 'thrust', vital: true })] },
+      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 180], cd: 0, cost: 0, track: 9, recovery: 0.3,
+        actions: strike(0.18, 0.14, thrust(160, 44), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) }
     ],
     // 原作 R：鎖定敵方英雄並暴露四個破綻，每擊破一個就造成最大生命比例真實傷害；改編為從四個方位連續刺中
     ultimate: { id: 'ult', name: '終極挑戰', ult: true, range: [0, 600], track: 0, recovery: 0.6,

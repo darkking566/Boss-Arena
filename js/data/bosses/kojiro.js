@@ -13,9 +13,10 @@
     desc: '終末的女武神第 3 回戰、人類代表。一生從未勝過任何人，卻把每一場敗北都化成養分。長刀「物干し竿」使出燕返し；被折斷後神器再錬成二刀的「二天岩流」，千手進化成萬手，看穿一切攻擊。',
     color: '#8c4a3a', color2: '#4a5a3a', glow: '#cfe8ff', style: 'kojiro',
     radius: 29, maxHp: 2050, speed: 240, turn: 7.5, mass: 0.95, fxEl: 'physical', hurt: 'flesh',
-    traits: ['counter', 'learn'], learnReset: true, // 被完美閃避＝預測被超越，千手的學習歸零（原作波賽頓超越千手）
+    traits: ['counter', 'learn', 'clash'], clash: { style: 'blade', proj: true }, learnReset: true, // 被完美閃避＝預測被超越，千手的學習歸零（原作波賽頓超越千手）
     stamina: { max: 105, regen: 34 }, posture: 120, dodgeCost: 18, dodgeSpeed: 580,
-    ai: { prefRange: [150, 290], aggression: 0.5, dodge: 0.65, precision: 0.9, reaction: 0.18, strafe: 0.6, walk: 0.75,
+    ai: { clash: 0.6, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
+      prefRange: [150, 290], aggression: 0.5, dodge: 0.65, precision: 0.9, reaction: 0.18, strafe: 0.6, walk: 0.75,
       feint: 0.25, delay: 0.45, retreat: 0.1, punish: 0.85, nervous: 0.03, patience: 0.8, read: 0.9, counter: 0.55,
       // 連段（僅沉重）：燕返し接虎切、剣氣後長刀突進、二階段小太刀亂舞接一刀兩斷、柳生繞背接二天十字
       combos: [
@@ -110,6 +111,9 @@
       { id: 'phantoms', name: '歷代劍豪', short: '幻影', phase: 2, tags: ['ranged', 'zone'], range: [200, 900], cd: 10, cost: 28, track: 7, recovery: 0.7,
         actions: [{ do: 'tele', at: 0, dur: 0.85, ...cone(820, 70), follow: true },
           { do: 'proj', at: 0.85, n: 5, spread: 0.2, speed: 780, r: 42, dmg: 78, posture: 22, kb: 240, life: 1.15, pierce: true, kind: 'swordghost' }] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '長刀斬', short: '長刀', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 300], cd: 0, cost: 0, track: 8, recovery: 0.3,
+        actions: strike(0.22, 0.16, rect(290, 56), { dmg: 28, posture: 8, kb: 60, fx: 'slash' }) }
     ],
     // 一階段「燕返し・千手無雙」：在腦中死了十八次後的三連返斬，一次比一次更深；
     // 二階段「雙燕斬虎萬刃繚亂」：劍豪幻影奔過全場、踏進零距離，小太刀上撩 → 長刀上撩 → 雙刀十字斬

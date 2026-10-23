@@ -11,9 +11,10 @@
     desc: '閃避極佳，在中距離游走誘使對手出招，再以居合、影步與「見切」懲罰每一個破綻。',
     color: '#ff5470', color2: '#1a1a2e', glow: '#ffb3c0', style: 'ronin',
     radius: 27, maxHp: 2050, speed: 235, turn: 8, mass: 0.8, fxEl: 'physical', hurt: 'flesh',
-    traits: ['echo', 'counter'], // 二階段影分身追斬、見切反擊（js/engine/traits.js）
+    traits: ['echo', 'counter', 'clash'], clash: { style: 'blade', proj: true }, // 二階段影分身追斬、見切反擊（js/engine/traits.js）
     stamina: { max: 100, regen: 34 }, posture: 100, dodgeCost: 18, dodgeSpeed: 600,
-    ai: { prefRange: [150, 240], aggression: 0.45, dodge: 0.76, precision: 0.9, reaction: 0.17, strafe: 0.9, walk: 0.6,
+    ai: { clash: 0.5, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
+      prefRange: [150, 240], aggression: 0.45, dodge: 0.76, precision: 0.9, reaction: 0.17, strafe: 0.9, walk: 0.6,
       feint: 0.35, delay: 0.35, retreat: 0.2, punish: 0.95, nervous: 0.05, patience: 0.8, read: 0.8, counter: 0.55,
       // 連段（僅沉重；格式見 js/engine/combo.js）
       combos: [
@@ -67,6 +68,9 @@
         actions: [...dashStrike(0.38, 0.38, 280, 56, 0.12, { dmg: 70, posture: 25, kb: 150 }, { iframe: true, fx: 'iaido' }),
           ...dashStrike(0.85, 0.3, 280, 56, 0.12, { dmg: 70, posture: 25, kb: 150 }, { iframe: true, fx: 'iaido' }),
           ...dashStrike(1.3, 0.3, 300, 60, 0.12, { dmg: 90, posture: 35, kb: 300 }, { iframe: true, fx: 'iaido' })] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '斬擊', short: '斬擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 170], cd: 0, cost: 0, track: 9, recovery: 0.3,
+        actions: strike(0.2, 0.14, { shape: 'cone', r: 150, arc: 100 * D }, { dmg: 26, posture: 8, kb: 60, fx: 'slash' }) }
     ],
     ultimate: { id: 'ult', name: '百鬼夜斬', ult: true, range: [0, 800], track: 0, recovery: 0.9,
       actions: [{ do: 'hide', at: 0.2, fx: { id: 'nightfall', el: 'shadow', life: 2.75 } },

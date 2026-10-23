@@ -13,11 +13,11 @@
 
   R.defineBossStyle('ronin', {
     body(ctx, o, t, { def, r, st, act }) {
-      const p2 = o.phase === 2, kneel = st === 'kneel', inst = o.inst;
+      const p2 = o.phase === 2, kneel = st === 'kneel', inst = o.inst, rl = !kneel && R.rally(o); // rl：對撞連拚的揮刀節奏（R.rally）
       // 拔刀前（居合架勢）：居合 / 千鳥第一段衝刺之前、或見切架式期間，刀留在鞘中
       const da = dashAt(inst);
-      const ready = !!inst && ((da >= 0 && inst.t < da) || inst.skill.id === 'mikiri');
-      const drawn = (inst && !ready) || st === 'feint' || st === 'dodge';
+      const ready = !rl && !!inst && ((da >= 0 && inst.t < da) || inst.skill.id === 'mikiri');
+      const drawn = rl || (inst && !ready) || st === 'feint' || st === 'dodge';
       const readyK = !ready ? 0 : da >= 0 ? U.clamp(inst.t / da, 0, 1) : 0.6 + 0.4 * Math.sin(t * 10);
 
       // 飄帶：跪坐時垂下；二階段染上暗影、拉長
@@ -62,7 +62,9 @@
       } else {
         // 拔出的刀
         const ka = inst ? -0.9 + act * 2.6 : -0.6;
-        ctx.save(); ctx.rotate(ka);
+        // 對撞連拚：刀身對準接點，碰的瞬間刀鋒剛好穿過；整把刀沿 x 前後送（rl.s = 1 為相碰）
+        ctx.save(); if (rl) ctx.translate(-0.3 * r + rl.s * Math.max(0, rl.c - 1.5 * r + 0.3 * r), 0); ctx.rotate(rl ? rl.off : ka);
+        if (rl && !o.shade) R.bladeTrail(ctx, rl, r * 2.3, p2 ? '#b48cff' : '#ffb3c0');
         // 發光刀身：幾何固定（旋轉在外層），含 10px 陰影
         R.blit(ctx, 'body:ronin:blade:' + o.phase + ':' + r, r * 1.8 + 40, 3 + 40, r * 1.4 + 20, 1.5 + 20, (g) => {
           g.strokeStyle = '#e9eef5'; g.lineWidth = 3; g.shadowColor = o.phase === 2 ? '#b48cff' : '#fff'; g.shadowBlur = 10;

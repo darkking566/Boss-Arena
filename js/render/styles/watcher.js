@@ -107,6 +107,16 @@
     }
   }
 
+  // 對撞連拚（R.rally）：大劍對準接點，碰的瞬間（s = 1）劍身剛好穿過接點，之後後甩蓄力、加速劈回下一個接點
+  function rallyPose(rl, r) {
+    for (const k of KEYS) A[k] = DEF[k];
+    A.s0 = 0; A.sa = 0; A.speed = 0; A.back = 0;
+    const L = r * 2.5, px = r * 0.2, py = r * 0.7;
+    A.fwd = (Math.max(0, Math.hypot(rl.c - px, py) - 0.8 * L) / r) * rl.s - 0.05 * (1 - rl.s);
+    const c = rl.c - A.fwd * r;
+    A.ga = Math.atan2(-py, c - px) + rl.off; A.rot = rl.off * 0.15; A.glow = 0.3 + 0.7 * rl.s; A.sq = 1 - 0.04 * (1 - rl.s);
+  }
+
   // 地面層（畫在身體底下）：碎裂紋、震波環、速度線、揚塵
   function crack(ctx, x, y, rad, a, col) {
     ctx.strokeStyle = hexA(col, a); ctx.lineWidth = 2.2; ctx.beginPath();
@@ -214,11 +224,13 @@
         special(sid, inst);
         if (A.glow >= 0.95 && p.N >= 0 && p.sw === 0 && !inst.dash) A.rot += Math.sin(t * 45) * 0.025; // 蓄滿力時顫動
       }
-      const w = p ? A : null;
+      const rl = !inst && o.state !== 'stagger' && o.state !== 'stun' && R.rally(o); // rl：對撞連拚的揮刀節奏（R.rally）
+      if (rl) rallyPose(rl, r);
+      const w = p || rl ? A : null;
       const ign = o.ign == null ? 1 : o.ign; // 二階段起身時，薪火自劍柄燒向劍尖（0→1）
       const sway = Math.sin(t * 4) * 0.2 + (inst && inst.dash ? 0.35 : 0);
       if (w) {
-        decor(ctx, sid, r, p, p2 ? '#ffb347' : '#dfe6f2', p2, t);
+        if (p) decor(ctx, sid, r, p, p2 ? '#ffb347' : '#dfe6f2', p2, t);
         ctx.save(); ctx.translate(w.fwd * r, 0); if (w.big !== 1) ctx.scale(w.big, w.big);
         ctx.rotate(w.rot); if (w.sq !== 1) ctx.scale(w.sq, 1 + (1 - w.sq) * 0.5);
       }
@@ -304,6 +316,7 @@
         }
       }
       ctx.save(); ctx.translate(px, py); ctx.rotate(ga); if (w && w.fs !== 1) ctx.scale(w.fs, 1);
+      if (rl && !o.shade) R.bladeTrail(ctx, rl, L, p2 ? '#ffb347' : '#dfe6f2');
       const burn = r * 0.45 + (L - r * 0.45) * ign; // 薪火燒到的劍長
       ctx.fillStyle = p2 ? '#3a2a2e' : '#b9c2d0'; // 二階段劍身燒成暗紅焦鐵，由熔岩裂紋撐出光
       ctx.beginPath(); ctx.moveTo(r * 0.35, -3.8); ctx.lineTo(L - 6, -3.8); ctx.lineTo(L + 4, 0); ctx.lineTo(L - 6, 3.8); ctx.lineTo(r * 0.35, 3.8); ctx.closePath(); ctx.fill();

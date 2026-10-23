@@ -64,9 +64,6 @@
       note: '佩服對手，拔出黑刀「夜」：所有近戰招式改用大刀，射程更長，鷹眼鎖定更久；解鎖「居合・夜」「飛斬」「三連月牙」「一斬沉艦」「荒星」；大招更寬更快' },
     skills: [
       // 輕鬆接下三刀流後反刺：小刀連刺（二階段換成夜的橫斬）
-      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
-      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 170], cd: 0, cost: 0, track: 9, recovery: 0.3,
-        actions: strike(0.18, 0.14, rect(150, 36), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) },
       { id: 'knife', name: '小刀連刺', short: '小刀', tags: ['melee', 'fast'], range: [0, 130], cd: 2.4, cost: 12, track: 9, creep: 0.3, recovery: 0.4,
         actions: [...strike(0.22, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),
           ...strike(0.42, 0.18, rect(110, 36), { dmg: 36, posture: 12, kb: 80, fx: 'thrust' }),
@@ -128,6 +125,9 @@
           { do: 'proj', at: 1.15, n: 5, radial: true, speed: 850, r: 50, dmg: 45, posture: 18, kb: 160, life: 0.8, pierce: true, kind: 'airslash' },
           { do: 'proj', at: 1.55, n: 5, radial: true, angOff: Math.PI / 5, speed: 850, r: 50, dmg: 45, posture: 18, kb: 160, life: 0.8, pierce: true, kind: 'airslash' },
           ...dashStrike(2.0, 0.45, 520, 80, 0.14, { dmg: 110, posture: 50, kb: 300, fx: 'thrust' }, { fx: 'slashline' })] },
+      // 普攻：單刺，無冷卻無消耗，填補技能空窗，也是對撞的主力
+      { id: 'basic', name: '刺擊', short: '刺擊', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 170], cd: 0, cost: 0, track: 9, recovery: 0.3,
+        actions: strike(0.18, 0.14, rect(150, 36), { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) }
     ],
     // 頂上戰爭向白鬍子陣營放出的遠距離巨斬（連冰山都斬開）＋對索隆那記斜劈過胸的最後一斬；
     // 改編為：橫貫全場的粗斬線 → 扇形月牙斬（「小月」衍生名稱）→ 貫穿目標的突進斬

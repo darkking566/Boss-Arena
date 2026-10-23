@@ -79,6 +79,19 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
   ok(w.damageBoss(a, b, { proj: { vx: -500, vy: 0, x: 500, y: 400, r: 9 }, dmg: 44 }) === 'hit', '沒標 deflect 的投射物照常命中');
 }
 
+// ── 5b. 所有能對撞的角色：有 clash 特性 + 描述、普攻可對撞且無冷卻、重擊標記生效 ──
+{
+  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon'];
+  for (const id of ids) {
+    const d = BD.bossById[id], bs = d.skills.find((s) => (s.tags || []).includes('basic'));
+    ok(d.traits.includes('clash') && d.clash && d.ai.clash > 0 && d.ai.basic > 0, `${id} 應有 clash 特性、描述與 ai.clash / ai.basic`);
+    ok(bs && bs.cd === 0 && bs.cost === 0 && BD.skillClash(bs) === 1, `${id} 的普攻應無冷卻、無消耗、light 等級`);
+    ok(d.skills[d.skills.length - 1] === bs, `${id} 的普攻應放在技能陣列最後（不改變既有按鍵）`);
+  }
+  const lv = (id, sid) => BD.skillClash(BD.bossById[id].skills.find((s) => s.id === sid));
+  ok(lv('lubu', 'randgriz_thrust') === 2 && lv('lubu', 'fangtian_sweep') === 2 && lv('poseidon', 'trident') === 2, '呂布 / 波賽頓的重武器招式應為 heavy');
+}
+
 // ── 6. 實戰：菲歐拉 vs 米霍克多個種子，AI 應能撞出對撞且不卡死 ──
 {
   let n = 0, done = 0;
@@ -89,6 +102,19 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
   }
   ok(n > 0, `6 場對戰應出現對撞（實際 ${n}）`);
   ok(done === 6, '對戰都應正常結束');
+}
+
+// ── 7. 七位能對撞的角色兩兩互打：都能打完，且每位都實際撞出過 ──
+{
+  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon'], got = {};
+  let done = 0, total = 0;
+  for (const a of ids) for (const b of ids) if (a !== b) {
+    const w = new BD.World(BD.bossById[a], BD.bossById[b], { seed: 2 });
+    total++; if (w.simulate(400)) done++;
+    got[a] = (got[a] || 0) + (w.bosses[0].stats.clashes | 0);
+  }
+  ok(done === total, `兩兩對戰都應打完（${done}/${total}）`);
+  for (const id of ids) ok(got[id] > 0, `${id} 在兩兩對戰中應撞出過（${got[id]}）`);
 }
 
 console.log(failed ? `CLASH TEST FAIL (${failed} failed, ${passed} passed)` : `CLASH TEST PASS (${passed})`);
