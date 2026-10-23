@@ -32,7 +32,7 @@
     const ground = GROUND[BD.biomeAt(x).id], D = ground || PAL.physical; // 沙 / 雪 / 麥田的「泥土色」
     const P = o.el === 'physical' && ground ? ground : PAL[o.el] || PAL.physical;
     const a = o.angle || 0, r = o.radius, k = o.k;
-    const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (fx.scars.length > CAP) fx.scars.shift(); };
+    const add = (s) => { if (BD.pondAt(s.x, s.y)) return; s.age = 0; fx.scars.push(s); if (!BD.keepScars && fx.scars.length > CAP) fx.scars.shift(); };
     // 劍痕：不規則的裂口。沿路取樣，寬度（尖端收窄＋起伏）、深度（深淺不一的暗核）、左右邊緣與中線偏移各自抖動；
     // 長痕會斷成數段，沿邊緣另有細裂紋與碎屑。每點 = [左x,左y,右x,右y,中x,中y,深度]
     const gash = (gx, gy, ga, len, wd, arc, al) => {

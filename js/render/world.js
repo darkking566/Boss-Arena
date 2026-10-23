@@ -188,7 +188,9 @@
       const hot = s.glow && s.age < 4 ? 1 - s.age / 4 : 0;
       if (s.k === 'blot') {
         const al = s.al || 1, A = al * SOFT;
-        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.3 * A; blob(ctx, s, 1.3); ctx.fill();
+        ctx.fillStyle = s.c2; ctx.globalAlpha = 0.1 * A; blob(ctx, s, 1.9); ctx.fill(); // 外圍多層淡暈，血漬邊緣向外滲開
+        ctx.globalAlpha = 0.18 * A; blob(ctx, s, 1.6); ctx.fill();
+        ctx.globalAlpha = 0.3 * A; blob(ctx, s, 1.3); ctx.fill();
         ctx.fillStyle = s.c; ctx.globalAlpha = 0.55 * A; blob(ctx, s, 1); ctx.fill();
         if (s.pts2) { ctx.globalAlpha = 0.4 * A; blob(ctx, { x: s.x + s.off[0], y: s.y + s.off[1], r: s.r, rot: s.rot2 }, 0.58, s.pts2); ctx.fill(); }
         if (s.sat) {

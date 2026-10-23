@@ -77,11 +77,11 @@
   };
   if (!SET) return;
   const BD = G.BD, V = BD.vrng, DIR = 'audio/' + SET + '/', EXT = SETS[SET].ext, FILES = SETS[SET].files;
-  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, bladeScrape: 0.2, swordWhoosh: 0.1, maceAir: 0.1, tridentThrow: 0.2, tridentReturn: 0.2, anvilDestroy: 0.5, throwWhoosh: 0.08, heartbeat: 0.22, shadowTeleport: 0.12, fangSnap: 0.15, crit: 0.08, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.8, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: 0.08, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1 };
+  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, bladeScrape: 0.2, swordWhoosh: 0.1, maceAir: 0.1, tridentThrow: 0.2, tridentReturn: 0.2, anvilDestroy: 0.5, throwWhoosh: 0.08, heartbeat: 0.22, shadowTeleport: 0.12, fangSnap: 0.15, crit: 0.08, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.35, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: 0.08, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1 };
   // 音檔常帶很長的尾巴（蓄力 7 秒、砸地 6.6 秒…），超過上限就淡出截斷；未列出者播完整檔
   const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, bladeScrape: 0.8, swordWhoosh: 0.5, maceAir: 0.6, tridentThrow: 0.8, tridentReturn: 1.2, anvilDestroy: 1.2, throwWhoosh: 0.4, heartbeat: 0.6, shadowTeleport: 0.8, fangSnap: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2 };
   const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath'];
-  const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'mangekyo', 'susanoo', 'godofgods'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow'];
+  const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'mangekyo', 'susanoo', 'godofgods', 'sightstance'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow', 'edenblink'];
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
   const ROAR = ['roar', 'bloodroar', 'awaken', 'dragonrage'];
   const MAX_VOICES = 12; // 同時發聲上限；同名音效最短間隔見 GAP（預設 0.04 秒）
@@ -121,6 +121,7 @@
   const seenHeal = new WeakSet();
   const seenP2 = new WeakSet();
   const seenLock = new WeakSet();
+  const seenDeathstand = new WeakSet();
   function tick(w, dt) {
     const g = MAP_SFX[BD.ARENA.map]; if (!g || w.over) return;
     if (ambW !== w) { ambW = w; ambT = 2 + V() * 3; }
@@ -276,6 +277,88 @@
           }
         }
       }
+      else if (b.def && b.def.id === 'adam') {
+        // 二階段轉變開始：神虛視過載、眼鼻流血，全人類之父的溫柔與決意
+        if ((b.state === 'transition' || b.phase === 2) && !seenP2.has(b)) {
+          seenP2.add(b);
+          play('bell', 0.85);          // 始祖聖鐘長鳴，父之意志
+          play('buff', 0.85);          // 神性光環湧現
+          play('heartbeat', 0.8);      // 沉重的心跳一振
+          setTimeout(() => {
+            if (b.hp > 0 && b.state !== 'dead') {
+              play('shockwave', 0.85); // 眼睛過載氣場震盪
+              play('roarMid', 0.75);   // 意志爆發長嘯
+              play('hitHeavy', 0.7);
+            }
+          }, 1000);
+        }
+        // 死立不倒（二階段瀕死無敵，死後依然揮拳）
+        const ds = b.statuses && BD.getStatus(b, 'deathstand');
+        if (ds && ds.rem > 0 && !seenDeathstand.has(b)) {
+          seenDeathstand.add(b);
+          play('heartbeat', 1.0);      // 絕唱心跳
+          play('bell', 0.95);          // 始祖喪鐘清鳴
+          play('ultCast', 0.9);        // 意志共振
+          play('shockwave', 0.85);     // 震懾全場的無敵氣場
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          const isP2 = b.phase === 2;
+          if (sid === 'divine_sight') {
+            play('bell', 0.85);         // 神虛視架式：神靈眼紋清鳴
+            play('mikiriRing', 0.75);   // 看穿萬物的清脆共振
+            play('buff', 0.6);
+          } else if (sid === 'time_fist') {
+            play('ambSnow', 0.6);       // 超越時間之拳：時間凍結的死寂陰風
+            play('heartbeat', 0.75);    // 時間停滯前的一拍沉重微鳴
+            play('buff', 0.6);
+          } else if (sid === 'meteor_jab') {
+            play('throwWhoosh', 0.75);  // 黃昏流星群：殘影極速蓄勢破空
+            play('swordWhoosh', 0.65);
+          } else if (sid === 'serpent_shred') {
+            play('fangSnap', 0.85);     // 蛇神之爪：黑綠骨爪異化伸展
+            play('bladeScrape', 0.7);   // 鱗片生長摩擦
+            play('poison', 0.6);
+          } else if (sid === 'divine_axe') {
+            play('maceAir', 0.8);       // 神之斧：下段掃腿撕裂空氣
+            play('swordWhoosh', 0.65);
+          } else if (sid === 'leaf_rush') {
+            play('dash', 0.65);         // 始祖衝拳：直線強襲突進踏步
+            play('throwWhoosh', 0.6);
+          } else if (sid === 'fatherly_ward') {
+            play('bell', 0.8);          // 為了孩子：守護光環低鳴
+            play('buff', 0.7);
+            play('ultCast', 0.65);
+          } else if (sid === 'eden_step') {
+            play('teleport', 0.65);     // 伊甸背擊：複製身法移形換影
+            play('throwWhoosh', 0.55);
+          } else if (sid === 'endurance_clash') {
+            play('block', 0.8);         // 我慢比べ：雙拳抱架、對轟開端
+            play('buff', 0.7);
+            play('heartbeat', 0.65);
+          } else if (sid === 'true_right') {
+            play('bladeScrape', 0.8);   // 真・神之右：手指虎金屬刮擦蓄力
+            play('maceAir', 0.75);
+            play('heartbeat', 0.7);
+          } else if (sid === 'ult') {
+            play('ultCast', 0.95);      // 大招絕唱：神聖力量狂湧
+            play('bell', 0.9);
+            play('shockwave', 0.75);
+            if (isP2) play('heartbeat', 0.85);
+          } else if (sid === 'reflect_copy') {
+            play('bell', 0.7);          // 神虛視複製招式發動清鳴
+            play('buff', 0.55);
+          } else if (sid === 'jab_combo') {
+            play('throwWhoosh', 0.65);  // 亞光速直拳：極速架式破空
+            play('swing', 0.5);
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+      }
       // 死亡印記（瞬獄影殺陣）心跳倒數音效：隨倒數時間加速跳動
       const dm = b.statuses && b.statuses.find((s) => s.id === 'deathmark');
       if (dm && dm.rem > 0 && b.hp > 0 && b.state !== 'dead') {
@@ -375,6 +458,7 @@
       const isZed = !!(wDef && wDef.id === 'zed');
       const isFiora = !!(wDef && wDef.id === 'fiora');
       const isMihawk = !!(wDef && wDef.id === 'mihawk');
+      const isAdam = !!(wDef && wDef.id === 'adam');
       const wSid = o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id;
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
@@ -397,7 +481,7 @@
       else if (id === 'iaido') { play('draw', 0.55); if (o.src && o.src.inst && o.src.inst.skill.id === 'chidori') play('lightning', 0.4); } // 居合 / 千鳥（再加電弧）：出鞘
       else if (id === 'shadowrise') play('sheath', 0.7); // 二階段：收刀入鞘
       else if (id === 'nightfall') play('ambSnow', 0.5); // 百鬼夜斬：夜幕陰風（只在開頭一次）
-      else if (id === 'threadcut') { if (o.scale >= 1.5) play('shockwave', 0.8); } // 只有最後的十字斬響，中間的刀線靜音
+      else if (id === 'threadcut' && !isAdam) { if (o.scale >= 1.5) play('shockwave', 0.8); } // 只有最後的十字斬響，中間的刀線靜音
       else if (id === 'pojun') {
         play('slamThud', 0.9);   // 鐵砧巨響：方天畫戟硬接雷神巨力
         play('hitHeavy', 0.85);  // 重金屬交擊震盪
@@ -1089,16 +1173,239 @@
           }
         }
       }
+      // 亞當（人類始祖・神虛視）專屬音效
+      else if (isAdam) {
+        if (id === 'divinesight' || id === 'sightstance') {
+          play('bell', 0.95);           // 神虛視發動：神之眼紋展開清脆聖鐘
+          play('mikiriRing', 0.85);     // 神靈清鳴共振
+          play('shockwave', 0.75);      // 視覺慢動作氣場震盪
+          play('buff', 0.6);
+        }
+        else if (id === 'timestop') {
+          play('ambSnow', 0.65);        // 時間停止蓄力：鐘面逆轉死寂
+          play('heartbeat', 0.8);       // 凍結前的心跳
+          play('buff', 0.65);
+        }
+        else if (id === 'chronofist' || id === 'timefist') {
+          play('shockwave', 1.0);       // 超越時間之拳／時鐘之拳：超越光速的致命裂空音爆！
+          play('slamHeavy', 0.95);      // 碎裂時空的沉重悶擊
+          play('slamThud', 0.85);
+          play('crit', 0.9);            // 貫穿胸口暴擊
+          play('ultCast', 0.85);        // 凍結解除時光爆鳴
+          if (o.scale && o.scale > 1.2) {
+            play('explodeBig', 0.8);    // 大招版本追加時空破裂
+          }
+        }
+        else if (id === 'fistjab') {
+          const sc = o.scale || 1.0;
+          if (sc >= 1.2) {
+            play('slashHeavy', 0.85);   // 音爆直拳・重拳：音障破空
+            play('crit', 0.85);
+            play('shockwave', 0.6);
+          } else {
+            play('swordWhoosh', 0.6);   // 刺拳／普攻音爆高速破空
+            play('slash', 0.55);
+          }
+        }
+        else if (id === 'meteorfist') {
+          const sc = o.scale || 1.0;
+          if (sc >= 1.4) {
+            play('slashHeavy', 0.9);    // 流星拳收尾重彗星
+            play('shockwave', 0.85);
+            play('slamThud', 0.8);
+          } else {
+            play('hitMid', 0.55);       // 流星拳連打高頻暴擊
+            play('crit', 0.5);
+            play('swordWhoosh', 0.45);
+          }
+        }
+        else if (id === 'replicaaxe') {
+          play('slashHeavy', 1.0);      // 複製神斧：如巨斧般切開對手的極速掃踢
+          play('maceAir', 0.9);         // 沉重破空
+          play('shockwave', 0.85);      // 裂地音爆
+          play('bladeScrape', 0.7);
+          if (isP2 || o.el === 'blood') {
+            play('slamThud', 0.8);      // 二階段血斧重擊
+          }
+        }
+        else if (id === 'serpentclaw') {
+          const sc = o.scale || 1.0;
+          if (sc >= 1.3) {
+            play('fangSnap', 1.0);      // 蛇爪裂：最終碎裂大撕咬！
+            play('slashHeavy', 0.95);   // 巨爪一齊裂開
+            play('shockwave', 0.85);
+            play('poison', 0.7);
+          } else {
+            play('fangSnap', 0.75);     // 墨綠爪痕撕裂
+            play('slash', 0.65);
+            play('poison', 0.5);
+          }
+        }
+        else if (id === 'wardnova') {
+          play('shockwave', 0.85);      // 庇護圓頂：金色光暈震開全場
+          play('bell', 0.8);
+          play('slamThud', 0.75);
+          play('buff', 0.7);
+        }
+        else if (id === 'edenblink') {
+          play('teleport', 0.65);       // 伊甸殘影：瞬間移動移形換影
+          play('throwWhoosh', 0.55);
+          play('dash', 0.5);
+        }
+        else if (id === 'rushfist') {
+          play('dash', 0.75);           // 始祖衝拳：肉身強襲破空衝刺
+          play('bladeScrape', 0.65);
+          play('throwWhoosh', 0.6);
+          play('slamThud', 0.6);
+        }
+        else if (id === 'guardbash') {
+          const sc = o.scale || 1.0;
+          if (sc >= 0.9) {
+            play('slamHeavy', 1.0);     // 我慢對轟收尾重拳
+            play('shockwave', 0.9);
+            play('slamThud', 0.85);
+            play('explodeMid', 0.75);
+          } else {
+            play('slamThud', 0.85);     // 我慢近身連續重拳對轟
+            play('hitHeavy', 0.8);
+            play('maceAir', 0.65);
+          }
+        }
+        else if (id === 'truefist') {
+          play('slamHeavy', 1.0);       // 真・神之右：傾注全力的一擊！
+          play('shockwave', 0.95);
+          play('hitHeavy', 0.9);
+          play('crit', 0.9);
+          play('slamThud', 0.85);
+        }
+        else if (id === 'parry') {
+          play('mikiriClang', 0.95);    // 見切格擋：手指虎硬接神器、清脆彈刀巨響
+          play('mikiriRing', 0.85);     // 鐘鳴共振
+          play('block', 0.7);
+        }
+        else if (id === 'roar') {
+          play('heartbeat', 1.0);       // 死立不倒特寫爆發：絕唱心跳
+          play('bell', 0.95);           // 始祖喪鐘清鳴
+          play('ultCast', 0.9);         // 意志共鳴
+          play('shockwave', 0.85);
+        }
+        else if (id === 'ultcast') {
+          play('ultCast', 0.95);        // 大招蓄力：神聖共鳴
+          play('bell', 0.85);
+          play('buff', 0.75);
+        }
+        else if (id === 'bigslam') {
+          play('slamHeavy', 1.0);       // 二階段父之絕唱：終結震裂大地
+          play('slamThud', 0.95);
+          play('explodeBig', 0.9);
+          play('shockwave', 0.9);
+        }
+        // 向後相容通用動作 id
+        else if (id === 'thrust') {
+          const sc = o.scale || 1.0;
+          if (sc >= 1.2) {
+            play('slashHeavy', 0.85);
+            play('crit', 0.85);
+            play('shockwave', 0.6);
+          } else {
+            play('swordWhoosh', 0.6);
+            play('slash', 0.55);
+          }
+        }
+        else if (id === 'projhit') {
+          play('hitMid', 0.55);
+          play('swordWhoosh', 0.45);
+        }
+        else if (id === 'cleave') {
+          play('slashHeavy', 1.0);
+          play('maceAir', 0.9);
+          play('shockwave', 0.85);
+        }
+        else if (id === 'threadcut') {
+          play('fangSnap', 0.85);
+          play('slash', 0.65);
+        }
+        else if (id === 'nova') {
+          play('shockwave', 0.85);
+          play('bell', 0.8);
+        }
+        else if (id === 'blink') {
+          play('teleport', 0.6);
+          play('dash', 0.5);
+        }
+        else if (id === 'dash') {
+          play('dash', 0.7);
+          play('bladeScrape', 0.6);
+        }
+        else if (id === 'slam') {
+          play('slamThud', 0.85);
+          play('hitHeavy', 0.8);
+        }
+      }
       else if (id === 'thunderwake') { play('buff', 0.6); play('lightning', 0.6); }
       else if (id === 'thunderstrike') { play('lightning', 0.8); play('slamHeavy', 0.6); }
       else if (id === 'thunderpath') { play('lightning', 0.7); play('shockwave', 0.5); }
       else if (id === 'boltblink') { play('lightning', 0.8); play('teleport', 0.5); }
+      else if (id === 'chronofist' || id === 'timefist') {
+        play('shockwave', 1.0);
+        play('slamHeavy', 0.95);
+        play('slamThud', 0.85);
+        play('crit', 0.9);
+        play('ultCast', 0.85);
+      }
+      else if (id === 'timestop') {
+        play('ambSnow', 0.65);
+        play('heartbeat', 0.8);
+        play('buff', 0.65);
+      }
+      else if (id === 'fistjab') {
+        play((o.scale || 1) >= 1.2 ? 'slashHeavy' : 'swordWhoosh', 0.7);
+        if ((o.scale || 1) >= 1.2) play('shockwave', 0.6); else play('slash', 0.5);
+      }
+      else if (id === 'meteorfist') {
+        if ((o.scale || 1) >= 1.4) { play('slashHeavy', 0.85); play('shockwave', 0.8); }
+        else { play('hitMid', 0.55); play('swordWhoosh', 0.45); }
+      }
+      else if (id === 'replicaaxe') {
+        play('slashHeavy', 0.95); play('maceAir', 0.85); play('shockwave', 0.8);
+      }
+      else if (id === 'serpentclaw') {
+        play('fangSnap', 0.85); play('slashHeavy', 0.8); play('poison', 0.6);
+      }
+      else if (id === 'wardnova') {
+        play('shockwave', 0.8); play('bell', 0.75); play('buff', 0.65);
+      }
+      else if (id === 'edenblink') {
+        play('teleport', 0.6); play('dash', 0.5);
+      }
+      else if (id === 'rushfist') {
+        play('dash', 0.7); play('slamThud', 0.6);
+      }
+      else if (id === 'guardbash') {
+        play((o.scale || 1) >= 0.9 ? 'slamHeavy' : 'slamThud', 0.8);
+        play((o.scale || 1) >= 0.9 ? 'shockwave' : 'hitHeavy', 0.7);
+      }
+      else if (id === 'truefist') {
+        play('slamHeavy', 0.95); play('shockwave', 0.9); play('hitHeavy', 0.85); play('crit', 0.85);
+      }
+      else if (id === 'sightstance') {
+        play('bell', 0.85); play('mikiriRing', 0.75); play('buff', 0.6);
+      }
       else if (id === 'ironfist') { play('mikiriClang', 0.8); play('slamHeavy', 0.7); }
       else if (id === 'pressure') { play('buff', 0.5); play('shockwave', 0.5); }
       else if (TERRAIN[id]) play(TERRAIN[id], 0.5);
       else if (id === 'posturebreak') play('stun', 0.7);
       else if (id === 'parry') play('block', 0.6);
-      else if (id === 'clash') play(o.last ? 'mikiriClang' : 'block', o.last ? 0.8 : 0.55);
+      else if (id === 'clash') {
+        const isFist = (o.src && o.src.def && o.src.def.clash && o.src.def.clash.style === 'fist') ||
+                       (o.other && o.other.def && o.other.def.clash && o.other.def.clash.style === 'fist');
+        if (isFist) {
+          play(o.last ? 'slamHeavy' : 'hitHeavy', o.last ? 0.9 : 0.65);
+          play(o.last ? 'shockwave' : 'slamThud', o.last ? 0.8 : 0.5);
+        } else {
+          play(o.last ? 'mikiriClang' : 'block', o.last ? 0.8 : 0.55);
+        }
+      }
       else if (id === 'gore') { if (o.lethal) play('death', 0.8); }
       else if (ROAR.includes(id)) play(o.k >= 1.5 ? 'roarBig' : 'roarMid', 0.7);
       else if (id === 'deathmark') {

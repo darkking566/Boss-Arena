@@ -87,7 +87,7 @@
       const k = o.scale, sk = Math.sqrt(k);
       for (let i = 0, n = Math.round(9 * k) + 5; i < n; i++) {
         const a = o.dir ? o.angle + (V() - 0.5) * 1.1 : V() * TAU, s = (80 + V() * 260) * sk;
-        fx.puff(x + (V() - 0.5) * 20, y + (V() - 0.5) * 20, Math.cos(a) * s, Math.sin(a) * s - 25, 22 + V() * 14, 70 + V() * 70 * sk, 2.2 + V() * 1.8, 'snow', 0.6);
+        fx.puff(x + (V() - 0.5) * 20, y + (V() - 0.5) * 20, Math.cos(a) * s, Math.sin(a) * s - 25, 22 + V() * 14, 70 + V() * 70 * sk, 2.2 + V() * 1.8, 'snow', 0.2); // 低不透明度：雪霧下仍能透出戰鬥輪廓與技能特效
       }
       for (let i = 0, n = Math.round(10 * k) + 4; i < n; i++) {
         const a = o.dir ? o.angle + (V() - 0.5) * 1.2 : V() * TAU, s = (200 + V() * 420) * sk;

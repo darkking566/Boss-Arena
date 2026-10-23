@@ -45,7 +45,7 @@
   // 見切 / 彈反架式：期間受到 Boss 的直接攻擊會觸發反擊（需要 'counter' 特性）
   BD.defineAction('counter', (w, b, inst, a) => {
     BD.applyStatus(b, 'counter', { data: a }, w);
-    BD.spawnFx(w, 'stance', b.x, b.y, { src: b });
+    BD.spawnFx(w, a.stanceFx || 'stance', b.x, b.y, { src: b, life: a.dur });
   }, { active: true, duration: true, requiresTrait: 'counter' });
 
   BD.defineAction('invuln', (w, b, inst, a) => { BD.applyStatus(b, 'invuln', { dur: a.dur }, w); });

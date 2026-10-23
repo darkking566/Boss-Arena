@@ -335,6 +335,11 @@
       if (src) { fx.ghost(src, 0.5, E.glow); fx.after(0.08, () => fx.ghost(src, 0.42, E.core)); fx.after(0.16, () => fx.ghost(src, 0.34, E.glow)); }
       fx.sparkle(x, y, E.core, Math.round(14 * Math.min(1.5, k)), 340);
       fx.motes(x, y, E, 8, r * 1.6, 120);
+      for (let j = 0; j < 2; j++) fx.after(0.05 + j * 0.1, () => { // 虹膜：十二道輪紋線由內向外旋開
+        const rr = r * (1.4 + j * 0.9);
+        for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2 + j * 0.26, c = Math.cos(a), s = Math.sin(a); fx.streak(x + c * rr * 0.35, y + s * rr * 0.35, x + c * rr, y + s * rr, 2, j ? E.glow : E.core, 0.22, true); }
+      });
+      fx.text(x, y - r - 24, '複製', E.core, 26); fx.punch(0.03, x, y);
       fx.shake(Math.min(8, 4 * k));
     },
   });

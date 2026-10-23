@@ -85,6 +85,37 @@
     }
     ctx.restore();
 
+    // 1b. 招式專屬光環：時鐘（時間拳 / 大招）、庇護光輪、神虛視虹膜、蛇毒霧、我慢鐵壁、高速連打的拳風線
+    if (inst) {
+      const act = wd > 0 || sn > 0, ult = inst.skill.ult, spin = (n, rr, a0, f) => { for (let i = 0; i < n; i++) { const a = a0 + i / n * U.TAU; f(Math.cos(a), Math.sin(a), i); } };
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      if ((sid === 'time_fist' || ult) && act) { // 金色鐘面：刻度順轉、兩根指針逆轉，出拳瞬間收束
+        const k = sn > 0 ? 1 - sn * 0.5 : 0.6 + 0.4 * wd, rr = r * 2.3 * k, col = p2 ? '#ff6a6a' : '#ffe27a';
+        ctx.strokeStyle = hexA(col, 0.55); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke();
+        spin(12, rr, t * 0.4, (c, s, i) => { ctx.lineWidth = i % 3 ? 1.5 : 3; ctx.beginPath(); ctx.moveTo(c * rr * 0.9, s * rr * 0.9); ctx.lineTo(c * rr * (i % 3 ? 1.04 : 1.14), s * rr * (i % 3 ? 1.04 : 1.14)); ctx.stroke(); });
+        ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(-t * 3) * rr * 0.75, Math.sin(-t * 3) * rr * 0.75); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(-t * 0.8) * rr * 0.5, Math.sin(-t * 0.8) * rr * 0.5); ctx.stroke();
+      } else if (sid === 'fatherly_ward') { // 光輪：兩圈反向旋轉的金色虛線環
+        for (let j = 0; j < 2; j++) { const rr = r * (1.5 + 0.4 * j) * (0.8 + 0.2 * Math.min(1, wd + sn)), dir = j ? -1 : 1;
+          ctx.strokeStyle = hexA(p2 ? '#ff7a7a' : '#ffe9a0', 0.5 - j * 0.15); ctx.lineWidth = 2;
+          spin(10, rr, t * dir, (c, s) => { const a = Math.atan2(s, c); ctx.beginPath(); ctx.arc(0, 0, rr, a, a + 0.38); ctx.stroke(); }); }
+      } else if (sid === 'divine_sight') { // 虹膜：十二道粉紅輪紋線緩緩旋轉
+        const rr = r * 1.7; ctx.strokeStyle = hexA('#ff6f95', 0.55); ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, rr * 0.55, 0, U.TAU); ctx.stroke();
+        spin(12, rr, t * 1.4, (c, s) => { ctx.beginPath(); ctx.moveTo(c * rr * 0.55, s * rr * 0.55); ctx.lineTo(c * rr, s * rr); ctx.stroke(); });
+      } else if (sid === 'serpent_shred') { // 蛇毒霧：墨綠的霧氣隨爪的成長鼓動
+        ctx.fillStyle = hexA('#5fbf4a', 0.1 + 0.1 * Math.min(1, wd + sn)); ctx.beginPath(); ctx.arc(0, 0, r * (1.6 + 0.2 * Math.sin(t * 6)), 0, U.TAU); ctx.fill();
+        spin(6, r, t * 0.9, (c, s, i) => { const d = r * (1.5 + 0.3 * Math.sin(t * 4 + i)); ctx.fillStyle = hexA('#9be15d', 0.25); ctx.beginPath(); ctx.arc(c * d, s * d, r * 0.14, 0, U.TAU); ctx.fill(); });
+      } else if (sid === 'endurance_clash') { // 鐵壁：金白色圓環隨連打一下下撐開
+        const rr = r * (1.45 + 0.12 * Math.sin(t * 22)); ctx.strokeStyle = hexA('#fff0b0', 0.6); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke();
+        ctx.strokeStyle = hexA('#ffffff', 0.35); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, rr * 1.12, 0, U.TAU); ctx.stroke();
+      }
+      if (sn > 0 && (sid === 'meteor_jab' || sid === 'true_right' || ult || sid === 'jab_combo' || sid === 'leaf_rush' || sid === 'eden_step')) { // 拳風：前方放射的速度線
+        ctx.strokeStyle = hexA(p2 ? '#ffb0b0' : '#d8f4ff', 0.55 * sn); ctx.lineWidth = 2;
+        for (let i = -3; i <= 3; i++) { const y0 = i * r * 0.28, l = r * (1.4 + 0.6 * ((i + 3) % 3)); ctx.beginPath(); ctx.moveTo(r * 0.9, y0); ctx.lineTo(r * 0.9 + l, y0 * 1.35); ctx.stroke(); }
+      }
+      ctx.restore();
+    }
+
     // 2. 神之斧：掃踢的腿（畫在身體下層；蓄力時收起、出腳時掃出一道弧）
     if (sid === 'divine_axe' && hitI >= 1) {
       const f = sn > 0 ? 1 - sn : 0, a = -1.5 + 3.0 * ease(f), L = r * (0.9 + 0.9 * (sn > 0 ? 1 : wd));

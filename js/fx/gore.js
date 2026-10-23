@@ -35,7 +35,7 @@
           if (BD.pondAt && (BD.pondAt(sx, sy) || BD.biomeAt(sx).id === 'lake')) return;
           const r = 1.2 + w * 0.7, ca = Math.cos(a), sa = Math.sin(a);
           fx.scars.push({ k: 'splat', x: sx, y: sy, a, r, c: col, al: 0.6, age: 0, sat: Array.from({ length: (V() * 3) | 0 }, () => [ca * r * (1.5 + V() * 2.5) + (V() - 0.5) * r, sa * r * (1.5 + V() * 2.5) + (V() - 0.5) * r, r * (0.2 + V() * 0.25)]) });
-          if (fx.scars.length > SCAR_CAP) fx.scars.shift();
+          if (!BD.keepScars && fx.scars.length > SCAR_CAP) fx.scars.shift();
         });
       };
       const spray = (n, spd, spread) => {
@@ -64,7 +64,7 @@
       // 血霧：中等以上的命中炸開一團，順著打擊方向飄出
       if (dmg >= 40 || big) {
         const a = dir == null ? 0 : dir, cc = big ? 2 : 1;
-        for (let i = 0; i < cc; i++) fx.puff(ox, oy, Math.cos(a) * 50, Math.sin(a) * 50, vr * 0.5, vr * (1.3 + 0.3 * sk), 0.7 + 0.2 * sk, m.mist, 0.5);
+        for (let i = 0; i < cc; i++) fx.puff(ox, oy, Math.cos(a) * 50, Math.sin(a) * 50, vr * 0.5, vr * (1.8 + 0.4 * sk), 0.9 + 0.3 * sk, m.mist, 0.5);
       }
 
       // 落地痕跡：水面上不留，改成一團暈開的霧
@@ -77,7 +77,7 @@
             const a = ang(0.8), d = vr * (0.6 + V() * 1.8 * sk), bx = x + Math.cos(a) * d, by = y + Math.sin(a) * d;
             if (BD.pondAt && BD.pondAt(bx, by)) continue;
             fx.scars.push({ k: 'blot', x: bx, y: by, r: Math.min(40, 7 + V() * 9 * sk), rot: V() * TAU, pts: jag(12), al: 0.9, c: m.scar.c, c2: m.scar.c2, glow: m.scar.glow, age: 0 });
-            if (fx.scars.length > SCAR_CAP) fx.scars.shift();
+            if (!BD.keepScars && fx.scars.length > SCAR_CAP) fx.scars.shift();
           }
         });
       }

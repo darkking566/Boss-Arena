@@ -160,6 +160,13 @@
     setTele(v);
     const cb = $('#optTele'); if (cb) cb.addEventListener('change', () => setTele(!cb.checked));
   })();
+  // 戰場痕跡上限開關（純視覺：只決定要不要擠掉最舊的痕跡；打開後長時間對戰可能變慢）
+  (function initScars() {
+    const cb = $('#optScars'); if (!cb) return;
+    try { cb.checked = localStorage.getItem('bd.keepScars') === '1'; } catch (e) { /* ignore */ }
+    BD.keepScars = cb.checked;
+    cb.addEventListener('change', () => { BD.keepScars = cb.checked; try { localStorage.setItem('bd.keepScars', cb.checked ? '1' : '0'); } catch (e) { /* ignore */ } });
+  })();
   function setPace(id) {
     if (!BD.PACES[id]) return;
     state.pace = id;

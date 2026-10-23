@@ -75,6 +75,7 @@
 - trait：`js/engine/traits.js` 的 `reflect`（`interceptDamage` 複製反擊、`onLethal` 死立不倒）；`js/engine/world.js` `damageBoss` 在致命傷前詢問各 trait 的 `onLethal`。
 - 狀態：`deathstand`（`js/engine/statuses/effects.js`，無敵、傷害 ×1.3、速度 ×1.15，到期自動倒下）。
 - 特效：`divinesight`（`js/fx/buff.js`）、`timefist`（`js/fx/ultimate.js`）；元素 `replica`（`js/fx/elements.js`）。
+- 招式專屬特效（`js/fx/adam.js`）：`fistjab` 音爆直拳、`meteorfist` 流星拳、`replicaaxe` 複製神斧、`serpentclaw` 蛇爪裂、`wardnova` 庇護圓頂、`edenblink` 伊甸殘影、`rushfist` 衝拳、`guardbash` 我慢對轟、`truefist` 真・神之右、`chronofist` 時鐘之拳、`sightstance` 神虛視架式（`counter` 動作的 `stanceFx`）；`divinesight` 增加虹膜旋開與「複製」字樣。造型另依招式畫出鐘面 / 光輪 / 虹膜 / 蛇毒霧 / 鐵壁圈與拳風線。
 - 造型：`js/render/styles/adam.js`（全部以程式繪製：白金髮、藍眼 / 粉紅輪紋眼、單手銀刺手指虎、蛇爪鱗手（蔽體樹葉在俯視角下會變成水平飄著，故省略不畫）、掃踢的腿、過載流血、死立不倒光焰）。
 - 測試：`test/reflect.test.js`；`adam:divine_sight` 加入訓練場 ALLOW_MISS。
 - 平衡見 §5.1（沉重 `hpMul` 1.36，見 `js/data/pace.js`）。
