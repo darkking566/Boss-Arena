@@ -244,8 +244,9 @@
   };
 
   // ── 時間軸動作：status ──
-  // 對「敵人」施加狀態（a.target === 'enemy'）或對自己施加（預設）；沒有中繼資料 → 不算出招中
+  // 對「敵人」施加狀態（a.target === 'enemy'）或對自己施加（預設）；沒有中繼資料 → 不算出招中；可帶純演出的 fx（在受施者位置播放）
   BD.defineAction('status', function (w, b, inst, a) {
+    if (a.fx) { const u = a.target === 'enemy' ? b.enemy : b; BD.spawnFx(w, a.fx, u.x, u.y, { src: u }); }
     return BD.applyStatus(a.target === 'enemy' ? b.enemy : b, a.id, { dur: a.dur, stacks: a.stacks, value: a.value, source: b }, w);
   });
 })(typeof window !== 'undefined' ? window : globalThis);
