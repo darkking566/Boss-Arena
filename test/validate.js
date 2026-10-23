@@ -533,13 +533,13 @@ if (BD.FX && typeof BD.spawnFx === 'function') {
   if (fw.fx.parts.length > BD.FX_CAPS.PART_CAP) err('fx', `粒子數 ${fw.fx.parts.length} 超過 PART_CAP`);
   if (fw.fx.timers.length) err('fx', `特效延遲（fx.after）未清空：${fw.fx.timers.length}`);
 }
-// 9. fx-gallery.html 必須載入 index.html 的所有腳本（同順序，排除 js/input.js / js/main.js / js/training-ui.js），新增 Boss / 特效檔案時兩邊要同步
+// 9. fx-gallery.html 必須載入 index.html 的所有腳本（同順序，排除 js/input.js / js/main.js / js/training-ui.js / js/touch.js），新增 Boss / 特效檔案時兩邊要同步
 {
   const gal = path.join(ROOT, 'fx-gallery.html');
   if (!fs.existsSync(gal)) err('fx-gallery.html', '找不到特效圖鑑頁面');
   else {
     const list = (html) => [...html.matchAll(/<script\b[^>]*\bsrc\s*=\s*"([^"]+)"/g)].map((m) => m[1]);
-    const want = list(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).filter((f) => f !== 'js/input.js' && f !== 'js/main.js' && f !== 'js/training-ui.js' && f !== 'js/hunt-ui.js');
+    const want = list(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).filter((f) => f !== 'js/input.js' && f !== 'js/main.js' && f !== 'js/training-ui.js' && f !== 'js/touch.js' && f !== 'js/hunt-ui.js');
     const have = list(fs.readFileSync(gal, 'utf8')).filter((f) => f !== 'js/fx-gallery.js');
     if (want.join('\n') !== have.join('\n')) {
       const miss = want.filter((f) => !have.includes(f)), extra = have.filter((f) => !want.includes(f));

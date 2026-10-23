@@ -365,6 +365,7 @@
     } catch (e) { state.errors.push(String(e && e.stack || e)); console.error(e); }
     requestAnimationFrame(frame);
   }
+  if (BD.Touch) BD.Touch.create($('#app'), input, state, view);
   if (BD.TrainingUI) BD.TrainingUI.create($('#app'), canvas);
   BD.HuntUI.create($('#app'), { onStart: startHunt, onBack: () => show('select') });
   setMode(state.mode);
