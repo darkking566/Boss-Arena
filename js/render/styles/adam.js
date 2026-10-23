@@ -114,6 +114,7 @@
     // 4. 雙臂：右手（+y）戴手指虎、左手空拳；出拳左右交替；神虛視架式時雙拳收在胸前；模倣蛇神時雙手長成鱗爪
     const guard = sid === 'divine_sight' || sid === 'fatherly_ward' || sid === 'endurance_clash';
     const claws = sid === 'serpent_shred';
+    const ry = !inst && !guard && o.state !== 'stagger' && o.state !== 'stun' && R.rally(o); // 對撞連拚（R.rally）：一拳一拳打向接點，左右手依每下交替
     const ck = claws ? (sn > 0 || hitI > 0 ? 1 : Math.min(1, 0.25 + wd * 1.4)) : 0;
     for (const s of [-1, 1]) {
       let ext = 0, glow = 0;
@@ -127,7 +128,11 @@
         else ext = r * 0.15 * Math.sin(t * 2 + s);
         if (claws) ext = r * 0.35 + r * 0.5 * (sn > 0 ? sn : 0);
       } else ext = r * 0.1 * Math.sin(t * 2.2 + s);
-      const fx = r * 0.55 + ext, fy = s * (r * 0.6 - (guard ? r * 0.28 : 0));
+      let fx = r * 0.55 + ext, fy = s * (r * 0.6 - (guard ? r * 0.28 : 0));
+      if (ry) { // s = 1 的瞬間拳鋒（含尖刺）剛好落在接點；蓄力時收回腰側，另一隻手護在胸前
+        if (s === (ry.off > 0 ? 1 : -1)) { fx = r * 0.25 + (Math.min(r * 2.2, ry.c - r * 0.4) - r * 0.25) * ry.s; fy = s * r * (0.6 - 0.45 * ry.s); glow = ry.s; }
+        else { fx = r * 0.7; fy = s * r * 0.32; }
+      }
       ctx.strokeStyle = claws ? SCALE : SKIN; ctx.lineWidth = r * (0.22 + 0.2 * ck); ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(r * 0.04, s * r * 0.74); ctx.lineTo(fx - r * 0.08, fy); ctx.stroke();
       if (!claws) { ctx.strokeStyle = hexA(LINE, 0.8); ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(r * 0.04, s * r * 0.74 - s * r * 0.1); ctx.lineTo(fx - r * 0.08, fy - s * r * 0.1); ctx.stroke(); }

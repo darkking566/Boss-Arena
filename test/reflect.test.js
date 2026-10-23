@@ -42,5 +42,17 @@ const STEP = BD.STEP;
   ok(w.damageBoss(e, a, { dmg: 500, unblockable: true }) === 'kill', '一階段致命傷應直接倒下');
 }
 
+// ── 4. 自動複製就緒判斷：沒看過 / 剛複製過不就緒；二階段間隔縮短；拳對拳對撞、AI 對沒看過的遠程招擺架式 ──
+{
+  const w = new BD.World(BD.bossById.adam, BD.bossById.witch, { seed: 3 });
+  const a = w.bosses[0];
+  ok(!BD.reflectAuto(w, a, 'lance'), '沒看過的招不能自動複製');
+  a._seen = { lance: 1 }; w.time = 10; a._reflectAt = 6.5;
+  ok(!BD.reflectAuto(w, a, 'lance'), '一階段 3.5 秒前才複製過，間隔未到');
+  a.phase = 2;
+  ok(BD.reflectAuto(w, a, 'lance'), '二階段間隔縮為 3 秒');
+  ok(BD.skillClash(a.skills.find((s) => s.id === 'true_right')) === 2 && BD.skillClash(a.skills.find((s) => s.id === 'basic')) === 1, '真・神之右為 heavy、普攻為 light');
+}
+
 console.log(failed ? `REFLECT TEST FAIL (${failed} failed, ${passed} passed)` : `REFLECT TEST PASS (${passed})`);
 process.exit(failed ? 1 : 0);

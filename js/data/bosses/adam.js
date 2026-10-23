@@ -17,10 +17,12 @@
     id: 'adam', name: '亞當', title: '人類始祖', archetype: '神虛視・拳骨主義',
     desc: '神按自己的形象造出的第一個人類、全人類之父，白金髮色的纖瘦青年，只用一片樹葉蔽體。右手戴著瑞吉蕾芙化成的銀色手指虎，以神虛視看穿並完整複製神的招式；為了「保護孩子們」而出拳，眼睛過載、甚至死去之後，也要站著打到最後。',
     color: '#e6d58a', color2: '#4a3a28', glow: '#ff6f8f', style: 'adam',
-    radius: 29, maxHp: 1850, speed: 205, turn: 6, mass: 1.1, fxEl: 'lightning', hurt: 'flesh',
-    traits: ['reflect', 'counter'], // reflect：神虛視（先判定）；counter：沒有可複製的招式時退回固定反斬
+    radius: 29, maxHp: 1700, speed: 205, turn: 6, mass: 1.1, fxEl: 'lightning', hurt: 'flesh',
+    traits: ['reflect', 'counter', 'clash'], clash: { style: 'fist', proj: true }, // reflect：神虛視（先判定）；counter：沒有可複製的招式時退回固定反斬；clash：拳對拳對撞
     stamina: { max: 120, regen: 30 }, posture: 150, dodgeCost: 18, dodgeSpeed: 540,
     ai: {
+      clash: 0.55, basic: 0.5, // 對撞傾向、普攻填空窗機率（js/engine/ai.js）
+      sight: { stance: 0.6, seenStance: 0.2, bait: 0.5 }, // 神虛視：沒看過的招擺架式現場複製；看過且自動複製就緒時故意挨打（原作：亞當故意讓宙斯打中）
       prefRange: [70, 190],
       aggression: 0.7,
       dodge: 0.5,
@@ -53,6 +55,11 @@
           { skill: 'meteor_jab', cancel: 0.4, branch: [
             { when: { dist: [0, 240] }, do: 'extend' },
             { do: 'stop' }] }] },
+        { id: 'eden', name: '伊甸背擊', weight: 1.1, steps: [
+          { skill: 'eden_step' },
+          { skill: 'divine_axe', cancel: 0.3, branch: [
+            { when: { landed: true }, do: 'extend' },
+            { do: 'stop' }] }] },
         { id: 'clash', name: '我慢比べ', phase: 2, weight: 1.4, steps: [
           { skill: 'endurance_clash' },
           { skill: 'divine_axe', cancel: 0.4, branch: [
@@ -69,7 +76,7 @@
     phase2: {
       speedMul: 1.15, dmgMul: 1.2, cdMul: 0.8, fxEl: 'blood', transDur: 2.2, roarAt: 1.0, transFx: { id: 'divinesight', el: 'replica' },
       line: '……哪裡有嬰兒在哭。沒事的，別哭——誰敢嚇你，爸爸就去收拾他。',
-      note: '神虛視用到極限、眼睛開始過載：每次複製都會損耗生命，但複製的招式更快更重；亞當也將死立不倒——生命耗盡時鎖在 1 點、4 秒內無敵並全力出拳；連打多一拳、神之斧範圍加大、超越時間之拳更痛，解鎖「我慢比べ」「真・神之右」',
+      note: '神虛視用到極限、眼睛開始過載：每次複製都會損耗生命，但複製的招式更快更重；亞當也將死立不倒——生命耗盡時鎖在 1 點、4 秒內無敵並全力出拳；連打多一拳、神之斧範圍加大、超越時間之拳更痛，解鎖「我慢比べ」「真・神之右」；自動複製的間隔由 4 秒縮到 3 秒，生命鎖 1 時 AI 轉為全力進攻',
     },
     skills: [
       // 原作：能以亞光速的直拳互毆（複製宙斯的亞光速 Jab）
@@ -96,7 +103,7 @@
         actions2: [...strike(0.26, 0.2, { shape: 'rect', len: 155, w: 70 }, { dmg: 46, posture: 12, kb: 100, fx: 'thrust' }),
           ...strike(0.85, 0.46, { shape: 'cone', r: 250, arc: 220 * D }, { dmg: 160, posture: 55, kb: 560, fx: { id: 'cleave', scale: 1.3, el: 'blood' } })] },
       // 核心——神虛視：架式中被攻擊，就把對手整招複製後立刻打回去（trait 'reflect'）
-      { id: 'divine_sight', name: '神虛視', short: '神虛視', tags: ['counter', 'defensive'], range: [0, 260], cd: 2.0, cost: 8, track: 10, recovery: 0.4,
+      { id: 'divine_sight', name: '神虛視', short: '神虛視', tags: ['counter', 'defensive'], range: [0, 260], cd: 5, cost: 10, track: 10, recovery: 0.4,
         actions: [{ do: 'counter', at: 0, dur: 1.0, dmg: 150, posture: 55, name: '神虛視', reflect: true }],
         actions2: [{ do: 'counter', at: 0, dur: 1.2, dmg: 160, posture: 60, name: '神虛視', reflect: true }] },
       // 原作：複製科羅諾斯傳給宙斯的「超越時間之拳」，快到時間停下
@@ -112,7 +119,7 @@
         actions2: [{ do: 'slashes', at: 0.3, n: 7, interval: 0.12, tele: 0.5, len: 400, w: 34, dmg: 32, posture: 10, fx: { id: 'threadcut', el: 'poison' },
           final: { tele: 0.6, len: 560, w: 64, dmg: 82, posture: 40, fx: { id: 'threadcut', el: 'poison', scale: 1.5 } } }] },
       // 改編：不穿甲冑、全靠肉身的直線強襲拳（原作「正真正銘的拳骨主義」），補足近身手段。
-      { id: 'leaf_rush', name: '始祖衝拳', short: '衝拳', tags: ['gap', 'melee'], range: [150, 440], cd: 4.8, cost: 24, track: 6, recovery: 0.6,
+      { id: 'leaf_rush', name: '始祖衝拳', short: '衝拳', tags: ['gap', 'melee'], clash: 'light', range: [150, 440], cd: 4.8, cost: 24, track: 6, recovery: 0.6,
         actions: [...dashStrike(0.55, 0.42, 360, 72, 0.16, { dmg: 118, posture: 40, kb: 380 }, { fx: 'dash' }),
           ...strike(1.05, 0.26, { shape: 'cone', r: 175, arc: 110 * D }, { dmg: 82, posture: 24, kb: 300, fx: 'slash' })],
         actions2: [...dashStrike(0.48, 0.38, 420, 76, 0.14, { dmg: 130, posture: 44, kb: 420 }, { fx: 'dash' }),
@@ -123,6 +130,15 @@
           { do: 'status', at: 0.3, id: 'shield', dur: 5, value: 130 }],
         actions2: [{ do: 'hit', at: 0.3, shape: 'circle', r: 210, dmg: 0, posture: 35, kb: 460, fx: { id: 'nova', el: 'blood' }, status: [{ id: 'slow', dur: 1.8 }, { id: 'vulnerable', dur: 2.5 }] },
           { do: 'status', at: 0.3, id: 'shield', dur: 5, value: 170 }] },
+      // 改編：複製式的身法——瞬間閃到對手背後連出兩拳（二階段三拳），閃現後只留短預警
+      { id: 'eden_step', name: '伊甸背擊', short: '背擊', tags: ['gap', 'melee'], range: [170, 460], cd: 8.5, cost: 22, track: 6, recovery: 0.6,
+        actions: [{ do: 'blink', at: 0.35, to: 'behind', dist: 60, fx: 'blink' },
+          ...strike(0.72, 0.26, { shape: 'rect', len: 170, w: 80 }, { dmg: 58, posture: 16, kb: 150, fx: 'thrust' }),
+          ...strike(1.0, 0.22, { shape: 'rect', len: 190, w: 95 }, { dmg: 82, posture: 28, kb: 380, fx: { id: 'thrust', scale: 1.2 } })],
+        actions2: [{ do: 'blink', at: 0.3, to: 'behind', dist: 60, fx: 'blink' },
+          ...strike(0.64, 0.24, { shape: 'rect', len: 175, w: 80 }, { dmg: 58, posture: 16, kb: 150, fx: 'thrust' }),
+          ...strike(0.86, 0.2, { shape: 'rect', len: 175, w: 80 }, { dmg: 58, posture: 16, kb: 150, fx: 'thrust' }),
+          ...strike(1.1, 0.22, { shape: 'rect', len: 200, w: 100 }, { dmg: 88, posture: 30, kb: 400, fx: { id: 'thrust', scale: 1.3, el: 'blood' } })] },
       // —— 二階段專屬 ——
       // 原作：宙斯變身阿陀磨須後兩人對轟、比拚誰先撐不住（我慢比べ）；亞當第一次擺出防禦姿勢
       { id: 'endurance_clash', name: '我慢比べ', short: '我慢', phase: 2, tags: ['melee', 'aoe'], range: [0, 175], cd: 11, cost: 30, track: 4, recovery: 0.95,
@@ -131,10 +147,13 @@
           ...flurry(0.7, 7, 0.17, { shape: 'circle', r: 150 }, { dmg: 26, posture: 10, kb: 70 }, { id: 'slam', scale: 0.55 }),
           ...strike(2.1, 0.3, { shape: 'circle', r: 175 }, { dmg: 150, posture: 55, kb: 580, fx: { id: 'bigslam', scale: 0.95 } })] },
       // 原作：真・神之右（真・神の右）——一記傾注全力的直拳，緊接著不停歇的連打；亞當以神虛視逐拳複製還擊，眼睛因此耗盡
-      { id: 'true_right', name: '真・神之右', short: '神之右', phase: 2, tags: ['melee', 'fast'], range: [0, 270], cd: 9, cost: 28, track: 6, recovery: 0.85,
+      { id: 'true_right', name: '真・神之右', short: '神之右', phase: 2, tags: ['melee', 'fast'], clash: 'heavy', range: [0, 270], cd: 9, cost: 28, track: 6, recovery: 0.85,
         actions: [{ do: 'tele', at: 0.1, dur: 0.6, shape: 'rect', len: 270, w: 110, follow: true },
           { do: 'hit', at: 0.7, shape: 'rect', len: 270, w: 110, dmg: 125, posture: 45, kb: 480, fx: { id: 'thrust', scale: 1.5 } },
           ...flurry(0.95, 12, 0.13, { shape: 'rect', len: 270, w: 110 }, { dmg: 17, posture: 5, kb: 40 }, 'projhit', 0.85)] },
+      // 普攻：無冷卻無消耗，填補技能空窗，也是拳對拳對撞的主力（置於陣列最後，不擠掉按鍵）
+      { id: 'basic', name: '始祖直拳', short: '直拳', tags: ['melee', 'fast', 'basic'], weight: 0.45, range: [0, 160], cd: 0, cost: 0, track: 9, recovery: 0.28,
+        actions: strike(0.2, 0.14, { shape: 'rect', len: 150, w: 70 }, { dmg: 24, posture: 8, kb: 60, fx: 'thrust' }) },
     ],
     ultimate: {
       id: 'ult', name: '神虛視・黃昏流星群', name2: '父之絕唱・死立不倒', ult: true, range: [0, 900], track: 4, recovery: 1.0,

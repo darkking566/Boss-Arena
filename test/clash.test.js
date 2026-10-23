@@ -81,7 +81,7 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
 
 // ── 5b. 所有能對撞的角色：有 clash 特性 + 描述、普攻可對撞且無冷卻、重擊標記生效 ──
 {
-  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon'];
+  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon', 'adam'];
   for (const id of ids) {
     const d = BD.bossById[id], bs = d.skills.find((s) => (s.tags || []).includes('basic'));
     ok(d.traits.includes('clash') && d.clash && d.ai.clash > 0 && d.ai.basic > 0, `${id} 應有 clash 特性、描述與 ai.clash / ai.basic`);
@@ -104,9 +104,9 @@ const sk = (b, id) => b.skills.find((s) => s.id === id);
   ok(done === 6, '對戰都應正常結束');
 }
 
-// ── 7. 七位能對撞的角色兩兩互打：都能打完，且每位都實際撞出過 ──
+// ── 7. 八位能對撞的角色兩兩互打：都能打完，且每位都實際撞出過 ──
 {
-  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon'], got = {};
+  const ids = ['fiora', 'mihawk', 'ronin', 'watcher', 'lubu', 'kojiro', 'poseidon', 'adam'], got = {};
   let done = 0, total = 0;
   for (const a of ids) for (const b of ids) if (a !== b) {
     const w = new BD.World(BD.bossById[a], BD.bossById[b], { seed: 2 });

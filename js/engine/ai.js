@@ -360,6 +360,17 @@
     }
     decide(th) {
       const b = this.b, p = this.p, rng = this.rng;
+      if (BD.hasStatus(b, 'deathstand')) return; // 死立不倒：無敵中，不閃不躲
+      // 神虛視（亞當）：對手的招看過且自動複製就緒 → 故意挨這一下（只吃得下 ≤4 擊、可被複製的招）；沒看過 → 擺見切架式現場複製
+      const S = p.sight, ei = this.e.inst;
+      if (S && th.kind === 'tele' && ei && th.ref.owner === this.e) {
+        const acts = ei.v.actions, hits = acts.filter((a) => a.do === 'hit' || a.do === 'dash').length;
+        if (BD.reflectAuto(this.w, b, ei.skill.id) && hits <= 4 && !acts.some((a) => a.unblockable || (a.hit && a.hit.unblockable))) { if (rng() < S.bait) return; }
+        else if (th.left > 0.2 && th.left < 1.4) {
+          const sk = b.available().find((s) => (s.tags || []).includes('counter'));
+          if (sk && b.skillReady(sk) && rng() < (b._seen && b._seen[ei.skill.id] > 0 ? S.seenStance : S.stance)) { this.plan = { type: 'counter', t: Math.max(0, th.left - 0.55), th }; return; }
+        }
+      }
       if (th.glow) {
         // 對蓄力過度反應：誘餌成功
         if (rng() < p.nervous && b.sta > b.def.dodgeCost) this.plan = { type: 'dodge', t: rng.range(0.02, 0.12), th };
@@ -458,6 +469,8 @@
       const [mn, mx] = p.prefRange;
       if (this.mode === 'approach' && d < mx) this.modeT = 0;
       if (this.mode === 'retreat' && d > mx * 1.15 && b.sta > b.maxSta * 0.5) this.modeT = 0;
+      const last = BD.hasStatus(b, 'deathstand'); // 死立不倒：全力進攻
+      if (last && this.mode !== 'approach') { this.mode = 'approach'; this.modeT = 1; }
       if (this.modeT <= 0) this.chooseMode(d);
       if (this.combo && this.combo.c) return; // 連段進行中：只閃避 / 走位，不另起技能
       // 出招
@@ -491,6 +504,7 @@
       }
       let chance = p.aggression * 0.2 + Math.min(0.55, (w.time - this.lastAttack) * 0.05 * (1 - p.patience * 0.6));
       if (hunt) chance += SH.execute;
+      if (last) chance += 0.5;
       if (this.locked) chance += 0.3 + (BD.hasStatus(b, 'poise') ? 0.2 : 0);
       if (win > 0) chance += p.punish * 0.85;
       else if (e.isWindingUp()) chance *= 0.25 + p.aggression * 0.5;

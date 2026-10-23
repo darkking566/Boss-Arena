@@ -163,6 +163,8 @@
   // 帶 reflect:true 的見切架式被攻擊時（或已看過的招式再被打中時，每 4 秒一次），不用固定反斬，而是把對手「正在使出的整招」複製成自己的時間軸立刻打回去：
   // 只複製預警 / 判定 / 衝刺 / 投射物 / 噴發等攻擊動作，節奏壓到 0.6 倍、傷害 60%（原作：複製不會超越原招），同一招每多看一次 +10%、最高 80%。
   const REFLECT_GAP = 4;
+  // 自動複製（沒擺架式）是否就緒：這招已看過、距上次複製夠久（二階段眼睛過載後縮短為 3 秒）；AI 也用它決定要不要故意挨打
+  BD.reflectAuto = (w, b, id) => !!(b._seen && b._seen[id] > 0) && w.time - (b._reflectAt || -99) > (b.phase === 2 ? REFLECT_GAP - 1 : REFLECT_GAP);
   const COPYABLE = new Set(['tele', 'hit', 'dash', 'proj', 'lob', 'erupt', 'zone']);
   function reflectCopy(b, src, seen) {
     const sk = src.inst.skill, acts = src.inst.v.actions.filter((a) => COPYABLE.has(a.do)).slice(0, 14);
@@ -182,8 +184,8 @@
     interceptDamage(w, b, src, p) {
       if (!src || !src.isBoss || !src.inst || p.dot || p.unblockable) return null;
       const cs = BD.getStatus(b, 'counter'), seen = b._seen || (b._seen = {}), id = src.inst.skill.id;
-      // 架式中一定複製；沒擺架式時，「已經看過」的招式被打中也會自動複製（每 REFLECT_GAP 秒一次，且只在待機 / 出招中）
-      const stance = cs && cs.data && cs.data.reflect, auto = seen[id] > 0 && w.time - (b._reflectAt || -99) > REFLECT_GAP && (b.state === 'idle' || b.state === 'skill');
+      // 架式中一定複製；沒擺架式時，「已經看過」的招式被打中也會自動複製（每 REFLECT_GAP 秒一次、二階段 3 秒，且只在待機 / 出招中）
+      const stance = cs && cs.data && cs.data.reflect, auto = BD.reflectAuto(w, b, id) && (b.state === 'idle' || b.state === 'skill');
       if (!stance && !auto) return null;
       const cp = reflectCopy(b, src, seen[id] || 0);
       if (!cp) return null; // 沒有可複製的攻擊動作：交給 counter 特性（固定反斬）
