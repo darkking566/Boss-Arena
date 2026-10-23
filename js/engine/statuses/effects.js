@@ -103,6 +103,23 @@
     modifiers: { dmgTakenMul: 1.25 },
   });
 
+  // ── 鏡爪印記（鏡爪）：每完成一次標記狩獵就累積一層，永久保留（不會自己消失）；每層 +6% 造成的傷害，最多 5 層 ──
+  BD.defineStatus('hunt', {
+    name: '鏡爪印記', tags: ['buff'], stacking: 'stack', maxStacks: 5, visual: 'hunt',
+    modifiers: { dmgDealtMul: function (u) { const s = BD.getStatus(u, 'hunt'); return s ? 1 + 0.06 * s.stacks : 1; } },
+  });
+
+  // ── 神羊喘息（鏡爪 R）：原作「圈內單位的生命不會低於 10%，結束時恢復生命」——期間生命鎖在 10% 以上，到期仍活著則回復 value 點 ──
+  BD.defineStatus('respite', {
+    name: '神羊喘息', tags: ['buff', 'defense'], stacking: 'refresh', defaultDur: 4, visual: 'respite',
+    absorb: function (u, st, dmg) { return Math.max(0, Math.min(dmg, u.hp - u.maxHp * 0.1)); },
+    onRemove: function (u, st, w) {
+      if (!w || w.winner || u.state === 'dead' || u.hp <= 0 || !st.value) return;
+      u.hp = Math.min(u.maxHp, u.hp + st.value);
+      if (w.fx) w.fx.text(u.x, u.y - (u.r || 20) - 30, '+' + st.value, '#eef7ff', 20);
+    },
+  });
+
   // ── 瞬獄影殺陣（劫的大招印記）：到期時引爆 value + 印記期間所受傷害 × 45%（施放者二階段 60%）；被提前移除（死亡等）不引爆 ──
   // shortcut: 以印記期間的生命差近似「劫造成的傷害」，1v1 幾乎都是劫打的；若有第三方傷害來源再改為記錄傷害來源
   BD.defineStatus('deathmark', {

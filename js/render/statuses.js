@@ -52,6 +52,8 @@
   R.defineStatusIcon('ogreback', { glyph: '鬼', color: '#ff4a33' });
   R.defineStatusIcon('jhorage', { glyph: '暴', color: '#e8402a' });
   R.defineStatusIcon('manju', { glyph: '萬', color: '#9fd8ff' });
+  R.defineStatusIcon('hunt', { glyph: '獵', color: '#9fe6ff' });
+  R.defineStatusIcon('respite', { glyph: '羊', color: '#eef7ff' });
   R.defineStatusIcon('tyrantwrath', { glyph: '怒', color: '#ffd86a' });
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });
   R.defineStatusIcon('dragonblight', { glyph: '龍', color: '#d0143c' });
