@@ -106,7 +106,7 @@
 
   BD.defineEffect('lambsanctum', {
     name: '神羊聖域', category: '大招',
-    desc: '神羊腳下展開 4 秒的銀色聖域：一圈符文環穩穩地鋪在地上、每半秒脈動一次，邊緣升起細長的白色光柱，最後一刻向內收攏、灑下星屑。適合鏡爪「神羊喘息」（status fx）。',
+    desc: '神羊腳下展開 4 秒的銀色聖域：一圈符文環穩穩地鋪在地上、每半秒脈動一次，邊緣升起細長的白色光柱，最後一刻向內收攏、灑下星屑。適合鏡爪大招「神羊喘息」（status fx）。',
     params: { radius: 200 },
     spawn(fx, x, y, o) {
       const E = o.E, r = o.radius || 200, life = 4;
@@ -124,7 +124,7 @@
 
   BD.defineEffect('lambrain', {
     name: '銀箭雨', category: '突刺',
-    desc: '銀箭從高空落下：每支箭在落點前拉出一道斜斜的銀白光線，落地炸出一圈光環與星屑，像流星般砸進獵場。適合鏡爪的狩獵風暴與大招箭雨（el 換成 blood 即血色箭雨）。',
+    desc: '銀箭從高空落下：每支箭在落點前拉出一道斜斜的銀白光線，落地炸出一圈光環與星屑，像流星般砸進獵場。目前鏡爪未使用（舊版狩獵風暴的箭雨）。',
     params: { radius: 60 },
     spawn(fx, x, y, o) {
       const E = o.E, k = Math.min(1.5, o.k), r = o.radius || 60;
@@ -180,7 +180,7 @@
 
   BD.defineEffect('wolfcharge', {
     name: '魔狼衝殺', category: '突刺',
-    desc: '魔狼沿直線狂奔衝殺：整條路徑被一道暗色的疾風與兩排平行的爪痕撕開，兩側噴出冷光與血色碎屑，終點炸開一圈震波與獠牙光弧。適合鏡爪二階段「魔狼撕咬」與大招最後的衝殺（el 換成 blood 即血色疾風）。',
+    desc: '魔狼沿直線狂奔衝殺：整條路徑被一道暗色的疾風與兩排平行的爪痕撕開，兩側噴出冷光與血色碎屑，終點炸開一圈震波與獠牙光弧。適合鏡爪二階段「魔狼撕咬」與「樹影幢幢」的殘影撲殺（el 換成 blood 即血色疾風）。',
     params: { len: 560, width: 100 },
     spawn(fx, x, y, o) {
       const E = o.E, k = Math.min(1.6, o.k), ang = o.angle || 0, len = o.len || 560, w = o.width || 100, [tx, ty] = along(x, y, ang, len, 0);
@@ -217,7 +217,7 @@
 
   BD.defineEffect('lambfinale', {
     name: '永恆獵手・終', category: '大招',
-    desc: '大招的終結：一道銀白巨光從天貫下，魔狼隨光撲落，四道爪痕的弧光橫劈地面，銀藍震環炸開、粉碎的符印化為星屑漫天飛舞，場地短暫染上冷光。適合鏡爪大招「永恆獵手」的符印命中（el 換成 blood 即血色的終結）。',
+    desc: '大招的終結：一道銀白巨光從天貫下，魔狼隨光撲落，四道爪痕的弧光橫劈地面，銀藍震環炸開、粉碎的符印化為星屑漫天飛舞，場地短暫染上冷光。目前鏡爪未使用（舊版大招「永恆獵手」的終結）。',
     params: { radius: 130 },
     spawn(fx, x, y, o) {
       const E = o.E, k = Math.min(1.6, o.k), r = o.radius || 130;

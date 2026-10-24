@@ -18,15 +18,14 @@
 
 | 原作（繁中官網名） | 原作機制（wiki 目前版本） | 本作對應 |
 |---|---|---|
-| 被動 鏡爪印記 | 標記獵物，完成狩獵後永久強化 | 狀態 `hunt`：「鏡爪印記・宣告」與大招命中各累積一層，每層 +6% 造成傷害（上限 5 層，不會消失） |
+| 被動 鏡爪印記 | 標記獵物，完成狩獵後永久強化 | 狀態 `hunt`：「鏡爪印記・宣告」命中累積一層，每層 +6% 造成傷害（上限 5 層，不會消失） |
 | Q 舞動箭矢 | 翻滾並射向附近最多三個敵人 | `arrows`：側向翻滾（翻滾中無敵）＋三支微追蹤的箭；二階段兩輪 |
 | W 魔狼狂熱 | 魔狼在範圍內撲咬，神羊離開範圍就結束 | `frenzy`：神羊在獵物腳下劃出獵場（持續傷害），魔狼從自己的位置連撲三口（二階段四口、每口重新瞄準），神羊在後方補箭 |
 | E 恐懼蔓延 | 前兩下緩速，第三下魔狼撲擊 | `dread`：兩支緩速箭 → 魔狼從牠所在的位置撲向被緩速的獵物（最遠 560） |
-| R 神羊喘息 | 圈內單位生命不會低於下限，結束時回血 | 狀態 `respite`：4 秒內生命鎖在 10% 以上，到期仍活著回復 160（二階段 220）；只保護自己 |
+| R 神羊喘息 | 圈內單位生命不會低於下限，結束時回血 | **大招** `ult`：狀態 `respite`，4.5 秒內生命鎖在 10% 以上，到期仍活著回復 200（二階段 260）；只保護自己。同時施展原作最經典的 R + W 連招：魔狼在獵物腳下的獵場連撲四口（二階段五口） |
 | （本作新增）神羊躍步 | 取原作「神羊遠射、魔狼斷後」的分工 | `leap`：被貼身時神羊後躍放箭，魔狼丟下手邊的事撲向追上來的人 |
 | （本作新增）魔狼撕咬 | 取 Pandemonium 皮膚「最後的饗宴」與魔狼的暴烈 | 二階段 `maw`：魔狼從牠所在的位置朝獵物直線衝殺 600 |
-| （本作新增）狩獵風暴 | — | 二階段 `storm`：銀箭雨 |
-| 大招 永恆獵手 | — | 箭雨 + 魔狼從所在之處躍上半空撲落（定身、易傷、累積一層印記）；二階段落地後再直線衝殺；魔狼被打散時只剩箭雨 |
+| （本作新增）樹影幢幢 | 取自原作故事〈樹影幢幢的森林〉：逃跑的扈從回頭只看見樹影，「四周的影子突然朝著他逼近而來」——那些都是魔狼高速移動留下的殘像 | 二階段 `shadows`：魔狼繞獵物狂奔一圈（半徑 210），每段留下一道朝圈心的殘影預警（7 道），跑完後殘影同時撲向圈心（只算一口，附易傷）。躲法：圈合上前跑出圈外，或站在兩道殘影之間 |
 
 數值（冷卻、傷害、範圍）以本作節奏重新設計，並未照搬 wiki 數字（不同版本數字互有出入）。
 
@@ -34,8 +33,8 @@
 
 - **魔狼是獨立的戰鬥夥伴**（`js/engine/minions/kindred.js`，召喚物 `wolf`、trait `wolf`）：開場就在，有自己的生命（300，二階段重新凝聚為 380）。
   - 自主行動：平時繞到獵物「背對神羊」的一側包夾；獵物逼近神羊（170 內）時改擋在兩人之間、撲咬冷卻轉得更快；獵物離神羊太遠（480 外，想逃）就加速追獵。逮到空檔（280 內、冷卻好）會自己撲咬一口。
-  - 聽令：神羊的魔狼狂熱 / 恐懼蔓延 / 神羊躍步 / 魔狼撕咬 / 大招以 `do:'wolf'` 下令，排進魔狼的佇列，魔狼從「自己所在的位置」蓄勢（預警從狼身上拉出、跟著獵物轉，最後 0.15 秒鎖定）、撲出、咬下。躲的方向要看狼，不是看羊。
-  - 可以被打散：生命歸零化為黑霧，9 秒（二階段 7 秒）後回到神羊身旁（原作：分立卻從不分離）。狼不在時神羊的下令落空——大招只剩箭雨。
+  - 聽令：神羊的魔狼狂熱 / 恐懼蔓延 / 神羊躍步 / 魔狼撕咬 / 樹影幢幢 / 大招以 `do:'wolf'` 下令，排進魔狼的佇列，魔狼從「自己所在的位置」蓄勢（預警從狼身上拉出、跟著獵物轉，最後 0.15 秒鎖定）、撲出、咬下。躲的方向要看狼，不是看羊。
+  - 可以被打散：生命歸零化為黑霧，9 秒（二階段 7 秒）後回到神羊身旁（原作：分立卻從不分離）。狼不在時神羊的下令落空——大招只剩聖域、樹影幢幢直接落空。
   - 平衡：狼與羊同時出手，總傷害與舊版相近，但狼的架勢傷害疊上神羊的會一直打崩對手架勢，因此狼的架勢傷害約為舊版一半；神羊生命 1900 → 1600。非鏡像勝率約 63%（舊版 62%）。
 - **魔狼的造型是一筆水墨**（`js/render/styles/kindred.js`）：沒有四肢，頭戴白色羊面具（兩側捲起羊角、S 形漩紋、細長的發光眼縫），頭後是一條長長的墨色身軀——
   身軀是跟著狼頭走的一條「繩」（18 節，存在 WeakMap，純視覺），停下時留在剛走過的路徑上緩緩起伏；邊緣是往後掃、左右交錯的鬃毛，身上是斷續的乾筆飛白，尾端散成數縷捲曲的墨絲。
@@ -56,18 +55,19 @@
 
 觀察重點：原版的羔羊與狼在陰影中，狼的眼睛為冷藍；Shadowfire 將狼改為火焰與紅眼；Chosen of the Wolf 偏冷色、狼身覆銀白。本作以深色長袍、銀色護襟、冷藍眼窩為一階段基調，二階段改為血紅與白色羊面具。
 
-## 5. 網頁來源（實際讀取內容者 10 頁）
+## 5. 網頁來源（實際讀取內容者 11 頁）
 
 1. [Universe:Kindred（LoL Wiki）](https://wiki.leagueoflegends.com/en-us/Universe:Kindred)
 2. [WR:Kindred（LoL Wiki 技能與數值）](https://wiki.leagueoflegends.com/en-us/WR:Kindred)
 3. [Kindred/Skins（LoL Wiki 皮膚列表）](https://wiki.leagueoflegends.com/en-us/Kindred/Skins)
 4. [英雄頁（leagueoflegends.com，en-us）](https://www.leagueoflegends.com/en-us/champions/kindred/)
-5. [Champion Reveal: Kindred, the Eternal Hunters（Surrender at 20）](https://surrenderat20.net/2015/09/champion-reveal-kindred-eternal-hunters.html)
-6. [Kindred guide（Dexerto）](https://www.dexerto.com/league-of-legends/lol-kindred-guide-best-builds-runes-tips-tricks-skins-1642026/)
-7. [Kindred（TheSpike.gg）](https://www.thespike.gg/league-of-legends/champions/Kindred)
-8. [What is Kindred（Fragster）](https://www.fragster.com/what-is-kindred/)
-9. [Kindred League of Legends（ExitLag，葡萄牙文版）](https://www.exitlag.com/blog/pt/kindred-league-of-legends/)
-10. [Kindred League of Legends（ExitLag，阿拉伯文版）](https://www.exitlag.com/blog/ar/kindred-league-of-legends/)
+5. [樹影幢幢的森林（Universe 繁中，原作短篇）](https://universe.leagueoflegends.com/zh_TW/story/kindred-color-story/)
+6. [Champion Reveal: Kindred, the Eternal Hunters（Surrender at 20）](https://surrenderat20.net/2015/09/champion-reveal-kindred-eternal-hunters.html)
+7. [Kindred guide（Dexerto）](https://www.dexerto.com/league-of-legends/lol-kindred-guide-best-builds-runes-tips-tricks-skins-1642026/)
+8. [Kindred（TheSpike.gg）](https://www.thespike.gg/league-of-legends/champions/Kindred)
+9. [What is Kindred（Fragster）](https://www.fragster.com/what-is-kindred/)
+10. [Kindred League of Legends（ExitLag，葡萄牙文版）](https://www.exitlag.com/blog/pt/kindred-league-of-legends/)
+11. [Kindred League of Legends（ExitLag，阿拉伯文版）](https://www.exitlag.com/blog/ar/kindred-league-of-legends/)
 
 另有搜尋到但無法讀取的頁面（403 / 402 / 404）：dotesports、giantbomb、LoL Wiki「Lamb」、Fandom「Kindred」與「Lamb」、earlygame（德文）、「Lambs in the Orchard」。
 

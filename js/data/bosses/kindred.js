@@ -3,7 +3,7 @@
 // 招式名取自繁中官網：鏡爪印記（被動）、舞動箭矢（Q）、魔狼狂熱（W）、恐懼蔓延（E）、神羊喘息（R）。
 // 魔狼是獨立的戰鬥夥伴（召喚物 wolf，js/engine/minions/kindred.js）：開場就在、自己包夾撲咬、可以被打散後重聚；
 // 神羊的招式以 do:'wolf' 下令，魔狼從自己的位置蓄勢撲出（tele 蓄勢、cap 最遠撲距 / len 固定衝殺長度、r 咬合半徑 / w 衝殺寬度、leap 不限距離的躍擊、now 插隊）。
-// 被動：狀態 hunt（每層 +6% 傷害）；R：狀態 respite（生命不低於 10%，結束回血）。考據見 docs/bosses/kindred.md
+// 被動：狀態 hunt（每層 +6% 傷害）；大招 = 原作 R 神羊喘息：狀態 respite（生命不低於 10%，結束回血）。考據見 docs/bosses/kindred.md
 (function (G) {
   const BD = G.BD;
   // 對魔狼下令：從狼自己的位置撲向目標（cap 最遠撲距）、咬合半徑 r
@@ -14,13 +14,13 @@
   // 神羊的單發箭（前兩箭的恐懼蔓延 / 魔狼狂熱期間的掩護射擊）
   const shot = (at, dmg, extra) => ({ do: 'proj', at, n: 1, speed: 1200, r: 11, dmg, posture: 8, kb: 40, life: 0.8, kind: 'arrow', fx: 'lambshot', ...extra });
   // 魔狼狂熱：神羊在獵物腳下劃出獵場，魔狼從自己的位置連撲數口（每口重新瞄準）；神羊在後方補箭。原作：魔狼在範圍內撲咬
-  const frenzy = (r, dps, bites, el) => {
+  const frenzy = (r, dps, bites, el, now) => {
     const fx = (id) => (el ? { id, el } : id);
     const out = [{ do: 'tele', at: 0, dur: 0.55, shape: 'circle', r, anchor: 'target', setMark: 'Z', follow: true, lockBefore: 0.25, teleFx: 'wolfpounce' },
       { do: 'zone', at: 0.3, pattern: 'at', r, dur: 0.5 + bites * 0.4, dps, kind: 'frenzy', delay: 0.25 }];
     for (let i = 0; i < bites; i++) {
       const last = i === bites - 1;
-      out.push(order(0.1, i ? 0.32 : 0.45, 70, last ? 34 : 22, last ? 10 : 6, last ? 220 : 110, fx(last ? 'wolfmaw' : 'wolfbite'), { rec: 0.1 }));
+      out.push(order(0.1, i ? 0.32 : 0.45, 70, last ? 34 : 22, last ? 10 : 6, last ? 220 : 110, fx(last ? 'wolfmaw' : 'wolfbite'), { rec: 0.1, now: now && !i }));
       if (!last) out.push(shot(0.75 + i * 0.4, 20));
     }
     return out;
@@ -43,7 +43,7 @@
       feint: 0.15, delay: 0.25, retreat: 0.3, punish: 0.7, nervous: 0.05, patience: 0.5 },
     phase2: { speedMul: 1.12, dmgMul: 1.2, cdMul: 0.82, fxEl: 'blood', transFx: { id: 'wolfawaken', el: 'blood' },
       line: '魔狼，這一場是你的饗宴。',
-      note: '魔狼的飢餓失控：身形暴漲、燃起鬼火，魔狼狂熱連咬四口、恐懼蔓延的撲擊更重；解鎖「魔狼撕咬」「狩獵風暴」；大招追加魔狼的直線衝殺' },
+      note: '魔狼的飢餓失控：身形暴漲、燃起鬼火，魔狼狂熱連咬四口、恐懼蔓延的撲擊更重；解鎖「魔狼撕咬」「樹影幢幢」；大招的聖域回復更多、魔狼多撲一口' },
     skills: [
       // 舞動箭矢（Q）：神羊往側面翻滾、落地連射三箭（二階段兩輪）；箭會微幅追蹤（原作：自動射向附近的敵人）
       { id: 'arrows', name: '舞動箭矢', short: '舞箭', tags: ['ranged', 'escape'], range: [80, 460], cd: 5.5, cost: 14, track: 7, recovery: 0.35,
@@ -68,10 +68,6 @@
       { id: 'mark', name: '鏡爪印記・宣告', short: '印記', tags: ['ranged', 'zone'], range: [140, 700], cd: 10, cost: 18, track: 7, recovery: 0.5,
         actions: markShot(0.9, 60, 60, 20, 3),
         actions2: markShot(0.8, 66, 68, 24, 3.5) },
-      // 神羊喘息（R）：神羊腳下展開銀色聖域，4 秒內生命不會低於 10%，結束時回復生命
-      { id: 'respite', name: '神羊喘息', short: '喘息', tags: ['defensive'], range: [0, 900], cd: 26, cost: 24, track: 6, recovery: 0.5,
-        actions: [{ do: 'status', at: 0.15, id: 'respite', dur: 4, value: 160, fx: 'lambsanctum' }],
-        actions2: [{ do: 'status', at: 0.15, id: 'respite', dur: 4, value: 220, fx: { id: 'lambsanctum', el: 'blood' } }] },
       // 神羊躍步：對手貼身時神羊往後躍開、空中放箭，魔狼丟下手邊的事撲向追上來的人
       { id: 'leap', name: '神羊躍步', short: '躍步', tags: ['escape', 'ranged'], range: [0, 200], cd: 8, cost: 16, track: 7, recovery: 0.35,
         actions: [{ do: 'blink', at: 0.1, to: 'away', dist: 280, fx: 'lambleap' },
@@ -83,22 +79,18 @@
       // 二階段：魔狼撕咬——魔狼從牠所在的位置朝獵物直線衝殺，整條路徑上的獵物都會被撕開
       { id: 'maw', name: '魔狼撕咬', short: '撕咬', phase: 2, tags: ['ranged', 'aoe'], range: [0, 640], cd: 8, cost: 20, track: 8, recovery: 0.45,
         actions: [charge(0.15, 0.65, 600, 110, 70, 18, 300)] },
-      // 二階段：狩獵風暴——銀箭從天而降，落點各自預警
-      { id: 'storm', name: '狩獵風暴', short: '風暴', phase: 2, tags: ['ranged', 'aoe'], range: [120, 640], cd: 10, cost: 24, track: 7, recovery: 0.6,
-        actions: [{ do: 'rain', at: 0.3, n: 14, dur: 1.2, area: 280, r: 60, flight: 0.7, dmg: 40, posture: 14, kb: 160, kind: 'arrow', fx: 'lambrain', fxEl: 'blood' }] },
+      // 二階段：樹影幢幢（原作故事〈樹影幢幢的森林〉）——神羊說「開始狩獵吧」，魔狼繞著獵物狂奔一圈、每段路留下一道漆黑殘影，
+      // 跑完後殘影從四面八方同時撲向圈心（「他這才發現他早已無處可逃」）。躲法：趁圈還沒合上跑出圈外，或站在兩道殘影之間
+      { id: 'shadows', name: '樹影幢幢', short: '殘影', phase: 2, tags: ['ranged', 'aoe'], range: [0, 640], cd: 10, cost: 22, track: 7, recovery: 0.4,
+        actions: [{ do: 'wolf', at: 0.1, ring: 210, n: 7, tele: 1.5, w: 56, dmg: 72, posture: 20, kb: 240, rec: 0.35,
+          fx: { id: 'wolfcharge', el: 'blood' }, status: { id: 'vulnerable', dur: 3 } }] },
     ],
-    // 大招：永恆獵手——銀箭雨淹沒獵場，魔狼丟下一切、從牠所在之處躍上半空撲落，把獵物壓進地面。二階段落地後再直線衝殺一次。魔狼被打散時只剩箭雨
-    ultimate: { id: 'ult', name: '永恆獵手', name2: '永恆獵手・饗宴', ult: true, range: [0, 900], track: 0, recovery: 0.8,
-      actions: [{ do: 'rain', at: 0.4, n: 16, dur: 1.4, area: 300, r: 64, flight: 0.7, dmg: 40, posture: 16, kb: 160, kind: 'arrow', fx: 'lambrain', fxEl: 'shadow' },
-        { do: 'wolf', at: 0.05, now: true, leap: true, tele: 1.25, lock: 0.3, dash: 0.3, r: 130, dmg: 120, posture: 40, kb: 380, fx: 'lambfinale', rec: 0.2,
-          status: [{ id: 'root', dur: 1 }, { id: 'vulnerable', dur: 4 }] },
-        { do: 'status', at: 1.4, id: 'hunt' }],
-      actions2: [{ do: 'rain', at: 0.35, n: 22, dur: 1.5, area: 320, r: 68, flight: 0.7, dmg: 44, posture: 18, kb: 170, kind: 'arrow', fx: 'lambrain', fxEl: 'blood' },
-        { do: 'wolf', at: 0.05, now: true, leap: true, tele: 1.15, lock: 0.3, dash: 0.3, r: 150, dmg: 140, posture: 46, kb: 400, fx: { id: 'lambfinale', el: 'blood' }, rec: 0.2,
-          status: [{ id: 'root', dur: 1.2 }, { id: 'vulnerable', dur: 4.5 }] },
-        charge(0.1, 0.6, 700, 120, 90, 24, 380),
-        { do: 'status', at: 1.3, id: 'hunt' }],
-      desc: '銀箭雨淹沒獵場，魔狼從牠所在之處躍上半空撲落，把獵物壓進地面（定身 + 易傷），並累積一層鏡爪印記。二階段魔狼落地後再直線衝殺一次。魔狼被打散時只剩箭雨。' },
+    // 大招：神羊喘息（原作 R）——神羊腳下展開銀色聖域，期間生命不會低於 10%、結束時回復生命；
+    // 同時施展原作最經典的 R + W：魔狼丟下手邊的事，在神羊劃出的獵場裡連撲（一階段四口、二階段五口）。魔狼被打散時只剩聖域
+    ultimate: { id: 'ult', name: '神羊喘息', name2: '神羊喘息・饗宴', ult: true, range: [0, 900], track: 0, recovery: 0.6,
+      actions: [{ do: 'status', at: 0.15, id: 'respite', dur: 4.5, value: 200, fx: 'lambsanctum' }, ...frenzy(170, 18, 4, null, true)],
+      actions2: [{ do: 'status', at: 0.15, id: 'respite', dur: 4.5, value: 260, fx: { id: 'lambsanctum', el: 'blood' } }, ...frenzy(190, 22, 5, 'blood', true)],
+      desc: '神羊展開銀色聖域：4.5 秒內生命不會低於 10%，結束時回復生命。同時在獵物腳下劃出獵場，魔狼在場內連撲四口（二階段五口），神羊在後方補箭——想在聖域裡收掉神羊是不可能的，撐過去，或趁魔狼撲咬時拉開距離。' },
   };
 
   BD.registerBoss(kindred);

@@ -22,6 +22,7 @@
     return o.w ? { kind: 'rect', x: m.x, y: m.y, ang: m.ang, len: U.dist(m, { x: m.ex, y: m.ey }), w: o.w } : { kind: 'circle', x: m.ex, y: m.ey, r: o.r };
   }
   function startLunge(w, m, o, e) {
+    if (o.ring) { Object.assign(m, { o, ms: 'ring', st: o.tele, vx: 0, vy: 0, cx: e.x, cy: e.y, ra: Math.atan2(m.y - e.y, m.x - e.x), sx: m.x, sy: m.y, lines: [], rteles: [] }); return; }
     m.o = o; m.ms = 'aim'; m.st = o.tele; m.vx = 0; m.vy = 0;
     [m.ex, m.ey, m.ang] = aimEnd(m, o, e); m.face = m.ang;
     m.tele = K.addTele(w, m.owner, null, lungeShape(m, o), o.tele, { detached: true, color: p2(m) ? EMBER : ICE });
@@ -32,9 +33,36 @@
     K.hitFx(w, m.owner, s, o.fx || elFx(m, 'wolfbite'), { dmg: o.dmg });
     m.ms = 'rec'; m.st = o.rec != null ? o.rec : 0.3; m.o = null;
   }
+  function clearTeles(w, m) {
+    const own = (m.rteles || []).concat(m.tele || []);
+    if (own.length) w.telegraphs = w.telegraphs.filter((t) => !own.includes(t));
+    m.tele = null; m.rteles = [];
+  }
   function dropOrders(w, m) {
-    if (m.tele) w.telegraphs = w.telegraphs.filter((t) => t !== m.tele);
-    m.q.length = 0; m.o = null; m.tele = null; if (m.ms !== 'rec') { m.ms = 'prowl'; m.st = 0; }
+    clearTeles(w, m);
+    m.q.length = 0; m.o = null; if (m.ms !== 'rec') { m.ms = 'prowl'; m.st = 0; }
+  }
+  // 樹影幢幢（原作故事〈樹影幢幢的森林〉）：魔狼繞著獵物狂奔一圈，每段路留下一道殘影（朝圈心的直線預警），
+  // 跑完一圈後所有殘影同時撲向圈心——同一次只算一口；最後魔狼停在圈心
+  const RUN_IN = 0.12, LAP = 0.8; // 進場衝到圈上的時間比例、跑完一圈的時間比例
+  function ringStep(w, m) {
+    const o = m.o, k = U.clamp(1 - m.st / o.tele, 0, 1), lap = U.clamp((k - RUN_IN) / (LAP - RUN_IN), 0, 1);
+    const a = m.ra + m.dir * U.TAU * lap, px = m.cx + Math.cos(a) * o.ring, py = m.cy + Math.sin(a) * o.ring;
+    [m.x, m.y] = k < RUN_IN ? [U.lerp(m.sx, px, k / RUN_IN), U.lerp(m.sy, py, k / RUN_IN)] : K.clampPt(px, py, 30);
+    m.ang = m.face = a + m.dir * Math.PI / 2;
+    if (k >= RUN_IN && m.lines.length < Math.min(o.n, Math.floor(lap * o.n) + 1)) {
+      const s = { kind: 'rect', x: px, y: py, ang: a + Math.PI, len: o.ring + 40, w: o.w };
+      m.lines.push(s);
+      m.rteles.push(K.addTele(w, m.owner, null, s, m.st, { detached: true, color: p2(m) ? EMBER : ICE }));
+    }
+    if (m.st > 0) return;
+    for (const u of w.enemiesOf(m.team)) {
+      const s = m.lines.find((l) => U.hitShape(l, u));
+      if (s) w.damageUnit(m, u, { from: s, dmg: o.dmg, posture: o.posture, kb: o.kb, status: o.status });
+    }
+    for (const s of m.lines) K.hitFx(w, m.owner, s, o.fx, { dmg: o.dmg });
+    [m.x, m.y] = K.clampPt(m.cx, m.cy, 30);
+    clearTeles(w, m); m.ms = 'rec'; m.st = o.rec != null ? o.rec : 0.3; m.o = null;
   }
 
   BD.defineMinion('wolf', {
@@ -47,7 +75,7 @@
     },
     onDeath(w, m) {
       const b = m.owner;
-      if (m.tele) w.telegraphs = w.telegraphs.filter((t) => t !== m.tele);
+      clearTeles(w, m);
       if (b.state === 'dead') return;
       b._wolfAt = w.time + WOLF_BACK[b.phase - 1];
       w.fx.text(m.x, m.y - 40, '魔狼潰散', '#9fb4e0', 20);
@@ -66,6 +94,7 @@
         if (m.st <= 0) { m.ms = 'dash'; m.st = m.o.dash || (m.o.w ? 0.24 : 0.16); m.dashT = m.st; m.sx = m.x; m.sy = m.y; m.tele = null; }
         return true;
       }
+      if (m.ms === 'ring') { ringStep(w, m); return true; }
       if (m.ms === 'dash') {
         const k = U.clamp(1 - m.st / m.dashT, 0, 1);
         m.x = U.lerp(m.sx, m.ex, k); m.y = U.lerp(m.sy, m.ey, k);
