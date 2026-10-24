@@ -1,7 +1,7 @@
 'use strict';
 // 特效庫｜鏡爪專屬（lambdash / lambvolley / lambshot / lambleap / lambmark / lambmarkbloom / lambsanctum / lambrain /
 // wolfpounce / wolfbite / wolfmaw / wolfcharge / wolfawaken / lambfinale）：神羊的銀弓、符印與聖域；魔狼的獵場、獠牙與衝殺。
-// 魔狼本體由造型（js/render/styles/kindred.js）畫出並撲到判定點，這裡只負責爪痕、咬合與光效。只呼叫 fx 原件；亂數只用 BD.vrng；不觸碰 DOM。
+// 魔狼本體是召喚物（js/engine/minions/kindred.js，造型在 js/render/styles/kindred.js），這裡只負責爪痕、咬合與光效。只呼叫 fx 原件；亂數只用 BD.vrng；不觸碰 DOM。
 (function (G) {
   const BD = G.BD, TAU = Math.PI * 2, V = BD.vrng;
   const SILVER = '#eef7ff', ICE = '#8fe3ff', DARK = '#141826', BLOOD = '#d0102a';

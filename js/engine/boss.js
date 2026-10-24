@@ -204,6 +204,7 @@
       if (this.state === 'dead') {
         this.vx *= 0.9; this.vy *= 0.9; this.integrate(dt); return;
       }
+      BD.traitHook(this, 'tick', w, this, dt); // 逐幀特性（例如鏡爪的魔狼在場保證）
       if (this.staDelay <= 0 && this.state !== 'skill' && this.state !== 'dodge') {
         this.sta = Math.min(this.maxSta, this.sta + this.def.stamina.regen * dt * (this.state === 'idle' ? 1 : 0.5));
       }

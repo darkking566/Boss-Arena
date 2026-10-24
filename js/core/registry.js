@@ -66,7 +66,7 @@
   };
 
   // ── Boss 特性（trait）：把個別 Boss 的特殊機制從通用程式碼抽出 ──
-  // BD.defineTrait(name, { onHit, onDash, interceptDamage })；Boss 資料以 traits: ['name', ...] 啟用
+  // BD.defineTrait(name, { onHit, onDash, interceptDamage, tick(w, b, dt) })；Boss 資料以 traits: ['name', ...] 啟用
   const traits = BD.traits = {};
   BD.defineTrait = function (name, hooks) {
     if (traits[name]) throw new Error(`defineTrait：特性「${name}」重複定義`);

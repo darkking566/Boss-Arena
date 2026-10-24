@@ -69,6 +69,8 @@
     ctx.fillStyle = TEAM[m.team]; ctx.fillRect(m.x - bw / 2, m.y - m.r - 14, bw * m.hp / m.maxHp, 4);
     if (m.kind === 'rogue') { ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#ff5566'; ctx.fillText('紅眼', m.x, m.y - m.r - 18); }
   }
+  // ── 鏡爪：魔狼的水墨身軀拖得很長、而且要壓在沙塵之上，整隻由造型的 over 畫（js/render/styles/kindred.js）──
+  R.defineMinionStyle('wolf', () => {});
   R.defineMinionStyle('watcher', knight, { absolute: true });
   R.defineMinionStyle('rogue', knight, { absolute: true });
 })(typeof window !== 'undefined' ? window : globalThis);
