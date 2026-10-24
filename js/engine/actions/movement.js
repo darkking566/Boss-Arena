@@ -29,7 +29,7 @@
 
   // 衝刺：每幀的移動與接觸判定在 Boss.updateSkill（inst.dash）
   BD.defineAction('dash', (w, b, inst, a) => {
-    const ang = b.face + (a.dir === 'back' ? Math.PI : a.dir === 'side' ? (w.rng() < 0.5 ? 1 : -1) * Math.PI / 2 : 0), sp = a.dist / a.dur;
+    const ang = b.face + (a.dir === 'back' ? Math.PI : a.dir === 'side' ? (w.rng() < 0.5 ? 1 : -1) * Math.PI / 2 : +a.dir || 0), sp = a.dist / a.dur;
     inst.dash = { vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t: 0, dur: a.dur, hit: a.hit, hitSet: new Set(), trail: a.trail || null };
     if (a.iframe) BD.applyStatus(b, 'iframe', { dur: a.dur + 0.05 }, w);
     const P = BD.parseFx(a.fx);
