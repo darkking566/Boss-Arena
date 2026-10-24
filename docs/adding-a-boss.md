@@ -64,6 +64,7 @@
     body(ctx, o, t, { def, r, st, act, swing }) { /* 已平移到 Boss 位置並旋轉到面向；畫身體 */ },
     hidden(ctx, b, t) { /* 選用：隱身（鑽地/躍起）時的畫面 */ },
     under(ctx, b, t) { /* 選用：畫在 Boss 底下、隱身時照畫的額外物件（世界座標；例如劫的影子） */ },
+    over(ctx, b, t) { /* 選用：畫在空中特效（沙塵、煙霧）之上的物件（世界座標；例如鏡爪的魔狼，不會被沙塵蓋掉） */ },
     transition(ctx, b, t) { /* 選用：階段轉換的自訂畫法，回傳 true 代表已畫完 */ return false; },
   });
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -170,7 +171,7 @@ BD.defineStatus('burn', {
 ```
 命中類參數另可加 `heal: 0.4`：施放者每次命中回復「造成傷害 × heal」的生命（恐暴龍的啃咬）。
 
-時間軸動作 `{ do: 'status', at, id, dur, stacks, value, target: 'enemy' }`（省略 `target` 表示對自己）：
+時間軸動作 `{ do: 'status', at, id, dur, stacks, value, target: 'enemy', fx }`（省略 `target` 表示對自己；`fx` 選用，在受施者位置播放的純演出特效）：
 ```js
 { do: 'status', at: 0.6, id: 'shield', dur: 8, value: 120 }        // 自身護盾
 { do: 'status', at: 1.2, id: 'vulnerable', dur: 4, target: 'enemy' } // 讓對手易傷

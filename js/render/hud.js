@@ -203,6 +203,8 @@
     drawProjectiles(ctx, w, t);
     drawLobs(ctx, w, t);
     drawFx(ctx, w, 'air');
+    // 造型的 over：畫在空中特效（煙塵）之上的部分，例如鏡爪的靈狼不會被沙塵蓋掉
+    for (const b of order) { const st = R.bossStyle(b.def.style); if (st.over) st.over(ctx, b, t); }
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
     drawTexts(ctx, w);

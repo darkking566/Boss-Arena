@@ -921,6 +921,12 @@
           g.shadowBlur = 0;
           g.fillStyle = 'rgba(160,220,255,0.35)'; g.fillRect(-p.r * 4, -p.r * 0.4, p.r * 2.5, p.r * 0.8);
         });
+      } else if (p.kind === 'arrow') {
+        // 銀弓的箭（犽宿羔羊）：銀白箭身、藍白箭尖、身後拖一道淡藍殘光與羽尾
+        ctx.strokeStyle = 'rgba(143,227,255,0.5)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-30, 0); ctx.stroke();
+        ctx.strokeStyle = '#eef7ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(7, 3.5); ctx.lineTo(7, -3.5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#8fe3ff'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-16, 4); ctx.lineTo(-14, 0); ctx.lineTo(-16, -4); ctx.closePath(); ctx.fill();
       } else if (p.kind === 'kunai') {
         // 小刀造型簡單、無陰影漸層，維持即時繪製
         ctx.fillStyle = '#ccd'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(0, 3); ctx.lineTo(-6, 0); ctx.lineTo(0, -3); ctx.closePath(); ctx.fill();
