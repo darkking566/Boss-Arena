@@ -67,6 +67,7 @@
     if (first) { w.fx.text(x, y - 36, '對撞！', '#ffffff', 26); w.log(b, '與 ' + a.name + ' 的招式對撞！', true); }
     BD.spawnFx(w, 'clash', x, y, { src: b, other: a, first, last }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : 0.05);
   }
+  function repelFx(w, u, o) { BD.spawnFx(w, 'clashrepel', u.x, u.y, { src: u, angle: BD.U.angTo(o, u) }); } // 純視覺：落敗方被撞飛
   function clash(w, b, a, lb, la) {
     const single = la !== lb;
     spark(w, b, a, true, single);
@@ -74,6 +75,7 @@
       const lose = la > lb ? b : a;
       setRally([lose], [w.time], 0.35);
       bump(w, lose, lose === b ? a : b, 35, 320);
+      repelFx(w, lose, lose === b ? a : b);
       return;
     }
     // 同級：雙方鎖在原地連拚 2–6 下，這一串用快 / 中 / 慢其中一種節奏、每下再各自抖動；每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
@@ -93,7 +95,11 @@
       w.later(at[i], () => {
         if (a.state !== 'recover' || b.state !== 'recover') return;
         spark(w, b, a, false, i === n - 1); hit();
-        if (i === n - 1) { bump(w, b, a, 0, 320); bump(w, a, b, 0, 320); }
+        if (i === n - 1) {
+          bump(w, b, a, 0, 320); bump(w, a, b, 0, 320);
+          const lose = a.posture / a.maxPosture > b.posture / b.maxPosture ? a : b; // 同級連拚：架勢吃得較滿的一方算弱勢
+          repelFx(w, lose, lose === a ? b : a);
+        }
       });
     }
   }

@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜增益（charge / stance / parry / divinesight / gfoc / adamas / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、神虛視、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
+// 特效庫｜增益（charge / stance / parry / divinesight / gfoc / adamas / clashrepel / mikiri / pojun / summon / roar / bloodroar / awaken / shadowrise / eclipse / thunderwake / pressure / ironfist / posturebreak）：蓄力、架式、見切、神虛視、見切一閃、破軍、召喚、咆哮、血吼、覺醒、影起、月蝕、雷槌覺醒、威壓、鐵手套反槌與架勢崩潰
 // 只呼叫 fx 原件（js/engine/entities/fx.js）；亂數只用 BD.vrng；不觸碰 DOM。
 // o：E 元素主題、life 持續時間、k 綜合倍率、src 施放者（可為 null）、flashColor（咆哮）
 (function (G) {
@@ -76,6 +76,35 @@
         if (a) fx.ghost(a, 0.3, ca);
         if (b) fx.ghost(b, 0.3, cb);
         fx.punch(0.035, x, y); fx.shake(8, th);
+      }
+    },
+  });
+
+  BD.defineEffect('clashrepel', {
+    name: '拚刀擊退', category: '增益',
+    desc: '拚刀落敗被撞飛：受擊側迸出白色衝擊弧，滑退途中連續留下殘影、地面拖痕與揚塵，腳下最後揚起一圈煙塵。適合對撞、拚刀較弱勢的一方。',
+    params: { angle: 0 },
+    spawn(fx, x, y, o) {
+      const E = o.E, V = BD.vrng, u = o.src, ang = o.angle || 0, r = u && u.r ? u.r : 30;
+      const cx = Math.cos(ang), cy = Math.sin(ang);
+      // 受擊面（朝向勝方那一側）的衝擊弧與火花
+      fx.slash(x - cx * r, y - cy * r, ang + Math.PI, 1.6, r * 1.3, '#ffffff', 7, 0.18, { core: E.core, trail: 2 });
+      fx.sparkle(x - cx * r, y - cy * r, E.core, 10, 280, ang, 0.8);
+      fx.smoke(x, y, 'rgba(200,190,170,0.35)', fx.budget(5), r * 0.6);
+      if (!u) return;
+      let px = x, py = y;
+      for (let i = 1; i <= 5; i++) {
+        fx.after(0.05 * i, () => {
+          if (u.x == null) return;
+          fx.ghost(u, 0.25, u.def ? u.def.glow : E.glow);
+          for (const s of [-1, 1]) { // 兩腳在地上犁出的拖痕
+            const ox = -cy * r * 0.45 * s, oy = cx * r * 0.45 * s;
+            fx.streak(px + ox, py + oy, u.x + ox, u.y + oy, 3, 'rgba(120,105,85,0.7)', 0.5, false);
+          }
+          fx.puff(u.x - cx * r * 0.3, u.y - cy * r * 0.3, -cx * 40 + V.range(-20, 20), -cy * 40 + V.range(-20, 20), r * 0.3, r * 0.8, 0.5, 'sand', 0.35);
+          px = u.x; py = u.y;
+          if (i === 5) fx.ring(u.x, u.y, r * 0.5, r * 1.6, 0.3, 'rgba(210,200,180,0.8)', 3);
+        });
       }
     },
   });
