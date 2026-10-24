@@ -74,7 +74,7 @@
     }
     skillPhase() { // windup / active / recovery
       const i = this.inst; if (!i) return null;
-      if (i.hold > 0 || i.t < i.v.windup) return 'windup';
+      if (i.aim > 0 || i.hold > 0 || i.t < i.v.windup) return 'windup';
       if (i.t < i.v.activeEnd) return 'active';
       return 'recovery';
     }
@@ -90,6 +90,8 @@
       this.state = 'skill'; this.stateT = 0;
       this.inst = { skill, v: this.phase === 2 ? skill.v2 : skill.v1, t: 0, hold: opts.hold || 0, idx: 0, marks: {}, id: w.nextId++, dash: null };
       if (opts.chase) { this.inst.chase = opts.chase; this.inst.chaseStop = opts.chaseStop || 0; } // 沉重限定
+      // 沉重：轉身慢，先轉向目標再開始時間軸（上限 1 秒），避免背對著把招放到空處；反擊 / 防禦 / 脫離招立即生效
+      if (this.def.pace && !(skill.tags || []).some((t) => t === 'counter' || t === 'defensive' || t === 'escape')) this.inst.aim = 1;
       if (!skill.ult && !opts.force) {
         if (skill.res) this[skill.res] -= skill.cost || 0;
         else { this.sta -= (skill.cost || 0) * (opts.costMul != null ? opts.costMul : 1); this.staDelay = 0.9; }
@@ -284,6 +286,11 @@
     }
     updateSkill(dt, tgt, spd) {
       const w = this.world, inst = this.inst, v = inst.v, sk = inst.skill;
+      if (inst.aim > 0) {
+        const a = U.angTo(this, tgt);
+        if (Math.abs(U.angDiff(this.face, a)) > 0.15) { inst.aim -= dt; this.face = U.rotateToward(this.face, a, this.def.turn * 2 * dt); return null; }
+        inst.aim = 0;
+      }
       if (inst.hold > 0) {
         inst.hold -= dt;
         this.face = U.rotateToward(this.face, U.angTo(this, tgt), (sk.track || 6) * dt);
