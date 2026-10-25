@@ -313,11 +313,6 @@
     }
     backArms(ctx, r, t, U.clamp(A.arms + clawK * (p2 ? 0 : 0.8), 0, 1.4), shade);
     cloak(ctx, r, shade);
-    if (!shade && run > 0.1) { // 腳：一隻騎士脛甲、一隻赤腳獸足（俯視只在跨步時露出斗篷外）
-      const st = Math.sin(t * (4 + 5 * run));
-      ctx.fillStyle = '#8a8c90'; ctx.beginPath(); ctx.ellipse(r * (0.9 + 0.22 * st), r * 0.38, r * 0.2, r * 0.12, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#6a5040'; ctx.beginPath(); ctx.ellipse(r * (0.9 - 0.22 * st), -r * 0.38, r * 0.22, r * 0.14, 0, 0, TAU); ctx.fill();
-    }
     // 左臂：一階段巨大手臂、二階段龍頭（高舉時縮短，表示朝上）
     const lup = U.clamp(A.ll, 0, 1), la = A.la + (clawK && p2 ? -0.3 * clawK : 0), le = A.le + clawK * 0.6;
     const sx = r * 0.2, sy = -r * 0.62;
