@@ -6,6 +6,7 @@
 //   tyrant：大海暴君（波賽頓）——每挨 4 下動怒（傷害與速度短暫提升）
 //   reflect：神虛視（亞當）——見切架式（counter 動作帶 reflect:true）看穿對手出招時，把整招複製成自己的反擊；二階段過載、將死時死立不倒
 //   phantomarms：黃金幻影（瑪爾基特）——每挨 3 下，自動朝攻擊者擲出一把黃金短刀
+//   grafted：接肢（葛瑞克）——每揮 3 下，背上接來的手臂追加一記爪掃；二階段換成左臂龍頭的火咬
 (function (G) {
   const BD = G.BD, K = BD.K;
 
@@ -281,6 +282,21 @@
         BD.spawnProj(w, b, b, BD.U.angTo(b, foe), PHANTOM_DAGGER);
       });
       return null; // 只計數，不攔截傷害
+    },
+  });
+
+  // ── grafted：接肢（葛瑞克）——每 3 個 hit 動作（多段噴火不算），0.2 秒後背上的手臂從左側追加一記爪掃；二階段換成龍頭火咬（燃燒）──
+  BD.defineTrait('grafted', {
+    onHit(w, b, s, a) {
+      if (a.multi || (b._graft = (b._graft || 0) + 1) < 3) return;
+      b._graft = 0;
+      w.later(0.2, () => {
+        if (b.state === 'dead' || b.state === 'transition' || BD.hasStatus(b, 'hidden')) return;
+        const p2 = b.phase === 2, ang = b.face - 0.5, sh = { kind: 'cone', x: b.x, y: b.y, ang, r: p2 ? 230 : 200, arc: 1.7 };
+        w.applyArea(b, sh, { dmg: p2 ? 60 : 48, posture: 16, kb: 240, unblockable: true, status: p2 ? { id: 'burn', dur: 3 } : null });
+        BD.spawnFx(w, 'graftclaw', b.x, b.y, { src: b, angle: ang, radius: sh.r, el: p2 ? 'fire' : 'physical', dragon: p2 });
+        b._clawAt = w.time; // 純演出：造型檔據此畫手臂探出
+      });
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

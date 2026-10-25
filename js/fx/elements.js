@@ -29,7 +29,7 @@
   const KIND_EL = { fire: 'fire', flame: 'fire', lava: 'fire', meteor: 'fire', magma: 'fire',
     ice: 'ice', blizzard: 'ice', mine: 'ice', frost: 'ice',
     acid: 'poison', poison: 'poison', swarm: 'poison', egg: 'poison', spider: 'poison',
-    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow', crow: 'umbra', blackfire: 'blackfire', magatama: 'fire', rock: 'physical', tidewave: 'ocean', tide: 'ocean', tornado: 'wind', windblade: 'wind', goldbeam: 'holy', holydagger: 'holy', holysword: 'holy' };
+    kunai: 'physical', caltrops: 'physical', web: 'physical', clone: 'shadow', sentinel: 'shadow', watcher: 'shadow', crow: 'umbra', blackfire: 'blackfire', magatama: 'fire', rock: 'physical', tidewave: 'ocean', tide: 'ocean', tornado: 'wind', windblade: 'wind', goldbeam: 'holy', holydagger: 'holy', holysword: 'holy', stormblade: 'wind', firerock: 'fire' };
   BD.KIND_EL = KIND_EL;
   BD.kindElement = function (kind, fallback) { return KIND_EL[kind] || fallback || 'physical'; };
 })(typeof window !== 'undefined' ? window : globalThis);
