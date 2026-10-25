@@ -176,3 +176,55 @@
 | shadowTeleport | shadow_teleport1.ogg | Entity\Teleport1.ogg |
 | shadowTeleport | shadow_teleport2.ogg | Entity\Teleport2.ogg |
 | fangSnap | evoker_fangs.ogg | Mob\Mob\Evoker fangs.ogg |
+| wolfHowl | wolf_howl1.ogg | Mob\Mob\Wolf howl1.ogg |
+| wolfHowl | wolf_howl2.ogg | Mob\Mob\Wolf howl2.ogg |
+| wolfGrowl | wolf_growl1.ogg | Mob\Mob\Wolf growl1.ogg |
+| wolfGrowl | wolf_growl2.ogg | Mob\Mob\Wolf growl2.ogg |
+| wolfGrowl | wolf_growl3.ogg | Mob\Mob\Wolf growl3.ogg |
+| wolfDisperse | wolf_death.ogg | Mob\Mob\Wolf death.ogg |
+| wolfDisperse | wolf_whine.ogg | Mob\Mob\Wolf whine.ogg |
+| wolfDisperse | wolf_hurt1.ogg | Mob\Mob\Wolf hurt1.ogg |
+| wolfPant | wolf_panting.ogg | Mob\Mob\Wolf panting.ogg |
+| beastBite | fox_bite1.ogg | Mob\Mob\Fox bite1.ogg |
+| beastBite | fox_bite2.ogg | Mob\Mob\Fox bite2.ogg |
+| beastBite | fox_bite3.ogg | Mob\Mob\Fox bite3.ogg |
+| ghostSwoop | phantom_swoop1.ogg | Mob\Mob\Phantom swoop1.ogg |
+| ghostSwoop | phantom_swoop2.ogg | Mob\Mob\Phantom swoop2.ogg |
+| bowShoot | bow_shoot.ogg | Item\Bow shoot.ogg |
+| windBurst | breeze_burst1.ogg | Mob\Mob\Breeze wind burst1 JE1 BE1.ogg |
+| windBurst | breeze_burst2.ogg | Mob\Mob\Breeze wind burst2 JE1 BE1.ogg |
+| windBurst | breeze_burst3.ogg | Mob\Mob\Breeze wind burst3 JE1 BE1.ogg |
+| windDeflect | breeze_deflect1.ogg | Mob\Mob\Breeze deflect1 JE1 BE1.ogg |
+| windDeflect | breeze_deflect2.ogg | Mob\Mob\Breeze deflect2 JE1 BE1.ogg |
+| windDeflect | breeze_deflect3.ogg | Mob\Mob\Breeze deflect3 JE1 BE1.ogg |
+| windWhirl | breeze_whirl.ogg | Mob\Mob\Breeze whirl JE1.ogg |
+| windWhirl | vortex_whoosh1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Suck whoosh1.ogg |
+| windWhirl | vortex_whoosh2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Suck whoosh2.ogg |
+| windCharge | breeze_charge1.ogg | Mob\Mob\Breeze charge1 JE1 BE1.ogg |
+| windCharge | breeze_charge2.ogg | Mob\Mob\Breeze charge2 JE1 BE1.ogg |
+| windCharge | breeze_charge3.ogg | Mob\Mob\Breeze charge3 JE1 BE1.ogg |
+| windCharge | breeze_inhale1.ogg | Mob\Mob\Breeze inhale1 JE1 BE1.ogg |
+| windShoot | breeze_shoot.ogg | Mob\Mob\Breeze shoot JE1 BE1.ogg |
+| windAir | breeze_air1.ogg | Mob\Mob\Breeze idle air1 JE2 BE2.ogg |
+| windAir | breeze_air2.ogg | Mob\Mob\Breeze idle air2 JE2 BE2.ogg |
+| windAir | breeze_air3.ogg | Mob\Mob\Breeze idle air3 JE2 BE2.ogg |
+| windPierce | trident_pierce1.ogg | Item\Item\Trident pierce1.ogg |
+| windPierce | trident_pierce2.ogg | Item\Item\Trident pierce2.ogg |
+| windPierce | trident_pierce3.ogg | Item\Item\Trident pierce3.ogg |
+| windSpin | riptide1.ogg | Enchantment\Riptide I.ogg |
+| windSpin | riptide2.ogg | Enchantment\Riptide II.ogg |
+| windSpin | riptide3.ogg | Enchantment\Riptide III.ogg |
+| metalWhoosh | metal_whoosh1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Metalic whoosh1.ogg |
+| metalWhoosh | metal_whoosh2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Metalic whoosh2.ogg |
+| metalWhoosh | metal_whoosh3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Metalic whoosh3.ogg |
+| windShield | wither_shield1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Shield1.ogg |
+| windShield | wither_shield2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Shield2.ogg |
+| sakeDrink | sake_drink.ogg | Mob\Mob\Drink.ogg |
+| sakeSpit | sake_spit.ogg | Mob\Mob\Fox spit1.ogg |
+| crystalResonate | amethyst_resonate1.ogg | Block\Block\Amethyst resonate1.ogg |
+| crystalResonate | amethyst_resonate2.ogg | Block\Block\Amethyst resonate2.ogg |
+| crystalResonate | amethyst_shimmer.ogg | Block\Block\Amethyst shimmer.ogg |
+| beaconBeam | beacon_activate.ogg | Block\Beacon activate.ogg |
+| soulCharge | respawn_anchor_charge.ogg | Block\Block\Respawn anchor charge1.ogg |
+| sculkPulse | sculk_charge.ogg | Block\Block\Sculk charge1.ogg |
+| sculkShriek | sculk_shriek.ogg | Block\Block\Sculk shrieker shriek1.ogg |

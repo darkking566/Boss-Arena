@@ -24,6 +24,14 @@
       mikiriClang: ['hit_metal_clash'], mikiriRing: ['hit_metal_clash', 'buff_up'],
       draw: ['swing_small'], sheath: ['slash_2'], bell: ['buff_up'], stun: ['hit_armor'],
       wood: ['slam_thud', 'hit_armor'], click: ['swing_small'], stepSand: ['slam_thud'], shoot: ['swing_small', 'dash_whoosh'],
+      wolfHowl: ['roar_big'], wolfGrowl: ['roar_mid'], wolfDisperse: ['death'], wolfPant: ['slam_thud'],
+      beastBite: ['hit_flesh_slice'], ghostSwoop: ['dash_whoosh'], bowShoot: ['proj_hit'],
+      windBurst: ['dash_whoosh'], crystalResonate: ['buff_up'], beaconBeam: ['magic_cast'],
+      soulCharge: ['magic_cast'], sculkPulse: ['slam_thud'], sculkShriek: ['roar_big'],
+      windDeflect: ['hit_armor'], windWhirl: ['dash_whoosh', 'swing_small'], windCharge: ['buff_up', 'dash_whoosh'],
+      windShoot: ['swing_small', 'dash_whoosh'], windAir: ['dash_whoosh'], windPierce: ['slash_2', 'hit_flesh_slice'],
+      windSpin: ['dash_whoosh', 'slash_2'], metalWhoosh: ['slash_violent', 'swing_small'],
+      windShield: ['buff_up'], sakeDrink: ['buff_up'], sakeSpit: ['slash_2'],
     } },
     mc_set: { ext: '.ogg', files: {
       slashHeavy: ['sweep_attack1', 'sweep_attack2', 'sweep_attack3'], slash: ['sweep_attack4', 'sweep_attack5'], swing: ['sweep_attack6', 'sweep_attack7'],
@@ -74,13 +82,37 @@
       ambForest: ['poplar_leaves_wind1_je2', 'poplar_leaves_wind2_je2', 'poplar_leaves_wind3_je2'],
       ambWheat: ['dry_grass_wind4', 'dry_grass_wind5', 'dry_grass_wind6'],
       ambSwamp: ['dead_bush_crickets', 'dead_bush_insect1'],
+      wolfHowl: ['wolf_howl1', 'wolf_howl2'],
+      wolfGrowl: ['wolf_growl1', 'wolf_growl2', 'wolf_growl3'],
+      wolfDisperse: ['wolf_death', 'wolf_whine', 'wolf_hurt1'],
+      wolfPant: ['wolf_panting'],
+      beastBite: ['fox_bite1', 'fox_bite2', 'fox_bite3'],
+      ghostSwoop: ['phantom_swoop1', 'phantom_swoop2'],
+      bowShoot: ['bow_shoot'],
+      windBurst: ['breeze_burst1', 'breeze_burst2', 'breeze_burst3'],
+      windDeflect: ['breeze_deflect1', 'breeze_deflect2', 'breeze_deflect3'],
+      windWhirl: ['breeze_whirl', 'vortex_whoosh1', 'vortex_whoosh2'],
+      windCharge: ['breeze_charge1', 'breeze_charge2', 'breeze_charge3', 'breeze_inhale1'],
+      windShoot: ['breeze_shoot'],
+      windAir: ['breeze_air1', 'breeze_air2', 'breeze_air3'],
+      windPierce: ['trident_pierce1', 'trident_pierce2', 'trident_pierce3'],
+      windSpin: ['riptide1', 'riptide2', 'riptide3'],
+      metalWhoosh: ['metal_whoosh1', 'metal_whoosh2', 'metal_whoosh3'],
+      windShield: ['wither_shield1', 'wither_shield2'],
+      sakeDrink: ['sake_drink'],
+      sakeSpit: ['sake_spit'],
+      crystalResonate: ['amethyst_resonate1', 'amethyst_resonate2', 'amethyst_shimmer'],
+      beaconBeam: ['beacon_activate'],
+      soulCharge: ['respawn_anchor_charge'],
+      sculkPulse: ['sculk_charge'],
+      sculkShriek: ['sculk_shriek'],
     } },
   };
   if (!SET) return;
   const BD = G.BD, V = BD.vrng, DIR = 'audio/' + SET + '/', EXT = SETS[SET].ext, FILES = SETS[SET].files;
-  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, bladeScrape: 0.2, swordWhoosh: 0.1, maceAir: 0.1, tridentThrow: 0.2, tridentReturn: 0.2, anvilDestroy: 0.5, throwWhoosh: 0.08, heartbeat: 0.22, shadowTeleport: 0.12, fangSnap: 0.15, crit: 0.08, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.35, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: 0.08, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1 };
+  const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, bladeScrape: 0.2, swordWhoosh: 0.1, maceAir: 0.1, tridentThrow: 0.2, tridentReturn: 0.2, anvilDestroy: 0.5, throwWhoosh: 0.08, heartbeat: 0.22, shadowTeleport: 0.12, fangSnap: 0.15, crit: 0.08, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.35, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: 0.08, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1, wolfHowl: 0.8, wolfGrowl: 0.25, wolfDisperse: 0.5, wolfPant: 0.3, beastBite: 0.12, ghostSwoop: 0.2, bowShoot: 0.08, windBurst: 0.15, windDeflect: 0.08, windWhirl: 0.15, windCharge: 0.18, windShoot: 0.06, windAir: 0.12, windPierce: 0.08, windSpin: 0.12, metalWhoosh: 0.06, windShield: 0.2, sakeDrink: 0.5, sakeSpit: 0.5, crystalResonate: 0.15, beaconBeam: 1.0, soulCharge: 0.6, sculkPulse: 0.2, sculkShriek: 0.6 };
   // 音檔常帶很長的尾巴（蓄力 7 秒、砸地 6.6 秒…），超過上限就淡出截斷；未列出者播完整檔
-  const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, bladeScrape: 0.8, swordWhoosh: 0.5, maceAir: 0.6, tridentThrow: 0.8, tridentReturn: 1.2, anvilDestroy: 1.2, throwWhoosh: 0.4, heartbeat: 0.6, shadowTeleport: 0.8, fangSnap: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2 };
+  const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, bladeScrape: 0.8, swordWhoosh: 0.5, maceAir: 0.6, tridentThrow: 0.8, tridentReturn: 1.2, anvilDestroy: 1.2, throwWhoosh: 0.4, heartbeat: 0.6, shadowTeleport: 0.8, fangSnap: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2, wolfHowl: 2.2, wolfGrowl: 1.2, wolfDisperse: 1.0, wolfPant: 0.6, beastBite: 0.5, ghostSwoop: 0.9, bowShoot: 0.5, windBurst: 0.8, windDeflect: 0.6, windWhirl: 1.2, windCharge: 0.7, windShoot: 0.4, windAir: 0.9, windPierce: 0.5, windSpin: 1.2, metalWhoosh: 0.7, windShield: 1.0, sakeDrink: 0.5, sakeSpit: 0.5, crystalResonate: 1.5, beaconBeam: 2.2, soulCharge: 1.8, sculkPulse: 1.0, sculkShriek: 1.5 };
   const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath'];
   const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'gfocroar', 'mangekyo', 'susanoo', 'godofgods', 'sightstance', 'ogreback'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow', 'edenblink'];
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
@@ -129,6 +161,10 @@
   const seenLearn = new WeakSet();
   const seenItachiP2 = new WeakSet();
   const amMap = new WeakMap();
+  const seenKindredP2 = new WeakSet();
+  const seenWolfDead = new WeakSet();
+  const huntMap = new WeakMap();
+  const rspMap = new WeakMap();
   function tick(w, dt) {
     const g = MAP_SFX[BD.ARENA.map]; if (!g || w.over) return;
     if (ambW !== w) { ambW = w; ambT = 2 + V() * 3; }
@@ -646,6 +682,157 @@
           }
         }
       }
+      else if (b.def && b.def.id === 'kindred') {
+        // 二階段轉變：HP 50% 進入 transition，魔狼的飢餓再也壓不住，身形暴漲、燃起鬼火
+        if ((b.state === 'transition' || b.phase === 2) && !seenKindredP2.has(b)) {
+          seenKindredP2.add(b);
+          play('wolfGrowl', 0.9);         // 魔狼低吼蓄力
+          play('soulCharge', 0.85);       // 鬼火靈能湧現
+          play('ambSnow', 0.7);           // 死亡陰風呼嘯
+          play('heartbeat', 0.8);
+          setTimeout(() => {
+            if (b.hp > 0 && b.state !== 'dead') {
+              play('wolfHowl', 1.0);      // 魔狼仰天長嚎——「魔狼，這一場是你的饗宴！」
+              play('sculkShriek', 0.85);  // 飢餓靈魂尖嘯
+              play('shockwave', 0.95);    // 氣場震懾
+              play('slamHeavy', 0.85);
+              play('fire', 0.7);          // 鬼火爆散
+            }
+          }, 800);
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          if (sid === 'arrows') {
+            play('windBurst', 0.65);          // 舞動箭矢：神羊翻滾風痕
+            play('dash', 0.55);
+          } else if (sid === 'frenzy') {
+            play('wolfGrowl', 0.8);           // 魔狼狂熱：魔狼盯上獵物低吼
+            play('sculkPulse', 0.75);         // 劃出獵場暗影波紋
+            play('crystalResonate', 0.6);
+          } else if (sid === 'dread') {
+            play('ambSnow', 0.7);             // 恐懼蔓延：緩速陰寒死寂
+            play('draw', 0.65);               // 鎖定拉弓
+            play('bowShoot', 0.6);
+          } else if (sid === 'pincer') {
+            play('draw', 0.85);               // 雙生夾擊：銀弓拉滿極限弦音
+            play('wolfGrowl', 0.75);          // 魔狼對側伏身蓄勢
+            play('swordWhoosh', 0.6);
+          } else if (sid === 'mark') {
+            play('crystalResonate', 0.85);    // 鏡爪印記・宣告：神聖銀色符印降臨清鳴
+            play('bell', 0.7);
+            play('sculkPulse', 0.65);
+          } else if (sid === 'leap') {
+            play('windBurst', 0.75);          // 神羊躍步：後躍絨光風爆
+            play('ghostSwoop', 0.65);         // 騰空疾掠
+            play('bowShoot', 0.6);
+          } else if (sid === 'maw') {
+            play('wolfGrowl', 0.95);          // 魔狼撕咬：狂暴撲殺直線鎖定
+            play('ghostSwoop', 0.85);         // 幽靈巨狼衝殺破空
+            play('shockwave', 0.75);
+          } else if (sid === 'shadows') {
+            play('wolfHowl', 0.95);           // 樹影幢幢：「開始狩獵吧」群狼獵嚎
+            play('ambSnow', 0.8);             // 鬼林陰風呼嘯
+            play('ghostSwoop', 0.75);
+          } else if (sid === 'ult') {
+            play('beaconBeam', 1.0);          // 神羊喘息：天界光柱靈音降臨，銀色聖域展開
+            play('ultCast', 0.95);            // 圖騰守護共振
+            play('crystalResonate', 0.9);     // 符文環神聖清鳴
+            play('soulCharge', 0.85);         // 靈魂不死誓約
+            play('wolfHowl', 0.8);            // 魔狼隨之發起獵場狂撲
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+        // 追蹤魔狼潰散與重聚
+        if (b._wolfAt && !seenWolfDead.has(b)) {
+          seenWolfDead.add(b);
+          play('wolfDisperse', 0.9);          // 魔狼被打散哀鳴化為黑霧
+          play('shadowTeleport', 0.65);       // 黑霧炸散
+        } else if (!b._wolfAt && seenWolfDead.has(b)) {
+          seenWolfDead.delete(b);
+          play('wolfGrowl', 0.75);            // 魔狼自黑霧重新凝聚重聚
+          play('shadowTeleport', 0.7);
+        }
+        // 追蹤神羊喘息（聖域脈動與回血）
+        const rsp = b.statuses && BD.getStatus(b, 'respite');
+        if (rsp && rsp.rem > 0 && b.hp > 0 && b.state !== 'dead') {
+          const nextRsp = rspMap.get(b) || 0;
+          if (w.time >= nextRsp) {
+            rspMap.set(b, w.time + 0.95);
+            play('crystalResonate', 0.5);     // 聖域符文脈動
+            play('soulCharge', 0.5);
+          }
+        } else if (rspMap.has(b)) {
+          rspMap.delete(b);
+          if (b.hp > 0 && b.state !== 'dead') {
+            play('buff', 0.9);                // 神羊喘息結束：聖域光芒斂入體內，生命回復
+            play('crystalResonate', 0.85);
+            play('bell', 0.75);
+          }
+        }
+        // 追蹤鏡爪印記層數獲取
+        const h = b.statuses && BD.getStatus(b, 'hunt');
+        const lastSt = huntMap.get(b) || 0;
+        const curSt = h ? h.stacks || 1 : 0;
+        if (curSt > lastSt) {
+          huntMap.set(b, curSt);
+          play('crystalResonate', 0.85);      // 獲得鏡爪印記層數：靈魂昇華清鳴
+          play('buff', 0.7);
+        } else if (!h && lastSt > 0) {
+          huntMap.delete(b);
+        }
+      }
+      else if (b.def && b.def.id === 'yasuo') {
+        // 二階段轉變開始：HP 50% 進入 transition，畫面慢動作、台詞「死亡就像一陣風，永遠伴隨著我。」
+        if ((b.state === 'transition' || b.phase === 2) && !seenP2.has(b)) {
+          seenP2.add(b);
+          play('sakeDrink', 0.85);    // 喝一口酒葫蘆
+          play('bladeScrape', 0.7);   // 拔劍橫置
+          setTimeout(() => {
+            play('sakeSpit', 0.85);   // 往劍上一噴
+            play('draw', 0.8);        // 劍身泛起青白風光鳴響
+          }, 350);
+          setTimeout(() => {
+            play('windBurst', 1.0);   // 周身捲起龍捲風狂暴爆發！
+            play('windWhirl', 0.95);
+            play('shockwave', 0.9);
+            play('buff', 0.85);
+          }, 650);
+        }
+        const curInst = b.inst;
+        const prevInst = lastSkill.get(b);
+        if (curInst && curInst !== prevInst) {
+          lastSkill.set(b, curInst);
+          const sid = curInst.skill && curInst.skill.id;
+          if (sid === 'sever_wind') {
+            play('sheath', 0.85);      // 納刀・斷風：收刀入鞘
+            play('bladeScrape', 0.65); // 刀身摩擦刀鞘金屬聲
+            play('windCharge', 0.75);  // 鞘口急速凝風、蓄勢待發
+          } else if (sid === 'tempest_tornado') {
+            play('windWhirl', 0.75);   // 鋼鐵暴雪・旋風：狂風蓄勢呼嘯
+            play('windCharge', 0.7);
+          } else if (sid === 'wind_wall') {
+            play('windAir', 0.7);      // 風牆：橫刀迎風掃過
+            play('swordWhoosh', 0.5);
+          } else if (sid === 'storm_breaker') {
+            play('dash', 0.7);         // 颶風破：低身極速突進破空
+            play('swordWhoosh', 0.65);
+          } else if (sid === 'rise_wind') {
+            play('windCharge', 0.85);  // 乘風而起：刀由低往前撩，導引狂風
+            play('windWhirl', 0.75);
+            play('maceAir', 0.6);
+          } else if (sid === 'ult') {
+            play('ultCast', 0.95);     // 奪命氣息：狂風絕息大招宣告
+            play('windWhirl', 0.85);
+            play('windAir', 0.75);
+          }
+        } else if (!curInst && prevInst) {
+          lastSkill.delete(b);
+        }
+      }
       // 死亡印記（瞬獄影殺陣）心跳倒數音效：隨倒數時間加速跳動
       const dm = b.statuses && b.statuses.find((s) => s.id === 'deathmark');
       if (dm && dm.rem > 0 && b.hp > 0 && b.state !== 'dead') {
@@ -705,9 +892,17 @@
       } else if (kind === 'kunai' || kind === 'shuriken' || kind === 'arrow') {
         const isItachi = !!(owner && owner.def && owner.def.id === 'itachi');
         const isItachiP2 = isItachi && owner.phase === 2;
-        play('throwWhoosh', 0.65);   // 諸刃手裏劍 / 苦無投擲破空
-        play('shoot', 0.4);
-        if (isItachiP2) play('fire', 0.55); // 二階段火遁包覆苦無／手裏劍
+        const isKindred = !!(owner && (owner.def && owner.def.id === 'kindred' || owner.owner && owner.owner.def && owner.owner.def.id === 'kindred'));
+        const isKindredP2 = isKindred && (owner.phase === 2 || (owner.owner && owner.owner.phase === 2));
+        if (isKindred) {
+          play('bowShoot', 0.7);      // 神羊銀弓射擊弦音破空
+          play('throwWhoosh', 0.45);
+          if (isKindredP2) play('crystalResonate', 0.4); // 二階段血色符印箭微鳴
+        } else {
+          play('throwWhoosh', 0.65);   // 諸刃手裏劍 / 苦無投擲破空
+          play('shoot', 0.4);
+          if (isItachiP2) play('fire', 0.55); // 二階段火遁包覆苦無／手裏劍
+        }
       } else if (kind === 'airslash') {
         const isMihawk = !!(owner && owner.def && owner.def.id === 'mihawk');
         if (isMihawk) {
@@ -746,6 +941,15 @@
         } else {
           play('swing', 0.35);
         }
+      } else if (kind === 'tornado') {
+        play('windWhirl', 0.85);       // 鋼鐵暴雪・旋風：狂暴氣旋呼嘯破空
+        play('throwWhoosh', 0.75);
+        play('windBurst', 0.65);
+      } else if (kind === 'windblade') {
+        play('metalWhoosh', 0.85);     // 斷風風刃：極速風刃貫穿裂空
+        play('windShoot', 0.8);
+        play('swordWhoosh', 0.75);
+        if (a && a.n > 1) play('windBurst', 0.6); // 二階段三道扇形散開
       }
     },
     fx(id, category, o) {
@@ -759,6 +963,8 @@
       const isZeus = !!(wDef && wDef.id === 'zeus');
       const isYujiro = !!(wDef && wDef.id === 'yujiro');
       const isItachi = !!(wDef && wDef.id === 'itachi');
+      const isKindred = !!(wDef && wDef.id === 'kindred');
+      const isYasuo = !!(wDef && wDef.id === 'yasuo');
       const wSid = o.src && o.src.inst && o.src.inst.skill && o.src.inst.skill.id;
       const isP2 = !!(o.src && (o.src.phase === 2 || (o.src.owner && o.src.owner.phase === 2)));
       const e = o.src && o.src.def && o.src.def.echoColor;
@@ -2204,6 +2410,246 @@
           if (isP2) play('fire', 0.7);
         }
       }
+      else if (isKindred) {
+        if (id === 'lambdash') {
+          play('windBurst', 0.75);         // 神羊側身翻滾：銀藍風痕破空
+          play('dash', 0.6);
+          play('crystalResonate', 0.5);    // 落地星屑清響
+          if (isP2) play('fire', 0.5);     // 血色風痕
+        }
+        else if (id === 'lambvolley') {
+          play('bowShoot', 0.85);          // 銀弓連射：新月弓弦震鳴
+          play('throwWhoosh', 0.7);        // 三箭扇形劃空
+          play('crystalResonate', 0.6);    // 銀白光尾星屑飄落
+          if (isP2) play('fire', 0.5);
+        }
+        else if (id === 'lambshot') {
+          play('bowShoot', 0.8);           // 恐懼之箭：筆直銀箭疾射
+          play('throwWhoosh', 0.7);
+          play('crystalResonate', 0.7);    // 符印細環掠過空靈共鳴
+          if (isP2) play('fire', 0.55);
+        }
+        else if (id === 'lambleap') {
+          play('windBurst', 0.8);          // 神羊躍步：起跳白色絨光爆散
+          play('ghostSwoop', 0.7);         // 空中銀色弧光軌跡
+          play('crystalResonate', 0.65);   // 落點冷藍光環
+        }
+        else if (id === 'lambmark') {
+          play('crystalResonate', 0.85);   // 鏡爪符印：符文環旋轉清鳴
+          play('sculkPulse', 0.75);        // 內圈銀光收縮脈動
+          play('bell', 0.65);
+        }
+        else if (id === 'lambmarkbloom') {
+          play('beaconBeam', 0.95);        // 符印爆開：靈魂光柱直沖天際
+          play('shockwave', 0.85);         // 冷藍光環外擴震波
+          play('crystalResonate', 0.8);    // 銀色星屑炸開
+          play('slamHeavy', 0.75);         // 靈能震地
+        }
+        else if (id === 'lambsanctum') {
+          play('beaconBeam', 1.0);         // 神羊聖域：天界光柱靈音降臨
+          play('soulCharge', 0.95);        // 聖域守護共振
+          play('crystalResonate', 0.9);    // 符文環神聖清鳴
+          play('ultCast', 0.85);           // 靈魂不死誓約
+        }
+        else if (id === 'wolfpounce') {
+          play('wolfGrowl', 0.8);          // 魔狼獵場：暗紅獵場浮現，魔狼鎖定低吼
+          play('sculkPulse', 0.75);        // 獵場冷霧升起
+          play('click', 0.65);             // 三枚爪印依序亮起
+        }
+        else if (id === 'wolfbite') {
+          play('beastBite', 0.9);          // 魔狼噬咬：上下獠牙光弧猛合
+          play('fangSnap', 0.85);          // 尖牙咬碎
+          play('slashHeavy', 0.75);        // 冷藍爪痕劃過
+          play('swordWhoosh', 0.6);
+          if (isP2) play('hitFlesh', 0.7); // 血色獠牙
+        }
+        else if (id === 'wolfmaw') {
+          play('wolfGrowl', 0.95);         // 魔狼撲殺：魔狼凌空重撲狂暴撕咬
+          play('beastBite', 1.0);          // 巨口咬合
+          play('fangSnap', 0.95);
+          play('shockwave', 0.9);          // 暗色震波震裂大地
+          play('slamHeavy', 0.85);
+          play('ghostSwoop', 0.8);
+        }
+        else if (id === 'wolfcharge') {
+          play('ghostSwoop', 0.95);        // 魔狼衝殺：直線衝殺撕裂空氣
+          play('beastBite', 0.9);          // 獠牙光弧合攏
+          play('shockwave', 0.85);         // 終點震波爆開
+          play('swordWhoosh', 0.8);        // 平行爪痕撕地
+          play('slamThud', 0.75);
+        }
+        else if (id === 'wolfawaken') {
+          play('wolfHowl', 1.0);           // 魔狼的饗宴：飢餓暴走長嚎
+          play('shockwave', 0.95);         // 血紅光暈翻湧震波
+          play('sculkShriek', 0.9);        // 餓狼靈魂長嘯
+          play('slamHeavy', 0.85);
+          play('fire', 0.75);              // 燃起鬼火
+        }
+        else if (id === 'lambrain') {
+          play('ghostSwoop', 0.85);        // 銀箭雨：銀箭從天貫下
+          play('crystalResonate', 0.75);   // 落地光環與星屑
+          play('projHit', 0.7);
+        }
+        else if (id === 'lambfinale') {
+          play('beaconBeam', 1.0);         // 永恆獵手・終：銀白巨光從天貫下
+          play('wolfHowl', 0.95);          // 魔狼隨光撲落
+          play('shockwave', 0.95);         // 銀藍震環炸開
+          play('slamHeavy', 0.9);
+          play('crystalResonate', 0.85);
+        }
+        else if (id === 'slash') {
+          play('beastBite', 0.8);
+          play('slash', 0.7);
+          play('swordWhoosh', 0.6);
+        }
+      }
+      // 犽宿（放逐浪人）專屬音效
+      else if (isYasuo) {
+        if (id === 'steeltempest') {
+          play('windPierce', 0.85);   // 鋼鐵暴雪：直刺破空與劍芒穿透
+          play('windShoot', 0.8);     // 劍尖激射突風
+          play('swordWhoosh', 0.75);  // 迅疾出劍破空
+          if (o.k >= 1.2) play('shockwave', 0.5);
+        }
+        else if (id === 'tornadocast') {
+          play('windBurst', 0.9);     // 旋風捲起：狂風爆發震散
+          play('windWhirl', 0.85);    // 雙層白藍渦流破空激盪
+          play('maceAir', 0.75);      // 揮劍掀起巨風
+          play('shockwave', 0.7);
+        }
+        else if (id === 'airlaunch') {
+          play('windBurst', 0.95);    // 捲上天：強烈升騰風柱爆發
+          play('shockwave', 0.85);    // 風壓環擴散震波
+          play('windWhirl', 0.8);     // 地面螺旋氣旋升空
+          setTimeout(() => play('windAir', 0.6), 120);
+        }
+        else if (id === 'sweepblade') {
+          play('windSpin', 0.85);     // 刃敵千軍：御風穿身滑行疾衝
+          play('dash', 0.75);         // 殘影高速位移
+          play('swordWhoosh', 0.7);
+          setTimeout(() => {
+            play('slash', 0.75);      // 終點橫向拔刀切開空氣
+            play('windShoot', 0.6);
+          }, Math.min(200, (o.dur || 0.2) * 1000));
+        }
+        else if (id === 'eqring') {
+          if (wSid === 'eq_storm') {
+            play('windBurst', 0.95);  // 旋風環斬：消耗層數、沉重暴風環爆
+            play('windWhirl', 0.9);   // 圓周外旋風弧
+            play('slashHeavy', 0.85); // 迴旋雙刀環
+            play('shockwave', 0.8);
+          } else {
+            play('windSpin', 0.85);   // 環斬：高速迴旋雙重刀環
+            play('slashHeavy', 0.8);  // 整圈迴旋切擊
+            play('windWhirl', 0.75);  // 外圈氣流渦流
+            play('shockwave', 0.65);
+          }
+        }
+        else if (id === 'windwallcast') {
+          play('windBurst', 0.95);    // 風牆：正面氣流屏障轟然升起
+          play('windShield', 0.85);   // 風壁結界成形能量脈衝
+          play('windWhirl', 0.75);    // 牆面兩端小渦流盤旋
+          play('shockwave', 0.65);    // 風壓環擴散
+        }
+        else if (id === 'windblock') {
+          if (o.empower) {
+            play('windBurst', 0.95);  // 旋風穿過風牆增幅：風暴咆哮
+            play('windWhirl', 0.9);   // 渦流劇烈放大
+            play('buff', 0.8);        // 力量激化音
+            play('shockwave', 0.75);
+          } else {
+            play('windDeflect', 0.9); // 風牆阻擋：投射物被流風彈散撥開
+            play('windShoot', 0.7);   // 氣流碎裂消散
+          }
+        }
+        else if (id === 'severwind') {
+          play('draw', 0.95);         // 納刀・斷風：居合拔刀清脆金屬出鞘鳴響
+          play('metalWhoosh', 0.9);   // 狹長白光刀風撕裂全場
+          play('windBurst', 0.85);    // 身前拔刀狂風爆破
+          play('windShoot', 0.8);     // 風刃噴薄
+          play('shockwave', 0.75);
+        }
+        else if (id === 'lbwarp') {
+          play('windAir', 0.9);       // 奪命氣息・瞬移：化為疾風移形
+          play('teleport', 0.85);     // 瞬移現身虛空
+          play('dash', 0.7);
+          play('ultCast', 0.8);       // 絕息之陣暗色宣告
+        }
+        else if (id === 'lbslash') {
+          const k = ((o.i || 0) + 1) / (o.n || 6);
+          play('metalWhoosh', 0.75 + k * 0.2); // 連斬：隨刀數遞增的凌厲刀風
+          play('slashHeavy', 0.7 + k * 0.2);  // 空中交錯長直刀線切割
+          play('swordWhoosh', 0.75);
+          if (k >= 0.8) play('crit', 0.8);    // 後段連斬追加暴擊撕裂感
+        }
+        else if (id === 'lbfinale') {
+          play('slamHeavy', 1.0);     // 落地斬：重斬將對手轟回地面
+          play('metalWhoosh', 0.95);  // 巨型橫貫刀光破空
+          play('shockwave', 0.95);    // 青綠圓環與雙層震波激盪
+          play('windBurst', 0.9);     // 暴風席捲全場
+          play('crit', 0.85);
+          setTimeout(() => {
+            play('sheath', 0.85);     // 落地歸位：收刀入鞘清脆一響
+            play('draw', 0.5);
+          }, 350);
+        }
+        else if (id === 'flowshield') {
+          play('windShield', 0.85);   // 浪人之道：劍意化為風壁護盾
+          play('windAir', 0.8);       // 身周逆時針流風環繞
+          play('buff', 0.65);
+        }
+        else if (id === 'galeawaken') {
+          play('sakeDrink', 0.9);     // 疾風覺醒：仰頭喝一口酒
+          play('sakeSpit', 0.85);     // 往劍上一噴，酒霧化作白光
+          play('bladeScrape', 0.75);
+          setTimeout(() => {
+            play('windBurst', 1.0);   // 狂暴龍捲自周身沖天而起
+            play('windWhirl', 0.95);
+            play('shockwave', 0.9);
+            play('buff', 0.85);
+          }, 300);
+        }
+        else if (id === 'stormbreaker') {
+          play('metalWhoosh', 0.95);  // 颶風破終結：X 形交錯巨斬撕裂空氣
+          play('slashHeavy', 0.9);    // 雙刀光狂暴重斬
+          play('windBurst', 0.85);    // 交點四芒星與青白震波炸開
+          play('shockwave', 0.85);
+          play('crit', 0.8);
+        }
+        else if (id === 'risecharge') {
+          play('windCharge', 0.85);   // 乘風而起・聚風：目標腳下風環收束急旋
+          play('windWhirl', 0.8);     // 地面風絲越轉越快
+          play('maceAir', 0.65);
+        }
+        else if (id === 'risewind') {
+          play('windBurst', 1.0);     // 乘風而起：巨大龍捲風柱拔地而起沖天！
+          play('shockwave', 0.95);    // 外圈雙層震波呼嘯
+          play('windWhirl', 0.9);     // 六層白藍渦流螺旋升騰
+          play('slamHeavy', 0.8);     // 碎石被捲起之重壓
+        }
+        else if (id === 'windstep') {
+          if (BD.stormReady(o.src)) {
+            play('windCharge', 0.85); // 旋風就緒：身上湧現急旋風鳴
+            play('windWhirl', 0.7);
+            play('bell', 0.5);        // 提示清鳴
+          } else {
+            play('windAir', 0.65);    // 風步：化風閃身殘影
+            play('dash', 0.55);
+            play('swordWhoosh', 0.45);
+          }
+        }
+        else if (id === 'slash') {
+          if (wSid === 'storm_breaker') {
+            play('slashHeavy', 0.85); // 颶風破中段：反手正身快斬
+            play('swordWhoosh', 0.8);
+            play('crit', 0.75);
+          } else {
+            play('swordWhoosh', 0.65); // 劍擊：清脆日本刀揮擊破空
+            play('slash', 0.6);
+            if (o.crit) play('crit', 0.7);
+          }
+        }
+      }
       else if (id === 'thunderwake') { play('buff', 0.6); play('lightning', 0.6); }
       else if (id === 'thunderstrike') { play('lightning', 0.8); play('slamHeavy', 0.6); }
       else if (id === 'thunderpath') { play('lightning', 0.7); play('shockwave', 0.5); }
@@ -2298,6 +2744,23 @@
         play('slashHeavy', 0.9);
         play('hitHeavy', 0.85);
       }
+      else if (id === 'steeltempest') { play('windPierce', 0.85); play('windShoot', 0.8); play('swordWhoosh', 0.75); }
+      else if (id === 'tornadocast') { play('windBurst', 0.9); play('windWhirl', 0.85); play('maceAir', 0.75); }
+      else if (id === 'airlaunch') { play('windBurst', 0.95); play('shockwave', 0.85); play('windWhirl', 0.8); }
+      else if (id === 'sweepblade') { play('windSpin', 0.85); play('dash', 0.75); play('swordWhoosh', 0.7); }
+      else if (id === 'eqring') { play('windSpin', 0.85); play('slashHeavy', 0.8); play('windWhirl', 0.75); }
+      else if (id === 'windwallcast') { play('windBurst', 0.95); play('windShield', 0.85); play('windWhirl', 0.75); }
+      else if (id === 'windblock') { if (o.empower) play('windBurst', 0.95); else play('windDeflect', 0.9); }
+      else if (id === 'severwind') { play('draw', 0.95); play('metalWhoosh', 0.9); play('windBurst', 0.85); }
+      else if (id === 'lbwarp') { play('windAir', 0.9); play('teleport', 0.85); play('ultCast', 0.8); }
+      else if (id === 'lbslash') { play('metalWhoosh', 0.85); play('slashHeavy', 0.8); play('swordWhoosh', 0.75); }
+      else if (id === 'lbfinale') { play('slamHeavy', 1.0); play('metalWhoosh', 0.95); play('shockwave', 0.95); play('windBurst', 0.9); }
+      else if (id === 'flowshield') { play('windShield', 0.85); play('windAir', 0.8); play('buff', 0.65); }
+      else if (id === 'galeawaken') { play('sakeDrink', 0.9); play('sakeSpit', 0.85); setTimeout(() => { play('windBurst', 1.0); play('windWhirl', 0.95); }, 300); }
+      else if (id === 'stormbreaker') { play('metalWhoosh', 0.95); play('slashHeavy', 0.9); play('windBurst', 0.85); }
+      else if (id === 'risecharge') { play('windCharge', 0.85); play('windWhirl', 0.8); }
+      else if (id === 'risewind') { play('windBurst', 1.0); play('shockwave', 0.95); play('windWhirl', 0.9); }
+      else if (id === 'windstep') { play('windAir', 0.65); play('dash', 0.55); }
       else if (category === '爆炸' && id !== 'deathmark') play(o.radius >= 140 ? 'explodeBig' : 'explodeMid', Math.min(0.9, 0.4 + o.k * 0.25));
       else if (category === '震波') play('shockwave', Math.min(0.8, 0.4 + o.k * 0.2));
       else if (category === '砸地') play(o.k >= 1.3 ? 'slamHeavy' : 'slamThud', Math.min(0.9, 0.45 + o.k * 0.2));

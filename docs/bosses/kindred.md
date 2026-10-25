@@ -79,3 +79,19 @@
 - 各來源對同一招的數字不一致（例如 E 的緩速幅度與 Q 的攻速加成），以 wiki 的 V6.2 版為準，本作數值另行設計。
 - 原作的「不會瀕死」（R）與「狩獵層數加射程」（被動）沒有完整移植；前者以護盾近似，後者未做。
 - 考據文字的繁中名稱（犽宿、千珏）以使用者指定為準。
+
+## 7. 音效設計（SFX，`js/audio.js`）
+
+鏡爪（神羊與魔狼）所有技能、投射物、狀態、轉場與魔狼夥伴狀態之音效補全（瀏覽器端 `BD.sfx`，取自 `audio/mc` 並整理至 `audio/mc_set`）：
+
+- **二階段轉場（魔狼的饗宴）**：HP 50% 進入轉場，魔狼飢餓失控、身形暴漲並燃起鬼火；先響起魔狼低吼與靈能心跳湧現，隨後魔狼仰天長嚎（`wolfHowl`）、靈魂尖嘯（`sculkShriek`）、雙層血霧音爆震裂全場（`shockwave` + `slamHeavy` + `fire`）。
+- **舞動箭矢（Q）**：神羊輕靈翻滾、拖出銀藍風痕破空（`lambdash` / `windBurst` + `dash`），落地星屑清響（`crystalResonate`）；銀弓新月連射三箭疾射劃空（`lambvolley` / `bowShoot` + `throwWhoosh` + `crystalResonate`）。二階段箭矢帶血色鬼火。
+- **魔狼狂熱（W）**：神羊劃出獵場，魔狼鎖定低吼、虛空暗影波紋擴散（`wolfpounce` / `wolfGrowl` + `sculkPulse` + `click`）；魔狼連環撲咬上下獠牙猛合撕咬（`wolfbite` / `beastBite` + `fangSnap` + `slashHeavy`），神羊後方補箭符印破空（`lambshot` / `bowShoot` + `crystalResonate`）；最後一口撲殺震波轟鳴（`wolfmaw`）。
+- **恐懼蔓延（E）**：前兩記銀箭帶冰冷緩速死寂侵襲（`lambshot` + `ice`），第三下魔狼凌空重撲、狂暴撕咬大地撕裂（`wolfmaw` / `wolfGrowl` + `beastBite` + `ghostSwoop` + `shockwave` + `slamHeavy`）。
+- **雙生夾擊（本作新增）**：神羊銀弓拉滿極限弦音（`draw` + `bowShoot`）、魔狼對側伏身蓄勢低吼（`wolfGrowl`）；銀箭貫穿與魔狼狂暴直線衝殺雙向穿心（`wolfcharge` / `ghostSwoop` + `beastBite` + `shockwave` + `swordWhoosh`）。
+- **鏡爪印記・宣告（被動）**：神聖銀色符印從天降臨旋轉清鳴（`lambmark` / `crystalResonate` + `sculkPulse` + `bell`）；爆開時靈魂光柱直沖天際、冷藍震環外擴（`lambmarkbloom` / `beaconBeam` + `shockwave` + `crystalResonate` + `slamHeavy`）；命中累積印記層數時響起靈魂昇華清鳴（`crystalResonate` + `buff`）。
+- **神羊躍步（本作新增）**：神羊被貼身時後躍逃脫、白色絨光爆散破空（`lambleap` / `windBurst` + `ghostSwoop` + `crystalResonate`），空中放箭（`bowShoot`），魔狼同時撲向追擊者斷後撕咬（`wolfbite`）。
+- **魔狼撕咬（二階段）**：魔狼直線狂暴衝殺撕裂空氣（`wolfcharge` / `ghostSwoop` + `beastBite` + `shockwave` + `swordWhoosh`），整條路徑被獠牙與爪痕撕裂。
+- **樹影幢幢（二階段）**：神羊「開始狩獵吧」，魔狼仰天獵嚎（`wolfHowl`）、陰風呼嘯（`ambSnow`），螺旋繞圈留下殘影；跑完後殘影同時撲向圈心大合殺，本體呼嘯衝出（`ghostSwoop` + `beastBite` + `shockwave`）。
+- **神羊喘息（大招 R）**：銀色聖域展開，天界光柱靈音降臨（`lambsanctum` / `beaconBeam` + `soulCharge` + `crystalResonate` + `ultCast`）；聖域期間符文每秒脈動低鳴，結束時聖域光芒斂入體內、生命回復（`buff` + `crystalResonate` + `bell`）；同時魔狼發起獵場連續狂暴撕咬。
+- **魔狼夥伴狀態**：魔狼被打散潰散時傳出哀鳴與黑霧散落（`wolfDisperse` + `shadowTeleport`）；重聚時魔狼自黑霧重新凝聚低吼現身（`wolfGrowl` + `shadowTeleport`）。
