@@ -42,6 +42,8 @@
     stamina: { max: 100, regen: 34 }, posture: 100, dodgeCost: 18, dodgeSpeed: 610,
     ai: { prefRange: [190, 430], aggression: 0.55, dodge: 0.55, precision: 0.8, reaction: 0.2, strafe: 0.85, walk: 0.6,
       feint: 0.15, delay: 0.25, retreat: 0.3, punish: 0.7, nervous: 0.05, patience: 0.5,
+      // 位移拉扯（js/engine/ai.js）：escDodge＝看到對手的招要落下時，改用舞箭翻滾 / 神羊躍步閃開並反打的機率；escKite＝平時遠距也用這兩招邊位移邊打
+      escDodge: 0.65, escKite: 0.7,
       // 連段（僅沉重）：一階段 舞箭接恐懼、印記接狂熱、恐懼接夾擊；二階段 舞箭接恐懼、印記接狂熱、恐懼接撕咬、狂熱接樹影
       combos: [
         { id: 'qe', name: '舞箭・恐懼', weight: 1.2, steps: [

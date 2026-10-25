@@ -147,6 +147,8 @@
             if (sk) b.startSkill(sk, { quiet: true });
           } else if (pl.type === 'clash') {
             if (this.stillThreat(pl.th)) b.startSkill(pl.sk, { quiet: true });
+          } else if (pl.type === 'esc') {
+            if (this.stillThreat(pl.th) && !(b.skillReady(pl.sk) && b.startSkill(pl.sk, { quiet: true }))) b.tryDodge(this.avoidMines(this.escapeAng(pl.th)));
           } else if (pl.type === 'swap') {
             const sk = b.available().find((s) => (s.tags || []).includes('swapdodge'));
             if (sk && this.stillThreat(pl.th)) b.startSkill(sk, { quiet: true });
@@ -410,6 +412,17 @@
           this.plan = { type: 'swap', t: Math.max(0, th.left - 0.3), th }; return;
         }
       }
+      // 位移閃避（鏡爪）：威脅落下前改放帶位移的 escape 技能；近身 / 對手貼近用後躍拉開，其餘用有無敵幀的翻滾
+      if (p.escDodge && th.left > 0.12 && th.left < 1.0 && rng() < p.escDodge) {
+        const near = th.melee || U.dist(b, this.e) < 230;
+        const esc = b.available().filter((s) => (s.tags || []).includes('escape') && b.skillReady(s) && !(s.tags || []).includes('melee'));
+        const sk = esc.find((s) => (s.range[0] === 0) === near) || esc[0];
+        if (sk) {
+          const t = Math.max(0, th.left - (b.phase === 2 ? sk.v2 : sk.v1).windup - 0.1);
+          if (!this.plan || t < this.plan.t) this.plan = { type: 'esc', t, th, sk };
+          return;
+        }
+      }
       let pr = p.dodge * (b.sta / b.maxSta < 0.3 ? 0.6 : 1) * (th.big ? 1.2 : 1);
       if (H && this.model && this.w.time < this.baitUntil && th.melee) pr += 0.25;
       if (th.kind === 'tele' && th.ref.shape.kind === 'except') pr = Math.max(pr, 0.7);
@@ -603,7 +616,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         let sc = (s.weight || 1) * rng.range(0.5, 1.5);
         if (tg.includes('melee')) sc *= 0.6 + p.aggression;
         if (tg.includes('gap')) sc *= d > p.prefRange[1] * 1.15 ? 1.4 + p.aggression : 0.45;
-        if (tg.includes('defensive') || tg.includes('escape')) sc *= d < p.prefRange[0] * 0.8 ? 2.6 : 0.06;
+        if (tg.includes('defensive') || tg.includes('escape')) sc *= d < p.prefRange[0] * 0.8 ? 2.6 : tg.includes('escape') && p.escKite || 0.06; // escKite：遠距也願意邊位移邊打（拉扯）
         if (tg.includes('summon')) sc *= owned < 4 ? 1.1 : 0.1;
         if (tg.includes('trap') || tg.includes('zone')) sc *= 0.85;
         if (tg.includes('ranged')) sc *= p.kiter ? 1.4 : 0.9;
