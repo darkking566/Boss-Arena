@@ -192,7 +192,7 @@
     } catch (e) { report(e, cell.id, 'draw'); }
     // 格子範圍內的畫面閃光
     if (fx.flashA > 0.01) {
-      ctx.globalAlpha = Math.min(0.9, fx.flashA * 0.6);
+      ctx.globalAlpha = Math.min(0.22, fx.flashA * 0.35);
       ctx.fillStyle = fx.flashC; ctx.fillRect(cell.aim, 0, CW, CH);
       ctx.globalAlpha = 1;
     }

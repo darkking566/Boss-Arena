@@ -45,7 +45,7 @@
   };
   R.defineBossStyle('hero', {
     body(ctx, o, t, { def, r }) {
-      const hf = o.hurtFlash > 0 ? o.hurtFlash : 0, s = swing(o);
+      const s = swing(o);
       // 武器：握在身體右側（區域 y 軸正向），出招時以 s 擺動
       const sw = o.state === 'skill' && o.inst.skill.sw; // 太刀連斬各式的揮刀動作
       ctx.save(); ctx.translate(r * 0.2, r * 0.55);
@@ -60,7 +60,6 @@
       // 兜帽（頭）
       ctx.fillStyle = '#d7e6f2'; ctx.beginPath(); ctx.arc(r * 0.15, 0, r * 0.52, 0, U.TAU); ctx.fill();
       ctx.fillStyle = def.color; ctx.beginPath(); ctx.arc(-r * 0.05, 0, r * 0.52, Math.PI * 0.6, Math.PI * 1.4); ctx.fill();
-      if (hf > 0) { ctx.fillStyle = `rgba(255,255,255,${U.clamp(hf / 0.12, 0, 1) * 0.6})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, U.TAU); ctx.fill(); }
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

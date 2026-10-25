@@ -661,6 +661,20 @@
     }
   }
 
+  // 受擊閃白：把本體畫到離屏畫布、只留形狀塗白，再以 a 的透明度疊回——閃的是整個身形輪廓而不是一顆圓
+  let flashCv = null;
+  function silhouetteFlash(ctx, b, drawBody, a) {
+    const m = ctx.getTransform(), s = Math.hypot(m.a, m.b), h = b.r * 4; // 半寬 4r 涵蓋長兵器與尾巴
+    const n = Math.min(2048, Math.ceil(h * 2 * s));
+    if (!flashCv) flashCv = document.createElement('canvas');
+    if (flashCv.width < n) flashCv.width = flashCv.height = n;
+    const g = flashCv.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, n, n);
+    g.setTransform(n / (2 * h), 0, 0, n / (2 * h), n / 2 - b.x * n / (2 * h), n / 2 - b.y * n / (2 * h));
+    drawBody(g);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 1; g.fillStyle = '#fff'; g.fillRect(0, 0, n, n);
+    ctx.save(); ctx.globalAlpha = a; ctx.drawImage(flashCv, 0, 0, n, n, b.x - h, b.y - h, h * 2, h * 2); ctx.restore();
+  }
   function drawBoss(ctx, b, t) {
     const style = R.bossStyle(b.def.style);
     if (style.under) style.under(ctx, b, t); // 例如劫的影子：隱身時也要畫
@@ -715,19 +729,16 @@
     }
     if (b.state === 'dodge' || BD.getMod(b, 'iframe')) ctx.globalAlpha = 0.6;
     if (b.state === 'dead') ctx.globalAlpha = Math.max(0.25, 1 - b.stateT * 0.5);
-    if (b.state === 'knockdown') {
-      // 倒地：壓扁躺地、逐漸起身回正，底下揚塵陰影與繞轉的褐色星塵
-      const k = U.clamp((b.stateDur - b.stateT) / 0.3, 0, 1);
-      ctx.save(); ctx.globalAlpha *= 0.85;
-      ctx.fillStyle = 'rgba(60,45,30,0.35)';
-      ctx.beginPath(); ctx.ellipse(b.x, b.y + b.r * 0.35, b.r * 1.25, b.r * 0.65, 0, 0, U.TAU); ctx.fill();
-      // 以 Boss 本身繪製（造型可讀取所有欄位），只在其位置沿面向做非等比縮放
-      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.face); ctx.scale(1 + 0.12 * k, 1 - 0.38 * k); ctx.rotate(-b.face); ctx.translate(-b.x, -b.y);
-      R.drawBossBody(ctx, b, t);
-      ctx.restore();
-      ctx.restore();
-      for (let i = 0; i < 3; i++) { const a = t * 3 + i * 2.09; star(ctx, b.x + Math.cos(a) * b.r * 0.75, b.y - b.r * 0.25 + Math.sin(a) * 5, 5, 'rgba(190,150,90,0.9)'); }
-    } else if (!(b.state === 'transition' && style.transition && style.transition(ctx, b, t))) {
+    // 本體（倒地壓扁 / 換階段造型 / 沉重蓄力後仰）；c 可以是畫面或受擊閃白用的離屏畫布
+    const drawBody = (c) => {
+      if (b.state === 'knockdown') {
+        // 以 Boss 本身繪製（造型可讀取所有欄位），只在其位置沿面向做非等比縮放
+        const k = U.clamp((b.stateDur - b.stateT) / 0.3, 0, 1);
+        c.save(); c.translate(b.x, b.y); c.rotate(b.face); c.scale(1 + 0.12 * k, 1 - 0.38 * k); c.rotate(-b.face); c.translate(-b.x, -b.y);
+        R.drawBossBody(c, b, t); c.restore();
+        return;
+      }
+      if (b.state === 'transition' && style.transition && style.transition(c, b, t)) return;
       // 沉重蓄力：身體向後拉（沿面向的反方向），蓄力越滿拉得越多
       let lean = 0;
       if (b.world && b.world.pace && b.isWindingUp()) {
@@ -736,18 +747,27 @@
         lean = U.clamp(lean, 0, 1);
       }
       if (lean > 0) {
-        ctx.save(); ctx.translate(-Math.cos(b.face) * 5 * lean, -Math.sin(b.face) * 5 * lean);
-        R.drawBossBody(ctx, b, t); ctx.restore();
-      } else R.drawBossBody(ctx, b, t);
-    }
+        c.save(); c.translate(-Math.cos(b.face) * 5 * lean, -Math.sin(b.face) * 5 * lean);
+        R.drawBossBody(c, b, t); c.restore();
+      } else R.drawBossBody(c, b, t);
+    };
+    if (b.state === 'knockdown') {
+      // 倒地：壓扁躺地、逐漸起身回正，底下揚塵陰影與繞轉的褐色星塵
+      ctx.save(); ctx.globalAlpha *= 0.85;
+      ctx.fillStyle = 'rgba(60,45,30,0.35)';
+      ctx.beginPath(); ctx.ellipse(b.x, b.y + b.r * 0.35, b.r * 1.25, b.r * 0.65, 0, 0, U.TAU); ctx.fill();
+      drawBody(ctx);
+      ctx.restore();
+      for (let i = 0; i < 3; i++) { const a = t * 3 + i * 2.09; star(ctx, b.x + Math.cos(a) * b.r * 0.75, b.y - b.r * 0.25 + Math.sin(a) * 5, 5, 'rgba(190,150,90,0.9)'); }
+    } else drawBody(ctx);
     ctx.globalAlpha = 1;
+    if (b.hurtFlash > 0) silhouetteFlash(ctx, b, drawBody, Math.min(1, b.hurtFlash * (b.hurtK || 4)));
     if (b.state === 'whiff') {
       // 空振破綻：紅橘色輪廓脈動，提示可反擊的破口
       const a = 0.45 + 0.45 * Math.sin(t * 18);
       ctx.strokeStyle = `rgba(255,150,80,${Math.max(0, a)})`; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 7, 0, U.TAU); ctx.stroke();
     }
-    if (b.hurtFlash > 0) { ctx.fillStyle = `rgba(255,255,255,${Math.min(1, b.hurtFlash * (b.hurtK || 4))})`; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, U.TAU); ctx.fill(); }
     if (BD.hasStatus(b, 'counter')) {
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.lineDashOffset = t * 60;
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 16, 0, U.TAU); ctx.stroke(); ctx.setLineDash([]);

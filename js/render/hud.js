@@ -162,6 +162,16 @@
     }
     ctx.globalAlpha = 1;
   }
+  // 大招黑邊：任一方施放大招期間，上下黑邊滑入（電影鏡頭感）；k 只是繪圖狀態，依真實時間緩動
+  const lbox = { k: 0, t: 0 };
+  function drawLetterbox(ctx, w, t) {
+    const on = w.bosses.some((b) => b.state === 'skill' && b.inst && b.inst.skill.ult);
+    const dt = Math.min(0.1, Math.max(0, t - lbox.t)); lbox.t = t;
+    lbox.k = U.clamp(lbox.k + (on ? dt / 0.25 : -dt / 0.4), 0, 1);
+    if (lbox.k <= 0) return;
+    const e = lbox.k * lbox.k * (3 - 2 * lbox.k), bh = R.VH * 0.085 * e;
+    ctx.fillStyle = '#000'; ctx.fillRect(-34, -34, R.VW + 68, bh + 34); ctx.fillRect(-34, R.VH - bh, R.VW + 68, bh + 34);
+  }
   R.render = function (ctx, w, view) {
     const t = performance.now() / 1000;
     if (R.cacheBeginFrame) R.cacheBeginFrame();
@@ -214,10 +224,12 @@
     }
     ctx.restore();
     drawGrade(ctx, w);
+    drawLetterbox(ctx, w, t);
     drawBanners(ctx, w);
     drawLog(ctx, w, view);
     ctx.restore();
-    if (w.fx.flashA > 0) { ctx.globalAlpha = w.fx.flashA * 0.6; ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
+    // 全螢幕閃光壓低上限（最多 22%），避免整片閃白刺眼
+    if (w.fx.flashA > 0) { ctx.globalAlpha = Math.min(0.22, w.fx.flashA * 0.35); ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
     drawHUD(ctx, w, view, t);
     // 底部提示
     ctx.font = `13px ${FONT}`; ctx.fillStyle = '#777'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
