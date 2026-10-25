@@ -45,7 +45,7 @@
         const c = document.createElement('div'); c.className = 'card'; c.dataset.id = def.id;
         c.innerHTML = `<canvas width="168" height="168"></canvas><div><div class="nm" style="color:${def.color}">${def.name}</div>
           <div class="tt">${def.title}</div><div class="ar">${def.archetype}</div>
-          <div class="tt">HP ${def.maxHp}</div></div>`;
+          <div class="tt"><span class="rk rk-${def.rank}">${BD.RANKS[def.rank].name}</span> <span class="st" title="${def.stars} 星">${BD.starText(def.stars)}</span></div></div>`;
         c.addEventListener('click', () => { if (state.mode === 'team') pickTeam(side, def.id); else state.pick[side] = def.id; refreshSelect(); });
         c.addEventListener('mouseenter', () => showDetail(side, def.id));
         box.appendChild(c);
@@ -73,6 +73,7 @@
   }
   function detailHtml(def, side) {
     return `<div><h3 style="color:${def.color}">${side === 0 ? '藍方' : '紅方'}：${def.name} — ${def.title}</h3>
+      <div class="d">${BD.RANKS[def.rank].name} ${BD.starText(def.stars)}（${def.stars} 星）· HP ${def.maxHp}</div>
       <div class="d">${def.desc}</div><ul>${skillList(def)}</ul>
       <div class="ult">大招【${def.ultimate.name}${def.ultimate.name2 ? '／' + def.ultimate.name2 : ''}】：${def.ultimate.desc}</div>
       <div class="p2">二階段（HP 50%）：${BD.describePhase2(def)}</div></div>`;

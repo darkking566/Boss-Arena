@@ -10,6 +10,7 @@
     id: 'ronin', name: '影刃武士', title: '無聲之刃', archetype: '耐心反擊型',
     desc: '閃避極佳，在中距離游走誘使對手出招，再以居合、影步與「見切」懲罰每一個破綻。',
     color: '#ff5470', color2: '#1a1a2e', glow: '#ffb3c0', style: 'ronin',
+    rank: 'boss', stars: 4.5,
     radius: 27, maxHp: 2050, speed: 235, turn: 8, mass: 0.8, fxEl: 'physical', hurt: 'flesh',
     traits: ['echo', 'counter', 'clash'], clash: { style: 'blade', proj: true }, // 二階段影分身追斬、見切反擊（js/engine/traits.js）
     stamina: { max: 100, regen: 34 }, posture: 100, dodgeCost: 18, dodgeSpeed: 600,

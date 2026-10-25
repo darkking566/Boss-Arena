@@ -11,6 +11,7 @@
     id: 'yujiro', name: '範馬勇次郎', title: '地上最強生物', archetype: '純粹暴力・鬼背',
     desc: '《刃牙》系列的終極反派、範馬刃牙與傑克的父親，人稱「地上最強生物」與「食人魔（Ogre）」。紅褐長髮往後梳起、濃眉與惡鬼般的笑容，平時一身黑色功夫裝；認為奧義與秘技都是「雜質」，只信純粹的肉體與暴力。認真起來肌肉撐破衣服，背上浮出一張惡鬼的面孔。',
     color: '#e8654d', color2: '#a8332a', glow: '#ff4a33', style: 'yujiro',
+    rank: 'boss', stars: 3,
     radius: 30, maxHp: 2450, speed: 225, turn: 6.5, mass: 1.6, fxEl: 'physical', hurt: 'flesh',
     traits: ['learn', 'counter'], // 一看就會：同一招看過越多次越傷不了他；消力：見切架式被攻擊時反擊（js/engine/traits.js）
     stamina: { max: 130, regen: 32 }, posture: 215, dodgeCost: 18, dodgeSpeed: 540,

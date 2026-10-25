@@ -26,6 +26,7 @@
     id: 'yasuo', name: '犽宿', title: '放逐浪人', archetype: '風之劍豪',
     desc: '愛歐尼亞的放逐劍客，背負弒師的冤罪浪跡天涯。劍隨風走：鋼鐵暴雪連刺兩次就捲起旋風把人送上天，風牆吹散一切飛來的東西，奪命氣息在對手落地前斬下最後一刀。「死亡就像一陣風，永遠伴隨著我。」',
     color: '#3f7fb5', color2: '#2a2f45', glow: '#9fe8ff', style: 'yasuo',
+    rank: 'boss', stars: 2.5,
     radius: 25, maxHp: 1520, speed: 272, turn: 11, mass: 0.8, fxEl: 'wind', hurt: 'flesh',
     traits: ['clash', 'wanderer'], clash: { style: 'blade', proj: true }, // 浪人之道（js/engine/actions/wind.js）；clash 在前：拚刀擋下的攻擊不耗劍意
     stamina: { max: 100, regen: 36 }, posture: 100, dodgeCost: 18, dodgeSpeed: 620,

@@ -31,6 +31,8 @@ for (const def of bosses) {
   if (ids.has(def.id)) err(W, '重複的 id'); ids.add(def.id);
   for (const k of ['id', 'name', 'title', 'archetype', 'desc', 'color', 'color2', 'glow', 'style'])
     if (typeof def[k] !== 'string' || !def[k]) err(W, `缺少字串欄位 ${k}`);
+  if (!BD.RANKS[def.rank]) err(W, `rank '${def.rank}' 應為 ${Object.keys(BD.RANKS).join(' / ')}`);
+  if (!inR(def.stars, 1, 5) || def.stars * 2 % 1) err(W, `stars ${def.stars} 應為 1~5（可半顆）`);
   if (!inR(def.radius, 10, 120)) err(W, `radius ${def.radius} 不合理`);
   if (!inR(def.maxHp, 500, 10000)) err(W, `maxHp ${def.maxHp} 不合理`);
   if (!inR(def.speed, 60, 500)) err(W, `speed ${def.speed} 不合理`);

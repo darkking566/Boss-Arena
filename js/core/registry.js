@@ -20,6 +20,10 @@
     return def;
   };
 
+  // 強度標示：rank 是階級（分類），stars 是同階級內的強度（1~5，可半顆）；純顯示，不影響戰鬥
+  BD.RANKS = { grunt: { name: '小兵' }, miniboss: { name: '小Boss' }, boss: { name: 'Boss' }, legend: { name: '傳說' } };
+  BD.starText = (n) => '★'.repeat(Math.floor(n)) + (n % 1 ? '½' : '') + '☆'.repeat(5 - Math.ceil(n));
+
   // 二階段說明的數值部分由倍率自動產生，避免文字與實際數值脫節
   BD.describePhase2 = function (def) {
     const p = def.phase2, pct = (m) => Math.round((m - 1) * 100), sg = (n) => (n >= 0 ? '+' : '−') + Math.abs(n) + '%';

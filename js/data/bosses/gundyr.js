@@ -13,6 +13,7 @@
     id: 'gundyr', name: '古達', title: '灰燼審判者', archetype: '長戟審判',
     desc: '胸口貫著螺旋劍、守在灰燼墓地的審判者，以長戟的大開大合重掃、剛猛鐵腿體術考驗無火之灰；半血時背脊裂開，人之膿化為深淵巨獸狂暴壓制。',
     color: '#8a8378', color2: '#1b1612', glow: '#e08a3a', style: 'gundyr',
+    rank: 'boss', stars: 3.5,
     radius: 47, maxHp: 3000, speed: 195, turn: 4.5, mass: 1.7, fxEl: 'physical', hurt: 'flesh',
     traits: ['counter'], // 審判立戟的見切架式
     stamina: { max: 120, regen: 26 }, posture: 190, dodgeCost: 22, dodgeSpeed: 470,

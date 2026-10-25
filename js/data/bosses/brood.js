@@ -6,6 +6,7 @@
     id: 'brood', name: '腐沼母巢', title: '萬蟲之母', archetype: '召喚 / 區域控制',
     desc: '行動緩慢但難以靠近：酸液、蛛網、毒霧與源源不絕的幼蟲，會把戰場變成沼澤。',
     color: '#9be15d', color2: '#3b1f4a', glow: '#d4ff8a', style: 'brood',
+    rank: 'boss', stars: 3,
     radius: 76, maxHp: 3150, speed: 140, turn: 3.6, mass: 2.0, fxEl: 'poison', hurt: 'ooze',
     stamina: { max: 120, regen: 24 }, posture: 190, dodgeCost: 26, dodgeSpeed: 390,
     ai: { prefRange: [270, 430], aggression: 0.55, dodge: 0.2, precision: 0.4, reaction: 0.32, strafe: 0.55, walk: 0.7,

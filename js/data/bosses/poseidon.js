@@ -13,6 +13,7 @@
     id: 'poseidon', name: '波賽頓', title: '大海的暴君', archetype: '長槍壓制',
     desc: '終末的女武神第 3 回戰、神方代表，奧林帕斯十二神中「最恐」的海神，眾神口中的「神中之神」。不群聚、不謀略、不依靠，神生來就是完美的；人類在他眼裡只是雜魚。以三叉槍使出一記接一記快到留下殘影的連刺，大招「四十日四十夜的大洪水」從四面八方同時刺來。',
     color: '#2b4fa8', color2: '#e9edf4', glow: '#5ac8ff', style: 'poseidon',
+    rank: 'boss', stars: 3,
     radius: 35, maxHp: 1800, speed: 240, turn: 6.5, mass: 1.25, fxEl: 'ocean', hurt: 'flesh',
     traits: ['counter', 'tyrant', 'echo', 'clash'], clash: { style: 'trident', proj: true }, echoColor: '#7fdcff', // counter＝撥浪見切；tyrant＝每挨 4 下動怒；echo＝二階段快到留下殘影、0.3 秒後再刺一次
     stamina: { max: 110, regen: 30 }, posture: 170, dodgeCost: 18, dodgeSpeed: 560,

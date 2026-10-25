@@ -17,6 +17,7 @@
     id: 'adam', name: '亞當', title: '人類始祖', archetype: '神虛視・拳骨主義',
     desc: '神按自己的形象造出的第一個人類、全人類之父，白金髮色的纖瘦青年，只用一片樹葉蔽體。右手戴著瑞吉蕾芙化成的銀色手指虎，以神虛視看穿並完整複製神的招式；為了「保護孩子們」而出拳，眼睛過載、甚至死去之後，也要站著打到最後。',
     color: '#e6d58a', color2: '#4a3a28', glow: '#ff6f8f', style: 'adam',
+    rank: 'boss', stars: 4,
     radius: 29, maxHp: 1700, speed: 205, turn: 6, mass: 1.1, fxEl: 'lightning', hurt: 'flesh',
     traits: ['reflect', 'counter', 'clash'], clash: { style: 'fist', proj: true }, // reflect：神虛視（先判定）；counter：沒有可複製的招式時退回固定反斬；clash：拳對拳對撞
     stamina: { max: 120, regen: 30 }, posture: 150, dodgeCost: 18, dodgeSpeed: 540,

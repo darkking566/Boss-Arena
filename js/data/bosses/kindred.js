@@ -37,6 +37,7 @@
     id: 'kindred', name: '鏡爪', title: '永恆獵手', archetype: '死亡的雙生（神羊與魔狼）',
     desc: '《英雄聯盟》中死亡的化身，「雖為各自為體，卻從不分離」：神羊的銀弓讓接受命運的人痛快解脫，魔狼追獵那些拒絕面對的人。神羊在遠處翻滾射箭、總是滾向與魔狼夾住獵物的那一側，魔狼則沿著獵物外圍繞到背後包夾撲咬，逃得越遠追得越兇；打散魔狼能換來片刻喘息，但牠總會回到神羊身旁。二階段魔狼的飢餓再也壓不住，身形暴漲、燃起鬼火，箭雨與狼牙一起淹沒整個獵場。',
     color: '#eef2fa', color2: '#1d2233', glow: '#8fe3ff', style: 'kindred',
+    rank: 'boss', stars: 5,
     radius: 24, maxHp: 1600, speed: 262, turn: 9, mass: 0.8, fxEl: 'shadow', hurt: 'flesh',
     traits: ['wolf'], // 魔狼：開場就在的獨立夥伴（js/engine/minions/kindred.js）
     stamina: { max: 100, regen: 34 }, posture: 100, dodgeCost: 18, dodgeSpeed: 610,

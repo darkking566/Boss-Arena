@@ -30,6 +30,9 @@ h1 span { color: #fff; margin-left: 6px; }
 .card canvas { width: 84px; height: 84px; flex: none; }
 .card .nm { font-size: 19px; font-weight: bold; }
 .card .tt { font-size: 13px; color: #aaa; }
+.card .st { color: #ffd34a; letter-spacing: 1px; }
+.card .rk { font-size: 11px; padding: 0 5px; border-radius: 4px; border: 1px solid currentColor; }
+.rk-grunt { color: #9aa; } .rk-miniboss { color: #6cd6a0; } .rk-boss { color: #6aaeff; } .rk-legend { color: #ff9f3a; }
 .card .ar { font-size: 12px; margin-top: 4px; display: inline-block; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); }
 /* ── 地圖選擇 ── */
 .maps { margin: 12px auto 0; text-align: center; }

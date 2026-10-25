@@ -12,6 +12,7 @@
   const myBoss = {
     id: 'golemking', name: '岩王', title: '…', archetype: '…', desc: '…',
     color: '#…', color2: '#…', glow: '#…', style: 'golemking',  // style 對應繪圖樣式
+    rank: 'boss', stars: 3,   // 強度標示（純顯示）：rank 為 grunt 小兵 / miniboss 小Boss / boss / legend 傳說；stars 為同階級內 1~5（可半顆），Boss 依 `node test/ai_stats.js` 的非鏡像勝率約每 6% 一級（≥64% 5 星、≥57% 4.5、≥51% 4、≥45% 3.5、≥39% 3、≥33% 2.5…）
     radius: 30, maxHp: 2800, speed: 180, turn: 5, mass: 1.4, fxEl: 'fire', hurt: 'magma', // 預設特效元素；hurt 為受擊材質（flesh / magma / frost / ooze / shadow / straw，預設 flesh）
     stamina: { max: 110, regen: 28 }, posture: 140, dodgeCost: 20, dodgeSpeed: 520,
     traits: [],                                   // 選用：'counter'（見切/彈反）、'echo'（二階段影分身追斬）、'reflect'（神虛視：`counter` 動作帶 `reflect: true` 時，被攻擊會複製對手整招反擊；另含二階段死立不倒，見 docs/bosses/adam.md）、'battlelust'（鬥神狂喜：一階段每挨 3 下進入 `ecstasy` 狀態，見 docs/bosses/zeus.md）、'learn'（一看就會：同一招看過越多次，傷害與架勢傷害最多降 36%，見 docs/bosses/yujiro.md）、'crowsub'（烏鴉分身：每 14 秒一次，被直接攻擊命中時換成烏鴉群、本體閃到後方，見 docs/bosses/itachi.md）、'clash'（對撞：見下方「對撞」一節）、'wolf'（魔狼：開場就召喚獨立夥伴、被打散後計時重聚，招式以 `do:'wolf'` 下令，見 docs/bosses/kindred.md）、'wanderer'（浪人之道：走動累積劍意、滿了受擊化為護盾；hit 的 `storm` 累積天寒地凍、`crit` 擲暴擊，見 docs/bosses/yasuo.md）、'sentinel'（黃金樹大盾：盾側（左前方）來的直接攻擊減傷 30%，見 docs/bosses/treesentinel.md）、'tyrant'（大海暴君：每挨 4 下動怒，短時間傷害與速度提升，見 docs/bosses/poseidon.md；`echo` 的殘影顏色可用 `def.echoColor` 指定）

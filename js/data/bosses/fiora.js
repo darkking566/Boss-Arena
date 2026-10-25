@@ -11,6 +11,7 @@
     id: 'fiora', name: '菲歐拉', title: '無雙劍姬', archetype: '決鬥劍士',
     desc: '德瑪西亞勞倫特家的無雙劍姬。以刺劍追逐對手防禦的破綻：從破綻方位刺中會追加真實傷害並回復體力；招架成功擋下進攻後的反刺命中會使對手暈眩；終極挑戰讓四個破綻同時暴露。',
     color: '#d4a94a', color2: '#f4f1ee', glow: '#e0527a', style: 'fiora',
+    rank: 'boss', stars: 3.5,
     radius: 26, maxHp: 1350, speed: 265, turn: 10, mass: 0.8, fxEl: 'holy', hurt: 'flesh',
     traits: ['duelist', 'counter', 'clash'], clash: { style: 'blade', proj: true },
     stamina: { max: 100, regen: 34 }, posture: 105, dodgeCost: 18, dodgeSpeed: 600,

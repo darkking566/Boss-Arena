@@ -25,6 +25,7 @@
     id: 'treesentinel', name: '大樹守衛', title: '黃金樹的活壁壘', archetype: '黃金重騎',
     desc: '侍奉黃金樹的重裝騎士團，被視為「黃金樹的活壁壘」。黃金戟大開大合、戰馬人立踐踏、衝鋒時整片大地都在震動；黃金樹大盾會把飛來的魔法化為黃金光束奉還。',
     color: '#c9a24a', color2: '#2a2218', glow: '#ffe27a', style: 'treesentinel',
+    rank: 'boss', stars: 4,
     radius: 50, maxHp: 2450, speed: 225, turn: 3.6, mass: 2.2, fxEl: 'holy', hurt: 'flesh',
     traits: ['sentinel'], // 黃金樹大盾：盾側（左前方）來的攻擊減傷
     stamina: { max: 130, regen: 26 }, posture: 210, dodgeCost: 26, dodgeSpeed: 430,

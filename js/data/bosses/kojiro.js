@@ -12,6 +12,7 @@
     id: 'kojiro', name: '佐佐木小次郎', title: '史上最強的敗者', archetype: '見切型劍聖',
     desc: '終末的女武神第 3 回戰、人類代表。一生從未勝過任何人，卻把每一場敗北都化成養分。長刀「物干し竿」使出燕返し；被折斷後神器再錬成二刀的「二天岩流」，千手進化成萬手，看穿一切攻擊。',
     color: '#8c4a3a', color2: '#4a5a3a', glow: '#cfe8ff', style: 'kojiro',
+    rank: 'boss', stars: 3,
     radius: 29, maxHp: 2050, speed: 240, turn: 7.5, mass: 0.95, fxEl: 'physical', hurt: 'flesh',
     traits: ['counter', 'learn', 'clash'], clash: { style: 'blade', proj: true }, learnReset: true, // 被完美閃避＝預測被超越，千手的學習歸零（原作波賽頓超越千手）
     stamina: { max: 105, regen: 34 }, posture: 120, dodgeCost: 18, dodgeSpeed: 580,
