@@ -34,6 +34,7 @@
       clash: 0.6, basic: 0.5, // 對撞傾向、普攻填空窗機率
       windWall: 0.75, // 風牆擋投射物的機率（js/engine/ai.js）
       escDodge: 0.3, escKite: 0.35, // 刃敵千軍穿過對手的招（無敵幀）、遠距也邊突進邊打
+      airUlt: true, ultRand: 0.01, ultSetup: 1.8, // 對手滯空就取消收招接奪命氣息；大招存著等捲人，大招滿時偏好捲人的招
       // 連段（僅沉重）：E 接 Q、普攻接 Q、斷風接 E 追擊
       combos: [
         { id: 'eq', name: '刃敵千軍・鋼鐵暴雪', weight: 1.4, steps: [
@@ -70,11 +71,19 @@
         actions: sweep(0.16, 0.14, 40),
         actions2: sweep(0.14, 0.12, 44) },
       // 原作 E → Q：突進途中的環斬；二階段環斬也會捲起旋風
-      { id: 'eq_ring', name: '刃敵千軍・環斬', short: '環斬', tags: ['gap', 'aoe'], range: [120, 420], cd: 5, cost: 18, track: 7, recovery: 0.45,
+      { id: 'eq_ring', name: '刃敵千軍・環斬', short: '環斬', tags: ['gap', 'aoe'], range: [120, 420], cd: 5, cost: 18, track: 7, recovery: 0.45, noStorm: true,
         actions: [{ do: 'dash', at: 0.18, dist: 320, dur: 0.2, iframe: true, fx: 'sweepblade' },
           ...strike(0.52, 0.14, { shape: 'circle', r: 135 }, { dmg: 70, posture: 22, kb: 170, fx: 'eqring', storm: true })],
         actions2: [{ do: 'dash', at: 0.16, dist: 330, dur: 0.18, iframe: true, fx: 'sweepblade' },
           ...strike(0.48, 0.14, { shape: 'circle', r: 150 }, { dmg: 72, posture: 22, kb: 60, fx: 'eqring', storm: true, status: { id: 'airborne', dur: 0.75 } })] },
+      // 原作 E → Q3：天寒地凍兩層時的環斬，用掉層數把周圍的人捲上天（兩階段都有）
+      { id: 'eq_storm', name: '刃敵千軍・旋風環斬', short: '旋環', tags: ['gap', 'aoe'], range: [120, 420], cd: 5, cost: 18, track: 7, recovery: 0.45, needStorm: true, weight: 1.4,
+        actions: [{ do: 'dash', at: 0.18, dist: 320, dur: 0.2, iframe: true, fx: 'sweepblade' },
+          ...strike(0.52, 0.14, { shape: 'circle', r: 140 }, { dmg: 72, posture: 22, kb: 60, fx: 'eqring', status: { id: 'airborne', dur: 0.85 } }),
+          { do: 'gather', at: 0.52 }],
+        actions2: [{ do: 'dash', at: 0.16, dist: 330, dur: 0.18, iframe: true, fx: 'sweepblade' },
+          ...strike(0.48, 0.14, { shape: 'circle', r: 155 }, { dmg: 76, posture: 22, kb: 60, fx: 'eqring', status: { id: 'airborne', dur: 1.0 } }),
+          { do: 'gather', at: 0.48 }] },
       // 原作 W：朝前方立起一道風牆 4 秒，擋下敵方投射物（AI 只在投射物將命中時反應施放）
       { id: 'wind_wall', name: '風牆', short: '風牆', tags: ['defensive', 'windwall'], range: [0, 900], cd: 14, cost: 10, recovery: 0.25,
         actions: [{ do: 'windwall', at: 0.08, w: 260, life: 4, drift: 90 }],

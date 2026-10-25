@@ -11,7 +11,7 @@
   BD.stormReady = (b) => { const s = BD.getStatus(b, 'gatherstorm'); return !!s && s.stacks >= 2; };
 
   BD.defineAction('windwall', (w, b, inst, a) => {
-    const ang = b.face, d = b.r + 46, x0 = b.x + Math.cos(ang) * d, y0 = b.y + Math.sin(ang) * d;
+    const ang = inst.wallAng != null ? inst.wallAng : b.face, d = b.r + 46, x0 = b.x + Math.cos(ang) * d, y0 = b.y + Math.sin(ang) * d;
     if (!w.walls) w.walls = [];
     w.walls.push({ team: b.team, owner: b, x0, y0, ang, w: a.w, t0: w.time, until: w.time + a.life, vx: Math.cos(ang) * a.drift / DRIFT, vy: Math.sin(ang) * a.drift / DRIFT });
     BD.spawnFx(w, 'windwallcast', x0, y0, { src: b, angle: ang, width: a.w, life: a.life });

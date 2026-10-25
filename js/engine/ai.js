@@ -137,6 +137,13 @@
       b.wantFace = U.angTo(b, e);
       if (this.model) { this.model.update(dt); this.updateAim(); } // 讀習慣：先吸收本幀資訊
       if (this.combo) this.combo.update(dt); // 連段狀態機先於思考
+      // 滯空接大招（犽宿 ai.airUlt）：對手滯空、大招滿 → 空檔或收招中直接放（取消收招），不等下一次思考
+      if (this.p.airUlt && b.ult >= 100 && !(this.combo && this.combo.c) && (b.state === 'idle' || (b.state === 'skill' && b.skillPhase() === 'recovery' && !b.inst.skill.ult))
+        && BD.hasStatus(e, 'airborne') && BD.statusRemaining(e, 'airborne') > 0.12) {
+        if (b.state === 'skill') b.comboCancel();
+        b.face = U.angTo(b, e); // 奪命氣息是瞬移：不必等轉身
+        if (b.startSkill(b.ultimate)) { this.plan = null; this.afterAttack(); }
+      }
       this.modeT -= dt; this.flipCd -= dt; this.attackGap -= dt; this.thinkT -= dt;
       if (this.plan) {
         this.plan.t -= dt;
@@ -149,6 +156,7 @@
             if (this.stillThreat(pl.th)) b.startSkill(pl.sk, { quiet: true });
           } else if (pl.type === 'esc') {
             if (this.stillThreat(pl.th) && !(b.skillReady(pl.sk) && b.startSkill(pl.sk, { quiet: true }))) b.tryDodge(this.avoidMines(this.escapeAng(pl.th)));
+            else if (b.inst && b.inst.skill === pl.sk && pl.th.kind === 'proj') b.inst.wallAng = U.angTo(b, pl.th.ref); // 風牆朝來襲的投射物立起（3v3 可能不是目標射來的）
           } else if (pl.type === 'swap') {
             const sk = b.available().find((s) => (s.tags || []).includes('swapdodge'));
             if (sk && this.stillThreat(pl.th)) b.startSkill(sk, { quiet: true });
@@ -506,7 +514,7 @@
       const win = this.punishWindow();
       const ult = b.ultimate;
       // 大招多半不追蹤：面向沒對準（例如剛衝過頭）就先等轉身，不然整招劈空
-      if (b.ult >= 100 && d >= ult.range[0] && d <= ult.range[1] && Math.abs(U.angDiff(b.face, U.angTo(b, e))) < 0.5 && (win > 0.5 || rng() < 0.05)) {
+      if (b.ult >= 100 && d >= ult.range[0] && d <= ult.range[1] && Math.abs(U.angDiff(b.face, U.angTo(b, e))) < 0.5 && (win > 0.5 || rng() < (p.ultRand != null ? p.ultRand : 0.05))) { // ai.ultRand：沒破綻也放大招的每次思考機率
         if (b.startSkill(ult)) { this.afterAttack(); return; }
       }
       const SH = p.shadow, hunt = !!SH && SH.execute > 0 && e.hp <= e.maxHp * 0.5 && (b._contemptT || 0) <= w.time; // 滅魂劫就緒
@@ -636,6 +644,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         }
         if (p.hawk) sc *= this.locked ? (tg.includes('melee') || tg.includes('gap') ? 1.6 : tg.includes('lock') ? 0.3 : 1) : tg.includes('lock') ? 2.2 : tg.includes('melee') ? 0.7 : 1; // 沒鎖定先鎖定，鎖定後近戰獵殺
         if (s.phase === 2) sc *= 1.3;
+        if (p.ultSetup && b.ult >= 100 && (b.phase === 2 && s.actions2 || s.actions).some((a) => a.status && a.status.id === 'airborne')) sc *= p.ultSetup; // 大招滿：偏好能把人捲上天的招（犽宿）
         if (win > 0) { sc *= v.windup <= win + 0.25 ? 2.6 : 0.4; if (tg.includes('fast')) sc *= 1.5; if (tg.includes('counter') || tg.includes('escape')) sc *= 0.05; }
         if (sc > bs) { bs = sc; best = s; }
       }
