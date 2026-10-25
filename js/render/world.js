@@ -139,7 +139,7 @@
   function drawArena(ctx, w, t) {
     const A = BD.ARENA;
     if (R.cache.enabled) {
-      const s = Math.min(1.1, R.renderScale(ctx)), L = getArenaLayer(s); // 大地圖：靜態層倍率上限 1.1（4200×1800 → 約 9M 像素），避免離屏畫布過大
+      const s = Math.min(1.1, R.renderScale(ctx), Math.sqrt(14e6 / ((A.w + 68) * (A.h + 68)))), L = getArenaLayer(s); // 大地圖：靜態層上限約 14M 像素，避免離屏畫布過大
       R.drawSprite(ctx, { canvas: L.canvas, scale: s }, -34 - 1 / s, -34 - 1 / s);
     } else {
       // 快取關閉：照舊即時繪製（地面用 1x 快取畫布）
@@ -448,7 +448,7 @@
     if (BD.ARENA.biomes[0].id === 'lake') { // 湖面：世界座標固定的閃爍漣漪，只畫鏡頭附近的
       const c = R.cam, A = BD.ARENA;
       ctx.save(); ctx.lineWidth = 1.5;
-      for (let i = 0; i < 70; i++) {
+      for (let i = 0; i < 280; i++) {
         const gx = (i * 977) % A.w, gy = (i * 613 + 41) % A.h;
         if (gx < c.x - 60 || gx > c.x + R.VW + 60 || gy < c.y - 40 || gy > c.y + R.VH + 40) continue;
         const k = (t * (0.1 + (i % 5) * 0.03) + i * 0.137) % 1;

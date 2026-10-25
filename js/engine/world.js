@@ -9,8 +9,8 @@
   }
   const ARENA = BD.ARENA = {
     // 內容由 js/engine/maps.js 的 BD.setMap(id) 依所選地圖就地改寫（每個 World 建構時呼叫）；這裡只是預設空殼
-    w: 3000, h: 1800, map: 'desert',
-    biomes: [{ id: 'desert', x0: 0, x1: 3000 }],
+    w: 6000, h: 3600, map: 'desert',
+    biomes: [{ id: 'desert', x0: 0, x1: 6000 }],
     ponds: [],
     // trees 由 maps.js 散佈；pillars 是「目前存活的障礙」，每場由 BD.resetArena() 依 trees 重建（樹被砍倒 / 撞飛會移除）
     trees: [],

@@ -186,7 +186,8 @@
       const pts = p && p.state !== 'dead' ? [p, p.enemy] : w.bosses.filter((u) => u.state !== 'dead');
       if (pts.length) { mx = my = 0; for (const u of pts) { mx += u.x / pts.length; my += u.y / pts.length; } }
     }
-    const tx = U.clamp(mx - R.VW / 2, 0, A.w - R.VW), ty = U.clamp(my - R.VH / 2, 0, A.h - R.VH);
+    const m = R.VH * 0.085 * lbox.k; // 大招黑邊期間鏡頭可多越出上下牆一條黑邊高，貼牆的角色不被遮住
+    const tx = U.clamp(mx - R.VW / 2, 0, A.w - R.VW), ty = U.clamp(my - R.VH / 2, -m, A.h - R.VH + m);
     if (c.w !== w) { c.w = w; c.x = tx; c.y = ty; } else { const k = Math.min(1, Math.max(0, t - c.t) * 5); c.x += (tx - c.x) * k; c.y += (ty - c.y) * k; }
     c.t = t;
     return c;
