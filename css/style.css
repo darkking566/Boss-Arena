@@ -25,6 +25,8 @@ h1 span { color: #fff; margin-left: 6px; }
 .card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.06); }
 #sideA .card.sel { border-color: #4aa3ff; background: rgba(74,163,255,0.12); }
 #sideB .card.sel { border-color: #ff4a5a; background: rgba(255,74,90,0.12); }
+.card { position: relative; }
+.card[data-n]::after { content: attr(data-n); position: absolute; top: 4px; right: 6px; font-weight: bold; font-size: 15px; color: #fff; }
 .card canvas { width: 84px; height: 84px; flex: none; }
 .card .nm { font-size: 19px; font-weight: bold; }
 .card .tt { font-size: 13px; color: #aaa; }

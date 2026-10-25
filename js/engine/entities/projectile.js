@@ -23,7 +23,7 @@
         if (Math.hypot(o.x - p.x, o.y - p.y) < o.r + p.r) { p.alive = false; continue; }
       }
       if (p.homing) {
-        const e = w.bosses[1 - p.team];
+        const e = w.foeOf(p.team, p);
         if (e.state !== 'dead' && !BD.getMod(e, 'untargetable')) {
           const sp = Math.hypot(p.vx, p.vy), a = U.rotateToward(Math.atan2(p.vy, p.vx), U.angTo(p, e), p.homing * dt);
           p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp;

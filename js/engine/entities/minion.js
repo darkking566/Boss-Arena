@@ -23,7 +23,7 @@
   };
   function updateMinion(w, m, dt) {
     m.t += dt; m.hurt -= dt; BD.tickStatuses(m, dt, w); if (!m.alive) return; m.dmgMul = m.owner.dmgMul;
-    const e = m.team === 2 ? null : w.bosses[1 - m.team]; // team 2 = 中立（敵我不分）
+    const e = m.team === 2 ? null : w.foeOf(m.team, m); // team 2 = 中立（敵我不分）
     const eAlive = !!e && e.state !== 'dead';
     if (BD.minionType(m.kind).update(w, m, dt, e, eAlive) === true) return;
     m.x += m.vx * dt; m.y += m.vy * dt;

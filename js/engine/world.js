@@ -45,7 +45,13 @@
       this.hitstop = 0; this.freezeF = 0; this.slowmo = 0; this.acc = 0; this.speed = 1; this.paused = false; this.nextId = 1;
       this.fx = new BD.FX(this);
       const pd = (d) => (d.hero ? d : BD.applyPace(d, this.paceId)); // 獵魂主角的定義已是最終數值，不再轉換節奏
-      this.bosses = [new Boss(this, pd(defA), 0, ARENA.w / 2 - 350, ARENA.h / 2), new Boss(this, pd(defB), 1, ARENA.w / 2 + 350, ARENA.h / 2)];
+      // 團隊戰（3v3）：defA / defB 可為陣列，每隊直排出場；bosses 依藍方、紅方順序排列，b.team 為隊伍
+      this.teamMode = Array.isArray(defA) || Array.isArray(defB);
+      this.bosses = [];
+      [[].concat(defA), [].concat(defB)].forEach((defs, team) => defs.forEach((d, k) => {
+        const y = ARENA.h / 2 + (k - (defs.length - 1) / 2) * 260;
+        this.bosses.push(new Boss(this, pd(d), team, ARENA.w / 2 + (team ? 350 : -350), y));
+      }));
       this.bosses.forEach((b, i) => {
         b.controller = (opts.player === i && BD.PlayerController) ? new BD.PlayerController(b, this, opts.input) : new BD.AIController(b, this);
       });
@@ -72,6 +78,7 @@
         this.intro -= dt;
         if (this.intro <= 0) this.banner('開戰！', '', '#fff', 0.9);
       } else if (!this.over) {
+        if (this.teamMode) for (const b of this.bosses) if (b.state !== 'dead') this.retarget(b);
         for (const b of this.bosses) if (b.controller && b.state !== 'dead' && b.enemy.state !== 'dead') b.controller.update(dt);
       }
       for (const b of this.bosses) {
@@ -103,6 +110,24 @@
       if (this.winner) { this.endT += dt; if (this.endT > 2.4) this.over = true; }
       if (this.training) this.training.postStep(dt);
     }
+    // 對方隊伍的 Boss（1v1 時只有一位，與原本 bosses[1 - team] 相同）
+    foes(team) { return this.teamMode ? this.bosses.filter((b) => b.team !== team) : [this.bosses[1 - team]]; }
+    // 離 u 最近的存活敵方 Boss；全滅時回傳第一位（已倒下）
+    foeOf(team, u) {
+      const list = this.foes(team);
+      let best = null, bd = Infinity;
+      for (const b of list) if (b.state !== 'dead') { const d = U.dist(u, b); if (d < bd) { bd = d; best = b; } }
+      return best || list[0];
+    }
+    // 團隊戰：目標倒下就換最近的；每 2.5 秒重新評估，明顯更近（距離 < 70%）才換，避免來回搖擺
+    retarget(b) {
+      const cur = b._target;
+      if (!cur || cur.state === 'dead') { b._target = this.foeOf(b.team, b); b._retT = this.time + 2.5; return; }
+      if (this.time < b._retT) return;
+      b._retT = this.time + 2.5;
+      const n = this.foeOf(b.team, b);
+      if (n !== cur && U.dist(b, n) < U.dist(b, cur) * 0.7) b._target = n;
+    }
     later(t, fn, inst) { this.scheduled.push({ t, fn, inst: inst || null }); }
     enemiesOf(team) {
       const out = [];
@@ -128,12 +153,15 @@
       return hit;
     }
     collideBosses() {
-      const [a, b] = this.bosses;
-      if (BD.getMod(a, 'noCollide') || BD.getMod(b, 'noCollide') || a.state === 'dead' || b.state === 'dead') return;
-      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, m = a.r + b.r;
-      if (d < m) {
-        const o = m - d, ta = b.def.mass / (a.def.mass + b.def.mass);
-        a.x -= dx / d * o * ta; a.y -= dy / d * o * ta; b.x += dx / d * o * (1 - ta); b.y += dy / d * o * (1 - ta);
+      const L = this.bosses;
+      for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
+        const a = L[i], b = L[j];
+        if (BD.getMod(a, 'noCollide') || BD.getMod(b, 'noCollide') || a.state === 'dead' || b.state === 'dead') continue;
+        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, m = a.r + b.r;
+        if (d < m) {
+          const o = m - d, ta = b.def.mass / (a.def.mass + b.def.mass);
+          a.x -= dx / d * o * ta; a.y -= dy / d * o * ta; b.x += dx / d * o * (1 - ta); b.y += dy / d * o * (1 - ta);
+        }
       }
     }
     // 對形狀內所有敵方單位造成傷害
@@ -265,6 +293,15 @@
     }
     kill(b) {
       b.cancelSkill(); b.state = 'dead'; b.stateT = 0; b.alive = false;
+      if (this.teamMode) {
+        const by = b.enemy, mates = this.bosses.filter((x) => x.team === b.team && x.state !== 'dead');
+        BD.spawnFx(this, 'finale', b.x, b.y, { src: b, color: b.def.color });
+        this.log(by, '擊敗了 ' + b.name + '！', true);
+        if (mates.length) { this.banner(b.name + ' 倒下了', `${b.team ? '紅方' : '藍方'}剩下 ${mates.length} 位`, by.def.color, 2); this.hitstop = Math.max(this.hitstop, 0.15); return; }
+        this.winner = this.bosses.find((x) => x.team !== b.team && x.state !== 'dead') || by; this.slowmo = 1.4; this.hitstop = Math.max(this.hitstop, 0.25);
+        this.banner((b.team ? '藍方' : '紅方') + '獲勝！', (b.team ? '紅方' : '藍方') + '全員倒下', this.winner.def.color, 3);
+        return;
+      }
       this.winner = b.enemy; this.slowmo = 1.4; this.hitstop = Math.max(this.hitstop, 0.25);
       BD.spawnFx(this, 'finale', b.x, b.y, { src: b, color: b.def.color });
       this.banner(b.enemy.name + ' 獲勝！', b.name + ' 倒下了', b.enemy.def.color, 3);

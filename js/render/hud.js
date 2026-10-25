@@ -11,6 +11,47 @@
     if (trail != null) { const tw = w * U.clamp(trail, 0, 1); ctx.fillStyle = 'rgba(255,240,220,0.8)'; ctx.fillRect(rtl ? x + w - tw : x, y, tw, h); }
     ctx.fillStyle = color; ctx.fillRect(rtl ? x + w - fw : x, y, fw, h);
   }
+  function drawSkills(ctx, b, x, ky, PW, rtl) {
+    const skills = b.skills, cw = 54, gap = 6;
+    ctx.textAlign = 'center'; ctx.font = `12px ${FONT}`;
+    const keys = b.controller && b.controller.isPlayer ? ['左鍵', '右鍵', 'Q', 'E', 'R', 'F', 'C', 'V', 'G'] : null;
+    skills.forEach((s, i) => {
+      const sx = rtl ? x + PW - (i + 1) * (cw + gap) + gap : x + i * (cw + gap);
+      const locked = (s.phase || 1) > b.phase || (s.maxPhase || 9) < b.phase, cd = Math.max(0, b.cds[s.id] || 0), max = (s.cd || 1) * b.cdMul;
+      const active = b.inst && b.inst.skill === s;
+      ctx.fillStyle = active ? hexA(b.def.color, 0.8) : locked ? 'rgba(40,40,40,0.8)' : 'rgba(255,255,255,0.12)';
+      ctx.fillRect(sx, ky, cw, 22);
+      if (cd > 0 && !locked) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(sx, ky, cw * U.clamp(cd / max, 0, 1), 22); }
+      ctx.fillStyle = locked ? '#666' : active ? '#111' : '#eee';
+      ctx.fillText((locked ? '🔒' : '') + (keys ? keys[i] + ' ' : '') + s.short, sx + cw / 2, ky + 15);
+    });
+  }
+  // 團隊戰：每隊三行精簡面板（名字 / 階段 / HP / 架勢 / 大招），倒下的變暗
+  function drawTeamPanel(ctx, w, team, t) {
+    const rtl = team === 1, PW = 640, x = rtl ? R.W - 40 - PW : 40, y = 14, RH = 51;
+    const list = w.bosses.filter((b) => b.team === team), al = rtl ? 'right' : 'left', ex = rtl ? x + PW : x;
+    ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(x - 10, y - 6, PW + 20, 158);
+    ctx.fillStyle = TEAM[team]; ctx.fillRect(rtl ? x + PW + 6 : x - 10, y - 6, 4, 158);
+    list.forEach((b, i) => {
+      const ry = y + i * RH, dead = b.state === 'dead';
+      ctx.globalAlpha = dead ? 0.4 : 1;
+      ctx.textBaseline = 'alphabetic'; ctx.textAlign = al;
+      ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = b.def.color; ctx.fillText(b.name, ex, ry + 16);
+      const nw = ctx.measureText(b.name).width;
+      ctx.font = `13px ${FONT}`; ctx.fillStyle = '#bbb';
+      const tag = dead ? '倒下' : (b.phase === 2 ? '第二階段' : '第一階段') + (b.controller && b.controller.isPlayer ? ' · 玩家' : '');
+      ctx.fillText(tag, rtl ? ex - nw - 10 : ex + nw + 10, ry + 15);
+      const hx = rtl ? x : x + 230, hw = PW - 230;
+      bar(ctx, hx, ry + 2, hw, 16, b.hp / b.maxHp, b.phase === 2 ? b.def.color : TEAM[team], 'rgba(0,0,0,0.65)', rtl, b.hpTrail / b.maxHp);
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(hx, ry + 2, hw, 16);
+      ctx.font = `bold 12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = rtl ? 'right' : 'left';
+      ctx.fillText(`${Math.ceil(b.hp)} / ${b.maxHp}`, rtl ? hx + hw - 6 : hx + 6, ry + 14);
+      bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.posture / b.maxPosture, b.posture / b.maxPosture > 0.75 ? '#ff8844' : '#f5c542', null, rtl);
+      bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, b.ult / 100, b.ult >= 100 ? `rgba(255,220,90,${0.6 + 0.4 * Math.sin(t * 8)})` : '#c8a0ff', null, rtl);
+      ctx.globalAlpha = 1;
+      if (!dead) R.drawStatusRow(ctx, b, rtl ? x + PW : x, ry + 30, rtl, PW);
+    });
+  }
   function drawPanel(ctx, b, w, t) {
     if (b.def.hero && R.drawHeroPanel) { R.drawHeroPanel(ctx, b, w, t); return; }
     if (w.training && b.def.training && R.drawDummyPanel) { R.drawDummyPanel(ctx, b, w, t); return; }
@@ -61,24 +102,17 @@
       ctx.fillText('【' + b.ultName() + '】就緒', rtl ? x + (PW - 34) / 2 : x + 34 + (PW - 34) / 2, uy + 10);
     }
     // 技能冷卻
-    const ky = uy + 18, skills = b.skills, cw = 54, gap = 6;
-    ctx.textAlign = 'center'; ctx.font = `12px ${FONT}`;
-    const keys = b.controller && b.controller.isPlayer ? ['左鍵', '右鍵', 'Q', 'E', 'R', 'F', 'C', 'V', 'G'] : null;
-    skills.forEach((s, i) => {
-      const sx = rtl ? x + PW - (i + 1) * (cw + gap) + gap : x + i * (cw + gap);
-      const locked = (s.phase || 1) > b.phase || (s.maxPhase || 9) < b.phase, cd = Math.max(0, b.cds[s.id] || 0), max = (s.cd || 1) * b.cdMul;
-      const active = b.inst && b.inst.skill === s;
-      ctx.fillStyle = active ? hexA(b.def.color, 0.8) : locked ? 'rgba(40,40,40,0.8)' : 'rgba(255,255,255,0.12)';
-      ctx.fillRect(sx, ky, cw, 22);
-      if (cd > 0 && !locked) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(sx, ky, cw * U.clamp(cd / max, 0, 1), 22); }
-      ctx.fillStyle = locked ? '#666' : active ? '#111' : '#eee';
-      ctx.fillText((locked ? '🔒' : '') + (keys ? keys[i] + ' ' : '') + s.short, sx + cw / 2, ky + 15);
-    });
+    const ky = uy + 18;
+    drawSkills(ctx, b, x, ky, PW, rtl);
     // 狀態列（位於技能列下方，仍在競技場上緣 y = R.OY 之上）
     R.drawStatusRow(ctx, b, rtl ? x + PW : x, ky + 26, rtl, PW);
   }
   function drawHUD(ctx, w, view, t) {
-    for (const b of w.bosses) drawPanel(ctx, b, w, t);
+    if (w.teamMode) {
+      drawTeamPanel(ctx, w, 0, t); drawTeamPanel(ctx, w, 1, t);
+      const p = view.player != null && w.bosses[view.player]; // 玩家的技能列畫在競技場下緣
+      if (p && p.state !== 'dead') drawSkills(ctx, p, R.W / 2 - 300, R.OY + R.VH - 30, 600, false);
+    } else for (const b of w.bosses) drawPanel(ctx, b, w, t);
     if (w.training && R.drawTrainingCenter) { R.drawTrainingCenter(ctx, w, t); return; }
     // 中央
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
@@ -103,7 +137,10 @@
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, R.VH / 2 - 60, R.VW, 120);
       ctx.font = `bold 56px ${FONT}`; ctx.fillStyle = '#fff';
-      ctx.fillText(`${w.bosses[0].name}  對  ${w.bosses[1].name}`, R.VW / 2, R.VH / 2 - 8);
+      if (w.teamMode) {
+        const names = (tm) => w.foes(1 - tm).map((b) => b.name).join('・');
+        ctx.font = `bold 34px ${FONT}`; ctx.fillText(`${names(0)}  對  ${names(1)}`, R.VW / 2, R.VH / 2 - 8);
+      } else ctx.fillText(`${w.bosses[0].name}  對  ${w.bosses[1].name}`, R.VW / 2, R.VH / 2 - 8);
       ctx.font = `20px ${FONT}`; ctx.fillStyle = '#ccc'; ctx.fillText('準備…', R.VW / 2, R.VH / 2 + 38);
     }
     if (!b) return;
@@ -140,9 +177,16 @@
 
   const shakeOut = { x: 0, y: 0 };
   // 鏡頭：平滑跟著雙方 Boss 的中點，夾在競技場內；換場（新 World）時直接定位。純繪圖狀態，滑鼠世界座標由 input.js 讀 R.cam
-  function followCamera(w, t) {
+  // 團隊戰：玩家在場就跟玩家與其目標，否則跟所有存活 Boss 的重心
+  function followCamera(w, t, view) {
     const A = BD.ARENA, c = R.cam, [a, b] = w.bosses;
-    const tx = U.clamp((a.x + b.x) / 2 - R.VW / 2, 0, A.w - R.VW), ty = U.clamp((a.y + b.y) / 2 - R.VH / 2, 0, A.h - R.VH);
+    let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (w.teamMode) {
+      const p = view.player != null && w.bosses[view.player];
+      const pts = p && p.state !== 'dead' ? [p, p.enemy] : w.bosses.filter((u) => u.state !== 'dead');
+      if (pts.length) { mx = my = 0; for (const u of pts) { mx += u.x / pts.length; my += u.y / pts.length; } }
+    }
+    const tx = U.clamp(mx - R.VW / 2, 0, A.w - R.VW), ty = U.clamp(my - R.VH / 2, 0, A.h - R.VH);
     if (c.w !== w) { c.w = w; c.x = tx; c.y = ty; } else { const k = Math.min(1, Math.max(0, t - c.t) * 5); c.x += (tx - c.x) * k; c.y += (ty - c.y) * k; }
     c.t = t;
     return c;
@@ -181,7 +225,7 @@
     ctx.save();
     ctx.translate(R.OX + sh.x, R.OY + sh.y);
     // 世界繪圖：裁切在競技場視窗（含邊框 34px）內，並套用鏡頭位移
-    const cam = followCamera(w, t);
+    const cam = followCamera(w, t, view);
     ctx.save(); ctx.beginPath(); ctx.rect(-34, -34, R.VW + 68, R.VH + 68); ctx.clip();
     // 鏡頭縮放（衝擊 punch / 大招與擊殺的推近）：以事件位置為中心，只縮世界，HUD 不動
     const Z = R.zoom, zn = w.fx.zoomNow();

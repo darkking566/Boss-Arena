@@ -86,12 +86,14 @@
     for (const tr of w.traps) {
       tr.t += dt;
       if (tr.t < tr.arm) continue;
-      const e = w.bosses[1 - tr.team];
-      if (e.state !== 'dead' && !BD.getMod(e, 'untargetable') && Math.hypot(e.x - tr.x, e.y - tr.y) < tr.trig + e.r) {
-        tr.dead = true;
-        w.applyArea(tr.owner, { kind: 'circle', x: tr.x, y: tr.y, r: tr.r }, { dmg: tr.dmg, posture: 20, slow: tr.slow, root: tr.root, kb: tr.kind === 'mine' ? 200 : 0, unblockable: true, undodgeable: tr.undodgeable, status: tr.status });
-        BD.spawnFx(w, 'trapburst', tr.x, tr.y, { src: tr.owner, radius: tr.r, el: tr.kind === 'mine' ? 'ice' : 'physical' });
-        if (tr.root && (tr.undodgeable || !BD.getMod(e, 'iframe')) && !BD.getMod(e, 'invuln')) w.fx.text(e.x, e.y - e.r - 26, '被蛛網纏住！', '#eee', 16);
+      for (const e of w.foes(tr.team)) {
+        if (e.state !== 'dead' && !BD.getMod(e, 'untargetable') && Math.hypot(e.x - tr.x, e.y - tr.y) < tr.trig + e.r) {
+          tr.dead = true;
+          w.applyArea(tr.owner, { kind: 'circle', x: tr.x, y: tr.y, r: tr.r }, { dmg: tr.dmg, posture: 20, slow: tr.slow, root: tr.root, kb: tr.kind === 'mine' ? 200 : 0, unblockable: true, undodgeable: tr.undodgeable, status: tr.status });
+          BD.spawnFx(w, 'trapburst', tr.x, tr.y, { src: tr.owner, radius: tr.r, el: tr.kind === 'mine' ? 'ice' : 'physical' });
+          if (tr.root && (tr.undodgeable || !BD.getMod(e, 'iframe')) && !BD.getMod(e, 'invuln')) w.fx.text(e.x, e.y - e.r - 26, '被蛛網纏住！', '#eee', 16);
+          break;
+        }
       }
     }
     w.traps = w.traps.filter((t) => !t.dead && t.t < t.life);

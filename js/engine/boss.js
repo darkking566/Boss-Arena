@@ -51,7 +51,7 @@
       this.ultimate = prepSkill(def.ultimate);
       this.controller = null;
     }
-    get enemy() { return this.world.bosses[1 - this.team]; }
+    get enemy() { return this.world.teamMode ? this._target || this.world.foeOf(this.team, this) : this.world.bosses[1 - this.team]; } // 團隊戰：World.retarget 維護的目標
     get name() { return this.def.name; }
     available() { return this.skills.filter((s) => (s.phase || 1) <= this.phase && (s.maxPhase || 9) >= this.phase); }
     ultName() { const u = this.ultimate; return this.phase === 2 && u.name2 ? u.name2 : u.name; }

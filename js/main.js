@@ -7,7 +7,7 @@
   const input = new BD.Input(canvas);
   const view = { showLog: true, player: null, mouse: input.mouse };
   const ids0 = BD.bosses.map((b) => b.id);
-  const state = { screen: 'select', world: null, pick: [ids0.includes('magmus') ? 'magmus' : ids0[0], ids0.includes('ronin') ? 'ronin' : ids0[1] || ids0[0]], pace: BD.DEFAULT_PACE, map: BD.DEFAULT_MAP, last: null, errors: [], page: [0, 0], mode: 'duel' };
+  const state = { screen: 'select', world: null, pick: [ids0.includes('magmus') ? 'magmus' : ids0[0], ids0.includes('ronin') ? 'ronin' : ids0[1] || ids0[0]], pace: BD.DEFAULT_PACE, map: BD.DEFAULT_MAP, last: null, errors: [], page: [0, 0], mode: 'duel', team: [ids0.slice(0, 3), ids0.slice(3, 6)] };
   G.__BD = state; // 測試掛勾
 
   // ── 畫布縮放 ──
@@ -46,7 +46,7 @@
         c.innerHTML = `<canvas width="168" height="168"></canvas><div><div class="nm" style="color:${def.color}">${def.name}</div>
           <div class="tt">${def.title}</div><div class="ar">${def.archetype}</div>
           <div class="tt">HP ${def.maxHp}</div></div>`;
-        c.addEventListener('click', () => { state.pick[side] = def.id; refreshSelect(); });
+        c.addEventListener('click', () => { if (state.mode === 'team') pickTeam(side, def.id); else state.pick[side] = def.id; refreshSelect(); });
         c.addEventListener('mouseenter', () => showDetail(side, def.id));
         box.appendChild(c);
         portraits.push([c.querySelector('canvas'), def]);
@@ -60,6 +60,11 @@
       }));
     });
     refreshSelect();
+  }
+  // 3v3：點一下加入 / 再點移除；同隊不能重複，滿 3 位時擠掉最早選的
+  function pickTeam(side, id) {
+    const t = state.team[side], i = t.indexOf(id);
+    if (i >= 0) t.splice(i, 1); else { if (t.length >= 3) t.shift(); t.push(id); }
   }
   // 讓目前選中的 Boss 所在頁面可見（例如隨機配對後）
   function pageOf(id) { return Math.floor(BD.bosses.findIndex((b) => b.id === id) / PER_PAGE); }
@@ -81,13 +86,23 @@
           <div class="d">一／二階段每招與大招都可從底部面板直接施放；預設無冷卻／無限體力，可隨時重置。</div></div>` : '');
       return;
     }
+    if (state.mode === 'team') { // 3v3：顯示游標所在的 Boss 與雙方陣容
+      const roster = (sd) => state.team[sd].map((x) => `<span style="color:${BD.bossById[x].color}">${BD.bossById[x].name}</span>`).join('・') || '（尚未選擇）';
+      $('#detail').innerHTML = detailHtml(BD.bossById[id], side) +
+        `<div><h3>陣容（每隊 1~3 位，點卡片加入 / 移除）</h3><div class="d">藍方 ${state.team[0].length}/3：${roster(0)}</div><div class="d">紅方 ${state.team[1].length}/3：${roster(1)}</div></div>`;
+      return;
+    }
     $('#detail').innerHTML = detailHtml(BD.bossById[a], 0) + detailHtml(BD.bossById[b], 1);
   }
   function refreshSelect() {
     ['#sideA', '#sideB'].forEach((sel, side) => {
-      document.querySelectorAll(sel + ' .card').forEach((c) => c.classList.toggle('sel', c.dataset.id === state.pick[side]));
+      document.querySelectorAll(sel + ' .card').forEach((c) => {
+        const n = state.team[side].indexOf(c.dataset.id) + 1;
+        c.classList.toggle('sel', state.mode === 'team' ? n > 0 : c.dataset.id === state.pick[side]);
+        if (state.mode === 'team' && n) c.dataset.n = n; else delete c.dataset.n;
+      });
     });
-    showDetail(0, state.pick[0]);
+    if (state.mode === 'team') showDetail(0, state.team[0][0] || state.pick[0]); else showDetail(0, state.pick[0]);
   }
   // ── 地圖（選角畫面）：每個地形是一張獨立地圖，卡片完全由 BD.MAPS 產生；選擇存在 localStorage ──
   function setMap(id) {
@@ -112,6 +127,10 @@
   })();
   $('#btnRandom').addEventListener('click', () => {
     const ids = BD.bosses.map((b) => b.id);
+    if (state.mode === 'team') { // 3v3：每隊隨機 3 位不重複
+      state.team = [0, 1].map(() => { const pool = ids.slice(), out = []; while (out.length < Math.min(3, pool.length)) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]); return out; });
+      refreshSelect(); return;
+    }
     state.pick[0] = ids[Math.floor(Math.random() * ids.length)];
     do { state.pick[1] = ids[Math.floor(Math.random() * ids.length)]; } while (ids.length > 1 && state.pick[1] === state.pick[0]);
     const np = [pageOf(state.pick[0]), pageOf(state.pick[1])];
@@ -122,25 +141,29 @@
       startTraining(state.pick[0], { mode: $('#optTrainMode').value, range: $('#optTrainRange').value, pace: state.pace, map: state.map });
       return;
     }
-    start(state.pick[0], state.pick[1], {
+    if (state.mode === 'team' && (!state.team[0].length || !state.team[1].length)) { alert('3v3：兩隊各至少要選 1 位 Boss'); return; }
+    start(state.mode === 'team' ? state.team[0].slice() : state.pick[0], state.mode === 'team' ? state.team[1].slice() : state.pick[1], {
       player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map,
     });
   });
 
   // ── 模式切換（對戰 / 訓練場）──
   function setMode(mode) {
-    state.mode = mode === 'train' ? 'train' : 'duel';
-    const train = state.mode === 'train';
+    state.mode = mode === 'train' || mode === 'team' ? mode : 'duel';
+    const train = state.mode === 'train', team = state.mode === 'team';
     $('#select').classList.toggle('training', train);
-    $('#modeDuel').classList.toggle('on', !train);
+    $('#modeDuel').classList.toggle('on', state.mode === 'duel');
     $('#modeTrain').classList.toggle('on', train);
-    $('#sideA h2').textContent = train ? '選擇 Boss' : '藍方';
+    $('#modeTeam').classList.toggle('on', team);
+    $('#sideA h2').textContent = train ? '選擇 Boss' : team ? '藍方（選 3 位）' : '藍方';
+    $('#sideB h2').textContent = team ? '紅方（選 3 位）' : '紅方';
     $('#sideA h2').className = 'blue';
-    $('#btnStart').textContent = train ? '🎯 進入訓練場' : '⚔ 開始對決';
+    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : '⚔ 開始對決';
     refreshSelect();
   }
   $('#modeDuel').addEventListener('click', () => setMode('duel'));
   $('#modeTrain').addEventListener('click', () => setMode('train'));
+  $('#modeTeam').addEventListener('click', () => setMode('team'));
 
   // ── 戰鬥節奏（選角畫面）──
   // 選單順序：沉重（預設）在前、輕快在後；描述隨選項更新
@@ -205,7 +228,8 @@
     opts = Object.assign({ player: null, speed: 1, pace: BD.DEFAULT_PACE, map: state.map }, opts || {});
     if (!opts.pace) opts.pace = BD.DEFAULT_PACE;
     state.last = { a, b, opts };
-    const w = new BD.World(BD.bossById[a], BD.bossById[b], { player: opts.player, input, seed: opts.seed, pace: opts.pace, map: opts.map });
+    const def = (x) => (Array.isArray(x) ? x.map((id) => BD.bossById[id]) : BD.bossById[x]); // 陣列 = 3v3 團隊戰
+    const w = new BD.World(def(a), def(b), { player: opts.player, input, seed: opts.seed, pace: opts.pace, map: opts.map });
     w.speed = opts.player != null ? 1 : opts.speed;
     state.world = w; state.resultShown = false;
     view.player = opts.player;
@@ -261,12 +285,12 @@
   function showResult(w) {
     state.resultShown = true; state.resultKind = 'duel';
     $('#btnRematch').textContent = '🔁 重賽（同組合）'; $('#btnSwap').style.display = ''; $('#btnMenu').textContent = '↩ 重新選角';
-    const win = w.winner, lose = win.enemy;
-    $('#resTitle').innerHTML = `<span style="color:${win.def.color}">${win.name}</span> 獲勝！`;
+    const win = w.winner;
+    $('#resTitle').innerHTML = w.teamMode ? `<span style="color:${R.TEAM[win.team]}">${win.team ? '紅方' : '藍方'}</span> 獲勝！`
+      : `<span style="color:${win.def.color}">${win.name}</span> 獲勝！`;
     const mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
     const paceName = BD.PACES[w.paceId] ? BD.PACES[w.paceId].name : w.paceId;
-    $('#resSub').textContent = `戰鬥時間 ${mm} 分 ${ss} 秒 · 勝者剩餘 HP ${Math.ceil(win.hp)} / ${win.maxHp} · 節奏 ${paceName}`;
-    const [A, B] = w.bosses;
+    $('#resSub').textContent = `戰鬥時間 ${mm} 分 ${ss} 秒 · ` + (w.teamMode ? `存活 ${w.bosses.filter((b) => b.state !== 'dead').length} 位` : `勝者剩餘 HP ${Math.ceil(win.hp)} / ${win.maxHp}`) + ` · 節奏 ${paceName}`;
     const rows = [
       ['造成傷害', (b) => Math.round(b.stats.dealt)],
       ['施放技能次數', (b) => b.stats.skills],
@@ -277,8 +301,9 @@
       ['假動作', (b) => b.stats.feints],
       ['進入二階段時間', (b) => (b.stats.phase2At != null ? b.stats.phase2At.toFixed(1) + ' 秒' : '—')],
     ];
-    $('#resStats').innerHTML = `<tr><th></th><th style="color:${A.def.color}">藍方 ${A.name}</th><th style="color:${B.def.color}">紅方 ${B.name}</th></tr>` +
-      rows.map(([n, f]) => `<tr><td>${n}</td><td>${f(A)}</td><td>${f(B)}</td></tr>`).join('');
+    const L = w.bosses;
+    $('#resStats').innerHTML = `<tr><th></th>${L.map((b) => `<th style="color:${b.def.color}">${b.team ? '紅方' : '藍方'} ${b.name}</th>`).join('')}</tr>` +
+      rows.map(([n, f]) => `<tr><td>${n}</td>${L.map((b) => `<td>${f(b)}</td>`).join('')}</tr>`).join('');
     show('result');
     state.screen = 'result';
   }
