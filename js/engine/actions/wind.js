@@ -13,8 +13,8 @@
   BD.defineAction('windwall', (w, b, inst, a) => {
     const ang = inst.wallAng != null ? inst.wallAng : b.face, d = b.r + 46, x0 = b.x + Math.cos(ang) * d, y0 = b.y + Math.sin(ang) * d;
     if (!w.walls) w.walls = [];
-    w.walls.push({ team: b.team, owner: b, x0, y0, ang, w: a.w, t0: w.time, until: w.time + a.life, vx: Math.cos(ang) * a.drift / DRIFT, vy: Math.sin(ang) * a.drift / DRIFT });
-    BD.spawnFx(w, 'windwallcast', x0, y0, { src: b, angle: ang, width: a.w, life: a.life });
+    w.walls.push({ team: b.team, owner: b, x0, y0, ang, w: a.w, t0: w.time, until: w.time + a.life, vx: Math.cos(ang) * a.drift / DRIFT, vy: Math.sin(ang) * a.drift / DRIFT, retaliate: a.retaliate });
+    BD.spawnFx(w, a.retaliate ? 'goldshield' : 'windwallcast', x0, y0, { src: b, angle: ang, width: a.w, life: a.life });
   }, { active: true });
 
   // 投射物碰到風牆：敵方的被吹散；犽宿自己的旋風穿過風牆時變大變強一次（2XKO：鋼鐵暴雪打中風牆化為長距風刃）
@@ -28,7 +28,13 @@
       if (Math.abs(n) > p.r + 12 || Math.abs(s) > wl.w / 2 + p.r * 0.5) continue;
       if (wl.team !== p.team) {
         p.alive = false;
-        BD.spawnFx(w, 'windblock', p.x, p.y, { src: wl.owner, angle: wl.ang });
+        // 黃金的返報（大樹守衛的盾）：擋下第一發時朝射手回敬一道追蹤的黃金光束
+        if (wl.retaliate && !wl.used && p.owner && p.owner.state !== 'dead') {
+          wl.used = true;
+          const at = U.angTo({ x: cx, y: cy }, p.owner);
+          BD.spawnProj(w, { x: cx, y: cy, r: 0 }, wl.owner, at, { speed: 1000, r: 20, dmg: wl.retaliate.dmg, posture: wl.retaliate.posture, kb: 260, life: 1.6, homing: 4, kind: 'goldbeam' });
+          BD.spawnFx(w, 'goldretaliate', cx, cy, { src: wl.owner, angle: at });
+        } else BD.spawnFx(w, wl.retaliate ? 'shieldguard' : 'windblock', p.x, p.y, { src: wl.owner, angle: wl.ang });
         return;
       }
       if (p.kind === 'tornado' && !p.walled) {

@@ -39,6 +39,7 @@ const ALLOW_MISS = new Set([
   'witch:mines',    // 霜凍地雷：陷阱散布於兩者之間，假人站立不動不會踩中
   'brood:web',      // 蛛網陷阱：陷阱環繞假人外圍生成（距離 150px），假人不動不會觸發
   'magmus:pools',   // 熔岩池：熔岩池散布於目標兩側（off 170px，半徑 105px），假人站立不動不會接觸
+  'treesentinel:golden_retaliation', // 黃金的返報：舉盾期間需有投射物打上盾才會回敬光束；假人不射擊
 ]);
 
 for (const pace of ['light', 'heavy']) {

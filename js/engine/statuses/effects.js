@@ -261,4 +261,9 @@
     name: '乘風', tags: ['buff'], stacking: 'stack', maxStacks: 4, defaultDur: 5,
     modifiers: { dmgDealtMul: function (u) { const s = BD.getStatus(u, 'ridewind'); return s ? 1 + 0.04 * s.stacks : 1; } },
   });
+  // ── 黃金誓言（大樹守衛）：黃金戟戰技「向黃金樹立誓」，提升攻擊力與防禦力 ──
+  BD.defineStatus('goldenvow', {
+    name: '黃金誓言', tags: ['buff'], stacking: 'refresh', defaultDur: 10,
+    modifiers: { dmgDealtMul: 1.1, dmgTakenMul: 0.9 },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

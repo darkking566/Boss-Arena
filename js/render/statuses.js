@@ -56,6 +56,7 @@
   R.defineStatusIcon('gatherstorm', { glyph: '寒', color: '#e6fbff' });
   R.defineStatusIcon('airborne', { glyph: '空', color: '#bff3ff' });
   R.defineStatusIcon('ridewind', { glyph: '風', color: '#9fe8ff' });
+  R.defineStatusIcon('goldenvow', { glyph: '誓', color: '#ffe27a' });
   R.defineStatusIcon('respite', { glyph: '羊', color: '#eef7ff' });
   R.defineStatusIcon('tyrantwrath', { glyph: '怒', color: '#ffd86a' });
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });

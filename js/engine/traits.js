@@ -251,4 +251,18 @@
       return null; // 只減傷，不攔截
     },
   });
+
+  // ── sentinel：黃金樹大盾（大樹守衛）——大盾掛在左手：從左前方（盾側）打來的直接攻擊與投射物，傷害與架勢傷害各減 30% ──
+  BD.defineTrait('sentinel', {
+    interceptDamage(w, b, src, p) {
+      if (!src || p.dot || p.unblockable || !(p.dmg > 0)) return null;
+      const o = p.proj || src, rel = BD.U.angDiff(b.face, BD.U.angTo(b, o));
+      if (rel > -0.35 || rel < -2.4) return null; // 左側為面向 −90°
+      p.dmg *= 0.7; if (p.posture != null) p.posture *= 0.7;
+      const a = b.face - 1.2;
+      BD.spawnFx(w, 'shieldguard', b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r, { src: b, angle: BD.U.angTo(b, o) });
+      w.fx.text(b.x, b.y - b.r - 30, '盾擋', '#ffe27a', 16);
+      return null; // 只減傷，不攔截
+    },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);
