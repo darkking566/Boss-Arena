@@ -72,7 +72,7 @@
     for (let i = 0; i < b.length && b[i] <= t; i++) L = i;
     if (L < 0) { out.s = 0; out.off = 0; return; }
     const N = L + 1 < b.length ? L + 1 : -1, tl = ((L + ry.seed) & 1) ? 1 : -1, since = t - b[L];
-    const x = N < 0 ? 0.4 * since / 0.3 : since / Math.max(0.05, b[N] - b[L]); // 最後一下後：用 0.3 秒收刀
+    const x = N < 0 ? 0.4 * since / 0.3 : since / Math.max(0.015, b[N] - b[L]); // 最後一下後：用 0.3 秒收刀
     if (x < 0.4) { const k = rEase(Math.min(1, x / 0.4)); out.s = 1 - k; out.off = tl * (0.15 + 0.75 * k); } // 剛碰完：刀往後甩開
     else { const y = (x - 0.4) / 0.6, q = y * y, tn = -tl; out.s = q; out.off = tl * 0.9 * (1 - q) + tn * 0.15 * q; } // 蓄到下一下：加速劈回接點
   }

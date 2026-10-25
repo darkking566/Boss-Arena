@@ -53,9 +53,9 @@
   BD.defineEffect('clash', {
     name: '對撞', category: '增益',
     desc: '刀刃相撞：雙方代表色的兩道弧光與交叉亮線在接點迸開、白熱閃光、垂直刀鋒噴出兩股火花；首下與最後一下更猛，最後一下留下雙方殘影與震波。適合近戰對撞、拚刀。',
-    params: { first: false, last: false },
+    params: { first: false, last: false, rapid: false }, // rapid：殘血快節奏連拚，中間每下的粒子減量
     spawn(fx, x, y, o) {
-      const E = o.E, V = BD.vrng, k = Math.min(1.4, o.k), a = o.src, b = o.other, big = o.first || o.last;
+      const E = o.E, V = BD.vrng, k = Math.min(1.4, o.k) * (o.rapid && !o.first && !o.last ? 0.6 : 1), a = o.src, b = o.other, big = o.first || o.last;
       const th = a && b ? Math.atan2(b.y - a.y, b.x - a.x) : o.angle, R = (big ? 120 : 85) * k;
       const ca = a ? a.def.glow : E.glow, cb = b ? b.def.glow : E.glow;
       // 雙方各一道弧光自己那側劈向接點；兩道交叉亮線的斜度每下隨機，連拚才不會每下長一樣

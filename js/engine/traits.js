@@ -44,7 +44,9 @@
     return t.includes('melee') && !t.includes('aoe') && !t.includes('zone') ? 1 : 0;
   };
   const swinging = (b) => b.state === 'skill' && b.inst && b.inst.t < b.inst.v.activeEnd + 0.1; // 從起手到最後一擊剛出手
-  const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞
+  const CLASH_GAP = 0.8; // 兩次對撞的最短間隔，避免永遠互撞（殘血時縮短）
+  // 拚刀狂熱度 0–1：兩人中較殘的一方血量越少，拚刀越頻繁（AI 傾向、間隔）、越激烈（刀數、節奏）
+  BD.clashFury = (a, b) => 1 - Math.min(a.hp / a.maxHp, b.hp / b.maxHp);
   function shove(u, o, kb) { // 沿兩人連線推 u：kb > 0 遠離 o、< 0 朝向 o
     const an = BD.U.angTo(o, u), k = kb / u.def.mass;
     u.kbx += Math.cos(an) * k; u.kby += Math.sin(an) * k;
@@ -60,17 +62,17 @@
     const seed = BD.vrng() < 0.5 ? 0 : 1;
     for (const u of us) u._rally = { beats, seed, end: beats[beats.length - 1] + hold };
   }
-  function spark(w, b, a, first, last) { // 一下刀刃相撞：特效 + 計數
+  function spark(w, b, a, first, last, hs) { // 一下刀刃相撞：特效 + 計數；hs 這一下的頓幀（快節奏連拚要短，否則頓幀會拖慢節奏）
     w._clashAt = w.time;
     b.stats.clashes = (b.stats.clashes || 0) + 1; a.stats.clashes = (a.stats.clashes || 0) + 1;
     const x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
     if (first) { w.fx.text(x, y - 36, '對撞！', '#ffffff', 26); w.log(b, '與 ' + a.name + ' 的招式對撞！', true); }
-    BD.spawnFx(w, 'clash', x, y, { src: b, other: a, first, last }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : 0.05);
+    BD.spawnFx(w, 'clash', x, y, { src: b, other: a, first, last, rapid: hs < 0.05 }); w.hitstop = Math.max(w.hitstop, first ? 0.1 : hs);
   }
   function repelFx(w, u, o) { BD.spawnFx(w, 'clashrepel', u.x, u.y, { src: u, angle: BD.U.angTo(o, u) }); } // 純視覺：落敗方被撞飛
   function clash(w, b, a, lb, la) {
     const single = la !== lb;
-    spark(w, b, a, true, single);
+    spark(w, b, a, true, single, 0.05);
     if (single) { // 重擊壓輕擊：較低級的被撞開
       const lose = la > lb ? b : a;
       setRally([lose], [w.time], 0.35);
@@ -79,7 +81,9 @@
       return;
     }
     // 同級：雙方鎖在原地連拚 2–6 下，這一串用快 / 中 / 慢其中一種節奏、每下再各自抖動；每下各吃架勢，最後才撞開；中途有人崩潰或倒下就提早收
-    const r = w.rng, n = [2, 2, 3, 3, 3, 4, 4, 5, 6][Math.floor(r() * 9)], tempo = r.range(0.09, 0.3), at = [0];
+    // 殘血時越拚越狂：刀數最多再加約 30 下、節奏逼近每秒 30–50 刀；每下架勢按刀數攤薄，總量不會一拚就崩
+    const r = w.rng, f = BD.clashFury(a, b) ** 2, n = [2, 2, 3, 3, 3, 4, 4, 5, 6][Math.floor(r() * 9)] + Math.round(f * r.range(8, 30));
+    const tempo = r.range(0.09, 0.3) * (1 - f) + r.range(0.018, 0.035) * f, hs = Math.min(0.05, tempo * 0.25), post = 7 * Math.min(1, 6 / n), at = [0];
     for (let i = 1; i < n; i++) at.push(at[i - 1] + tempo * r.range(0.6, 1.4));
     const hold = at[n - 1] + 0.35;
     setRally([a, b], at.map((x) => w.time + x), 0.35);
@@ -88,13 +92,13 @@
     const hit = () => { // 兩人被同向推動一小段，每下換向：邊撞邊微微前後晃動
       const k = r.range(60, 110) * dir; dir = -dir;
       shove(a, b, k); shove(b, a, -k);
-      for (const u of [a, b]) { u.posture += 7; u.postureDelay = 1.4; w.checkPostureBreak(u, false); }
+      for (const u of [a, b]) { u.posture += post; u.postureDelay = 1.4; w.checkPostureBreak(u, false); }
     };
     hit();
     for (let i = 1; i < n; i++) {
       w.later(at[i], () => {
         if (a.state !== 'recover' || b.state !== 'recover') return;
-        spark(w, b, a, false, i === n - 1); hit();
+        spark(w, b, a, false, i === n - 1, hs); hit();
         if (i === n - 1) {
           bump(w, b, a, 0, 320); bump(w, a, b, 0, 320);
           const lose = a.posture / a.maxPosture > b.posture / b.maxPosture ? a : b; // 同級連拚：架勢吃得較滿的一方算弱勢
@@ -115,7 +119,7 @@
         w.fx.text(b.x, b.y - b.r - 30, '彈開！', '#ffffff', 24); BD.spawnFx(w, 'parry', b.x, b.y, { src: b }); w.hitstop = Math.max(w.hitstop, 0.06);
         return 'deflected';
       }
-      if (!src.isBoss || !src.inst || w.time - (w._clashAt == null ? -9 : w._clashAt) < CLASH_GAP) return null;
+      if (!src.isBoss || !src.inst || w.time - (w._clashAt == null ? -9 : w._clashAt) < CLASH_GAP * (1 - 0.7 * BD.clashFury(b, src))) return null;
       const lb = BD.skillClash(b.inst.skill), la = BD.skillClash(src.inst.skill);
       if (!la) return null;
       clash(w, b, src, lb, la);
