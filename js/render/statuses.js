@@ -53,6 +53,9 @@
   R.defineStatusIcon('jhorage', { glyph: '暴', color: '#e8402a' });
   R.defineStatusIcon('manju', { glyph: '萬', color: '#9fd8ff' });
   R.defineStatusIcon('hunt', { glyph: '獵', color: '#9fe6ff' });
+  R.defineStatusIcon('gatherstorm', { glyph: '寒', color: '#e6fbff' });
+  R.defineStatusIcon('airborne', { glyph: '空', color: '#bff3ff' });
+  R.defineStatusIcon('ridewind', { glyph: '風', color: '#9fe8ff' });
   R.defineStatusIcon('respite', { glyph: '羊', color: '#eef7ff' });
   R.defineStatusIcon('tyrantwrath', { glyph: '怒', color: '#ffd86a' });
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });

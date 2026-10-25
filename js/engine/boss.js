@@ -63,7 +63,9 @@
     speed() { return BD.scaleMod(this, 'speedMul', this.def.speed * this.speedMul) * BD.terrainSpeedMul(this); }
     canAct() { return this.state === 'idle' && this.world.intro <= 0 && !this.world.over && BD.getMod(this, 'canAct'); }
     // 影子條件（劫）：needShadow＝場上要有影子才能用、noShadow＝已有影子就不再放；只供 AI 選招 / 連段判斷，手動施放不受限
+    // 旋風條件（犽宿）：needStorm＝天寒地凍兩層才能用（手動施放也受限）、noStorm＝兩層時 AI 改放旋風
     shadowOk(s) {
+      if (s.needStorm || s.noStorm) return BD.stormReady(this) === !!s.needStorm;
       if (!s.needShadow && !s.noShadow) return true;
       return (BD.liveShadows(this.world, this).length > 0) === !!s.needShadow;
     }
@@ -87,6 +89,7 @@
       // opts.comboOk（僅沉重連段）：以連段的就緒判定（減少後的冷卻門檻 / 打折體力）取代 skillReady
       if (!opts.force && (!this.canAct() || !(opts.comboOk != null ? opts.comboOk : this.skillReady(skill)))) return false;
       if (!opts.force && ((skill.phase || 1) > this.phase || (skill.maxPhase || 9) < this.phase)) return false;
+      if (!opts.force && skill.needStorm && !BD.stormReady(this)) return false;
       this.state = 'skill'; this.stateT = 0;
       this.inst = { skill, v: this.phase === 2 ? skill.v2 : skill.v1, t: 0, hold: opts.hold || 0, idx: 0, marks: {}, id: w.nextId++, dash: null };
       if (opts.chase) { this.inst.chase = opts.chase; this.inst.chaseStop = opts.chaseStop || 0; } // 沉重限定

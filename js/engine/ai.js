@@ -412,6 +412,11 @@
           this.plan = { type: 'swap', t: Math.max(0, th.left - 0.3), th }; return;
         }
       }
+      // 風牆（犽宿）：對手的投射物將命中前，朝面向立起風牆擋下
+      if (p.windWall && th.kind === 'proj' && th.left < 0.75 && rng() < p.windWall) {
+        const sk = b.available().find((s) => (s.tags || []).includes('windwall'));
+        if (sk && b.skillReady(sk)) { this.plan = { type: 'esc', t: Math.max(0, th.left - (b.phase === 2 ? sk.v2 : sk.v1).windup - 0.15), th, sk }; return; }
+      }
       // 位移閃避（鏡爪）：威脅落下前改放帶位移的 escape 技能；近身 / 對手貼近用後躍拉開，其餘用有無敵幀的翻滾
       if (p.escDodge && th.left > 0.12 && th.left < 1.0 && rng() < p.escDodge) {
         const near = th.melee || U.dist(b, this.e) < 230;
@@ -621,7 +626,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
         if (tg.includes('trap') || tg.includes('zone')) sc *= 0.85;
         if (tg.includes('ranged')) sc *= p.kiter ? 1.4 : 0.9;
         if (tg.includes('counter')) sc *= (e.isWindingUp() || d < 170) ? 0.9 * (p.counter || 0) : 0.15;
-        if ((s.tags || []).includes('swapdodge')) continue; // 反應式技能：只由閃避計畫施放
+        if (tg.includes('swapdodge') || tg.includes('windwall')) continue; // 反應式技能：只由閃避計畫施放
         if (s.shadowMul && b.shadows && b.shadows.length) sc *= s.shadowMul; // 影子在場：影子會同步施放的招式更划算
         if (this.hunt && s.execMul) sc *= s.execMul;                        // 滅魂劫就緒：偏好普攻類
         if (this.markKite) sc *= tg.includes('ranged') ? 2 : tg.includes('melee') ? 0.4 : 1;

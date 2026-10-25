@@ -247,4 +247,18 @@
     modifiers: { dmgTakenMul: 0.75 },
     onApply(u, st, opts, w, isNew) { if (isNew && w) BD.spawnFx(w, 'susanoo', u.x, u.y, { src: u }); },
   });
+
+  // ── 犽宿：天寒地凍（鋼鐵暴雪命中累積，兩層時下一記鋼鐵暴雪化為旋風）、滯空（被旋風捲起，無法行動；奪命氣息的目標）、乘風（刃敵千軍連續突進，每層 +4% 造成的傷害）──
+  BD.defineStatus('gatherstorm', { name: '天寒地凍', tags: ['buff'], stacking: 'stack', maxStacks: 2, defaultDur: 6 });
+  BD.defineStatus('airborne', {
+    name: '滯空', tags: ['cc'], bindState: 'stun',
+    onApply: function (u, st, opts, w, isNew) {
+      if (opts.dur && u.setState) u.setState('stun', opts.dur); // 召喚物沒有 setState；已在滯空中再施加＝延長
+      if (isNew && w && w.fx) { w.fx.text(u.x, u.y - u.r - 30, '滯空！', '#e6fbff', 20); BD.spawnFx(w, 'airlaunch', u.x, u.y, { src: st.source, victim: u }); }
+    },
+  });
+  BD.defineStatus('ridewind', {
+    name: '乘風', tags: ['buff'], stacking: 'stack', maxStacks: 4, defaultDur: 5,
+    modifiers: { dmgDealtMul: function (u) { const s = BD.getStatus(u, 'ridewind'); return s ? 1 + 0.04 * s.stacks : 1; } },
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

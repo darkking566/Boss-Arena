@@ -675,6 +675,14 @@
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 1; g.fillStyle = '#fff'; g.fillRect(0, 0, n, n);
     ctx.save(); ctx.globalAlpha = a; ctx.drawImage(flashCv, 0, 0, n, n, b.x - h, b.y - h, h * 2, h * 2); ctx.restore();
   }
+  // 滯空高度（0 = 在地上）：滯空狀態或犽宿奪命氣息期間；剛起飛 / 將落地時平滑升降
+  function air(b, t) {
+    const w = b.world;
+    const lb = b._lb && w && w.time < b._lb.until;
+    if (!lb && !BD.hasStatus(b, 'airborne')) return 0;
+    const left = lb ? b._lb.until - w.time : b.stateDur - b.stateT, up = lb ? w.time - b._lb.t0 : b.stateT;
+    return 26 * U.clamp(Math.min(up / 0.15, left / 0.15), 0, 1) + Math.sin(t * 6) * 3;
+  }
   function drawBoss(ctx, b, t) {
     const style = R.bossStyle(b.def.style);
     if (style.under) style.under(ctx, b, t); // 例如劫的影子：隱身時也要畫
@@ -700,6 +708,12 @@
     ctx.beginPath(); ctx.moveTo(b.x + Math.cos(b.face) * (b.r + 18), b.y + Math.sin(b.face) * (b.r + 18));
     ctx.lineTo(b.x + Math.cos(b.face + 0.25) * (b.r + 9), b.y + Math.sin(b.face + 0.25) * (b.r + 9));
     ctx.lineTo(b.x + Math.cos(b.face - 0.25) * (b.r + 9), b.y + Math.sin(b.face - 0.25) * (b.r + 9)); ctx.closePath(); ctx.fill();
+    // 滯空：腳下一圈繞轉的白藍旋風（身體浮在上面）
+    if (air(b, t)) {
+      ctx.save(); ctx.translate(b.x, b.y); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      for (let i = 0; i < 5; i++) { const a0 = t * 12 + i * 1.26, rr = b.r * (0.9 + 0.18 * i); ctx.strokeStyle = i % 2 ? 'rgba(159,232,255,0.55)' : 'rgba(255,255,255,0.6)'; ctx.lineWidth = 3 - i * 0.4; ctx.beginPath(); ctx.arc(0, 0, rr, a0, a0 + 2); ctx.stroke(); }
+      ctx.restore();
+    }
     // 二階段氣場
     if (b.phase === 2 || b.state === 'transition') {
       const k = b.state === 'transition' ? 1.6 : 1, a = 0.25 + 0.15 * Math.sin(t * 6);
@@ -739,6 +753,13 @@
         return;
       }
       if (b.state === 'transition' && style.transition && style.transition(c, b, t)) return;
+      // 滯空（被旋風捲起）/ 奪命氣息中：身體離地浮起、放大一點並微微晃動
+      const lift = air(b, t);
+      if (lift) {
+        c.save(); c.translate(b.x, b.y - lift); c.rotate(Math.sin(t * 9) * 0.12); c.scale(1 + lift / 160, 1 + lift / 160); c.translate(-b.x, -b.y);
+        R.drawBossBody(c, b, t); c.restore();
+        return;
+      }
       // 沉重蓄力：身體向後拉（沿面向的反方向），蓄力越滿拉得越多
       let lean = 0;
       if (b.world && b.world.pace && b.isWindingUp()) {
@@ -1115,6 +1136,8 @@
         ctx.fillStyle = '#c8ff7a'; ctx.beginPath();
         for (let i = 0; i < 20; i++) { const an = i * 2.39996 * 1.7 + t * 2, rr = Math.sqrt(i / 20) * p.r * 0.85; ctx.rect(Math.cos(an) * rr, Math.sin(an) * rr, 2, 2); }
         ctx.fill();
+      } else if (R.projStyles && R.projStyles[p.kind]) { // 造型檔自帶的投射物外觀（例如犽宿的旋風）
+        R.projStyles[p.kind](ctx, p, t);
       } else if (R.huntProj && R.huntProj[p.kind]) {
         R.huntProj[p.kind](ctx, p, t);
       } else {

@@ -7,7 +7,7 @@
   const FLAT = { hp: '生命', sta: '體力', mana: '法力' };
   const CAP = { def: 0.6, cdr: 0.5, spd: 0.4, lifesteal: 0.15 };
   // 含這些動作的招式不能借用（需要 Boss 專屬特性 / 召喚物 / 影子等狀態）
-  const DENY = new Set(['summon', 'shadow', 'swap', 'shadowstep', 'shadowshuriken', 'shadowslash', 'vitalstep', 'vitalmark', 'wolf']);
+  const DENY = new Set(['summon', 'shadow', 'swap', 'shadowstep', 'shadowshuriken', 'shadowslash', 'vitalstep', 'vitalmark', 'wolf', 'gather']); // gather：旋風要犽宿的天寒地凍層數，主角沒有
   const ok = (msg) => ({ ok: true, msg: msg || '' }), no = (msg) => ({ ok: false, msg });
 
   function addMods(t, m, k) { for (const x in m) t[x] = (t[x] || 0) + m[x] * (k == null ? 1 : k); return t; }

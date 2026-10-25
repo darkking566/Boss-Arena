@@ -39,6 +39,7 @@
           if (Math.hypot(p.x - pl.x, p.y - pl.y) < pl.r + p.r) { p.alive = false; if (pl.tree) BD.projHitsTree(w, p, pl); break; }
         }
         if (p.alive) BD.projTerrain(w, p, dt);
+        if (p.alive && w.walls && w.walls.length) BD.wallBlocks(w, p); // 犽宿的風牆
         if (!p.alive) BD.spawnFx(w, 'projwall', p.x, p.y, { el: BD.kindElement(p.kind, BD.fxElementOf(p.owner)) });
       }
       if (p.life <= 0) p.alive = false;
