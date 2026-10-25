@@ -130,6 +130,7 @@
     treesentinel: { short: '大樹', arch: 'fury', passive: { name: '黃金樹大盾', mods: { def: 0.06, hp: 120 } }, set2: { name: '黃金戟', mods: { dmg: 0.04 } }, set4: { name: '黃金誓言', mods: { dmg: 0.08, def: 0.06 } } },
     yasuo: { short: '浪人', arch: 'swift', passive: { name: '浪人之道', mods: { spd: 0.04, def: 0.04 } }, set2: { name: '乘風', mods: { spd: 0.04 } }, set4: { name: '死亡如風', mods: { dmg: 0.1, cdr: 0.06 } } },
     kindred: { short: '雙生', arch: 'vital', passive: { name: '鏡爪印記', mods: { dmg: 0.05, cdr: 0.04 } }, set2: { name: '神羊銀弓', mods: { mana: 20 } }, set4: { name: '永恆獵手', mods: { dmg: 0.08, spd: 0.03 } } },
+    margit: { short: '惡兆', arch: 'fury', passive: { name: '黃金幻影', mods: { dmg: 0.05, cdr: 0.05 } }, set2: { name: '惡兆妖鬼斗篷', mods: { hp: 100 } }, set4: { name: '隱密之王', mods: { dmg: 0.08, def: 0.05 } } },
   };
 
   // 基礎數值強化：每級 +per；花費 = base + 級數 × step 顆靈魂（可用任一 Boss 的靈魂支付）

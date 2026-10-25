@@ -12,7 +12,7 @@
   }
   function lobOne(w, b, x0, y0, x1, y1, a, sky) {
     const s = { kind: 'circle', x: x1, y: y1, r: a.r };
-    K.addTele(w, b, null, s, a.flight, { detached: true, color: a.kind === 'acid' ? '#9be15d' : '#ff7a2e' });
+    K.addTele(w, b, null, s, a.flight, { detached: true, color: a.teleColor || (a.kind === 'acid' ? '#9be15d' : '#ff7a2e') });
     w.lobs.push({ x0, y0, x1, y1, t: 0, dur: a.flight, kind: a.kind, sky: !!sky });
     w.later(a.flight, () => explodeAt(w, b, x1, y1, a));
   }

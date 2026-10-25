@@ -5,6 +5,7 @@
 //   learn：一看就會（範馬勇次郎）——同一招每被他「看過」一次，下次的傷害與架勢傷害降低 12%（最多 36%）
 //   tyrant：大海暴君（波賽頓）——每挨 4 下動怒（傷害與速度短暫提升）
 //   reflect：神虛視（亞當）——見切架式（counter 動作帶 reflect:true）看穿對手出招時，把整招複製成自己的反擊；二階段過載、將死時死立不倒
+//   phantomarms：黃金幻影（瑪爾基特）——每挨 3 下，自動朝攻擊者擲出一把黃金短刀
 (function (G) {
   const BD = G.BD, K = BD.K;
 
@@ -263,6 +264,23 @@
       BD.spawnFx(w, 'shieldguard', b.x + Math.cos(a) * b.r, b.y + Math.sin(a) * b.r, { src: b, angle: BD.U.angTo(b, o) });
       w.fx.text(b.x, b.y - b.r - 30, '盾擋', '#ffe27a', 16);
       return null; // 只減傷，不攔截
+    },
+  });
+
+  // ── phantomarms：黃金幻影（瑪爾基特）——每挨 3 下（非持續傷害），左手凝出一把黃金短刀，0.15 秒後自動擲向攻擊者 ──
+  const PHANTOM_DAGGER = { speed: 860, r: 12, dmg: 55, posture: 14, kb: 120, life: 1.1, homing: 1.4, kind: 'holydagger', deflect: true };
+  BD.defineTrait('phantomarms', {
+    interceptDamage(w, b, src, p) {
+      if (p.dot || !src || BD.getMod(b, 'invuln')) return null;
+      if ((b._phantom = (b._phantom || 0) + 1) < 3) return null;
+      b._phantom = 0;
+      const foe = src.isBoss ? src : src.owner || src;
+      BD.spawnFx(w, 'daggerform', b.x, b.y, { src: b, angle: BD.U.angTo(b, foe) });
+      w.later(0.15, () => {
+        if (b.state === 'dead' || b.state === 'transition' || BD.hasStatus(b, 'hidden') || foe.state === 'dead') return;
+        BD.spawnProj(w, b, b, BD.U.angTo(b, foe), PHANTOM_DAGGER);
+      });
+      return null; // 只計數，不攔截傷害
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

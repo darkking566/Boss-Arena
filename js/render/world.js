@@ -1153,6 +1153,7 @@
       if (l.sky) { x = U.lerp(l.x0, l.x1, k); y = U.lerp(l.y0, l.y1, k); h = 0; }
       else { x = U.lerp(l.x0, l.x1, k); y = U.lerp(l.y0, l.y1, k); h = Math.sin(Math.PI * k) * 160; }
       ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(l.sky ? l.x1 : x, l.sky ? l.y1 : y, 10 * (l.sky ? k : 1), 6 * (l.sky ? k : 1), 0, 0, U.TAU); ctx.fill();
+      if (R.lobStyles && R.lobStyles[l.kind]) { R.lobStyles[l.kind](ctx, l, x, y - h, k, t); continue; } // 造型檔自帶的拋射物外觀（例如瑪爾基特的黃金劍雨）
       if (l.kind === 'crow') { // 烏鴉風暴：展翅的烏鴉從高空俯衝向落點，尾後一道暗紅殘影
         const an = Math.atan2(l.y1 - l.y0, l.x1 - l.x0), fl = Math.sin(t * 26 + l.x0) * 0.5 + 0.5, kk = 1.7;
         ctx.save(); ctx.translate(x, y - h); ctx.rotate(an);
