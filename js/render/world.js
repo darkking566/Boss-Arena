@@ -302,8 +302,8 @@
     const W = BD.WHEAT, cam = R.cam;
     if (cam.w !== w) return; // 鏡頭不屬於此世界（特效圖鑑）時不畫
     const field = w.fx.field, gusts = w.fx.gusts, cell = W.cell;
-    const c0 = Math.max(Math.floor(W.x0 / cell), Math.floor((cam.x - 50) / cell)), c1 = Math.min(Math.floor((W.x1 - 1) / cell), Math.floor((cam.x + R.VW + 50) / cell));
-    const r0 = Math.max(1, Math.floor((cam.y - 30) / cell)), r1 = Math.min(Math.floor((W.y1 - 1) / cell), Math.floor((cam.y + R.VH + 110) / cell));
+    const c0 = Math.max(Math.floor(W.x0 / cell), Math.floor((cam.x - 50) / cell)), c1 = Math.min(Math.floor((W.x1 - 1) / cell), Math.floor((cam.x + R.VW / cam.z + 50) / cell));
+    const r0 = Math.max(1, Math.floor((cam.y - 30) / cell)), r1 = Math.min(Math.floor((W.y1 - 1) / cell), Math.floor((cam.y + R.VH / cam.z + 110) / cell));
     for (let r = r0; r <= r1; r++) {
       for (let c = c0; c <= c1; c++) {
         const i = r * W.cols + c; if (field[i]) continue;
@@ -450,7 +450,7 @@
       ctx.save(); ctx.lineWidth = 1.5;
       for (let i = 0; i < 280; i++) {
         const gx = (i * 977) % A.w, gy = (i * 613 + 41) % A.h;
-        if (gx < c.x - 60 || gx > c.x + R.VW + 60 || gy < c.y - 40 || gy > c.y + R.VH + 40) continue;
+        if (gx < c.x - 60 || gx > c.x + R.VW / c.z + 60 || gy < c.y - 40 || gy > c.y + R.VH / c.z + 40) continue;
         const k = (t * (0.1 + (i % 5) * 0.03) + i * 0.137) % 1;
         ctx.strokeStyle = `rgba(255,244,225,${(1 - k) * 0.22})`; ctx.beginPath(); ctx.ellipse(gx, gy, 6 + k * 42, 3 + k * 19, 0, 0, U.TAU); ctx.stroke();
       }

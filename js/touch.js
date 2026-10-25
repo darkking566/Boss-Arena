@@ -56,7 +56,7 @@
         if (built !== p) { built = p; build(p, !!w.hunt); }
         if (performance.now() > manualAimUntil && p.enemy) { // 自動鎖定：把螢幕座標反推成指向對手
           const z = R.zoom, m = input.mouse, e = p.enemy;
-          m.sx = z.fx + (e.x - R.cam.x - z.fx) * z.z; m.sy = z.fy + (e.y - R.cam.y - z.fy) * z.z;
+          m.sx = z.fx + ((e.x - R.cam.x) * R.cam.z - z.fx) * z.z; m.sy = z.fy + ((e.y - R.cam.y) * R.cam.z - z.fy) * z.z;
         }
       } else if (built) { built = null; setStick(0, 0); }
       requestAnimationFrame(tick);

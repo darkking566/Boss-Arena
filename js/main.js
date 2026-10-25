@@ -232,7 +232,7 @@
     const w = new BD.World(def(a), def(b), { player: opts.player, input, seed: opts.seed, pace: opts.pace, map: opts.map });
     w.speed = opts.player != null ? 1 : opts.speed;
     state.world = w; state.resultShown = false;
-    view.player = opts.player;
+    view.player = opts.player; view.focus = null;
     show('game');
     return w;
   }
@@ -335,6 +335,11 @@
     }
     const w = state.world;
     if (!w || state.screen !== 'game') return;
+    if (k === 'Tab' && !w.training && !w.hunt) { // 聚焦模式：全體 → 每位存活 Boss → 全體
+      const order = [null, ...w.bosses.map((b, i) => (b.state !== 'dead' ? i : -1)).filter((i) => i >= 0)];
+      view.focus = order[(order.indexOf(view.focus) + 1) % order.length];
+      return;
+    }
     if (w.training) {
       const tr = w.training;
       if (k === 'F2') { e.preventDefault(); tr.cycleMode(); return; }

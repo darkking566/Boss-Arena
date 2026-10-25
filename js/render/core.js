@@ -6,11 +6,11 @@
   const R = BD.Render = {};
   R.W = 1600; R.H = 1010; R.OX = 50; R.OY = 172;
   R.VW = 1500; R.VH = 820; // 競技場視窗（世界座標單位）；競技場比視窗大，鏡頭 R.cam（視窗左上角的世界座標）跟著戰鬥移動
-  R.cam = { x: 0, y: 0, w: null, t: 0 };
+  R.cam = { x: 0, y: 0, z: 1, w: null, t: 0 }; // z：團隊戰拉遠倍率（≤1），可見世界範圍為 VW/z × VH/z
   R.zoom = { z: 1, fx: 0, fy: 0 }; // 本幀的鏡頭縮放（倍率與縮放中心，視窗座標）；純繪圖狀態
   // 視窗座標（滑鼠）→ 世界座標，已扣掉鏡頭位置與縮放
-  R.worldX = (sx) => R.cam.x + R.zoom.fx + (sx - R.zoom.fx) / R.zoom.z;
-  R.worldY = (sy) => R.cam.y + R.zoom.fy + (sy - R.zoom.fy) / R.zoom.z;
+  R.worldX = (sx) => R.cam.x + (R.zoom.fx + (sx - R.zoom.fx) / R.zoom.z) / R.cam.z;
+  R.worldY = (sy) => R.cam.y + (R.zoom.fy + (sy - R.zoom.fy) / R.zoom.z) / R.cam.z;
   const TEAM = ['#4aa3ff', '#ff4a5a', '#d01030'];
   R.TEAM = TEAM;
   const FONT = '"Microsoft JhengHei","微軟正黑體","PingFang TC","Noto Sans TC","Noto Sans CJK TC",sans-serif';

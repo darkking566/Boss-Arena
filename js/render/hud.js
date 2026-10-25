@@ -177,18 +177,26 @@
 
   const shakeOut = { x: 0, y: 0 };
   // 鏡頭：平滑跟著雙方 Boss 的中點，夾在競技場內；換場（新 World）時直接定位。純繪圖狀態，滑鼠世界座標由 input.js 讀 R.cam
-  // 團隊戰：玩家在場就跟玩家與其目標，否則跟所有存活 Boss 的重心
+  // 團隊戰：框住所有存活 Boss 的範圍，太散時鏡頭拉遠（c.z < 1，最遠 0.4 倍）讓每個人都在畫面內
+  // 聚焦模式（view.focus，Tab 切換）：鏡頭只跟那一位，正常倍率；他倒下就回到全體視角
   function followCamera(w, t, view) {
-    const A = BD.ARENA, c = R.cam, [a, b] = w.bosses;
-    let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-    if (w.teamMode) {
-      const p = view.player != null && w.bosses[view.player];
-      const pts = p && p.state !== 'dead' ? [p, p.enemy] : w.bosses.filter((u) => u.state !== 'dead');
-      if (pts.length) { mx = my = 0; for (const u of pts) { mx += u.x / pts.length; my += u.y / pts.length; } }
+    const A = BD.ARENA, c = R.cam, [a, b] = w.bosses, f = view.focus != null && w.bosses[view.focus];
+    let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, tz = 1;
+    if (f && f.state !== 'dead') { mx = f.x; my = f.y; } else if (view.focus != null) view.focus = null;
+    else if (w.teamMode) {
+      const pts = w.bosses.filter((u) => u.state !== 'dead');
+      if (pts.length) {
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (const u of pts) { x0 = Math.min(x0, u.x); x1 = Math.max(x1, u.x); y0 = Math.min(y0, u.y); y1 = Math.max(y1, u.y); }
+        mx = (x0 + x1) / 2; my = (y0 + y1) / 2;
+        tz = U.clamp(Math.min(R.VW / (x1 - x0 + 420), R.VH / (y1 - y0 + 360)), 0.4, 1); // 邊距：Boss 身形與招式範圍
+      }
     }
-    const m = R.VH * 0.085 * lbox.k; // 大招黑邊期間鏡頭可多越出上下牆一條黑邊高，貼牆的角色不被遮住
-    const tx = U.clamp(mx - R.VW / 2, 0, A.w - R.VW), ty = U.clamp(my - R.VH / 2, -m, A.h - R.VH + m);
-    if (c.w !== w) { c.w = w; c.x = tx; c.y = ty; } else { const k = Math.min(1, Math.max(0, t - c.t) * 5); c.x += (tx - c.x) * k; c.y += (ty - c.y) * k; }
+    const k = c.w !== w ? 1 : Math.min(1, Math.max(0, t - c.t) * 5);
+    c.z += (tz - c.z) * k * 0.6;
+    const vw = R.VW / c.z, vh = R.VH / c.z, m = R.VH * 0.085 * lbox.k / c.z; // 大招黑邊期間鏡頭可多越出上下牆一條黑邊高，貼牆的角色不被遮住
+    const tx = U.clamp(mx - vw / 2, 0, A.w - vw), ty = U.clamp(my - vh / 2, -m, A.h - vh + m);
+    if (c.w !== w) { c.w = w; c.z = tz; c.x = U.clamp(mx - R.VW / tz / 2, 0, A.w - R.VW / tz); c.y = U.clamp(my - R.VH / tz / 2, 0, A.h - R.VH / tz); } else { c.x += (tx - c.x) * k; c.y += (ty - c.y) * k; }
     c.t = t;
     return c;
   }
@@ -230,8 +238,9 @@
     ctx.save(); ctx.beginPath(); ctx.rect(-34, -34, R.VW + 68, R.VH + 68); ctx.clip();
     // 鏡頭縮放（衝擊 punch / 大招與擊殺的推近）：以事件位置為中心，只縮世界，HUD 不動
     const Z = R.zoom, zn = w.fx.zoomNow();
-    Z.z = zn; Z.fx = w.fx.zx == null ? R.VW / 2 : U.clamp(w.fx.zx - cam.x, 0, R.VW); Z.fy = w.fx.zy == null ? R.VH / 2 : U.clamp(w.fx.zy - cam.y, 0, R.VH);
+    Z.z = zn; Z.fx = w.fx.zx == null ? R.VW / 2 : U.clamp((w.fx.zx - cam.x) * cam.z, 0, R.VW); Z.fy = w.fx.zy == null ? R.VH / 2 : U.clamp((w.fx.zy - cam.y) * cam.z, 0, R.VH);
     if (zn !== 1) { ctx.translate(Z.fx, Z.fy); ctx.scale(zn, zn); ctx.translate(-Z.fx, -Z.fy); }
+    if (cam.z !== 1) ctx.scale(cam.z, cam.z); // 團隊戰拉遠
     ctx.translate(-cam.x, -cam.y);
     drawArena(ctx, w, t);
     drawLights(ctx, w);
@@ -263,6 +272,10 @@
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
     drawTexts(ctx, w);
+    if (view.focus != null) {
+      const f = w.bosses[view.focus]; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * 30;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r + 18, 0, U.TAU); ctx.stroke(); ctx.restore();
+    }
     if (view.player != null) {
       const m = view.mouse; ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(m.x, m.y, 10, 0, U.TAU); ctx.moveTo(m.x - 15, m.y); ctx.lineTo(m.x + 15, m.y); ctx.moveTo(m.x, m.y - 15); ctx.lineTo(m.x, m.y + 15); ctx.stroke();
@@ -272,6 +285,12 @@
     drawLetterbox(ctx, w, t);
     drawBanners(ctx, w);
     drawLog(ctx, w, view);
+    if (view.focus != null) {
+      const f = w.bosses[view.focus], s = `◎ 聚焦：${f.name}　（Tab 切換 / 回到全體）`;
+      ctx.font = `bold 16px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(s).width + 28; ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(R.VW / 2 - tw / 2, 10, tw, 28);
+      ctx.fillStyle = f.def.color; ctx.fillText(s, R.VW / 2, 25);
+    }
     ctx.restore();
     // 全螢幕閃光壓低上限（最多 22%），避免整片閃白刺眼
     if (w.fx.flashA > 0) { ctx.globalAlpha = Math.min(0.22, w.fx.flashA * 0.35); ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
@@ -288,7 +307,7 @@
       ctx.fillText(w.hunt ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F 技能 · X 大招 · 空白鍵 翻滾 · 1 生命藥水 · 2 法力藥水 · P 暫停 · Esc 回據點'
         : view.player != null
         ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F C V G 技能 · X 大招 · 空白鍵 翻滾 · P 暫停 · Esc 選單'
-        : '1/2/3/4 切換速度 ×1/×2/×3/×0.5 · P 暫停 · L 戰鬥紀錄 · Esc 回選單 · F3 效能 · F4 快取 · F6 AI', R.W - 50, R.H - 6);
+        : '1/2/3/4 切換速度 ×1/×2/×3/×0.5 · Tab 聚焦 · P 暫停 · L 戰鬥紀錄 · Esc 回選單 · F3 效能 · F4 快取 · F6 AI', R.W - 50, R.H - 6);
     }
     if (w.paused) {
       ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 0, R.W, R.H);
