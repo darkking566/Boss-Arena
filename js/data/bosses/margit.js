@@ -53,32 +53,43 @@
     ai: {
       prefRange: [100, 260], aggression: 0.7, dodge: 0.45, precision: 0.65, reaction: 0.28, strafe: 0.5, walk: 0.75,
       feint: 0.15, delay: 0.6, retreat: 0.15, punish: 0.65, nervous: 0.05, patience: 0.45, // 原作招牌：延遲出手騙翻滾
+      // 距離條件要算進前一招的擊退（拐杖第三下 / 大槌會把人打飛到 350~450 外），否則連段接不起來
       combos: [
         { id: 'delay', name: '拐杖・延遲下砸', weight: 1.4, steps: [
           { skill: 'cane_combo' },
           { skill: 'delayed_slam', cancel: 0.4, branch: [
+            { when: { rolled: true, rollDir: ['back'] }, chance: 0.6, do: 'switch', skill: 'leaping_stab' }, // 往後滾 → 躍起追刺
             { when: { rolled: true }, chance: 0.6, do: 'delay', hold: [0.3, 0.6] }, // 看到翻滾就再拖一拍
-            { when: { dist: [0, 300] }, do: 'extend' },
+            { when: { dist: [0, 420] }, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'dagger', name: '短刀快斬・尾掃', weight: 1.0, steps: [
           { skill: 'dagger_slash' },
           { skill: 'tail_sweep', cancel: 0.3, branch: [
-            { when: { dist: [0, 200] }, do: 'extend' },
+            { when: { dist: [0, 260] }, do: 'extend' },
+            { when: { dist: [260, 700] }, do: 'switch', skill: 'leaping_stab' }, // 被拉開 → 躍刺
             { do: 'stop' }] }] },
         { id: 'retreat', name: '後撤擲刀・躍刺', phase: 1, weight: 1.1, steps: [
           { skill: 'dagger_retreat' },
           { skill: 'leaping_stab', cancel: 0.35, branch: [
-            { when: { dist: [160, 480] }, do: 'extend' },
+            { when: { dist: [160, 700] }, do: 'extend' },
+            { do: 'stop' }] }] },
+        { id: 'toss', name: '雙擲躍刺・短刀追擊', phase: 1, weight: 1.2, steps: [
+          { skill: 'dagger_toss' },
+          { skill: 'dagger_slash', cancel: 0.35, branch: [
+            { when: { rolled: true, rollDir: ['left', 'right', 'through'] }, do: 'switch', skill: 'tail_sweep' }, // 滾到身側 / 身後 → 尾掃
+            { when: { dist: [0, 300] }, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'hammer', name: '拐杖大槌・聖劍迴旋', phase: 2, weight: 1.3, steps: [
           { skill: 'cane_hammer' },
           { skill: 'sword_spin', cancel: 0.4, branch: [
-            { when: { dist: [0, 320] }, do: 'extend' },
+            { when: { rolled: true, rollDir: ['back'] }, chance: 0.6, do: 'switch', skill: 'hammer_leap' }, // 往後滾 → 大槌躍擊
+            { when: { dist: [0, 460] }, do: 'extend' },
             { do: 'stop' }] }] },
         { id: 'sword', name: '聖劍三連・大槌躍擊', phase: 2, weight: 1.1, steps: [
           { skill: 'sword_combo' },
           { skill: 'hammer_leap', cancel: 0.4, branch: [
-            { when: { dist: [140, 520] }, do: 'extend' },
+            { when: { dist: [0, 140] }, do: 'switch', skill: 'tail_sweep' }, // 貼身 → 尾掃甩開
+            { when: { dist: [140, 700] }, do: 'extend' },
             { when: { rolled: true }, do: 'extend' },
             { do: 'stop' }] }] },
       ],
@@ -98,7 +109,7 @@
           ...strike(0.8, 0.28, { shape: 'cone', r: 240, arc: 145 * D, angOff: -0.35 }, { dmg: 98, posture: 28, kb: 320, fx: { id: 'cleave', ...CANE } }),
           ...strike(1.65, 0.72, { shape: 'rect', len: 280, w: 76 }, { dmg: 150, posture: 44, kb: 400, fx: { id: 'canesmash', scale: 1.15 } })] },
       // 2. 延遲重砸：雙手高舉拐杖，停頓很久才砸（原作 Delayed Overhead Strike / Windup Attack）
-      { id: 'delayed_slam', name: '延遲重砸', short: '重砸', tags: ['melee', 'aoe'], range: [0, 280], cd: 4.8, cost: 26, track: 4, recovery: 0.8,
+      { id: 'delayed_slam', name: '延遲重砸', short: '重砸', tags: ['melee', 'aoe'], range: [0, 280], cd: 4.8, cost: 26, track: 4, creep: 0.6, recovery: 0.8,
         actions: [...strike(1.25, 1.05, { shape: 'circle', r: 120, off: 150 }, { dmg: 170, posture: 50, kb: 450, fx: { id: 'canesmash', scale: 1.3 } }),
           ...strike(1.4, 0.2, { shape: 'ring', r0: 100, r: 220, off: 150 }, { dmg: 50, posture: 16, kb: 300, fx: { id: 'ring', ...CANE } })],
         actions2: [...strike(1.15, 1.0, { shape: 'circle', r: 130, off: 155 }, { dmg: 180, posture: 54, kb: 470, fx: { id: 'canesmash', scale: 1.45 } }),
@@ -123,13 +134,13 @@
         actions2: [...strike(0.28, 0.22, { shape: 'cone', r: 210, arc: 140 * D }, { dmg: 74, posture: 20, kb: 320, fx: 'slash' }),
           { do: 'dash', at: 0.4, dir: 'back', dist: 250, dur: 0.24 }, dagger(0.6, { n: 3, spread: 0.16, homing: 1.0 })] },
       // 6. 尾掃：扭身，長尾先掃背後、再隨轉身掃過前方（原作 Tail Swipe 只掃背後；這裡接著轉回正面）
-      { id: 'tail_sweep', name: '尾掃', short: '尾掃', tags: ['melee', 'fast', 'defensive'], range: [0, 185], cd: 4.5, cost: 14, track: 9, recovery: 0.45,
+      { id: 'tail_sweep', name: '尾掃', short: '尾掃', tags: ['melee', 'fast', 'defensive'], range: [0, 185], cd: 4.5, cost: 14, track: 9, creep: 0.5, recovery: 0.45,
         actions: [...strike(0.26, 0.2, { shape: 'cone', r: 180, arc: 180 * D, angOff: Math.PI }, { dmg: 72, posture: 34, kb: 460, fx: { id: 'cleave', ...CANE } }),
           ...strike(0.44, 0.16, { shape: 'cone', r: 180, arc: 160 * D }, { dmg: 66, posture: 30, kb: 420, fx: { id: 'cleave', ...CANE } })],
         actions2: [...strike(0.24, 0.18, { shape: 'cone', r: 195, arc: 180 * D, angOff: Math.PI }, { dmg: 78, posture: 36, kb: 480, fx: { id: 'cleave', ...CANE } }),
           ...strike(0.4, 0.15, { shape: 'cone', r: 195, arc: 160 * D }, { dmg: 72, posture: 32, kb: 440, fx: { id: 'cleave', ...CANE } })] },
       // 7. 躍起下刺：躍起、在空中停一下鎖定落點，再往下刺（原作 Leaping Stab）
-      { id: 'leaping_stab', name: '躍起下刺', short: '躍刺', tags: ['gap', 'melee'], range: [160, 480], cd: 5.5, cost: 24, track: 5, recovery: 0.7,
+      { id: 'leaping_stab', name: '躍起下刺', short: '躍刺', tags: ['gap', 'melee'], range: [160, 700], cd: 5.5, cost: 24, track: 5, recovery: 0.7,
         actions: leapStab(1.15, 125, 165, 0.95),
         actions2: leapStab(1.05, 135, 175, 0.88) },
       // —— 二階段專屬（原作招式表第二階段）——
@@ -142,7 +153,7 @@
           ...strike(1.35, 0.62, { shape: 'circle', r: 140, off: 165 }, { dmg: 190, posture: 58, kb: 500, fx: { id: 'goldhammer', scale: 0.7 } }),
           ...strike(1.5, 0.2, { shape: 'ring', r0: 120, r: 260, off: 165 }, { dmg: 56, posture: 16, kb: 320, fx: 'ring' })] },
       // 10. 聖劍五連迴旋：召出黃金聖劍，邊推進邊連轉五圈（Quintuple Spin）
-      { id: 'sword_spin', name: '聖劍五連迴旋', short: '迴旋', phase: 2, tags: ['melee', 'aoe'], range: [0, 300], cd: 7.5, cost: 32, track: 3, recovery: 0.9,
+      { id: 'sword_spin', name: '聖劍五連迴旋', short: '迴旋', phase: 2, tags: ['melee', 'aoe'], range: [0, 300], cd: 7.5, cost: 32, track: 3, creep: 0.3, recovery: 0.9,
         actions: spin(0.6, 5, 0.3, 175, 50) },
       // 11. 聖劍三連：橫斬、回斬、往地上一刺（Sword and Stab Three-Hit String）
       { id: 'sword_combo', name: '聖劍三連', short: '三連', phase: 2, tags: ['melee'], range: [0, 300], cd: 5, cost: 24, track: 6, creep: 0.3, recovery: 0.65,
