@@ -15,23 +15,23 @@
   const ease = (u) => 1 - (1 - u) * (1 - u);
   const lerp = (a, b, u) => a + (b - a) * u;
 
-  // 姿態：ang 戟身方向（相對面向）、ext 持戟手前伸、up 高舉過頂（戟身縮短示意朝上）、rear 戰馬人立、sh 舉盾、fwd 前衝、spin 扭身、gl 戟上金光
-  const DEF = { ang: 2.55, ext: 0.1, up: 0, rear: 0, sh: 0, fwd: 0, spin: 0, gl: 0 };
+  // 姿態：ang 戟身方向（相對面向）、ext 持戟手前伸、up 高舉過頂（戟身縮短示意朝上）、rear 戰馬人立、sh 舉盾、fwd 前衝、spin 扭身、gl 戟上金光、thr 戟尖前方的光槍、bk 盾面撞擊弧光
+  const DEF = { ang: 2.55, ext: 0.1, up: 0, rear: 0, sh: 0, fwd: 0, spin: 0, gl: 0, thr: 0, bk: 0 };
   const KEYS = Object.keys(DEF);
   // key: [蓄滿, 擊]
   const SWING = [ // 側揮：由右後往左前掃、第二下反手掃回
     { ang: [2.3, -0.7], ext: [0.2, 0.9], spin: [0.35, -0.3], gl: [0.4, 1] },
     { ang: [-0.9, 1.9], ext: [0.3, 0.9], spin: [-0.3, 0.35], gl: [0.4, 1] }];
-  const STAB = { ang: [0.15, 0], ext: [-0.4, 1.25], rear: [0.7, 0.15], fwd: [-0.1, 0.3], gl: [0.6, 1] };
+  const STAB = { ang: [0.15, 0], ext: [-0.4, 1.25], rear: [0.7, 0.15], fwd: [-0.1, 0.3], gl: [0.6, 1], thr: [0.1, 1] };
   const SLAM = { ang: [0, 0], ext: [0.4, 1.1], up: [1, 0], rear: [1, -0.1], fwd: [-0.12, 0.25], gl: [1, 1] };
   const STOMP = { rear: [1, -0.25], fwd: [-0.05, 0.25], ang: [2.4, 2.2] };
   const BASH = { spin: [-0.45, 0.7], fwd: [0, 0.15], ang: [2.6, 2.3] };
   const TWIRL = { ang: [-2.2, 3.7], ext: [0.3, 1.1], rear: [0.8, 0.1], spin: [-0.5, 0.7], gl: [0.8, 1] };
   const BACKSWING = { ang: [1.2, 3.6], ext: [0.3, 1], spin: [0.4, 0.9], gl: [0.5, 1] };
-  const DASH = { ang: [0.25, 0.08], ext: [0.6, 1.1], fwd: [-0.12, 0.35], gl: [0.5, 0.9] }; // 戟夾腋下平舉，像騎槍衝鋒
+  const DASH = { ang: [0.25, 0.08], ext: [0.6, 1.1], fwd: [-0.12, 0.35], gl: [0.5, 0.9], thr: [0.3, 0.8] }; // 戟夾腋下平舉，像騎槍衝鋒
   const WALL = { sh: [1, 1], fwd: [0, 0.08], ang: [2.6, 2.6], gl: [0, 0] };
-  const SHIELDBASH = { sh: [0.8, 1], spin: [0.35, -0.45], fwd: [-0.12, 0.35], ang: [2.6, 2.4] };
-  const CRUSH = { sh: [1, 1], rear: [1, -0.2], fwd: [0, 0.2], ang: [2.6, 2.6] };
+  const SHIELDBASH = { sh: [0.8, 1], spin: [0.35, -0.45], fwd: [-0.12, 0.35], ang: [2.6, 2.4], bk: [0.2, 1] };
+  const CRUSH = { sh: [1, 1], rear: [1, -0.2], fwd: [0, 0.2], ang: [2.6, 2.6], bk: [0.3, 1] };
   const VOW = { up: [1, 1], rear: [0.6, 0.5], gl: [1, 1], ext: [0.4, 0.5], ang: [0, 0] };
 
   function pick(e, sid) {
@@ -46,7 +46,7 @@
         if (sid === 'horse_bash') return BASH;
         if (sid === 'twirl_swing') return TWIRL;
         if (sid === 'shield_crush' || (sid === 'ult' && a.anchor === 'mark')) return CRUSH;
-        if (a.fx && a.fx.id === 'guardbash') return SHIELDBASH;
+        if (a.fx && a.fx.id === 'erdbash') return SHIELDBASH;
         if (a.angOff === Math.PI) return BACKSWING;
         if (a.shape === 'rect') return STAB;
         if (a.shape === 'circle' || a.shape === 'ring') return SLAM;
@@ -262,7 +262,7 @@
     if (w && w.walls && w.walls.some((wl) => wl.owner === o && wl.until > w.time)) A.sh = 1; // 盾壁還在：盾一直舉著
     const spd = Math.hypot(o.vx || 0, o.vy || 0), run = U.clamp(spd / 260, 0, 1);
     const ph = t * (6 + 10 * run) + (o.x || 0) * 0.01, sway = Math.sin(t * 3 + (o.y || 0) * 0.01) * (1 - run * 0.5);
-    const rear = Math.max(0, A.rear), gl = Math.max(A.gl, p2 ? 0.6 : 0);
+    const rear = Math.max(0, A.rear), gl = Math.max(A.gl, p2 ? 0.6 : 0), fl2 = Math.max(run, U.clamp(A.fwd * 2.2, 0, 0.85)); // 衝刺 / 前撲時披風與尾巴也飄起
 
     ctx.save();
     ctx.translate(A.fwd * r, 0); if (A.spin) ctx.rotate(A.spin);
@@ -273,13 +273,16 @@
       const a0 = Math.min(ARC0, ARC1), a1 = Math.max(ARC0, ARC1);
       ctx.strokeStyle = hexA(GOLD, 0.45 * ARC); ctx.lineWidth = r * 0.35; ctx.beginPath(); ctx.arc(0, 0, len * 1.15, a0, a1); ctx.stroke();
       ctx.strokeStyle = hexA(WHITE, 0.85 * ARC); ctx.lineWidth = 3; ctx.stroke();
+      if (a1 - a0 > 3) for (const f of [0.8, 0.56]) { // 迴旋大掃：內側再掃兩圈
+        ctx.strokeStyle = hexA(f > 0.7 ? GOLD : PALE, 0.35 * ARC); ctx.lineWidth = r * 0.2 * f; ctx.beginPath(); ctx.arc(0, 0, len * 1.15 * f, a0, a1); ctx.stroke();
+      }
       ctx.restore();
     }
     // 人立：前半身抬起——整體放大、往前推一點（影子由引擎畫在原地）
     const lift = 1 + 0.16 * rear;
     if (rear > 0) { ctx.translate(r * 0.25 * rear, 0); ctx.scale(lift, lift); }
     legs(ctx, r, Math.max(run, rear * 0.4), ph, rear, shade);
-    tail(ctx, r, sway, run, shade);
+    tail(ctx, r, sway, fl2, shade);
     barding(ctx, r, shade);
     // 頸與頭：人立時頭抬得更高（再放大）
     ctx.save(); ctx.translate(r * 0.95, 0);
@@ -294,14 +297,35 @@
     ctx.rotate(lerp(0, 0.5, A.sh));
     const sg = A.sh * (0.6 + 0.4 * Math.sin(t * 14));
     shield(ctx, r, shade, sid === 'golden_retaliation' ? Math.max(sg, 0.6 * A.sh) : sg * 0.6);
+    if (A.bk > 0.05 && !shade) { // 盾面撞出的金色弧光與放射根紋
+      ctx.save(); ctx.lineCap = 'round';
+      ctx.strokeStyle = hexA('#c08418', 0.5 * A.bk); ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(0, 0, r * 0.88, -0.95, 0.95); ctx.stroke();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = hexA(GOLD, 0.7 * A.bk); ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(0, 0, r * 0.88, -0.95, 0.95); ctx.stroke();
+      ctx.strokeStyle = hexA(WHITE, 0.9 * A.bk); ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = hexA(PALE, 0.6 * A.bk); ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let i = -3; i <= 3; i++) { const a = i * 0.28; ctx.moveTo(Math.cos(a) * r * 0.7, Math.sin(a) * r * 0.7); ctx.lineTo(Math.cos(a) * r * (1.05 + 0.2 * (i & 1)), Math.sin(a) * r * (1.05 + 0.2 * (i & 1))); }
+      ctx.stroke(); ctx.restore();
+    }
     ctx.restore();
-    rider(ctx, r, shade, sway, run);
+    rider(ctx, r, shade, sway, fl2);
     // 右臂 + 黃金戟（高舉時戟身縮短，表示朝上）
     ctx.strokeStyle = C(shade, GILT); ctx.lineWidth = r * 0.16; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(0, r * 0.36); ctx.lineTo(hx, hy); ctx.stroke();
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(A.ang);
     const fl = 1 - 0.62 * U.clamp(A.up, 0, 1);
     ctx.scale(fl, 1);
+    if (A.thr > 0.05 && !shade) { // 戟尖前方延伸出一道光槍（突刺、衝鋒）
+      ctx.save(); ctx.lineCap = 'round';
+      const L = len * (1.25 + 1.6 * A.thr);
+      ctx.strokeStyle = hexA('#c08418', 0.4 * A.thr); ctx.lineWidth = r * 0.3; ctx.beginPath(); ctx.moveTo(len * 0.6, 0); ctx.lineTo(L, 0); ctx.stroke(); // 琥珀底（淺色地圖上加亮看不出來）
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = hexA(GOLD, 0.35 * A.thr); ctx.lineWidth = r * 0.34; ctx.beginPath(); ctx.moveTo(len * 0.6, 0); ctx.lineTo(L, 0); ctx.stroke();
+      ctx.strokeStyle = hexA(WHITE, 0.85 * A.thr); ctx.lineWidth = 3; ctx.stroke();
+      ctx.strokeStyle = hexA(PALE, 0.55 * A.thr); ctx.lineWidth = 1.5; ctx.beginPath();
+      for (const sd of [-1, 1]) { ctx.moveTo(len * 0.95, sd * r * 0.16); ctx.lineTo(L * 0.92, sd * r * 0.16); }
+      ctx.stroke(); ctx.restore();
+    }
     halberd(ctx, len, r, shade, gl);
     ctx.restore();
     if (A.up > 0.5 && gl > 0.5 && !shade) { // 高舉時戟頭上方的金色光點
@@ -310,7 +334,9 @@
       const g = ctx.createRadialGradient(tx, ty, 1, tx, ty, r * 0.8);
       g.addColorStop(0, hexA(WHITE, 0.9)); g.addColorStop(0.4, hexA(GOLD, 0.5)); g.addColorStop(1, hexA(GOLD, 0));
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(tx, ty, r * 0.8, 0, TAU); ctx.fill();
-      ctx.restore();
+      ctx.strokeStyle = hexA(PALE, 0.5); ctx.lineWidth = 1.5; ctx.beginPath(); // 旋轉放射光芒
+      for (let i = 0; i < 8; i++) { const a = t * 0.8 + i * TAU / 8, l0 = r * 0.5, l1 = r * (i % 2 ? 1.0 : 1.4); ctx.moveTo(tx + Math.cos(a) * l0, ty + Math.sin(a) * l0); ctx.lineTo(tx + Math.cos(a) * l1, ty + Math.sin(a) * l1); }
+      ctx.stroke(); ctx.restore();
     }
     ctx.restore();
     if (w && w.time != null && BD.hasStatus && o.statuses && BD.hasStatus(o, 'goldenvow') && !shade) { // 黃金誓言：身上繞著升起的金色光點
@@ -336,6 +362,20 @@
       for (let i = 0; i < 6; i++) { const s = -hw + (i + 0.5) * wl.w / 6, p = t * 4 + i; ctx.beginPath(); ctx.moveTo(4, s); ctx.quadraticCurveTo(14 + Math.sin(p) * 6, s + 10, 6, s + 22); ctx.stroke(); }
       ctx.restore();
     }
+    const dh = b.inst && b.inst.dash;
+    if (dh && dh.t < dh.dur && b.state !== 'dead' && !BD.hasStatus(b, 'hidden')) { // 衝鋒：身後拖五條金色光帶
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(dh.vy, dh.vx)); ctx.lineCap = 'round';
+      for (let i = -2; i <= 2; i++) {
+        const ay = Math.abs(i), l = b.r * (2.6 - 0.4 * ay) + ((t * 30 + i * 7) % 1) * 22;
+        ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hexA('#b07818', 0.3 - 0.04 * ay); ctx.lineWidth = 7 - ay; ctx.beginPath(); ctx.moveTo(-b.r * 0.7, i * b.r * 0.3); ctx.lineTo(-b.r * 0.7 - l, i * b.r * 0.3); ctx.stroke();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = hexA(i & 1 ? PALE : GOLD, 0.55 - 0.08 * ay); ctx.lineWidth = 4 - 0.6 * ay;
+        ctx.beginPath(); ctx.moveTo(-b.r * 0.7, i * b.r * 0.3); ctx.lineTo(-b.r * 0.7 - l, i * b.r * 0.3); ctx.stroke();
+      }
+      const g = ctx.createRadialGradient(0, 0, 2, 0, 0, b.r * 1.7); g.addColorStop(0, hexA(GOLD, 0.35)); g.addColorStop(1, hexA(GOLD, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, b.r * 1.7, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
     if (b.state !== 'dead' && BD.hasStatus(b, 'goldenvow') && !BD.hasStatus(b, 'hidden')) {
       ctx.save(); ctx.translate(b.x, b.y); ctx.globalCompositeOperation = 'lighter';
       const rr = b.r * 1.55;
@@ -357,7 +397,18 @@
     ctx.save();
     ctx.fillStyle = hexA('#1a1004', 0.15 + 0.4 * u); ctx.beginPath(); ctx.ellipse(m.x, m.y, b.r * (1.2 + 1.2 * u), b.r * (0.8 + 0.8 * u), 0, 0, TAU); ctx.fill();
     ctx.restore();
-    const x = lerp(b.x, m.x, ease(u)), y = lerp(b.y, m.y, ease(u)) - Math.sin(PI * u) * 160, s = 1 + 0.45 * Math.sin(PI * u);
+    const at = (uu) => [lerp(b.x, m.x, ease(uu)), lerp(b.y, m.y, ease(uu)) - Math.sin(PI * uu) * 160];
+    const [x, y] = at(u), s = 1 + 0.45 * Math.sin(PI * u);
+    const hit = inst.v.actions.find((a) => a.do === 'hit' && a.anchor === 'mark'), rr = (hit ? hit.r : 230) * (0.55 + 0.45 * u);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; // 落點符環：越落越實，並旋轉
+    ctx.strokeStyle = hexA(GOLD, 0.15 + 0.5 * u); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(m.x, m.y, rr, 0, TAU); ctx.stroke();
+    ctx.strokeStyle = hexA(PALE, 0.2 + 0.4 * u); ctx.lineWidth = 1.5;
+    for (let i = 0; i < 8; i++) { const a = t * 0.6 + i * TAU / 8; ctx.beginPath(); ctx.arc(m.x, m.y, rr - 8, a, a + 0.4); ctx.stroke(); }
+    const [px, py] = at(Math.max(0, u - 0.22)); // 彗尾：人馬身後拖出的金色光跡
+    ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hexA('#b07818', 0.3); ctx.lineWidth = b.r * 0.6; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+    ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(GOLD, 0.45); ctx.lineWidth = b.r * 0.6; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+    ctx.strokeStyle = hexA(WHITE, 0.7); ctx.lineWidth = 3; ctx.stroke();
+    ctx.restore();
     Object.assign(TB, { x, y, face: U.angTo(b, m), r: b.r, def: b.def, phase: b.phase, inst, world: b.world });
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
     R.drawBossBody(ctx, TB, t);

@@ -1014,7 +1014,7 @@
         play('horseNeigh', 0.95); // 赤兔長嘶破陣
         setTimeout(() => { play('horseGallop', 0.7); }, 220); // 鐵蹄踏地
       }
-      else if (id === 'hoofcharge') {
+      else if (id === 'hoofcharge' || id === 'goldcharge') {
         play('horseGallop', 0.75); // 戰馬奔騰衝刺
         play('dash', 0.4);
       }
