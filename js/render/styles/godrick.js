@@ -5,15 +5,18 @@
 //   右手刻著葛孚雷獅紋的黃金雙刃戰斧。二階段左臂換成龍頭（暗紫紅的肉、黑鱗、尖刺），嘴裡常駐火光，噴火時張大嘴。
 // 逐招動畫：依動作種類與技能挑「蓄力 → 擊」關鍵值姿態（斧角度、伸手、高舉、左臂角度 / 前伸 / 高舉、張嘴、前撲、扭身、蹲伏、背臂張開）；
 //   喚風整個人掄斧旋轉；龍息的龍頭跟著每一格扇形轉。transition()：斷臂接龍過場；hidden()：躍起在半空。
+//   各技能組另加：雙揮雙刃細金線、狂怒紅色怒氣與怒紅斧弧、跪下金光聚起與收緊金環、喚風身邊旋風環、風刃斧頭捲風、拖斧斧刃磨紅、
+//   龍口蓄火；hidden() 落點標記依招式分成獅紋金環（躍劈）/ 旋轉風渦（突襲）/ 放射金光（大招）。
 //   R.projStyles.stormblade：彎月形風刃（二階段火風）；R.lobStyles.firerock：燃燒的火岩。
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA;
   const TAU = U.TAU, PI = Math.PI;
-  const WHITE = '#ffffff', PALE = '#fff6d0', GOLD = '#ffcf4a', GOLD_D = '#a07a2a', FLAME = '#ff7a1a', FLAME_L = '#ffd27a', BLOOD = '#b0102a';
+  const WHITE = '#ffffff', PALE = '#fff6d0', GOLD = '#ffcf4a', GOLD_D = '#a07a2a', FLAME = '#ff7a1a', FLAME_L = '#ffd27a', BLOOD = '#b0102a', RAGE = '#ff5a2a', WIND = '#d8f4ec';
   const CLOAK = '#3e5a3c', CLOAK_L = '#5f7d56', CLOAK_D = '#1e2c1c', TRIM = '#c9a24a', TRIM_D = '#6e5426';
   const HAIR = '#e6e2d8', HAIR_D = '#a8a49a', SKIN = '#c8b8a8', ARMS = ['#a08878', '#8a7466', '#b49a88', '#7a6458', '#9a8070', '#a89080'];
   const AXE = '#c8a050', AXE_L = '#ead9a0', AXE_D = '#6e5426', DRAGON = '#6a2a40', DRAGON_L = '#9a4a5e', SCALE = '#2a1a22';
   const TRIG = { hit: 1, dash: 1, proj: 1, lob: 1, rain: 1, erupt: 1 };
+  const FIRE_FX = /graftbreath|stridingflame|grabflame|grabslam|bearwitness|dragonbite|witnessgouge|dragonpyre|firerockburst/;
   const ease = (u) => 1 - (1 - u) * (1 - u);
   const lerp = (a, b, u) => a + (b - a) * u;
   const hash = (i) => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }; // 固定的偽亂數（快取圖用，不碰戰鬥亂數）
@@ -53,14 +56,15 @@
     if (a.do === 'dash') return a.dir === 'side' ? ROLL : sid === 'drag_slash' ? DRAG : DRAG;
     if (fid === 'stormcall') return STORM;
     if (a.anchor === 'mark') return SLAM;
-    if (fid === 'flamethrow') return a.shape === 'circle' ? HOLD : aimed(a, 1.15, 1, 0);
+    if (fid === 'grabflame') return HOLD;
+    if (fid === 'graftbreath' || fid === 'stridingflame') return aimed(a, 1.15, 1, 0);
     if (fid === 'dragonbite') return a.shape === 'rect' ? LUNGE : BITE;
-    if (fid === 'burst') return DSLAM;
-    if (fid === 'erupt') return aimed(a, 1.4, 0.6, 0.35);
+    if (fid === 'grabslam') return DSLAM;
+    if (fid === 'witnessgouge') return aimed(a, 1.4, 0.6, 0.35);
     if (fid === 'bearwitness') return UPPER;
     if (fid === 'kneelquake') return KNEEL;
     if (fid === 'axegrind') return UPSLASH;
-    if (fid === 'slam') return POUND;
+    if (fid === 'graftpound') return POUND;
     return AXE_SWING[e.hi & 1];
   }
 
@@ -230,9 +234,13 @@
       ctx.beginPath(); ctx.moveTo(-r * 0.05, r * 0.18); ctx.lineTo(-r * 0.35, r * 0.34); ctx.lineTo(r * 0.05, r * 0.1); ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#ffb030'; ctx.beginPath(); ctx.arc(r * 0.12, -r * 0.14, r * 0.035, 0, TAU); ctx.arc(r * 0.12, r * 0.14, r * 0.035, 0, TAU); ctx.fill(); // 眼
       ctx.save(); ctx.globalCompositeOperation = 'lighter'; // 口中的火光
-      const f = (fire ? 0.6 : 0.25) + 0.15 * Math.sin(t * 13), gr = ctx.createRadialGradient(r * 0.3, 0, 1, r * 0.3, 0, r * (0.3 + 0.4 * jaw));
+      const f = Math.min(1, 0.25 + 0.5 * fire) + 0.15 * Math.sin(t * 13), gr = ctx.createRadialGradient(r * 0.3, 0, 1, r * 0.3, 0, r * (0.3 + 0.4 * jaw) * (1 + 0.4 * Math.max(0, fire - 1)));
       gr.addColorStop(0, hexA(FLAME_L, f)); gr.addColorStop(1, hexA(FLAME, 0));
-      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(r * 0.3, 0, r * (0.3 + 0.4 * jaw), 0, TAU); ctx.fill();
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(r * 0.3, 0, r * (0.3 + 0.4 * jaw) * (1 + 0.4 * Math.max(0, fire - 1)), 0, TAU); ctx.fill();
+      if (fire > 1) { // 蓄火：火星繞著龍口往裡收
+        ctx.fillStyle = hexA(FLAME_L, 0.8);
+        for (let i = 0; i < 5; i++) { const a = t * 8 + i * TAU / 5, d = r * (0.7 - 0.5 * ((t * 2 + i * 0.2) % 1)); ctx.beginPath(); ctx.arc(r * 0.3 + Math.cos(a) * d, Math.sin(a) * d, 1.8, 0, TAU); ctx.fill(); }
+      }
       ctx.restore();
     }
     ctx.restore();
@@ -276,11 +284,17 @@
     for (const k of KEYS) A[k] = DEF[k];
     A.aa = DEF.aa + Math.sin(t * 1.4) * 0.05; A.jaw = DEF.jaw + Math.sin(t * 2.3) * 0.08;
     ARC = 0;
-    let spinA = 0, fire = false;
+    let spinA = 0, fire = 0, rage = 0, royal = 0, gust = 0, hot = 0;
     if (inst) {
       pace(inst); build(sid);
       const e = P.ne && (P.wd > 0.3 || !P.le) ? P.ne : P.le;
-      fire = !!(e && e.a.fx && /flamethrow|bearwitness|burst|dragonbite|erupt/.test(e.a.fx.id || e.a.fx));
+      fire = e && e.a.fx && FIRE_FX.test(e.a.fx.id || e.a.fx) ? 1 : 0;
+      const n = P.ne, nf = n && n.a.fx && (n.a.fx.id || n.a.fx);
+      if (nf && FIRE_FX.test(nf) && P.wd > 0.3) fire = 1 + U.clamp((P.wd - 0.3) / 0.5, 0, 1); // 出招前龍口蓄火（> 1 時火光變大、火星往裡收）
+      if (sid === 'fury_swings') rage = 0.35 + 0.65 * U.clamp(inst.t / 2.35, 0, 1); // 狂怒：一刀比一刀紅
+      if (nf === 'kneelquake' && P.wd < 0.75) royal = P.wd / 0.75; // 給我跪下：斧頭拉到胸前時金光聚起、地上金環收緊
+      if (n && n.a.do === 'proj' && P.wd > 0.15) gust = (P.wd - 0.15) / 0.85; // 風暴之刃：斧刃捲起風
+      if (sid === 'drag_slash') hot = inst.dash && inst.dash.t < inst.dash.dur ? 1 : nf === 'axegrind' ? 0.4 + 0.6 * P.wd : 0; // 拖斧：斧刃磨地發紅
       let c = STORMS.get(inst.v.actions);
       if (!c) { c = trigs(inst.v).filter((x) => x.a.fx && (x.a.fx.id || x.a.fx) === 'stormcall'); STORMS.set(inst.v.actions, c); }
       if (c.length && inst.t > c[0].a.at - 0.35 && inst.t < c[c.length - 1].a.at + 0.12) spinA = (inst.t - c[0].a.at + 0.35) / 0.32 * TAU; // 喚風：掄斧旋轉
@@ -293,22 +307,40 @@
       else if (u < 0.14) { A.up = 0; A.aa = -1.6; A.ae = 1.1; A.spin = -0.3; }
       else { A.aa = -1.2; A.ae = 0.6; A.arms = 0.9; }
       armGone = u >= 0.13 && u < 0.38; p2 = u >= 0.38; dragonK = p2 ? ease(Math.min(1, (u - 0.38) / 0.08)) : 1;
-      if (u >= 0.62) { A.ll = 1; A.la = -0.3; A.le = 1; A.jaw = 1; fire = true; }
+      if (u >= 0.62) { A.ll = 1; A.la = -0.3; A.le = 1; A.jaw = 1; fire = 1.6; }
     }
     const spd = Math.hypot(o.vx || 0, o.vy || 0), run = U.clamp(spd / 220, 0, 1);
     const bob = Math.sin(t * (4 + 5 * run)) * 0.05 * run, lurch = Math.sin(t * (3 + 4 * run)) * 0.06 * run; // 兩條腿不一樣：走路一拐一拐
     const clawK = w && o._clawAt != null ? U.clamp(1 - (w.time - o._clawAt) / 0.35, 0, 1) : 0; // 被動追擊：背臂 / 龍頭探出
 
     ctx.save();
+    if (!shade && (rage || royal)) { // 狂怒的紅色怒氣 / 王威的金色光暈；跪下時前方地上一圈金環往落點收緊
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      const col = rage ? RAGE : GOLD, k = rage || royal, g = ctx.createRadialGradient(0, 0, r * 0.4, 0, 0, r * 2.1);
+      g.addColorStop(0, hexA(col, (0.3 + 0.12 * Math.sin(t * (rage ? 14 : 6))) * k)); g.addColorStop(1, hexA(col, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * 2.1, 0, TAU); ctx.fill();
+      if (royal) { ctx.strokeStyle = hexA(GOLD, 0.6 * royal); ctx.lineWidth = 2 + 2 * royal; ctx.beginPath(); ctx.arc(60, 0, 150 * (1.6 - 0.6 * royal), 0, TAU); ctx.stroke(); }
+      ctx.restore();
+    }
     ctx.translate((A.fwd + bob) * r, 0); ctx.rotate(A.spin + spinA + lurch);
     const cr = 1 - 0.1 * U.clamp(A.cr, -1, 1); ctx.scale(cr, cr);
     // 地面斧光
     const hx = r * (0.3 + 0.5 * A.ae), hy = r * 0.62;
     if (ARC > 0 && !shade) {
       ctx.save(); ctx.translate(hx, hy); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-      const a0 = Math.min(ARC0, ARC1), a1 = Math.max(ARC0, ARC1), col = p2 ? FLAME : GOLD;
-      ctx.strokeStyle = hexA(col, 0.4 * ARC); ctx.lineWidth = r * 0.45; ctx.beginPath(); ctx.arc(0, 0, r * 2.2, a0, a1); ctx.stroke();
+      const a0 = Math.min(ARC0, ARC1), a1 = Math.max(ARC0, ARC1), col = rage ? RAGE : p2 ? FLAME : GOLD;
+      ctx.strokeStyle = hexA(col, 0.4 * ARC); ctx.lineWidth = r * (0.45 + 0.2 * rage); ctx.beginPath(); ctx.arc(0, 0, r * 2.2, a0, a1); ctx.stroke();
       ctx.strokeStyle = hexA(WHITE, 0.8 * ARC); ctx.lineWidth = 3; ctx.stroke();
+      if (sid === 'axe_swing') { ctx.strokeStyle = hexA(PALE, 0.55 * ARC); ctx.lineWidth = 1.5; for (const f of [1.85, 2.5]) { ctx.beginPath(); ctx.arc(0, 0, r * f, a0, a1); ctx.stroke(); } } // 雙刃各拖一道細金線
+      if (rage) { ctx.fillStyle = hexA(FLAME_L, 0.8 * ARC); for (let i = 0; i < 6; i++) { const a = lerp(a0, a1, hash(i + 40)), d = r * (2.2 + (hash(i + 50) - 0.5) * 0.5); ctx.beginPath(); ctx.arc(Math.cos(a) * d, Math.sin(a) * d, 1.5 + Math.abs(Math.sin(t * 19 + i)) * 1.5, 0, TAU); ctx.fill(); } } // 怒紅火星
+      ctx.restore();
+    }
+    if (spinA && !shade) { // 喚風：身邊一圈青白旋風，風弧跟著斧頭轉
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      const wc = p2 ? FLAME : WIND;
+      ctx.strokeStyle = hexA(wc, 0.18); ctx.lineWidth = r * 0.5; ctx.beginPath(); ctx.arc(0, 0, r * 2.2, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = hexA(p2 ? FLAME_L : WHITE, 0.55); ctx.lineWidth = 2.5;
+      for (let i = 0; i < 5; i++) { const a = -spinA * 0.2 + i * TAU / 5, d = r * (1.6 + 0.3 * (i % 3)); ctx.beginPath(); ctx.arc(0, 0, d, a, a + 0.7); ctx.stroke(); }
       ctx.restore();
     }
     backArms(ctx, r, t, U.clamp(A.arms + clawK * (p2 ? 0 : 0.8), 0, 1.4), shade);
@@ -331,6 +363,16 @@
     limb(ctx, r * 0.15, r * 0.6, hx, hy, r * 0.22, SKIN, shade);
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(A.aa); ctx.scale(1 - 0.55 * U.clamp(A.up, 0, 1), 1);
     axe(ctx, r, shade);
+    if (!shade && (royal || gust || hot)) { // 斧頭特效：跪下金光聚起 / 風刃捲風 / 拖斧磨紅
+      const ah = r * 1.97;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      const col = hot ? FLAME : gust ? (p2 ? FLAME : WIND) : GOLD, k = Math.max(royal, gust, hot), g = ctx.createRadialGradient(ah, 0, 1, ah, 0, r * (0.5 + 0.4 * k));
+      g.addColorStop(0, hexA(hot ? FLAME_L : WHITE, 0.6 * k)); g.addColorStop(0.5, hexA(col, 0.4 * k)); g.addColorStop(1, hexA(col, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ah, 0, r, 0, TAU); ctx.fill();
+      if (gust) { ctx.strokeStyle = hexA(p2 ? FLAME_L : WHITE, 0.7 * gust); ctx.lineWidth = 2; ctx.lineCap = 'round'; for (let i = 0; i < 3; i++) { const a = t * 11 + i * TAU / 3, d = r * (0.85 - 0.45 * gust); ctx.beginPath(); ctx.arc(ah, 0, d, a, a + 1.4); ctx.stroke(); } }
+      if (hot) { ctx.fillStyle = hexA(FLAME_L, 0.9 * hot); for (let i = 0; i < 4; i++) { const a = PI * 0.5 + (hash(i + Math.floor(t * 20)) - 0.5) * 2, d = r * (0.6 + 0.3 * hash(i + 7 + Math.floor(t * 20))); ctx.beginPath(); ctx.arc(ah + Math.cos(a) * d * 0.5, Math.sin(a) * d, 1.8, 0, TAU); ctx.fill(); } }
+      ctx.restore();
+    }
     if (p2 && !shade && fire) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hexA(FLAME, 0.25); ctx.beginPath(); ctx.arc(r * 2, 0, r * 0.7, 0, TAU); ctx.fill(); ctx.restore(); }
     ctx.restore();
     ctx.restore();
@@ -348,7 +390,25 @@
     ctx.save();
     ctx.fillStyle = hexA('#100a04', 0.15 + 0.4 * u); ctx.beginPath(); ctx.ellipse(m.x, m.y, b.r * (1.1 + 1.2 * u), b.r * (0.75 + 0.8 * u), 0, 0, TAU); ctx.fill();
     ctx.restore();
-    const x = lerp(b.x, m.x, ease(u)), y0 = lerp(b.y, m.y, ease(u)), y = y0 - Math.sin(PI * Math.min(1, u * 1.15)) * 220, s = 1 + 0.5 * Math.min(1, (y0 - y) / 200);
+    const at = (uu) => { const gy = lerp(b.y, m.y, ease(uu)); return [lerp(b.x, m.x, ease(uu)), gy - Math.sin(PI * Math.min(1, uu * 1.15)) * 220, gy]; };
+    const [x, y, y0] = at(u), s = 1 + 0.5 * Math.min(1, (y0 - y) / 200);
+    // 落點標記：躍劈是收緊的金色獅紋盾、風暴突襲是旋轉的風渦、大招是巨大金環與放射金光
+    const hit = inst.v.actions.find((a) => a.do === 'hit' && a.anchor === 'mark' && a.mark === land.mark), rr = (hit ? hit.r : 150) * (1.25 - 0.3 * u);
+    const p2 = b.phase === 2, gc = p2 ? FLAME : GOLD;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    if (land.mark === 'stormSpot') {
+      ctx.strokeStyle = hexA(p2 ? FLAME : WIND, 0.2 + 0.5 * u); ctx.lineWidth = 3;
+      for (let i = 0; i < 4; i++) { const a = -t * 4 + i * TAU / 4; ctx.beginPath(); ctx.arc(m.x, m.y, rr * (0.5 + 0.12 * i), a, a + 1.6); ctx.stroke(); }
+    } else {
+      ctx.strokeStyle = hexA(gc, 0.15 + 0.5 * u); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(m.x, m.y, rr * 0.85, 0, TAU); ctx.stroke();
+      const sh = rr * 0.35; ctx.strokeStyle = hexA(PALE, 0.15 + 0.5 * u); ctx.lineWidth = 2; ctx.beginPath(); // 獅紋盾的外框
+      for (const [ax, ay] of [[-0.8, -1], [0.8, -1], [0.8, 0.2], [0, 1.1], [-0.8, 0.2], [-0.8, -1]]) ctx.lineTo(m.x + ax * sh, m.y + ay * sh);
+      ctx.stroke();
+      if (land.mark === 'lordSpot') { ctx.strokeStyle = hexA(gc, 0.3 * u); ctx.lineWidth = 2; for (let i = 0; i < 12; i++) { const a = t * 0.8 + i * TAU / 12; ctx.beginPath(); ctx.moveTo(m.x + Math.cos(a) * rr * 0.9, m.y + Math.sin(a) * rr * 0.9); ctx.lineTo(m.x + Math.cos(a) * rr * (1.1 + 0.2 * (i % 2)), m.y + Math.sin(a) * rr * (1.1 + 0.2 * (i % 2))); ctx.stroke(); } }
+    }
+    const [px, py] = at(Math.max(0, u - 0.15)); // 身後拖出的光跡：金色（風暴突襲青白、二階段火）
+    ctx.strokeStyle = hexA(land.mark === 'stormSpot' && !p2 ? WIND : gc, 0.35); ctx.lineWidth = b.r * 0.45; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+    ctx.restore();
     Object.assign(TB, { x, y, face: U.angTo(b, m), r: b.r, def: b.def, phase: b.phase, inst, world: b.world });
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
     R.drawBossBody(ctx, TB, t);

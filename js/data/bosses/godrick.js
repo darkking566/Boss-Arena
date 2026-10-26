@@ -12,15 +12,15 @@
   const FIRE = { fxEl: 'fire', status: BURN };
 
   // 跳躍：起跳消失 → 空中停頓鎖定落點 → 砸下，外圈再一圈震波
-  function leap(at, up, r, dmg, mark, fx, ring) {
+  function leap(at, up, r, dmg, mark, fx, ring, jump) {
     const out = [
       { do: 'tele', at: at - up, dur: up, shape: 'circle', r, anchor: 'target', follow: true, lockBefore: 0.35, setMark: mark },
-      { do: 'hide', at: at - up + 0.08, fx: 'leap' },
+      { do: 'hide', at: at - up + 0.08, fx: jump || 'axeleap' },
       { do: 'land', at, mark },
       { do: 'hit', at, shape: 'circle', r, anchor: 'mark', mark, dmg, posture: 60, kb: 520, fx },
     ];
     if (ring) out.push({ do: 'tele', at: at - 0.15, dur: 0.4, shape: 'ring', r0: r - 20, r: r + ring, anchor: 'mark', mark },
-      { do: 'hit', at: at + 0.25, shape: 'ring', r0: r - 20, r: r + ring, anchor: 'mark', mark, dmg: Math.round(dmg * 0.3), posture: 18, kb: 340, fx: 'ring' });
+      { do: 'hit', at: at + 0.25, shape: 'ring', r0: r - 20, r: r + ring, anchor: 'mark', mark, dmg: Math.round(dmg * 0.3), posture: 18, kb: 340, fx: 'goldquakering' });
     return out;
   }
   // 喚風：四面風壁（擋下投射物）+ n 圈旋風（kb < 0 是把人捲進來）
@@ -32,7 +32,7 @@
   // 龍息：n 個接力的扇形從 from 轉到 from − step×(n−1)（相對面向，度）
   function sweep(t0, n, gap, from, step, arc, r, dmg) {
     const out = [];
-    for (let i = 0; i < n; i++) out.push({ do: 'hit', at: +(t0 + i * gap).toFixed(3), shape: 'cone', r, arc: arc * D, angOff: (from - i * step) * D, dmg, posture: 8, kb: 110, multi: true, ...FIRE, fx: { id: 'flamethrow', scale: 0.9 } });
+    for (let i = 0; i < n; i++) out.push({ do: 'hit', at: +(t0 + i * gap).toFixed(3), shape: 'cone', r, arc: arc * D, angOff: (from - i * step) * D, dmg, posture: 8, kb: 110, multi: true, ...FIRE, fx: { id: 'graftbreath', scale: 0.9 } });
     return out;
   }
   // 給我跪下！：斧頭往地上捶，每一下震地比上一下大
@@ -109,17 +109,17 @@
     skills: [
       // 1. 戰斧雙揮：右往左、左往右，中間停頓很久才揮第二刀，接左臂捶地（原作 Axe Swing ↺ ↻ → Arm Swing）
       { id: 'axe_swing', name: '戰斧雙揮', short: '雙揮', tags: ['melee', 'aoe'], range: [0, 270], cd: 3.8, cost: 22, track: 5, creep: 0.3, recovery: 0.6,
-        actions: [...strike(0.5, 0.4, { shape: 'cone', r: 250, arc: 150 * D, angOff: 0.4 }, { dmg: 96, posture: 26, kb: 300, fx: { id: 'cleave', ...AXE } }),
-          ...strike(1.45, 0.5, { shape: 'cone', r: 250, arc: 150 * D, angOff: -0.4 }, { dmg: 104, posture: 28, kb: 330, fx: { id: 'cleave', ...AXE } }),
-          ...strike(1.85, 0.25, { shape: 'circle', r: 110, off: 120, angOff: 0.6 }, { dmg: 70, posture: 30, kb: 360, fx: { id: 'slam', ...AXE } })],
-        actions2: [...strike(0.46, 0.36, { shape: 'cone', r: 260, arc: 150 * D, angOff: 0.4 }, { dmg: 96, posture: 26, kb: 300, fx: { id: 'cleave', ...AXE } }),
-          ...strike(1.35, 0.48, { shape: 'cone', r: 260, arc: 150 * D, angOff: -0.4 }, { dmg: 104, posture: 28, kb: 330, fx: { id: 'cleave', ...AXE } }),
+        actions: [...strike(0.5, 0.4, { shape: 'cone', r: 250, arc: 150 * D, angOff: 0.4 }, { dmg: 96, posture: 26, kb: 300, fx: { id: 'goldaxeswing', ...AXE } }),
+          ...strike(1.45, 0.5, { shape: 'cone', r: 250, arc: 150 * D, angOff: -0.4 }, { dmg: 104, posture: 28, kb: 330, fx: { id: 'goldaxeswing', ...AXE } }),
+          ...strike(1.85, 0.25, { shape: 'circle', r: 110, off: 120, angOff: 0.6 }, { dmg: 70, posture: 30, kb: 360, fx: { id: 'graftpound', ...AXE } })],
+        actions2: [...strike(0.46, 0.36, { shape: 'cone', r: 260, arc: 150 * D, angOff: 0.4 }, { dmg: 96, posture: 26, kb: 300, fx: { id: 'goldaxeswing', ...AXE } }),
+          ...strike(1.35, 0.48, { shape: 'cone', r: 260, arc: 150 * D, angOff: -0.4 }, { dmg: 104, posture: 28, kb: 330, fx: { id: 'goldaxeswing', ...AXE } }),
           ...strike(1.72, 0.24, { shape: 'cone', r: 200, arc: 100 * D, angOff: 0.5 }, { dmg: 80, posture: 28, kb: 360, fx: 'dragonbite', ...FIRE })] },
       // 2. 狂怒五連：怒吼後雙手握斧左右連揮五下，一刀比一刀遠，最後一下延遲（原作 Fury Swings）
       { id: 'fury_swings', name: '狂怒五連', short: '五連', tags: ['melee', 'aoe'], range: [0, 300], cd: 7.5, cost: 34, track: 4, creep: 0.45, recovery: 1.0,
         actions: [0, 1, 2, 3, 4].flatMap((i) => strike([0.55, 0.9, 1.25, 1.6, 2.35][i], i ? (i === 4 ? 0.55 : 0.26) : 0.45,
           { shape: 'cone', r: 220 + i * 20, arc: 150 * D, angOff: i % 2 ? -0.4 : 0.4 },
-          { dmg: i === 4 ? 140 : 64, posture: i === 4 ? 40 : 18, kb: i === 4 ? 460 : 200, fx: { id: 'cleave', ...AXE, scale: i === 4 ? 1.4 : 1 } })) },
+          { dmg: i === 4 ? 140 : 64, posture: i === 4 ? 40 : 18, kb: i === 4 ? 460 : 200, fx: { id: 'furyswing', ...AXE, scale: i === 4 ? 1.4 : 1 } })) },
       // 3. 給我跪下！：斧頭拉到胸前、往地上捶兩下震地；二階段停頓後第三下炸出大震波（原作 Lesser Command / I Command Thee, Kneel!）
       { id: 'kneel', name: '給我跪下！', short: '跪下', tags: ['melee', 'aoe'], range: [0, 320], cd: 6.5, cost: 28, track: 4, recovery: 0.8,
         actions: [...quake(0.9, 0.6, { shape: 'circle', r: 150, off: 60 }, 92, 0.8),
@@ -134,13 +134,13 @@
       // 5. 風暴之刃：斧刃插地，擲出彎曲追蹤的風刃（原作 Storm Blade）
       { id: 'storm_blade', name: '風暴之刃', short: '風刃', tags: ['ranged'], range: [220, 700], cd: 6, cost: 20, track: 6, recovery: 0.6,
         actions: [{ do: 'tele', at: 0.1, dur: 0.55, shape: 'rect', len: 640, w: 60, follow: true },
-          { do: 'proj', at: 0.65, n: 2, spread: 0.55, speed: 640, r: 26, dmg: 74, posture: 20, kb: 260, life: 1.4, homing: 2.2, pierce: true, kind: 'stormblade', fx: 'tornadocast' }],
+          { do: 'proj', at: 0.65, n: 2, spread: 0.55, speed: 640, r: 26, dmg: 74, posture: 20, kb: 260, life: 1.4, homing: 2.2, pierce: true, kind: 'stormblade', fx: 'stormbladecast' }],
         actions2: [{ do: 'tele', at: 0.1, dur: 0.5, shape: 'rect', len: 640, w: 60, follow: true },
-          { do: 'proj', at: 0.6, n: 3, spread: 0.5, speed: 680, r: 28, dmg: 70, posture: 20, kb: 260, life: 1.4, homing: 2.2, pierce: true, kind: 'stormblade', fx: 'tornadocast', fxEl: 'fire', status: BURN }] },
+          { do: 'proj', at: 0.6, n: 3, spread: 0.5, speed: 680, r: 28, dmg: 70, posture: 20, kb: 260, life: 1.4, homing: 2.2, pierce: true, kind: 'stormblade', fx: 'stormbladecast', fxEl: 'fire', status: BURN }] },
       // 6. 風暴突襲：往側邊翻滾、躍起、從空中一斧劈下（原作 Storm Assault）
       { id: 'storm_assault', name: '風暴突襲', short: '突襲', tags: ['gap', 'melee'], range: [160, 520], cd: 6.5, cost: 24, track: 5, recovery: 0.8,
-        actions: [{ do: 'dash', at: 0.1, dir: 'side', dist: 170, dur: 0.3 }, ...leap(1.35, 0.8, 140, 160, 'stormSpot', { id: 'goldaxeslam', scale: 0.8 })],
-        actions2: [{ do: 'dash', at: 0.1, dir: 'side', dist: 170, dur: 0.28 }, ...leap(1.3, 0.78, 150, 170, 'stormSpot', { id: 'goldaxeslam', scale: 0.9, el: 'fire' }, 110)] },
+        actions: [{ do: 'dash', at: 0.1, dir: 'side', dist: 170, dur: 0.3, fx: 'stormroll' }, ...leap(1.35, 0.8, 140, 160, 'stormSpot', { id: 'stormslam', scale: 0.8 }, 0, 'stormleap')],
+        actions2: [{ do: 'dash', at: 0.1, dir: 'side', dist: 170, dur: 0.28, fx: 'stormroll' }, ...leap(1.3, 0.78, 150, 170, 'stormSpot', { id: 'stormslam', scale: 0.9, el: 'fire' }, 110, 'stormleap')] },
       // 7. 拖斧上撩：斧頭拖地往前推進、火花四濺，停一拍往上撩（原作 Dragging Slash / Axe Grind）
       { id: 'drag_slash', name: '拖斧上撩', short: '拖斧', tags: ['melee', 'gap'], range: [80, 380], cd: 5, cost: 22, track: 6, recovery: 0.65,
         actions: [{ do: 'dash', at: 0.2, dist: 190, dur: 0.55, fx: 'axegrind' }, ...strike(1.1, 0.4, { shape: 'rect', len: 300, w: 84 }, { dmg: 132, posture: 38, kb: 420, fx: 'axegrind' })],
@@ -158,20 +158,20 @@
       { id: 'striding_flame', name: '噴火進軍', short: '進軍', phase: 2, tags: ['ranged'], range: [0, 460], cd: 9, cost: 28, track: 4, sweep: true, recovery: 0.8,
         actions: [{ do: 'tele', at: 0.1, dur: 0.6, shape: 'rect', len: 420, w: 96, follow: true, chargeFx: { id: 'charge', el: 'fire' } },
           { do: 'dash', at: 0.7, dist: 230, dur: 1.3, trail: { kind: 'fire', r: 60, dur: 4, dps: 16, delay: 0.3 } },
-          ...[0, 1, 2, 3, 4].map((i) => ({ do: 'hit', at: +(0.75 + i * 0.25).toFixed(2), shape: 'rect', len: 400, w: 96, dmg: 26, posture: 6, kb: 80, multi: true, ...FIRE, fx: { id: 'flamethrow', scale: 0.8, arc: 0.35 } })),
-          ...strike(2.3, 0.3, { shape: 'cone', r: 330, arc: 120 * D }, { dmg: 74, posture: 22, kb: 300, ...FIRE, fx: 'flamethrow' })] },
+          ...[0, 1, 2, 3, 4].map((i) => ({ do: 'hit', at: +(0.75 + i * 0.25).toFixed(2), shape: 'rect', len: 400, w: 96, dmg: 26, posture: 6, kb: 80, multi: true, ...FIRE, fx: { id: 'stridingflame', scale: 0.8, arc: 0.35 } })),
+          ...strike(2.3, 0.3, { shape: 'cone', r: 330, arc: 120 * D }, { dmg: 74, posture: 22, kb: 300, ...FIRE, fx: 'stridingflame' })] },
       // 11. 龍首擒噬：龍頭撲出咬住（暈眩）、提起來噴火、再摔到地上爆一團火（原作 Grab）
       { id: 'dragon_grab', name: '龍首擒噬', short: '擒噬', phase: 2, tags: ['melee'], clash: false, range: [0, 260], cd: 8, cost: 26, track: 7, recovery: 0.7,
         actions: [...strike(0.75, 0.45, { shape: 'rect', len: 250, w: 96 }, { dmg: 60, posture: 20, kb: 0, status: { id: 'stun', dur: 1.5 }, fx: 'dragonbite', fxEl: 'fire' }),
-          { do: 'hit', at: 1.15, shape: 'circle', r: 95, off: 150, dmg: 30, posture: 6, kb: 0, multi: true, ...FIRE, fx: { id: 'flamethrow', scale: 0.5 } },
-          { do: 'hit', at: 1.45, shape: 'circle', r: 95, off: 150, dmg: 30, posture: 6, kb: 0, multi: true, ...FIRE, fx: { id: 'flamethrow', scale: 0.5 } },
-          ...strike(1.95, 0.3, { shape: 'circle', r: 150, off: 150 }, { dmg: 124, posture: 40, kb: 500, ...FIRE, fx: { id: 'burst', scale: 1.4 } })] },
+          { do: 'hit', at: 1.15, shape: 'circle', r: 95, off: 150, dmg: 30, posture: 6, kb: 0, multi: true, ...FIRE, fx: { id: 'grabflame' } },
+          { do: 'hit', at: 1.45, shape: 'circle', r: 95, off: 150, dmg: 30, posture: 6, kb: 0, multi: true, ...FIRE, fx: { id: 'grabflame' } },
+          ...strike(1.95, 0.3, { shape: 'circle', r: 150, off: 150 }, { dmg: 124, posture: 40, kb: 500, ...FIRE, fx: 'grabslam' })] },
       // 12. 見證吧！：龍頭插進地面拖半圈（火痕）、往上一撩，正前方落下一片火岩雨（原作 Bear Witness!，接肢飛龍的戰技）
       { id: 'bear_witness', name: '見證吧！', short: '見證', phase: 2, tags: ['melee', 'aoe'], range: [0, 420], cd: 11, cost: 34, track: 3, recovery: 1.0,
         actions: [{ do: 'tele', at: 0.1, dur: 0.7, shape: 'circle', r: 260, follow: true, chargeFx: 'bearwitness' },
-          ...[0, 1, 2, 3, 4].map((i) => ({ do: 'hit', at: +(0.8 + i * 0.13).toFixed(2), shape: 'circle', r: 110, off: 150, angOff: 1.6 - i * 0.8, dmg: 44, posture: 12, kb: 200, multi: true, ...FIRE, fx: { id: 'erupt', scale: 0.8 } })),
+          ...[0, 1, 2, 3, 4].map((i) => ({ do: 'hit', at: +(0.8 + i * 0.13).toFixed(2), shape: 'circle', r: 110, off: 150, angOff: 1.6 - i * 0.8, dmg: 44, posture: 12, kb: 200, multi: true, ...FIRE, fx: { id: 'witnessgouge', scale: 0.8 } })),
           ...strike(1.8, 0.3, { shape: 'cone', r: 270, arc: 90 * D }, { dmg: 118, posture: 36, kb: 420, ...FIRE, fx: 'bearwitness' }),
-          { do: 'lob', at: 1.9, n: 8, scatter: 190, flight: 0.9, r: 85, dmg: 56, posture: 14, kb: 160, kind: 'firerock', fx: 'explode', fxEl: 'fire', teleColor: '#ff7a2e', status: BURN }] },
+          { do: 'lob', at: 1.9, n: 8, scatter: 190, flight: 0.9, r: 85, dmg: 56, posture: 14, kb: 160, kind: 'firerock', fx: 'firerockburst', fxEl: 'fire', teleColor: '#ff7a2e', status: BURN }] },
     ],
     // 大招（改編）：一階段「我乃黃金之王！」——巨大旋風把人捲近 → 三連震地 → 躍起重劈；
     //   二階段「列祖列宗，見證吧！」——全程無敵：火岩雨 → 旋身一整圈龍息 → 龍頭插地、火柱一路往前炸
@@ -188,11 +188,11 @@
       actions2: [
         { do: 'invuln', at: 0, dur: 4.4 },
         { do: 'tele', at: 0.2, dur: 1.0, shape: 'circle', r: 440, follow: true, chargeFx: 'bearwitness' },
-        { do: 'rain', at: 0.5, n: 16, dur: 1.8, area: 420, flight: 0.8, r: 80, dmg: 48, posture: 12, kb: 150, kind: 'firerock', fx: 'explode', fxEl: 'fire', teleColor: '#ff7a2e', status: BURN },
+        { do: 'rain', at: 0.5, n: 16, dur: 1.8, area: 420, flight: 0.8, r: 80, dmg: 48, posture: 12, kb: 150, kind: 'firerock', fx: 'firerockburst', fxEl: 'fire', teleColor: '#ff7a2e', status: BURN },
         ...sweep(1.25, 12, 0.12, 180, 30, 40, 440, 30),
         { do: 'tele', at: 2.75, dur: 0.6, shape: 'rect', len: 680, w: 180, follow: true, lockBefore: 0.25 },
         ...strike(3.35, 0.2, { shape: 'circle', r: 150, off: 70 }, { dmg: 110, posture: 40, kb: 420, ...FIRE, fx: { id: 'bearwitness', scale: 1.3 } }),
-        { do: 'erupt', at: 3.4, n: 8, interval: 0.08, start: 140, step: 75, r: 95, dmg: 72, posture: 22, kb: 360, fx: 'erupt', fxEl: 'fire', status: BURN },
+        { do: 'erupt', at: 3.4, n: 8, interval: 0.08, start: 140, step: 75, r: 95, dmg: 72, posture: 22, kb: 360, fx: 'dragonpyre', fxEl: 'fire', status: BURN },
       ],
       desc: '一階段「我乃黃金之王！」：「我命令你，跪下！」——掄斧捲起巨大旋風把對手捲到身邊（四面風壁擋下投射物），三連震地一圈比一圈大，最後高高躍起一斧劈下，落點浮出葛孚雷的金色獅紋。二階段「列祖列宗，見證吧！」（全程無敵）：龍頭朝天噴火、火岩雨從天而降，旋身一整圈龍息，最後龍頭插地，火柱一路往前炸開。',
     },

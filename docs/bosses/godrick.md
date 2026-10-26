@@ -90,22 +90,25 @@
 - 二階段左臂換成龍頭：嘴裡常駐火光，噴火時張大嘴。
 - `hidden()`：躍起重劈 / 風暴突襲在半空。
 - `transition()`：斷臂接龍——舉斧、砍下、血噴、龍頭飛來接上、朝天噴火。
+- 每個技能組各自的特效（不再借用 cleave / slam / leap / ring / flamethrow / burst / erupt / explode / tornadocast）；音效把 `stormbladecast` 當 `tornadocast`、三種龍頭噴火走火焰元素音；地面痕跡把 `axeleap` / `stormleap` 當 leap、`firerockburst` / `dragonpyre` 當爆炸焦痕、`graftbreath` 當吐息焦痕。
 
 | 技能 | 招式動畫 | 特效（`js/fx/godrick.js`） |
 |---|---|---|
-| 戰斧雙揮 / 狂怒五連 | 黃金戰斧大弧橫掃，地面刀光 | 物理斬擊 |
-| 給我跪下！ | 斧頭拉到胸前、往地上捶 | `kneelquake`：金色震地環、地裂、碎石；第三下 `bigslam` |
-| 喚風 | 斧頭在頭頂掄圈 | `stormcall`：三圈旋風、落葉、四面風壁 |
-| 風暴之刃 | 斧刃插地往前一撥 | 投射物 `stormblade`：彎月形風刃 |
-| 拖斧上撩 | 斧頭拖地 → 上撩 | `axegrind`：一路火花、上撩金弧 |
-| 躍起重劈 / 風暴突襲 | 半空舉斧 → 砸地 | `goldaxeslam`：獅子紋金光、雙層震波 |
-| 龍息橫掃 / 噴火進軍 | 龍頭張嘴噴火 | `flamethrow`（火）＋火地 |
-| 龍首擒噬 | 龍頭撲出、咬住、摔下 | `dragonbite`、`burst` |
-| 見證吧！ | 龍頭插地拖半圈、上撩 | `bearwitness`：火痕、火柱；拋射物 `firerock` |
+| 戰斧雙揮 | 黃金戰斧大弧橫掃，地面金弧外多兩道細金線（雙刃） | `goldaxeswing`；一階段第三下巨臂捶地 `graftpound`（五指掌印）、二階段 `dragonbite` |
+| 狂怒五連 | 全身紅色怒氣一刀比一刀濃，地面斧弧轉怒紅、甩火星 | `furyswing`：最後一斧雙層殘弧、震波、「喝啊！」 |
+| 給我跪下！ | 斧頭拉到胸前時斧頭金光聚起、身上金色王威、前方地上一圈金環往落點收緊 → 捶地 | `kneelquake` |
+| 喚風 | 斧頭在頭頂掄圈，身邊一圈青白旋風（二階段火捲）跟著轉 | `stormcall`、四面風壁 |
+| 風暴之刃 | 斧刃插地前斧頭捲起風弧、發青白光 | `stormbladecast`；投射物 `stormblade` |
+| 風暴突襲 | 側滾 → 乘風躍起，落點旋轉的風渦標記、青白光跡 | `stormroll`、`stormleap`、`stormslam`；二階段外環 `goldquakering` |
+| 拖斧上撩 | 拖地時斧刃磨得發紅、冒火星 → 上撩 | `axegrind` |
+| 躍起重劈 | 起跳 → 落點收緊的金環與獅紋盾框、金色光跡 → 砸地 | `axeleap`、`goldaxeslam`、`goldquakering` |
+| 龍息橫掃 / 噴火進軍 | 出招前龍口蓄火（火光變大、火星往裡收），張嘴噴火 | `graftbreath` / `stridingflame`＋火地 |
+| 龍首擒噬 | 龍頭撲出、咬住噴火、摔下 | `dragonbite`、`grabflame`、`grabslam` |
+| 見證吧！ | 龍頭插地拖半圈、上撩 | `witnessgouge`（火痕）、`bearwitness`；拋射物 `firerock` 落點 `firerockburst` |
 | 被動 | 背上手臂探出抓一把 / 龍頭咬一口 | `graftclaw` |
 | 換階段 | 斷臂接龍 | `graftsever`：血柱、龍頭接合、火柱 |
-| 大招一階段 | 喚風 → 震地 → 躍劈 | `stormcall`、`kneelquake`、`goldaxeslam`、`lordgold` |
-| 大招二階段 | 火雨 → 一圈龍息 → 火柱 | `bearwitness`、`flamethrow`、`erupt` |
+| 大招一階段 | 喚風 → 震地 → 躍劈（落點巨大金環與放射金光） | `stormcall`、`kneelquake`、`axeleap`、`lordgold`、`goldquakering` |
+| 大招二階段 | 火雨 → 一圈龍息 → 火柱 | `bearwitness`、`firerockburst`、`graftbreath`、`dragonpyre` |
 
 ## 7. 平衡
 
