@@ -102,9 +102,9 @@
     } else if (cat === '區域') {
       if (id === 'breath' && o.el !== 'physical') for (const f of [0.5, 0.8]) blot(x + Math.cos(a) * r * f, y + Math.sin(a) * r * f, r * 0.3);
     } else if (cat === '位移') {
-      if (id === 'leap') pit(x, y, 20);
+      if (id === 'leap' || id === 'omenleap') pit(x, y, 20);
       else if (id === 'burrow') pit(x, y, clamp(36 * k, 20, 60));
-      else if ((id === 'dash' || id === 'hoofcharge' || id === 'goldcharge') && o.len > 0) { // 衝刺滑痕 / 蹄痕：沿路兩道淡痕
+      else if ((id === 'dash' || id === 'hoofcharge' || id === 'goldcharge' || id === 'omenbackstep') && o.len > 0) { // 衝刺滑痕 / 蹄痕：沿路兩道淡痕
         const gap = id === 'dash' ? (o.src && o.src.r || 20) * 0.5 : 14;
         for (const s of [-1, 1]) gash(x - Math.sin(a) * s * gap, y + Math.cos(a) * s * gap, a, o.len, 2, 0, 0.45);
       }

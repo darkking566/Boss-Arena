@@ -5,7 +5,8 @@
 //   右手燒焦樹根般的黑色扭曲長拐杖，左手凝出金色聖光的幻影武器（短刀 / 大槌 / 聖劍），斗篷底下拖著一條長尾。
 // 逐招動畫：依動作種類與技能挑「蓄力 → 擊」關鍵值姿態（拐杖角度、伸手、高舉、左手武器角度、前撲、扭身、甩尾、蹲伏），
 //   左手武器依招式切換；走路時整個人前傾晃動、布條往後飄。二階段左手與角尖常駐金光；大招二階段揭開面紗時身上滲出暗紅咒血。
-// hidden()：躍起下刺 / 大槌躍擊在半空（落點影子越來越大 + 放大的瑪爾基特）；R.projStyles.holydagger：黃金短刀；R.lobStyles.holysword：黃金劍雨。
+// 招式細節：拐杖弧帶焦黑火星、幻影武器弧帶殘影、尾掃貼地掃痕、延遲那一下杖尖閃光發抖、擲刀前光點收進掌心、大槌蓄力發亮、聖劍迴旋的金色劍環。
+// hidden()：躍起下刺 / 大槌躍擊在半空（落點影子越來越大 + 放大的瑪爾基特 + 光跡；躍刺十字準星、大槌雙環）；R.projStyles.holydagger：黃金短刀；R.lobStyles.holysword：黃金劍雨。
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, hexA = R.hexA;
   const TAU = U.TAU, PI = Math.PI;
@@ -100,10 +101,12 @@
       O[k] = mode === 'snap' ? lerp(DEF[k], x[1], a) : b > 0 ? lerp(x[0], x[1], b) : lerp(DEF[k], x[0], a);
     }
   }
-  let ARC = 0, ARC0 = 0, ARC1 = 0, ARCW = false; // 本幀武器掃過的弧（強度、起訖角、是否左手幻影武器）
+  const K_CANE = 0, K_PHANTOM = 1, K_TAIL = 2;
+  let ARC = 0, ARC0 = 0, ARC1 = 0, ARCK = K_CANE; // 本幀掃過的弧（強度、起訖角、拐杖 / 左手幻影武器 / 長尾）
   function arcOf(e, sw, cur) {
-    if (e.ca && Math.abs(e.ca[1] - e.ca[0]) > 0.8) { ARC = sw; ARC0 = e.ca[0]; ARC1 = cur ? A.ca : e.ca[1]; ARCW = false; }
-    else if (e.lw && Math.abs(e.lw[1] - e.lw[0]) > 0.8) { ARC = sw; ARC0 = e.lw[0]; ARC1 = cur ? A.lw : e.lw[1]; ARCW = true; }
+    if (e.ca && Math.abs(e.ca[1] - e.ca[0]) > 0.8) { ARC = sw; ARC0 = e.ca[0]; ARC1 = cur ? A.ca : e.ca[1]; ARCK = K_CANE; }
+    else if (e.lw && Math.abs(e.lw[1] - e.lw[0]) > 0.8) { ARC = sw; ARC0 = e.lw[0]; ARC1 = cur ? A.lw : e.lw[1]; ARCK = K_PHANTOM; }
+    else if (e.tail && Math.abs(e.tail[1] - e.tail[0]) > 0.8) { ARC = sw; ARC0 = PI + e.tail[0] * 0.9; ARC1 = PI + (cur ? A.tail : e.tail[1]) * 0.9; ARCK = K_TAIL; }
   }
   function build(sid) {
     const eN = P.ne && pick(P.ne, sid), eL = P.le && pick(P.le, sid);
@@ -273,16 +276,21 @@
     for (const k of KEYS) A[k] = DEF[k];
     A.ca = DEF.ca + Math.sin(t * 1.6) * 0.05;
     ARC = 0;
-    let wk = W_NONE, spinA = 0;
+    let wk = W_NONE, spinA = 0, hold = 0, form = 0, charge = 0;
     if (inst) {
       pace(inst); build(sid);
       const e = P.ne && (P.wd > 0.1 || !P.le) ? P.ne : P.le || P.ne;
       if (e) wk = weaponOf(sid, e.a, p2);
       if (sid === 'sword_spin') { const c = trigs(inst.v), t0 = c[0].a.at - 0.5, t1 = c[c.length - 1].a.at; if (inst.t > t0 && inst.t < t1 + 0.15) spinA = (inst.t - t0) / 0.3 * TAU; }
+      const n = P.ne;
+      // 延遲的那一下（重砸、拐杖連擊第三下）：高舉停住時拐杖微微發抖、杖尖閃光——原作騙翻滾的那一拍
+      if (n && n.a.do === 'hit' && (sid === 'delayed_slam' || (sid === 'cane_combo' && n.hi === 2)) && P.wd > 0.4 && P.wd < 0.74) { hold = Math.sin((P.wd - 0.4) / 0.34 * PI); A.ca += Math.sin(t * 42) * 0.035 * hold; }
+      if (n && n.a.do === 'proj' && P.wd > 0.15) form = (P.wd - 0.15) / 0.85; // 短刀在左手凝成
+      if (n && wk === W_HAMMER && P.wd < 0.75) charge = U.clamp(P.wd / 0.75, 0, 1); // 大槌蓄力發亮
     }
     if (o.state === 'transition') { wk = W_HAMMER; A.ll = 1; A.lw = -PI / 2; A.le = 0.6; A.cr = -0.1; }
     const blood = inst && sid === 'ult' && p2; // 大招二階段：揭開面紗，滲出咒血
-    const spd = Math.hypot(o.vx || 0, o.vy || 0), run = U.clamp(spd / 240, 0, 1);
+    const dh = inst && inst.dash, spd = Math.hypot(o.vx || 0, o.vy || 0), run = dh && dh.t < dh.dur ? 1 : U.clamp(spd / 240, 0, 1); // 後撤跳步 / 迴旋推進時布條整個翻飛
     const sway = Math.sin(t * 3 + (o.y || 0) * 0.01) * (1 - run * 0.5), bob = Math.sin(t * (4 + 6 * run)) * 0.04 * run;
     const gl = p2 ? 0.7 : 0.4;
 
@@ -298,11 +306,31 @@
     // 地面刀光：武器大幅揮動時沿武器尖端畫一道弧（拐杖灰白、幻影武器金色）
     const hx = r * (0.25 + 0.45 * A.ce), hy = r * 0.55, lx = r * (0.25 + 0.45 * A.le) - A.ll * r * 0.1, ly = -r * (0.55 - 0.1 * A.ll);
     if (ARC > 0 && !shade) {
-      const [ox, oy, rad, col] = ARCW ? [lx, ly, r * (wk === W_SWORD ? 2.0 : wk === W_HAMMER ? 1.9 : 1.0), GOLD] : [hx, hy, r * 2.2, '#d8d0c0'];
-      ctx.save(); ctx.translate(ox, oy); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-      const a0 = Math.min(ARC0, ARC1), a1 = Math.max(ARC0, ARC1);
-      ctx.strokeStyle = hexA(col, 0.4 * ARC); ctx.lineWidth = r * 0.3; ctx.beginPath(); ctx.arc(0, 0, rad, a0, a1); ctx.stroke();
-      ctx.strokeStyle = hexA(WHITE, 0.8 * ARC); ctx.lineWidth = 2.5; ctx.stroke();
+      const [ox, oy, rad] = ARCK === K_PHANTOM ? [lx, ly, r * (wk === W_SWORD ? 2.0 : wk === W_HAMMER ? 1.9 : 1.0)] : ARCK === K_TAIL ? [-r * 0.75, 0, r * 1.6] : [hx, hy, r * 2.2];
+      ctx.save(); ctx.translate(ox, oy); ctx.lineCap = 'round';
+      const a0 = Math.min(ARC0, ARC1), a1 = Math.max(ARC0, ARC1), arc = (rr, wd, col, al) => { ctx.strokeStyle = hexA(col, al); ctx.lineWidth = wd; ctx.beginPath(); ctx.arc(0, 0, rr, a0, a1); ctx.stroke(); };
+      if (ARCK === K_PHANTOM) { // 幻影武器：金色主弧 + 往回落後一截的殘影弧
+        ctx.globalCompositeOperation = 'lighter';
+        const d = ARC1 > ARC0 ? -0.3 : 0.3;
+        ctx.strokeStyle = hexA(GOLD, 0.18 * ARC); ctx.lineWidth = r * 0.22; ctx.beginPath(); ctx.arc(0, 0, rad * 0.92, a0 + d, a1 + d); ctx.stroke();
+        arc(rad, r * 0.3, GOLD, 0.4 * ARC); arc(rad, 2.5, WHITE, 0.8 * ARC);
+      } else if (ARCK === K_TAIL) { // 長尾：貼地的棕灰掃痕
+        arc(rad, r * 0.36, '#3a3026', 0.3 * ARC);
+        ctx.globalCompositeOperation = 'lighter'; arc(rad, r * 0.16, '#8a7a62', 0.35 * ARC); arc(rad * 1.04, 1.5, PALE, 0.5 * ARC);
+      } else { // 黑色拐杖：焦黑底帶 + 灰白弧，沿弧冒出閃爍的火星
+        arc(rad, r * 0.36, '#2a221c', 0.35 * ARC);
+        ctx.globalCompositeOperation = 'lighter'; arc(rad, r * 0.22, '#d8d0c0', 0.3 * ARC); arc(rad, 2.5, WHITE, 0.7 * ARC);
+        ctx.fillStyle = hexA('#ff9a40', 0.8 * ARC);
+        for (let i = 0; i < 6; i++) { const a = lerp(a0, a1, hash(i + 90)), d = rad + (hash(i + 95) - 0.5) * r * 0.4; ctx.beginPath(); ctx.arc(Math.cos(a) * d, Math.sin(a) * d, 1.2 + 1.2 * Math.abs(Math.sin(t * 17 + i * 3)), 0, TAU); ctx.fill(); }
+      }
+      ctx.restore();
+    }
+    if (spinA && !shade) { // 聖劍迴旋：身邊一圈金色劍環，環上的劍痕跟著轉
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      ctx.strokeStyle = hexA(GOLD, 0.3); ctx.lineWidth = r * 0.25; ctx.beginPath(); ctx.arc(0, 0, r * 2.05, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = hexA(WHITE, 0.6); ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = hexA(PALE, 0.7); ctx.lineWidth = 3;
+      for (let i = 0; i < 6; i++) { const a = -spinA * 0.15 + i * TAU / 6; ctx.beginPath(); ctx.arc(0, 0, r * 2.05, a, a + 0.35); ctx.stroke(); }
       ctx.restore();
     }
     tail(ctx, r, sway, A.tail, shade);
@@ -314,16 +342,33 @@
     if (wk) {
       ctx.save(); ctx.translate(lx, ly); ctx.rotate(A.lw); ctx.scale(1 - 0.55 * lup, 1);
       if (!shade) { const g = ctx.createRadialGradient(0, 0, 1, 0, 0, r * 0.9); g.addColorStop(0, hexA(GOLD, 0.5)); g.addColorStop(1, hexA(GOLD, 0)); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * 0.9, 0, TAU); ctx.fill(); ctx.restore(); }
-      phantom(ctx, wk, r, shade, gl);
+      phantom(ctx, wk, r, shade, Math.max(gl, charge));
+      if (charge > 0.05 && !shade && wk === W_HAMMER) { // 大槌蓄力：槌頭越來越亮，外圈一道光環收緊
+        const hx2 = r * 1.75, g = ctx.createRadialGradient(hx2, 0, 1, hx2, 0, r * (0.5 + 0.5 * charge));
+        g.addColorStop(0, hexA(WHITE, 0.7 * charge)); g.addColorStop(0.5, hexA(GOLD, 0.45 * charge)); g.addColorStop(1, hexA(GOLD, 0));
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(hx2, 0, r, 0, TAU); ctx.fill();
+        ctx.strokeStyle = hexA(PALE, 0.6 * charge); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(hx2, 0, r * (1.3 - 0.7 * charge), 0, TAU); ctx.stroke(); ctx.restore();
+      }
       ctx.restore();
     } else if (p2 && !shade) { // 二階段空手時掌心也亮著金光
       ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hexA(GOLD, 0.35 + 0.2 * Math.sin(t * 6)); ctx.beginPath(); ctx.arc(lx, ly, r * 0.22, 0, TAU); ctx.fill(); ctx.restore();
+    }
+    if (form > 0 && !shade) { // 短刀成形：四顆金色光點繞著左手往掌心收
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hexA(PALE, 0.5 + 0.5 * form);
+      for (let i = 0; i < 4; i++) { const a = t * 9 + i * TAU / 4, d = r * (0.9 - 0.7 * form); ctx.beginPath(); ctx.arc(lx + Math.cos(a) * d, ly + Math.sin(a) * d, 2 + 1.5 * form, 0, TAU); ctx.fill(); }
+      ctx.restore();
     }
     ctx.save(); ctx.translate(r * 0.42, 0); head(ctx, r, shade, p2, t); ctx.restore();
     // 右手 + 黑色拐杖（高舉時拐杖縮短，表示朝上）
     arm(ctx, r * 0.15, r * 0.55, hx, hy, r, shade);
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(A.ca); ctx.scale(1 - 0.6 * U.clamp(A.up, 0, 1), 1);
     cane(ctx, r * 2.3, r, shade);
+    if (hold > 0.05 && !shade) { // 杖尖星芒
+      const L = r * 2.3, s = r * 0.5 * hold;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(PALE, 0.85 * hold); ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(L - s, 0); ctx.lineTo(L + s, 0); ctx.moveTo(L, -s); ctx.lineTo(L, s); ctx.stroke();
+      ctx.fillStyle = hexA(WHITE, 0.8 * hold); ctx.beginPath(); ctx.arc(L, 0, 3, 0, TAU); ctx.fill(); ctx.restore();
+    }
     ctx.restore();
     ctx.restore();
   }
@@ -341,9 +386,26 @@
     ctx.fillStyle = hexA('#1a1004', 0.15 + 0.4 * u); ctx.beginPath(); ctx.ellipse(m.x, m.y, b.r * (1.1 + 1.1 * u), b.r * (0.75 + 0.75 * u), 0, 0, TAU); ctx.fill();
     ctx.restore();
     // 躍起下刺：飛到落點上空後停在半空（原作的滯空），最後一瞬才刺下
-    const fly = stab ? Math.min(1, u / 0.6) : u, hang = stab && u > 0.6 ? 1 - (u - 0.6) / 0.4 * 0.3 : 1;
-    const x = lerp(b.x, m.x, ease(fly)), y = lerp(b.y, m.y, ease(fly)) - (stab ? Math.sin(PI * 0.5 * Math.min(1, fly * 1.6)) * 170 * hang * (u > 0.92 ? (1 - u) / 0.08 : 1) : Math.sin(PI * u) * 200);
-    const s = 1 + 0.45 * (y < lerp(b.y, m.y, ease(fly)) ? Math.min(1, (lerp(b.y, m.y, ease(fly)) - y) / 180) : 0);
+    const at = (uu) => {
+      const fly = stab ? Math.min(1, uu / 0.6) : uu, hang = stab && uu > 0.6 ? 1 - (uu - 0.6) / 0.4 * 0.3 : 1, gy = lerp(b.y, m.y, ease(fly));
+      return [lerp(b.x, m.x, ease(fly)), gy - (stab ? Math.sin(PI * 0.5 * Math.min(1, fly * 1.6)) * 170 * hang * (uu > 0.92 ? (1 - uu) / 0.08 : 1) : Math.sin(PI * uu) * 200), gy];
+    };
+    const [x, y, gy] = at(u), s = 1 + 0.45 * (y < gy ? Math.min(1, (gy - y) / 180) : 0);
+    const hit = inst.v.actions.find((a) => a.do === 'hit' && a.anchor === 'mark' && a.mark === land.mark), rr = (hit ? hit.r : 120) * (1.25 - 0.3 * u);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    if (stab) { // 躍刺：落點一個往內收緊的金色十字準星
+      ctx.strokeStyle = hexA(GOLD, 0.2 + 0.5 * u); ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) { const a = t * 1.2 + i * TAU / 4; ctx.beginPath(); ctx.moveTo(m.x + Math.cos(a) * rr * 0.35, m.y + Math.sin(a) * rr * 0.35); ctx.lineTo(m.x + Math.cos(a) * rr, m.y + Math.sin(a) * rr); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(m.x, m.y, rr * 0.8, 0, TAU); ctx.stroke();
+      if (u > 0.6) { const k = (u - 0.6) / 0.4; ctx.strokeStyle = hexA(PALE, 0.8 * k); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y + b.r * 0.4); ctx.lineTo(x, y + b.r * (0.4 + 1.6 * k)); ctx.stroke(); } // 滯空時往下指的短刀光
+    } else { // 大槌：落點雙層金環，越落越實
+      ctx.strokeStyle = hexA(GOLD, 0.15 + 0.5 * u); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(m.x, m.y, rr * 0.85, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = hexA(PALE, 0.1 + 0.35 * u); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(m.x, m.y, rr * 0.6, 0, TAU); ctx.stroke();
+    }
+    const [px, py] = at(Math.max(0, u - 0.18)); // 身後拖出的光跡：躍刺偏暗、大槌金色
+    ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hexA(stab ? '#3e3020' : '#b07818', 0.3); ctx.lineWidth = b.r * 0.55; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+    ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = hexA(GOLD, stab ? 0.25 : 0.45); ctx.lineWidth = b.r * 0.4; ctx.stroke();
+    ctx.restore();
     Object.assign(TB, { x, y, face: U.angTo(b, m), r: b.r, def: b.def, phase: b.phase, inst, world: b.world });
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
     R.drawBossBody(ctx, TB, t);
