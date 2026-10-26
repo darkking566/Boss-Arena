@@ -56,26 +56,48 @@
             { when: { dist: [260, 800] }, do: 'switch', skill: 'storm_blade' }, // 原作：喚風後拉遠就擲風刃、近就翻滾躍擊
             { when: { dist: [0, 260] }, do: 'extend' },
             { do: 'stop' }] }] },
+        // 距離條件要算進前一招的擊退（雙揮的左臂捶地 / 五連最後一斧 / 擒噬摔地會把人打飛），否則連段接不起來
         { id: 'axe', name: '戰斧・拖斧', weight: 1.1, steps: [
           { skill: 'axe_swing' },
           { skill: 'drag_slash', cancel: 0.35, branch: [
+            { when: { rolled: true, rollDir: ['back'] }, chance: 0.6, do: 'switch', skill: 'jump_slam' }, // 往後滾 → 躍起重劈
+            { when: { rolled: true, rollDir: ['left', 'right', 'through'], dist: [0, 300] }, do: 'switch', skill: 'fury_swings' }, // 滾到身側 / 身後 → 狂怒五連
             { when: { rolled: true }, chance: 0.5, do: 'delay', hold: [0.25, 0.5] },
-            { when: { dist: [0, 380] }, do: 'extend' },
+            { when: { dist: [0, 520] }, do: 'extend' },
+            // 拖斧冷卻中 → 依距離改接其他招
+            { when: { dist: [0, 300] }, do: 'switch', skill: 'fury_swings' },
+            { when: { dist: [150, 700] }, do: 'switch', skill: 'jump_slam' },
+            { when: { dist: [520, 900] }, do: 'switch', skill: 'storm_blade' }, // 被拉開 → 風刃
             { do: 'stop' }] }] },
         { id: 'kneel', name: '跪下・躍劈', phase: 1, weight: 1.0, steps: [
           { skill: 'kneel' },
           { skill: 'jump_slam', cancel: 0.4, branch: [
             { when: { dist: [150, 520] }, do: 'extend' },
             { do: 'stop' }] }] },
-        { id: 'flame', name: '戰斧・龍息', phase: 2, weight: 1.4, steps: [ // 原作流程圖：揮斧 → 龍息橫掃 → 擒拿
+        { id: 'fury', name: '五連・跪下', phase: 1, weight: 1.0, steps: [
+          { skill: 'fury_swings' },
+          { skill: 'kneel', cancel: 0.4, branch: [
+            { when: { rolled: true, rollDir: ['back'] }, chance: 0.6, do: 'switch', skill: 'jump_slam' },
+            { when: { dist: [0, 320] }, do: 'extend' },
+            { when: { dist: [320, 700] }, do: 'switch', skill: 'jump_slam' }, // 最後一斧打飛 → 躍劈追上
+            { do: 'stop' }] }] },
+        { id: 'flame', name: '戰斧・龍息・擒噬', phase: 2, weight: 1.4, steps: [ // 原作流程圖：揮斧 → 龍息橫掃 → 擒拿
           { skill: 'axe_swing' },
           { skill: 'sweeping_flame', cancel: 0.4, branch: [
             { when: { dist: [0, 480] }, do: 'extend' },
+            { do: 'stop' }] },
+          { skill: 'dragon_grab', cancel: 0.35, branch: [
+            { when: { dist: [0, 300] }, do: 'extend' },
+            { when: { dist: [300, 500] }, do: 'switch', skill: 'striding_flame' }, // 遠 → 邊噴邊逼近
             { do: 'stop' }] }] },
-        { id: 'grab', name: '龍息・擒噬', phase: 2, weight: 1.0, steps: [
+        { id: 'grab', name: '龍息・擒噬・見證', phase: 2, weight: 1.0, steps: [
           { skill: 'striding_flame' },
           { skill: 'dragon_grab', cancel: 0.35, branch: [
-            { when: { dist: [0, 260] }, do: 'extend' },
+            { when: { dist: [0, 300] }, do: 'extend' },
+            { when: { dist: [300, 520] }, do: 'switch', skill: 'sweeping_flame' }, // 被推遠擒不到 → 龍息橫掃
+            { do: 'stop' }] },
+          { skill: 'bear_witness', cancel: 0.4, branch: [ // 擒噬摔地把人打飛，火岩雨正好收尾
+            { when: { dist: [0, 520] }, do: 'extend' },
             { do: 'stop' }] }] },
       ],
     },
