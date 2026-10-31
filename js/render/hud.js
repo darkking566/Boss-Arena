@@ -47,7 +47,8 @@
       ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(hx, ry + 2, hw, 16);
       ctx.font = `bold 12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = rtl ? 'right' : 'left';
       ctx.fillText(`${Math.ceil(b.hp)} / ${b.maxHp}`, rtl ? hx + hw - 6 : hx + 6, ry + 14);
-      if (b.def.hunter) { // 獵人：耐力 / 武器量表（太刀＝氣刃槽，練氣等級上色）
+      if (b.def.hunter) { // 獵人：耐力 / 武器量表（太刀＝氣刃槽，練氣等級上色）；HP 條左邊一格為銳利度顏色
+        if (b.h4 && b.h4.spec.sharp) { ctx.fillStyle = BD.H4Combat.sharpBand(b.h4).color; ctx.fillRect(x + 214, ry + 3, 10, 14); }
         bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.sta / b.maxSta, '#5fd47a', null, rtl);
         const lv = b.hunt && b.hunt.kt ? b.hunt.kt.level : 0;
         bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, (b.spirit || 0) / (b.maxSpirit || 1), ['#c8a0ff', '#ffffff', '#ffe27a', '#ff5a4a'][lv], null, rtl);
@@ -115,7 +116,7 @@
     R.drawStatusRow(ctx, b, rtl ? x + PW : x, ky + 26, rtl, PW);
   }
   function drawHUD(ctx, w, view, t) {
-    if (w.hunt4) { drawTeamPanel(ctx, w, 0, t); drawPanel(ctx, w.hunt4.boss, w, t); }
+    if (w.hunt4) { drawTeamPanel(ctx, w, 0, t); drawPanel(ctx, w.hunt4.boss, w, t); if (R.drawHunt4Parts) R.drawHunt4Parts(ctx, w, t); }
     else if (w.teamMode) {
       drawTeamPanel(ctx, w, 0, t); drawTeamPanel(ctx, w, 1, t);
       const p = view.player != null && w.bosses[view.player]; // 玩家的技能列畫在競技場下緣
@@ -280,6 +281,7 @@
     for (const b of order) { const st = R.bossStyle(b.def.style); if (st.over) st.over(ctx, b, t); }
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
+    if (w.hunt4 && R.drawHunt4World) R.drawHunt4World(ctx, w, t);
     drawTexts(ctx, w);
     if (view.focus != null) {
       const f = w.bosses[view.focus]; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * 30;

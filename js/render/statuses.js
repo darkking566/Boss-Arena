@@ -24,6 +24,7 @@
   // ── 所有狀態的圖示 ──
   R.defineStatusIcon('iframe', { glyph: '閃', color: '#d8fff0' });
   R.defineStatusIcon('invuln', { glyph: '無', color: '#ffe680' });
+  R.defineStatusIcon('h4fatigue', { glyph: '疲', color: '#cfc8a8' }); // 狩獵模式：Boss 疲勞
   R.defineStatusIcon('transition', { glyph: '轉', color: '#ff9a3c' });
   R.defineStatusIcon('hidden', { glyph: '隱', color: '#9a8cff' });
   R.defineStatusIcon('counter', { glyph: '見', color: '#ffffff' });

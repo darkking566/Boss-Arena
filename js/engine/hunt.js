@@ -222,7 +222,7 @@
     const ai = c.update.bind(c), jit = new Map();
     c.update = (dt) => {
       const b = c.b;
-      if (b.canAct()) for (const th of c.scanThreats()) {
+      if (b.pick && b.canAct()) for (const th of c.scanThreats()) { // 只有帶彈刀邏輯的武器（太刀）才搶時機揮刀
         if (th.glow) continue;
         if (!jit.has(th.key)) jit.set(th.key, c.rng.range(-0.05, 0.05));
         if (th.left <= 0.1 + jit.get(th.key) && b.startSkill(b.pick(0))) return;
@@ -235,9 +235,14 @@
     const h = b.def.hunt;
     b.dmgMul = 1 + h.dmg; b.lifesteal = h.lifesteal;
     b.hunt = { hpPotions: h.potions, manaPotions: h.potions, used: 0, baseDmg: b.dmgMul };
-    const L = LOGIC[b.def.weapon]; // 武器專屬邏輯（目前只有太刀）
-    if (L) { L.init(b); b.hunt.tick = L.tick; b.pick = (i) => L.pick(b, i); }
+    BD.huntWeapon(b);
     if (agent) BD.agentize(b.controller);
+  };
+  // 依 b.def.weapon 掛上（或換掉）武器專屬邏輯（目前只有太刀）；狩獵模式切換武器時也會呼叫
+  BD.huntWeapon = function (b) {
+    const L = LOGIC[b.def.weapon];
+    b.hunt.tick = null; delete b.pick;
+    if (L) { L.init(b); b.hunt.tick = L.tick; b.pick = (i) => L.pick(b, i); }
   };
   BD.setupHunt = function (w, opts) {
     BD.huntUnit(w.bosses[0], opts && opts.agent);

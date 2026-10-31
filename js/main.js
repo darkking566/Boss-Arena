@@ -309,9 +309,11 @@
     state.resultShown = true; state.resultKind = 'hunt4';
     const st = w.hunt4, boss = st.boss, win = w.winner && w.winner.team === 0, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
     $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 討伐成功！` : '狩獵失敗…';
-    $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS}` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
+    $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS} · 怯 ${st.flinches} 次 · 倒地 ${st.topples} 次` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
     const rows = [['造成傷害', (h) => Math.round(h.stats.dealt)], ['承受傷害', (h) => Math.round(h.stats.taken)], ['力竭', (h) => st.faintsBy.get(h)],
-      ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`], ['回復藥', (h) => h.hunt.used]];
+      ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`],
+      ['傷口破壞 / 部位破壞', (h) => `${h.stats.h4.pops} / ${h.stats.h4.breaks}`], ['異常觸發', (h) => h.stats.h4.procs], ['換武器', (h) => h.stats.h4.switches],
+      ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`]];
     $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +
       rows.map(([n, f]) => `<tr><td>${n}</td>${st.hunters.map((h) => `<td>${f(h)}</td>`).join('')}</tr>`).join('');
     $('#btnRematch').textContent = '🔁 再狩獵一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回選單';
