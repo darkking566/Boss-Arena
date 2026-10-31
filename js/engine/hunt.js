@@ -205,8 +205,8 @@
         return b.kv[chain[j >= 0 && j < chain.length - 1 ? j + 1 : 0]];
       },
       tick(b, dt) {
-        const kt = b.hunt.kt, e = b.enemy, t = b.world.time, sk = b.inst && b.inst.skill;
-        const d = e.stats.taken - kt.taken; kt.taken = e.stats.taken;
+        const kt = b.hunt.kt, t = b.world.time, sk = b.inst && b.inst.skill;
+        const d = b.stats.dealt - kt.taken; kt.taken = b.stats.dealt; // 只算自己造成的傷害（狩獵模式有隊友）
         if (d > 0 && !(sk && sk.grp === 's')) { b.spirit = Math.min(b.maxSpirit, b.spirit + Math.min(14, d * 0.15)); kt.gainAt = t; } // 氣刃斬本身不回氣
         if (t - kt.gainAt > KT.idleDecay) b.spirit = Math.max(0, b.spirit - 2 * dt);
         if (sk && sk.id === 'k_spin' && b.inst.landed && !b.inst.lvDone) { b.inst.lvDone = true; setLevel(b, kt.level + 1); }
@@ -230,13 +230,17 @@
       ai(dt);
     };
   };
-  BD.setupHunt = function (w, opts) {
-    const b = w.bosses[0], h = b.def.hunt;
+  // 把主角定義的存檔數值與武器邏輯套到單位上（獵魂主角、狩獵模式的每位獵人共用）
+  BD.huntUnit = function (b, agent) {
+    const h = b.def.hunt;
     b.dmgMul = 1 + h.dmg; b.lifesteal = h.lifesteal;
     b.hunt = { hpPotions: h.potions, manaPotions: h.potions, used: 0, baseDmg: b.dmgMul };
     const L = LOGIC[b.def.weapon]; // 武器專屬邏輯（目前只有太刀）
     if (L) { L.init(b); b.hunt.tick = L.tick; b.pick = (i) => L.pick(b, i); }
-    if (opts && opts.agent) BD.agentize(b.controller);
+    if (agent) BD.agentize(b.controller);
+  };
+  BD.setupHunt = function (w, opts) {
+    BD.huntUnit(w.bosses[0], opts && opts.agent);
     w.enrageAt = 720; // 挑戰 Boss 不必趕時間
     w.hunt = true;
   };

@@ -183,3 +183,12 @@ body.touch .tp { display: none; }
   .h-wrap { width: 96vw; } .h-body { min-height: 0; padding: 10px; }
   .h-row { flex-wrap: wrap; } .h-row b { min-width: 0; }
 }
+
+/* 狩獵模式（4v1）：左側換成固定四位獵人，右側選 Boss */
+#select .hunt4-only { display: none; }
+#select.hunt4 .hunt4-only { display: flex; }
+#select.hunt4 #sideA .cards, #select.hunt4 #sideA .pager, #select.hunt4 .duel-only { display: none; }
+.roster4 { flex-direction: column; gap: 8px; }
+.roster4 .h4 { padding: 8px 12px; background: rgba(255,255,255,0.05); border-left: 4px solid; border-radius: 6px; text-align: left; }
+.roster4 .h4 .nm { font-size: 19px; font-weight: bold; }
+.roster4 .h4 .tt { font-size: 13px; color: #aaa; }

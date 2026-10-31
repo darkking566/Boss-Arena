@@ -14,9 +14,9 @@
     <div class="sel-wrap">
       <h1>Boss<span>鬥技場</span></h1>
       <p class="sub">俯視角 Boss 對決 —— 選出兩位 Boss，觀看具有魂系 AI 的牠們一決勝負</p>
-      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button></div>
+      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button><button id="modeHunt4" class="mode">🐉 狩獵</button></div>
       <div class="cols">
-        <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div></div>
+        <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div><div class="roster4 hunt4-only" id="roster4"></div></div>
         <div class="vs">VS</div>
         <div class="side" id="sideB"><h2 class="red">紅方</h2><div class="cards"></div></div>
       </div>
@@ -99,6 +99,7 @@
 <script src="js/data/bosses/godrick.js"></script>
 <script src="js/data/training/dummy.js"></script>
 <script src="js/data/hunt.js"></script>
+<script src="js/data/hunt4/hunters.js"></script>
 <!-- 特效庫（純視覺、不觸碰 DOM；Boss 資料以 fx / fxEl 引用，見 docs/effects.md）-->
 <script src="js/fx/elements.js"></script>
 <script src="js/fx/slash.js"></script>
@@ -142,6 +143,7 @@
 <script src="js/engine/pace.js"></script>
 <script src="js/engine/traits.js"></script>
 <script src="js/engine/hunt.js"></script>
+<script src="js/engine/hunt4/mode.js"></script>
 <script src="js/engine/minions/brood.js"></script>
 <script src="js/engine/minions/witch.js"></script>
 <script src="js/engine/minions/watcher.js"></script>

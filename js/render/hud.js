@@ -28,8 +28,8 @@
   }
   // 團隊戰：每隊三行精簡面板（名字 / 階段 / HP / 架勢 / 大招），倒下的變暗
   function drawTeamPanel(ctx, w, team, t) {
-    const rtl = team === 1, PW = 640, x = rtl ? R.W - 40 - PW : 40, y = 14, RH = 51;
-    const list = w.bosses.filter((b) => b.team === team), al = rtl ? 'right' : 'left', ex = rtl ? x + PW : x;
+    const list = w.bosses.filter((b) => b.team === team), RH = list.length > 3 ? 38 : 51; // 狩獵模式 4 人：行距縮小、不畫狀態列
+    const rtl = team === 1, PW = 640, x = rtl ? R.W - 40 - PW : 40, y = 14, al = rtl ? 'right' : 'left', ex = rtl ? x + PW : x;
     ctx.fillStyle = 'rgba(10,8,14,0.75)'; ctx.fillRect(x - 10, y - 6, PW + 20, 158);
     ctx.fillStyle = TEAM[team]; ctx.fillRect(rtl ? x + PW + 6 : x - 10, y - 6, 4, 158);
     list.forEach((b, i) => {
@@ -39,17 +39,24 @@
       ctx.font = `bold 18px ${FONT}`; ctx.fillStyle = b.def.color; ctx.fillText(b.name, ex, ry + 16);
       const nw = ctx.measureText(b.name).width;
       ctx.font = `13px ${FONT}`; ctx.fillStyle = '#bbb';
-      const tag = dead ? '倒下' : (b.phase === 2 ? '第二階段' : '第一階段') + (b.controller && b.controller.isPlayer ? ' · 玩家' : '');
+      const tag = b.def.hunter ? (dead ? '力竭中…' : `${b.def.title} · ${b.def.archetype}`)
+        : dead ? '倒下' : (b.phase === 2 ? '第二階段' : '第一階段') + (b.controller && b.controller.isPlayer ? ' · 玩家' : '');
       ctx.fillText(tag, rtl ? ex - nw - 10 : ex + nw + 10, ry + 15);
       const hx = rtl ? x : x + 230, hw = PW - 230;
       bar(ctx, hx, ry + 2, hw, 16, b.hp / b.maxHp, b.phase === 2 ? b.def.color : TEAM[team], 'rgba(0,0,0,0.65)', rtl, b.hpTrail / b.maxHp);
       ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(hx, ry + 2, hw, 16);
       ctx.font = `bold 12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = rtl ? 'right' : 'left';
       ctx.fillText(`${Math.ceil(b.hp)} / ${b.maxHp}`, rtl ? hx + hw - 6 : hx + 6, ry + 14);
-      bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.posture / b.maxPosture, b.posture / b.maxPosture > 0.75 ? '#ff8844' : '#f5c542', null, rtl);
-      bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, b.ult / 100, b.ult >= 100 ? `rgba(255,220,90,${0.6 + 0.4 * Math.sin(t * 8)})` : '#c8a0ff', null, rtl);
+      if (b.def.hunter) { // 獵人：耐力 / 武器量表（太刀＝氣刃槽，練氣等級上色）
+        bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.sta / b.maxSta, '#5fd47a', null, rtl);
+        const lv = b.hunt && b.hunt.kt ? b.hunt.kt.level : 0;
+        bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, (b.spirit || 0) / (b.maxSpirit || 1), ['#c8a0ff', '#ffffff', '#ffe27a', '#ff5a4a'][lv], null, rtl);
+      } else {
+        bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.posture / b.maxPosture, b.posture / b.maxPosture > 0.75 ? '#ff8844' : '#f5c542', null, rtl);
+        bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, b.ult / 100, b.ult >= 100 ? `rgba(255,220,90,${0.6 + 0.4 * Math.sin(t * 8)})` : '#c8a0ff', null, rtl);
+      }
       ctx.globalAlpha = 1;
-      if (!dead) R.drawStatusRow(ctx, b, rtl ? x + PW : x, ry + 30, rtl, PW);
+      if (!dead && RH > 40) R.drawStatusRow(ctx, b, rtl ? x + PW : x, ry + 30, rtl, PW);
     });
   }
   function drawPanel(ctx, b, w, t) {
@@ -108,7 +115,8 @@
     R.drawStatusRow(ctx, b, rtl ? x + PW : x, ky + 26, rtl, PW);
   }
   function drawHUD(ctx, w, view, t) {
-    if (w.teamMode) {
+    if (w.hunt4) { drawTeamPanel(ctx, w, 0, t); drawPanel(ctx, w.hunt4.boss, w, t); }
+    else if (w.teamMode) {
       drawTeamPanel(ctx, w, 0, t); drawTeamPanel(ctx, w, 1, t);
       const p = view.player != null && w.bosses[view.player]; // 玩家的技能列畫在競技場下緣
       if (p && p.state !== 'dead') drawSkills(ctx, p, R.W / 2 - 300, R.OY + R.VH - 30, 600, false);
@@ -117,7 +125,7 @@
     // 中央
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = `bold 40px ${FONT}`; ctx.fillStyle = '#fff';
-    ctx.fillText('VS', R.W / 2, 62);
+    ctx.fillText(w.hunt4 ? '狩獵' : 'VS', R.W / 2, 62);
     const tm = Math.max(0, w.time - 0), mm = Math.floor(tm / 60), ss = Math.floor(tm % 60);
     ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = '#ddd';
     ctx.fillText(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, R.W / 2, 98);
@@ -129,6 +137,7 @@
       ctx.font = `12px ${FONT}`; ctx.fillStyle = heavy ? '#ffb070' : '#9fdcff';
       ctx.fillText(`節奏：${pc.name}`, R.W / 2, 140);
     }
+    if (w.hunt4) { const H4 = BD.HUNT4, left = H4.CARTS - w.hunt4.faints; ctx.font = `bold 15px ${FONT}`; ctx.fillStyle = left <= 1 ? '#ff6a6a' : '#ffd0a0'; ctx.fillText(`力竭 ${w.hunt4.faints} / ${H4.CARTS}`, R.W / 2, pc ? 160 : 144); }
     if (w.enrageOn) { ctx.fillStyle = `rgba(255,60,90,${0.7 + 0.3 * Math.sin(t * 6)})`; ctx.font = `bold 15px ${FONT}`; ctx.fillText(`狂暴 ×${w.enrage.toFixed(2)}`, R.W / 2, pc ? 160 : 144); }
   }
   function drawBanners(ctx, w) {

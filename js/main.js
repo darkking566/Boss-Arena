@@ -87,6 +87,12 @@
           <div class="d">一／二階段每招與大招都可從底部面板直接施放；預設無冷卻／無限體力，可隨時重置。</div></div>` : '');
       return;
     }
+    if (state.mode === 'hunt4') { // 狩獵：顯示目標 Boss（右側選的）與獵人隊
+      $('#detail').innerHTML = detailHtml(BD.bossById[b], 1).replace('紅方：', '目標：') +
+        `<div><h3>獵人隊（4 人，AI 操控）</h3>${BD.HUNT4.HUNTERS.map((h) => `<div class="d"><b style="color:${h.color}">${h.title}・${h.name}</b>：${h.desc}</div>`).join('')}
+        <div class="d">Boss 生命 ×${BD.HUNT4.BOSS_HP_MUL}；全隊共用 ${BD.HUNT4.CARTS} 次力竭，用完即失敗。</div></div>`;
+      return;
+    }
     if (state.mode === 'team') { // 3v3：顯示游標所在的 Boss 與雙方陣容
       const roster = (sd) => state.team[sd].map((x) => `<span style="color:${BD.bossById[x].color}">${BD.bossById[x].name}</span>`).join('・') || '（尚未選擇）';
       $('#detail').innerHTML = detailHtml(BD.bossById[id], side) +
@@ -142,6 +148,7 @@
       startTraining(state.pick[0], { mode: $('#optTrainMode').value, range: $('#optTrainRange').value, pace: state.pace, map: state.map });
       return;
     }
+    if (state.mode === 'hunt4') { startHunt4(state.pick[1], state.map); return; }
     if (state.mode === 'team' && (!state.team[0].length || !state.team[1].length)) { alert('3v3：兩隊各至少要選 1 位 Boss'); return; }
     start(state.mode === 'team' ? state.team[0].slice() : state.pick[0], state.mode === 'team' ? state.team[1].slice() : state.pick[1], {
       player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map,
@@ -150,21 +157,26 @@
 
   // ── 模式切換（對戰 / 訓練場）──
   function setMode(mode) {
-    state.mode = mode === 'train' || mode === 'team' ? mode : 'duel';
-    const train = state.mode === 'train', team = state.mode === 'team';
+    state.mode = mode === 'train' || mode === 'team' || mode === 'hunt4' ? mode : 'duel';
+    const train = state.mode === 'train', team = state.mode === 'team', h4 = state.mode === 'hunt4';
     $('#select').classList.toggle('training', train);
+    $('#select').classList.toggle('hunt4', h4);
+    $('#modeHunt4').classList.toggle('on', h4);
     $('#modeDuel').classList.toggle('on', state.mode === 'duel');
     $('#modeTrain').classList.toggle('on', train);
     $('#modeTeam').classList.toggle('on', team);
-    $('#sideA h2').textContent = train ? '選擇 Boss' : team ? '藍方（選 3 位）' : '藍方';
-    $('#sideB h2').textContent = team ? '紅方（選 3 位）' : '紅方';
+    $('#sideA h2').textContent = train ? '選擇 Boss' : team ? '藍方（選 3 位）' : h4 ? '獵人隊' : '藍方';
+    $('#sideB h2').textContent = team ? '紅方（選 3 位）' : h4 ? '選擇目標 Boss' : '紅方';
     $('#sideA h2').className = 'blue';
-    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : '⚔ 開始對決';
+    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : h4 ? '🐉 出發狩獵' : '⚔ 開始對決';
     refreshSelect();
   }
   $('#modeDuel').addEventListener('click', () => setMode('duel'));
   $('#modeTrain').addEventListener('click', () => setMode('train'));
   $('#modeTeam').addEventListener('click', () => setMode('team'));
+  $('#modeHunt4').addEventListener('click', () => setMode('hunt4'));
+  $('#roster4').innerHTML = BD.HUNT4.HUNTERS.map((h) => `<div class="h4" style="border-color:${h.color}"><div class="nm" style="color:${h.color}">${h.title}・${h.name}</div>
+    <div class="tt">${h.desc}</div><div class="tt">武器：${h.weapons.map((id) => BD.HUNT4.WEAPON_NAMES[id]).join(' / ')}（P1 全員先用太刀）　「${h.line}」</div></div>`).join('');
 
   // ── 戰鬥節奏（選角畫面）──
   // 選單順序：沉重（預設）在前、輕快在後；描述隨選項更新
@@ -209,7 +221,7 @@
     sel.addEventListener('change', () => setPace(sel.value));
     setPace(BD.DEFAULT_PACE);
   })();
-  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent) : start(state.last.a, state.last.b, state.last.opts)));
+  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : start(state.last.a, state.last.b, state.last.opts)));
   $('#btnSwap').addEventListener('click', () => start(state.last.b, state.last.a, state.last.opts));
   $('#btnMenu').addEventListener('click', () => show(state.resultKind === 'hunt' ? 'hunt' : 'select'));
   $('#modeHunt').addEventListener('click', () => show('hunt'));
@@ -278,6 +290,31 @@
     $('#resStats').innerHTML = `<tr><th></th><th style="color:${hero.def.color}">獵魂者</th><th style="color:${boss.def.color}">${boss.name}</th></tr>` +
       rows.map(([n, f]) => `<tr><td>${n}</td><td>${f(hero)}</td><td>${f(boss)}</td></tr>`).join('') + `<tr><td>使用藥水</td><td>${hero.hunt.used}</td><td>—</td></tr>`;
     $('#btnRematch').textContent = '🔁 再戰一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回據點';
+    show('result');
+    if (win && BD.sfx) BD.sfx.play('victory', 0.7);
+    state.screen = 'result';
+  }
+
+  // 狩獵模式（4v1）：四位 AI 獵人討伐一位 Boss
+  function startHunt4(bossId, mapId) {
+    const w = new BD.World(BD.Hunt4.team(), BD.bossById[bossId], { input, pace: 'heavy', map: mapId || state.map, hunt4: true });
+    w.speed = 1;
+    state.world = w; state.resultShown = false; state.hunt4 = { boss: bossId, map: mapId || state.map };
+    view.player = null; view.focus = null;
+    show('game');
+    return w;
+  }
+  state.startHunt4 = startHunt4;
+  function showHunt4Result(w) {
+    state.resultShown = true; state.resultKind = 'hunt4';
+    const st = w.hunt4, boss = st.boss, win = w.winner && w.winner.team === 0, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
+    $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 討伐成功！` : '狩獵失敗…';
+    $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS}` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
+    const rows = [['造成傷害', (h) => Math.round(h.stats.dealt)], ['承受傷害', (h) => Math.round(h.stats.taken)], ['力竭', (h) => st.faintsBy.get(h)],
+      ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`], ['回復藥', (h) => h.hunt.used]];
+    $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +
+      rows.map(([n, f]) => `<tr><td>${n}</td>${st.hunters.map((h) => `<td>${f(h)}</td>`).join('')}</tr>`).join('');
+    $('#btnRematch').textContent = '🔁 再狩獵一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回選單';
     show('result');
     if (win && BD.sfx) BD.sfx.play('victory', 0.7);
     state.screen = 'result';
@@ -386,7 +423,7 @@
           view.player = w.training.mode === 'player' ? 0 : null;
           if (BD.TrainingUI) BD.TrainingUI.update(w);
         }
-        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : showResult)(w);
+        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : w.hunt4 ? showHunt4Result : showResult)(w);
       } else {
         if (R.perf) R.perf.push(frameMs, 0);
         ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, R.W, R.H);

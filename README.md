@@ -46,6 +46,11 @@
 - **架構**：主角是不進註冊表的 hero 定義（`BD.Hunt.buildHero(save)`，`js/engine/hunt.js`），沿用同一個 Boss 引擎與 `PlayerController`；`new BD.World(hero, boss, { player: 0, hunt: true })` 啟用（`BD.setupHunt`）。法力（`def.mana`、招式 `res: 'mana'`）、吸血（`b.lifesteal`）是對 Boss 引擎的小型通用掛勾，一般對戰不受影響。資料在 `js/data/hunt.js`，介面在 `js/hunt-ui.js`，繪圖在 `js/render/hunt.js`、`js/render/styles/hero.js`。測試：`npm run test:hunt`。
 - 新增 Boss 時要在 `js/data/hunt.js` 的 `BOSS_META` 補上一筆（簡稱、裝備原型、被動、二件 / 四件套裝），否則 `test/hunt.test.js` 會失敗。
 
+## 狩獵模式（4v1，開發中）
+選角畫面上方「🐉 狩獵」：四位固定的 AI 獵人（凜、茉莉、小柚、瑟琳娜）組隊討伐右側選的 Boss，玩家觀戰。總設計與分期見 `docs/hunt4.md`（目前完成 P1 骨架，四人暫時都用太刀）。
+- **規則**：Boss 生命 ×7、架勢 ×3；Boss 依仇恨值（傷害、距離、維持目標加成，偶爾隨機換人）挑目標；獵人倒下是「力竭」，8 秒後歸隊，全隊共用 3 次，用完或超過 15 分鐘即失敗；獵人在 Boss 沒追自己時會喝回復藥。
+- **架構**：`js/data/hunt4/hunters.js`（四人資料與規則數值）、`js/engine/hunt4/mode.js`（`BD.Hunt4.team()` 建隊、`BD.setupHunt4`）；`new BD.World(BD.Hunt4.team(), boss, { pace: 'heavy', hunt4: true })`，沿用 3v3 團隊戰與獵魂的 hero 定義（`BD.huntUnit` 套用武器邏輯）。只在 `opts.hunt4` 下生效，其他模式指紋不變。測試：`npm run test:hunt4`。
+
 ## 操作
 - 觀戰：1/2/3/4 = 速度 ×1/×2/×3/×0.5，P 暫停，L 戰鬥紀錄，Esc 回選單
 - 操控：WASD 移動、滑鼠瞄準、左鍵/右鍵/Q/E/R/F/C/V/G = 技能 1~9（依 HUD 技能列順序；鎖頭表示該階段不可用）、X 大招、空白鍵 翻滾（有無敵幀）
