@@ -12,7 +12,8 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   const w = make('ronin', 1), st = w.hunt4;
   assert.strictEqual(st.hunters.length, 4);
   assert.strictEqual(new Set(st.hunters.map((h) => h.name)).size, 4, '四位獵人名字不重複');
-  for (const h of st.hunters) assert.ok(h.maxSpirit > 0 && h.hunt.hpPotions > 0, h.name + ' 沒有套上太刀邏輯 / 藥水');
+  assert.strictEqual(st.hunters.map((h) => h.def.weapon).join(), 'katana,gs,db,sns', '四人主武器');
+  for (const h of st.hunters) assert.ok(h.h4.D && h.hunt.hpPotions > 0, h.name + ' 沒有武器驅動 / 藥水');
   assert.strictEqual(st.boss.maxHp, Math.round(BD.applyPace(BD.bossById.ronin, 'heavy').maxHp * H4.BOSS_HP_MUL), 'Boss 生命放大');
   assert.ok(st.hunters.every((h) => h.enemy === st.boss), '獵人目標都是 Boss');
 }
@@ -70,6 +71,61 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   assert.ok(rin.def.weapon === 'bow' && rin.skills.some((s) => s.id === 'w_shot'), '換成弓');
   run(w, 7); b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(st.hunters[1], b, { dmg: 10, posture: 10 }); run(w, 3);
   assert.ok(rin.def.weapon === 'katana' && rin.maxSpirit > 0, '倒地時換回太刀');
+}
+
+// P3 武器：每一招（含連段變體、集中弱點攻擊、額外招）都能施放並打到身旁的 Boss
+{
+  const w = make('ronin', 5), st = w.hunt4, b = st.boss;
+  run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {}; // 全員不自己行動，只放指定的招
+  for (const h of st.hunters) {
+    for (const id in h.h4.kv) {
+      const s = h.h4.kv[id];
+      if (s.guard || id === 'db_demon' || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手
+      b.x = 3000; b.y = 1800; b.state = 'idle'; b.statuses = b.statuses.filter((x) => x.id === 'kdGuard'); h.x = b.x - 60 - 0.8 * Math.max(0, ...s.actions.map((a) => (a.do === 'dash' ? a.dist : 0))); h.y = b.y; // 突進招站遠一點 h.face = 0; h.state = 'idle'; h.spirit = 100; h.sta = h.maxSta;
+      const hp = b.hp; assert.ok(h.startSkill(s, { force: true }), `${h.name} ${id} 無法施放`);
+      for (let k = 0; k < ((s.v1.dur || 1) + 0.1) * 60; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); b.x = 3000; b.y = 1800; } // 釘住 Boss（不被碰撞推開）
+      assert.ok(b.hp < hp || w.winner, `${h.name} ${id} 沒打到 Boss`);
+      b.hp = Math.max(b.hp, b.maxHp * 0.6);
+    }
+  }
+}
+// 大劍：Boss 有破綻 → 蓄力 → 強蓄力 → 真蓄力；鐵壁衝撞減傷、相殺、力量對抗
+{
+  const w = make('ronin', 6), st = w.hunt4, b = st.boss, mari = st.hunters[1];
+  run(w, 1);
+  const seen = [];
+  b.x = 3000; b.y = 1800; mari.x = b.x - 90; mari.y = b.y; b.setState('stun', 6); mari.state = 'idle';
+  mari.startSkill(mari.h4.D.choose(mari, 60));
+  for (let i = 0; i < 60 * 5; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); if (mari.inst && seen[seen.length - 1] !== mari.inst.skill.id) seen.push(mari.inst.skill.id); b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); }
+  assert.strictEqual(seen.slice(0, 3).join(), 'gs_c1,gs_c2,gs_true', '大劍蓄力連段：' + seen);
+  const tk = mari.h4.kv.gs_tackle;
+  mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.4; let hp = mari.hp; w.damageBoss(b, mari, { dmg: 100 });
+  assert.ok(hp - mari.hp > 0 && hp - mari.hp < 70, '鐵壁衝撞減傷 ' + (hp - mari.hp));
+  b.setState('idle', 0); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1; hp = mari.hp;
+  assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(mari.hp === hp && b.state === 'stagger' && mari.stats.h4.offsets === 1, '相殺：免傷、Boss 硬直');
+  b.setState('idle', 0); b.startSkill(b.skills[0], { force: true }); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1;
+  w.damageBoss(b, mari, { dmg: 200 }); assert.ok(mari.stats.h4.clashes === 1, '大招式相殺 → 力量對抗');
+  run(w, 1.5); assert.ok(b.state === 'knockdown' || mari.hp < hp, '力量對抗有結果');
+}
+// 雙刀：鬼人化耗體力、鬼人槽累積、體力見底解除時槽滿 → 鬼人強化
+{
+  const w = make('ronin', 7), st = w.hunt4, b = st.boss, yuzu = st.hunters[2], s = () => yuzu.h4.drv;
+  run(w, 1); yuzu.state = 'idle'; yuzu.sta = yuzu.maxSta;
+  yuzu.startSkill(yuzu.h4.kv.db_demon, { force: true }); run(w, 0.3);
+  assert.ok(s().demon, '鬼人化');
+  const sta = yuzu.sta; run(w, 1); assert.ok(yuzu.sta < sta, '鬼人化耗體力');
+  s().gauge = 99; b.x = 3000; b.y = 1800; yuzu.x = b.x - 60; yuzu.y = b.y; yuzu.face = 0; yuzu.state = 'idle'; yuzu.startSkill(yuzu.h4.kv.db_d1, { force: true }); run(w, 0.5);
+  assert.ok(s().gauge >= 100, '命中累積鬼人槽');
+  yuzu.sta = 1; run(w, 0.1); assert.ok(!s().demon && s().arch, '體力見底 → 鬼人強化');
+}
+// 片手劍：完美防禦免傷並接反擊；一般防禦減傷
+{
+  const w = make('ronin', 8), st = w.hunt4, b = st.boss, sel = st.hunters[3];
+  run(w, 1); sel.state = 'idle'; sel.startSkill(sel.h4.kv.sns_guard, { force: true }); run(w, 0.05);
+  let hp = sel.hp; assert.strictEqual(w.damageBoss(b, sel, { dmg: 120 }), 'deflected'); assert.ok(sel.hp === hp && sel.h4.drv.counter, '完美防禦');
+  run(w, 1); assert.ok(sel.lastSkillId === 'sns_counter' || (sel.inst && sel.inst.skill.id === 'sns_counter'), '完美防禦後反擊');
+  sel.cancelSkill(); sel.state = 'idle'; sel.startSkill(sel.h4.kv.sns_guard, { force: true }); run(w, 0.4); hp = sel.hp; sel.sta = sel.maxSta;
+  w.damageBoss(b, sel, { dmg: 120 }); assert.ok(hp - sel.hp > 0 && hp - sel.hp < 60, '一般防禦減傷 ' + (hp - sel.hp));
 }
 
 // 整場：分出勝負、Boss 換過目標、同種子結果相同

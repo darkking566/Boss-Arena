@@ -176,7 +176,7 @@
   $('#modeTeam').addEventListener('click', () => setMode('team'));
   $('#modeHunt4').addEventListener('click', () => setMode('hunt4'));
   $('#roster4').innerHTML = BD.HUNT4.HUNTERS.map((h) => `<div class="h4" style="border-color:${h.color}"><div class="nm" style="color:${h.color}">${h.title}・${h.name}</div>
-    <div class="tt">${h.desc}</div><div class="tt">武器：${h.weapons.map((id) => BD.HUNT4.WEAPON_NAMES[id]).join(' / ')}（P1 全員先用太刀）　「${h.line}」</div></div>`).join('');
+    <div class="tt">${h.desc}</div><div class="tt">武器：${h.weapons.map((id) => BD.HUNT4.WEAPON_NAMES[id]).join(' / ')}　「${h.line}」</div></div>`).join('');
 
   // ── 戰鬥節奏（選角畫面）──
   // 選單順序：沉重（預設）在前、輕快在後；描述隨選項更新
@@ -311,7 +311,7 @@
     $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 討伐成功！` : '狩獵失敗…';
     $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS} · 怯 ${st.flinches} 次 · 倒地 ${st.topples} 次` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
     const rows = [['造成傷害', (h) => Math.round(h.stats.dealt)], ['承受傷害', (h) => Math.round(h.stats.taken)], ['力竭', (h) => st.faintsBy.get(h)],
-      ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`],
+      ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['相殺 / 力量對抗 / 完美防禦', (h) => `${h.stats.h4.offsets} / ${h.stats.h4.clashes} / ${h.stats.h4.pguards}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`],
       ['傷口破壞 / 部位破壞', (h) => `${h.stats.h4.pops} / ${h.stats.h4.breaks}`], ['異常觸發', (h) => h.stats.h4.procs], ['換武器', (h) => h.stats.h4.switches],
       ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`]];
     $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +

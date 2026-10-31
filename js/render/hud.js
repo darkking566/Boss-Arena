@@ -47,11 +47,11 @@
       ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(hx, ry + 2, hw, 16);
       ctx.font = `bold 12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = rtl ? 'right' : 'left';
       ctx.fillText(`${Math.ceil(b.hp)} / ${b.maxHp}`, rtl ? hx + hw - 6 : hx + 6, ry + 14);
-      if (b.def.hunter) { // 獵人：耐力 / 武器量表（太刀＝氣刃槽，練氣等級上色）；HP 條左邊一格為銳利度顏色
+      if (b.def.hunter) { // 獵人：耐力 / 武器量表；HP 條左邊一格為銳利度顏色
         if (b.h4 && b.h4.spec.sharp) { ctx.fillStyle = BD.H4Combat.sharpBand(b.h4).color; ctx.fillRect(x + 214, ry + 3, 10, 14); }
         bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.sta / b.maxSta, '#5fd47a', null, rtl);
-        const lv = b.hunt && b.hunt.kt ? b.hunt.kt.level : 0;
-        bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, (b.spirit || 0) / (b.maxSpirit || 1), ['#c8a0ff', '#ffffff', '#ffe27a', '#ff5a4a'][lv], null, rtl);
+        const g = b.h4 && b.h4.D && b.h4.D.gauge(b); // 武器量表：太刀氣刃、大劍蓄力段數、雙刀鬼人槽
+        if (g) bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, g.v, g.color, null, rtl);
       } else {
         bar(ctx, x, ry + 22, PW / 2 - 6, 5, b.posture / b.maxPosture, b.posture / b.maxPosture > 0.75 ? '#ff8844' : '#f5c542', null, rtl);
         bar(ctx, x + PW / 2 + 6, ry + 22, PW / 2 - 6, 5, b.ult / 100, b.ult >= 100 ? `rgba(255,220,90,${0.6 + 0.4 * Math.sin(t * 8)})` : '#c8a0ff', null, rtl);

@@ -30,6 +30,19 @@
       if (lv) { ctx.shadowColor = ['', '#fff', '#ffe27a', '#ff3a2a'][lv]; ctx.shadowBlur = 10 + lv * 4; }
       blade(ctx, r * 2.2, 3, ['#f2f5fa', '#ffffff', '#fff2b0', '#ff9a8a'][lv]); ctx.shadowBlur = 0; ctx.fillStyle = '#c0a050'; ctx.fillRect(-1, -4, 3, 8);
     },
+    // 狩獵模式：大劍（蓄力段數 → 刀身發橘紅光）、雙刀（鬼人化紅光 / 鬼人強化金光）、片手劍（劍；盾另外畫在左手）
+    gs(ctx, r, t, o) {
+      const lv = (o && o.h4 && o.h4.drv.lvl) || 0;
+      if (lv) { ctx.shadowColor = ['', '#ffd08a', '#ffa040', '#ff5a2a'][lv]; ctx.shadowBlur = 8 + lv * 5; }
+      blade(ctx, r * 2.7, 8, lv ? '#fff0d8' : '#dfe6ee'); ctx.shadowBlur = 0; ctx.fillStyle = '#6b4a2a'; ctx.fillRect(-3, -6, 6, 12);
+    },
+    db(ctx, r, t, o) {
+      const d = o && o.h4 && o.h4.drv, glow = d && (d.demon ? '#ff3a3a' : d.arch ? '#ffd34a' : null);
+      if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 12; }
+      for (const s of [-1, 1]) { ctx.save(); ctx.translate(r * 0.3, s * r * 0.75); blade(ctx, r * 1.1, 3, glow ? '#ffe0d8' : '#e8ecf2'); ctx.restore(); }
+      ctx.shadowBlur = 0;
+    },
+    sns(ctx, r) { blade(ctx, r * 1.5, 4, '#e8ecf2'); ctx.fillStyle = '#c0a050'; ctx.fillRect(-1, -6, 3, 12); },
     staff(ctx, r, t) {
       blade(ctx, r * 2.2, 3, '#7a5a3a');
       ctx.fillStyle = `rgba(170,140,255,${0.6 + 0.4 * Math.sin(t * 6)})`; ctx.beginPath(); ctx.arc(r * 2.3, 0, r * 0.38, 0, U.TAU); ctx.fill();
@@ -51,6 +64,13 @@
       ctx.save(); ctx.translate(r * 0.2, r * 0.55);
       if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
       else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
+      if (def.weapon === 'sns') { // 盾：左手；防禦時舉到正前方，完美防禦窗內發亮
+        const g = o.state === 'skill' && o.inst.skill.guard, pf = g && o.inst.t <= o.inst.skill.guard.perfect;
+        ctx.save(); ctx.translate(g ? r * 0.75 : r * 0.25, g ? 0 : -r * 0.75); ctx.rotate(g ? 0 : -0.4);
+        if (pf) { ctx.shadowColor = '#9fe8ff'; ctx.shadowBlur = 16; }
+        ctx.fillStyle = '#4a6a8a'; ctx.strokeStyle = '#d8e4f0'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.28, r * 0.62, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.restore();
+      }
       if (o.state === 'skill' && o.inst.skill.grp === 'a' && o.inst.t < 0.2) { // 彈刀判定中：刀前一道白弧
         ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r * 1.7, -0.9, 0.9); ctx.stroke();
       }

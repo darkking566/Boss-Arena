@@ -155,9 +155,9 @@
     if (ab.kind !== 'ult') c.cd = (c.cd || 1) * (1 - cdr);
     return c;
   }
-  function buildHero(save, paceId) {
+  function buildHero(save, paceId, wpOverride) { // wpOverride：狩獵模式自己的武器物件（不在獵魂武器表裡）
     paceId = paceId || 'heavy';
-    const wp = H.WEAPON_BY_ID[save.loadout.weapon], { mods: m, up } = stats(save), B = H.BASE;
+    const wp = wpOverride || H.WEAPON_BY_ID[save.loadout.weapon], { mods: m, up } = stats(save), B = H.BASE;
     const cdr = m.cdr || 0, soulK = B.soulMul * (1 + 0.05 * up.soul);
     const weapon = wp.skills.map((s) => { const c = clone(s); c.cd *= 1 - cdr; return c; });
     const variants = {};
@@ -191,6 +191,7 @@
     if (n > kt.level) { b.world.fx.text(b.x, b.y - b.r - 36, '練氣：' + KT.lv[n], ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 22); b.world.fx.sparkle(b.x, b.y, ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 12, 160, -Math.PI / 2, 1); }
     kt.level = n; kt.lvAt = b.world.time; b.dmgMul = b.hunt.baseDmg * KT.mul[n];
   }
+  BD.katanaLevel = setLevel; // 狩獵模式的氣刃兜割會消耗練氣等級
   const LOGIC = {
     katana: {
       init(b) {
@@ -222,10 +223,11 @@
     const ai = c.update.bind(c), jit = new Map();
     c.update = (dt) => {
       const b = c.b;
-      if (b.pick && b.canAct()) for (const th of c.scanThreats()) { // 只有帶彈刀邏輯的武器（太刀）才搶時機揮刀
+      // 只有帶反應招的武器才搶時機：b.react（狩獵模式各武器，例如片手劍防禦）或太刀的彈刀（b.pick(0)）
+      if ((b.react || b.pick) && b.canAct()) for (const th of c.scanThreats()) {
         if (th.glow) continue;
         if (!jit.has(th.key)) jit.set(th.key, c.rng.range(-0.05, 0.05));
-        if (th.left <= 0.1 + jit.get(th.key) && b.startSkill(b.pick(0))) return;
+        if (th.left <= 0.1 + jit.get(th.key)) { const sk = b.react ? b.react(th) : b.pick(0); if (sk && b.startSkill(sk)) return; }
       }
       ai(dt);
     };

@@ -7,12 +7,12 @@
 
   // 獵人 = 獵魂的 hero 定義換上名字 / 配色 / 個性；個性換算成底層 AI 參數（P4 的獵人大腦會直接讀 persona）
   function buildHunter(h, paceId, weapon) {
-    const s = BD.Hunt.newSave(); s.loadout.weapon = weapon || h.weapons[0];
-    const def = BD.Hunt.buildHero(s, paceId || 'heavy'), p = h.persona;
+    const s = BD.Hunt.newSave(), id = weapon || h.weapons[0]; s.loadout.weapon = 'katana'; // 狩獵專用武器（大劍 / 雙刀 / 片手劍）以武器物件傳入
+    const wp = H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id], def = BD.Hunt.buildHero(s, paceId || 'heavy', wp), p = h.persona;
     return Object.assign(def, {
       id: 'h4_' + h.id, hunter: h.id, persona: p, name: h.name, title: h.title, desc: h.desc, color: h.color, color2: h.color2, glow: h.glow,
-      traits: def.traits.concat('hunt4'),
-      ai: Object.assign({}, def.ai, { aggression: 0.35 + 0.5 * p.risk, patience: p.patience, retreat: 0.1 + 0.4 * (1 - p.risk), punish: 0.5 + 0.4 * p.show, nervous: 0.3 * (1 - p.risk) }),
+      traits: def.traits.concat('hunt4', 'h4arms'),
+      ai: Object.assign({}, def.ai, { aggression: 0.35 + 0.5 * p.risk, patience: p.patience, retreat: 0.1 + 0.4 * (1 - p.risk), punish: 0.5 + 0.4 * p.show, nervous: 0.3 * (1 - p.risk) }, wp.aiMod),
     });
   }
   const team = () => H4.HUNTERS.map((h) => buildHunter(h, 'heavy'));
@@ -64,7 +64,7 @@
     const hs = h.h4, def = hs.defs[hs.wi ^= 1];
     h.def = def; h.skills = def.skills.map(BD.prepSkill); h.traits = def.traits.map(BD.trait); h.controller.p = def.ai;
     h.dmgMul = h.hunt.baseDmg; BD.huntWeapon(h);
-    hs.spec = H4.WEAPON_SPECS[def.weapon]; hs.sharp = hs.sharps[hs.wi]; hs.focus = hs.spec.focus ? BD.prepSkill(hs.spec.focus) : null; hs.wT = w.time;
+    hs.spec = H4.WEAPON_SPECS[def.weapon]; hs.sharp = hs.sharps[hs.wi]; hs.wT = w.time; BD.H4Weapons.equip(h);
     h.stats.h4.switches++; h.setState('recover', 1); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
   }
   const use = (w, h, dur, text) => { h.setState('recover', dur); w.fx.text(h.x, h.y - h.r - 24, text, '#e8f4ff', 16); };
@@ -88,7 +88,7 @@
       b.setState('stun', dur); w.fx.text(b.x, b.y - b.r - 34, '目眩！', '#ffffff', 24); w.fx.ring(h.x, h.y, 10, 160, 0.3, '#ffffff', 8);
       w.log(h, `丟閃光彈掩護 ${t.name}`, true); return;
     }
-    if (h.hp < h.maxHp * H4.POTION_AT && !chased && BD.Hunt.drink(h, 'hp')) return;
+    if (h.hp < h.maxHp * H4.POTION_AT && !chased && BD.Hunt.drink(h, 'hp')) { if (h.def.weapon === 'sns') h.stateDur = 0.25; return; } // 片手劍拔刀喝藥：硬直短
     if (hs.spec.sharp && hs.sharp < hs.spec.sharp * H4.SHARP.whetAt && rest) {
       hs.sharp = hs.spec.sharp; h.stats.h4.whets++; use(w, h, H4.SHARP.whetTime, '磨刀'); return;
     }
@@ -104,7 +104,7 @@
     const k = Math.exp(-dt / H4.AGGRO.decay);
     for (const h of st.hunters) {
       st.aggro.set(h, st.aggro.get(h) * k + h.stats.dealt - st.dealt.get(h)); st.dealt.set(h, h.stats.dealt);
-      if (!w.winner && h.state !== 'dead') { act(w, st, h); h.h4.sharps[h.h4.wi] = h.h4.sharp; }
+      if (!w.winner && h.state !== 'dead') { act(w, st, h); BD.H4Weapons.step(h, dt); h.h4.sharps[h.h4.wi] = h.h4.sharp; }
     }
     BD.H4Combat.tick(w, st, dt, st.orig);
     if (w.winner && !st.done) { st.done = true; if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
@@ -115,11 +115,12 @@
     const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
     for (const h of hunters) {
       BD.huntUnit(h, true);
-      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = hd.weapons.slice(1).find((id) => BD.HUNT.WEAPON_BY_ID[id] && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
+      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = hd.weapons.slice(1).find((id) => (H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id]) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
       const spec = H4.WEAPON_SPECS[h.def.weapon];
       h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, mod: hd.mod || {}, sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
-        focus: spec.focus ? BD.prepSkill(spec.focus) : null, items: Object.assign({}, hd.items), nextAct: 0 };
-      h.stats.h4 = { pops: 0, breaks: 0, procs: 0, whets: 0, flashes: 0, dusts: 0, switches: 0 };
+        items: Object.assign({}, hd.items), nextAct: 0 };
+      h.stats.h4 = { pops: 0, breaks: 0, procs: 0, whets: 0, flashes: 0, dusts: 0, switches: 0, offsets: 0, pguards: 0, clashes: 0 };
+      BD.H4Weapons.equip(h);
     }
     boss.maxHp = boss.hp = boss.hpTrail = Math.round(boss.maxHp * H4.BOSS_HP_MUL); boss.maxPosture *= H4.POSTURE_MUL;
     w.enrageAt = Infinity; // 以時限取代狂暴
