@@ -16,7 +16,7 @@
   }
   const keepGoing = (h, base) => rng(h)() < (open(h) ? 0.95 : base); // 連段要不要接：Boss 有破綻幾乎必接
   BD.defineStatus('h4atk', { name: '攻擊強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgDealtMul: 1.1 } }); // 狩獵笛旋律
-  BD.defineStatus('h4def', { name: '防禦強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.85 } });
+  BD.defineStatus('h4def', { name: '防禦強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.9 } });
   // 狩獵笛：最近 3 個音符 → 旋律（同色兩個以上；紅藍綠各一 = 全音）；目標旋律依隊伍狀況決定
   const NOTE = { horn_l: 'A', horn_dash: 'A', horn_r: 'B', horn_back: 'C' }, NOTE_SK = { A: 'horn_l', B: 'horn_r', C: 'horn_back' }, MEL_NOTE = { atk: 'A', def: 'B', heal: 'C' };
   const MEL_NAME = { atk: '攻擊強化', def: '防禦強化', heal: '回復', all: '全音・回復與體力' };
@@ -41,7 +41,7 @@
   }
   BD.defineStatus('h4red', { name: '紅精華', tags: ['buff'], stacking: 'refresh', modifiers: { dmgDealtMul: 1.1 } }); // 操蟲棍
   BD.defineStatus('h4white', { name: '白精華', tags: ['buff'], stacking: 'refresh', modifiers: { speedMul: 1.15 } });
-  BD.defineStatus('h4orange', { name: '橙精華', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.9 } });
+  BD.defineStatus('h4orange', { name: '橙精華', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.8 } });
   const EXTRACT_NAME = { red: '紅精華', white: '白精華', orange: '橙精華' };
   // 變形武器：招式開始時切到該招的形態（AI 備援挑到另一形態的招 = 順勢變形）
   const startOnce = (h) => { const i = h.inst; if (!i || i.h4done) return null; i.h4done = true; if (i.skill.mode) h.h4.drv.mode = i.skill.mode; return i.skill.id; };
@@ -448,7 +448,7 @@
   }
   BD.defineTrait('h4arms', {
     interceptDamage(w, b, src, p) {
-      if (!p.dot && p.dmg) p.dmg *= BD.H4Gear.takenMul(w, b); // 防具：耐震、守護靈光
+      if (!p.dot && p.dmg) p.dmg *= BD.H4Gear.takenMul(w, b) * (b.h4.spec.taken || 1); // 防具：耐震、守護靈光；遠程防具較薄
       const i = b.inst, boss = src && (src.isBoss ? src : null);
       if (!i || !src || p.dot) return null;
       const s = i.skill;

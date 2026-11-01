@@ -54,7 +54,7 @@
     katana: { dtype: 'cut', sharp: 150,
       focus: { id: 'h4_focus_katana', name: '穿傷・居合突', short: '穿傷', tags: ['melee'], range: [0, 200], cd: 6, cost: 0, track: 9, recovery: 0.45,
         actions: [hit(0.3, cone(200, 40), { dmg: 70, posture: 30, kb: 120, focus: true, fx: { id: 'thrust', scale: 1.2 } })] } },
-    bow: { dtype: 'shot', sharp: 0 },
-    lightxbow: { dtype: 'shot', sharp: 0 },
+    bow: { dtype: 'shot', sharp: 0, taken: 1.3 }, // taken：遠程防具較薄，受傷倍率
+    lightxbow: { dtype: 'shot', sharp: 0, taken: 1.3 },
   };
 })(typeof window !== 'undefined' ? window : globalThis);

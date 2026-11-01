@@ -128,7 +128,7 @@
     variants: [
       thrust('lance_p2', '中段突刺二', '二段', 50, 16, 60),
       thrust('lance_p3', '上段突刺', '三段', 64, 22, 150),
-      sk('lance_guard', '防禦', '防禦', ['defensive'], [0, 400], { cost: 0, track: 12, recovery: 0.7, guard: { perfect: 0.25, chip: 0.12, block: true } }, []),
+      sk('lance_guard', '防禦', '防禦', ['defensive'], [0, 400], { cost: 0, track: 12, recovery: 0.7, guard: { perfect: 0.25, chip: 0.18, block: true } }, []),
       sk('lance_counter', '反擊突刺', '反擊', ['melee'], [0, 190], { cost: 0, sw: 'thrust', track: 10, recovery: 0.3 },
         [hit(0.14, rect(190, 60), { dmg: 120, posture: 55, kb: 260, fx: { id: 'thrust', scale: 1.3 } })]),
     ] };
@@ -168,7 +168,7 @@
       swd('sa_sw1', '劍：縱斬', '劍縱', { sw: 'down', recovery: 0.25 }, [hit(0.18, cone(150, 60), { dmg: 72, posture: 16, kb: 90, fx: 'slash' })]),
       swd('sa_sw2', '劍：橫斬', '劍橫', { sw: 'ccw', recovery: 0.25 }, [hit(0.18, cone(150, 100), { dmg: 70, posture: 16, kb: 90, fx: 'slash' })]),
       swd('sa_sw3', '劍：二連斬', '二連', { sw: 'cw', recovery: 0.3 }, [hit(0.16, cone(150, 90), { dmg: 44, posture: 12, kb: 60 }), hit(0.32, cone(150, 90), { dmg: 50, posture: 14, kb: 120, fx: 'slash' })]),
-      swd('sa_zsd', '零距離屬性解放突擊', '零解', { sw: 'thrust', track: 8, recovery: 0.7 },
+      swd('sa_zsd', '零距離屬性解放突擊', '零解', { sw: 'thrust', track: 8, recovery: 0.7, armor: 0.3 },
         [dash(0.05, 80, 0.12)].concat(flurry(0.25, 6, 0.1, rect(140, 70), { dmg: 36, posture: 10, kb: 0 }, 'thrust'), [hit(0.95, circle(170), { dmg: 220, posture: 70, kb: 360, fx: { id: 'whirl', scale: 1.6 } })])),
       axe('sa_morph_axe', '變形斬（斧）', '回斧', { sw: 'down', recovery: 0.35 }, [hit(0.3, cone(165, 60), { dmg: 80, posture: 24, kb: 160, fx: 'slash' })]),
     ] };
@@ -190,7 +190,7 @@
       cbA('cb_ed1', '屬性解放斬 I', '解放I', { sw: 'cw', recovery: 0.4 }, [hit(0.3, cone(170, 90), { dmg: 85, posture: 25, kb: 120, fx: 'slash' }), phial(0.36, 30)]),
       cbA('cb_ed2', '屬性解放斬 II', '解放II', { sw: 'ccw', recovery: 0.45 },
         [hit(0.28, cone(170, 90), { dmg: 70, posture: 22, kb: 60 }), phial(0.34, 25), hit(0.5, cone(170, 90), { dmg: 75, posture: 22, kb: 160, fx: 'slash' }), phial(0.56, 25)]),
-      cbA('cb_aed', '大解放斬', '大解放', { sw: 'down', recovery: 0.7 }, [hit(0.55, cone(175, 70), { dmg: 200, posture: 60, kb: 300, fx: { id: 'slash', scale: 1.6 } }), phial(0.62, 70)]),
+      cbA('cb_aed', '大解放斬', '大解放', { sw: 'down', recovery: 0.7, armor: 0.3 }, [hit(0.55, cone(175, 70), { dmg: 200, posture: 60, kb: 300, fx: { id: 'slash', scale: 1.6 } }), phial(0.62, 70)]),
       cbA('cb_saed', '超解放斬', '超解', { sw: 'down', track: 5, recovery: 0.9 }, [hit(0.7, cone(180, 60), { dmg: 160, posture: 50, kb: 200, fx: { id: 'slash', scale: 1.8 } })]), // 瓶爆由驅動依瓶數追加
     ] };
 
@@ -279,18 +279,18 @@
       focus: sk('h4_focus_glaive', '蟲穿・旋斬', '蟲穿', ['melee'], [0, 180], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
         [dash(0.05, 90, 0.15, { iframe: true }), hit(0.3, circle(160), { dmg: 110, posture: 35, kb: 180, focus: true, fx: 'whirl' })]) },
   });
-  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0 } }); // 遠程沒有集中弱點攻擊（投射物不開 / 不打破傷口）
+  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0, taken: 1.3 } }); // 遠程沒有集中弱點攻擊（投射物不開 / 不打破傷口）
   // 弓：強擊瓶支數 / 傷害倍率、龍之一矢冷卻；輕弩：各彈種彈數；重弩：彈匣、狙擊 / 架設冷卻
   H4.BOW = { coats: 12, coatDmg: 1.25, dragonCd: 30 };
   H4.LBG = { mag: { n: 8, p: 4, rapid: 3 } };
   H4.HBG = { mag: 6, snipeCd: 25, siegeCd: 14 };
   // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽
-  H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.2, ampDrain: 2.5, lowAt: 20, morphAt: 55 };
+  H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.25, ampDrain: 2.5, lowAt: 20, morphAt: 55 };
   // 充能斧：劍命中加能量、每 20 能量裝 1 瓶、最多 5 瓶、超解每瓶瓶爆傷害、盾強化秒數 / 防禦承受 / 斧傷害倍率
   H4.CHARGE = { energyPerHit: 10, perPhial: 20, maxPhials: 5, saedPhial: 70, shieldDur: 45, shieldChip: 0.1, shieldDmg: 1.15 };
   // 操蟲棍：精華秒數；紅 = 傷害、白 = 移動、橙 = 減傷
   H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
-  H4.HORN = { range: 600, dur: 45, heal: 0.15, allHeal: 0.08, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
+  H4.HORN = { range: 600, dur: 45, heal: 0.05, allHeal: 0.03, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
   H4.DEMON = { drain: 7, exitAt: 0.25, gaugePerHit: 2.2, archDrain: 2, flurryCost: 30, dmgMul: 1.15 }; // 雙刀：鬼人化每秒耗體力、體力低於此比例自動解除（留翻滾的體力）、每次命中加鬼人槽、鬼人強化每秒掉槽、亂舞耗槽、鬼人化傷害倍率
   H4.GUARD = { chip: 0.25, staPerDmg: 0.35, kbMul: 0.3 }; // 一般防禦：承受傷害比例、每點傷害耗體力、擊退倍率
   H4.CLASH = { dmg: 120, lock: 1.2, win: 0.55, topple: 2.5 }; // 力量對抗：Boss 單擊傷害門檻、對峙時間、基礎勝率、勝利時 Boss 倒地秒數

@@ -147,7 +147,7 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   hd.notes = []; horn.state = 'idle'; horn.cancelSkill(); horn.startSkill(horn.h4.kv.horn_back, { force: true }); run(w, 0.05); assert.strictEqual(hd.notes.join(), 'C', '綠音記一個音符');
   // 長槍：一般防禦（不完美）擋下也接反擊突刺
   lance.cancelSkill(); lance.state = 'idle'; lance.sta = lance.maxSta; lance.startSkill(lance.h4.kv.lance_guard, { force: true }); run(w, 0.4);
-  let hp = lance.hp; w.damageBoss(b, lance, { dmg: 120 }); assert.ok(hp - lance.hp > 0 && hp - lance.hp <= 120 * 0.12 + 1, '長槍防禦減傷 ' + (hp - lance.hp));
+  let hp = lance.hp; w.damageBoss(b, lance, { dmg: 120 }); assert.ok(hp - lance.hp > 0 && hp - lance.hp <= 120 * 0.18 * 1.1, '長槍防禦減傷 ' + (hp - lance.hp));
   run(w, 1); assert.ok(lance.lastSkillId === 'lance_counter' || (lance.inst && lance.inst.skill.id === 'lance_counter'), '擋下後反擊突刺');
   // 銃槍：砲擊耗彈、固定傷害（不吃肉質）；裝填補滿
   const gd = gl.h4.drv; gd.shells = 5;
