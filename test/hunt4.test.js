@@ -128,6 +128,25 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   w.damageBoss(b, sel, { dmg: 120 }); assert.ok(hp - sel.hp > 0 && hp - sel.hp < 60, '一般防禦減傷 ' + (hp - sel.hp));
 }
 
+// P4 獵人大腦：存檔防呆、學習會寫進存檔、同存檔 + 同種子結果相同、熟練度隨場數上升
+{
+  const H = BD.H4Brain, bad = H.sanitize({ v: H.V, matches: 'x', hunters: { rin: { xp: { katana: 1e9 }, strat: { katana: { k: { go: [999, NaN] } } }, dex: { x: 5 } }, evil: {} } });
+  assert.strictEqual(bad.matches, 0); assert.strictEqual(bad.hunters.rin.xp.katana, 1e5); assert.strictEqual(bad.hunters.rin.strat.katana.k.go.join(), '200,-10');
+  assert.ok(!bad.hunters.evil && !bad.hunters.rin.dex.x, '未知欄位要丟掉');
+  assert.strictEqual(H.sanitize(null).matches, 0); assert.strictEqual(H.sanitize({ v: 99 }).matches, 0);
+  const save = H.newSave(), m0 = H.mastery(save, 'rin', 'katana');
+  const fight = (sv) => { const w = new BD.World(BD.Hunt4.team(), BD.bossById.ronin, { seed: 5, pace: 'heavy', hunt4: true, intro: 0.5, h4save: sv }); run(w, 1000); return w; };
+  const snap = JSON.stringify(save), w = fight(save);
+  assert.ok(w.over && save.matches === 1 && save.hunters.rin.xp.katana === 1 && save.hunters.rin.dex.ronin.fights === 1, '一場結束要寫回存檔');
+  assert.ok(Object.keys(save.hunters.mari.strat.gs).length > 0 && Object.keys(save.hunters.rin.dex.ronin.sk).length > 0, '武器策略 / 圖鑑有學到東西');
+  assert.ok(H.mastery(save, 'rin', 'katana') > m0, '熟練度上升');
+  const a = JSON.parse(snap), b = JSON.parse(snap), wa = fight(a), wb = fight(b);
+  assert.strictEqual(wa.time.toFixed(3) + JSON.stringify(a), wb.time.toFixed(3) + JSON.stringify(b), '同存檔 + 同種子結果不同');
+  const cl = H.sanitize(JSON.parse(JSON.stringify(save))); // 合法存檔經防呆後內容不變（欄位順序可能不同）
+  assert.strictEqual(JSON.stringify(H.dexInfo(cl, 'yuzu', 'ronin')) + H.mastery(cl, 'yuzu', 'db') + cl.hunters.mari.strat.gs['mid|atk'].go, JSON.stringify(H.dexInfo(save, 'yuzu', 'ronin')) + H.mastery(save, 'yuzu', 'db') + save.hunters.mari.strat.gs['mid|atk'].go, '合法存檔經防呆後不變');
+  assert.ok(H.dexInfo(save, 'rin', 'ronin').all > 0 && H.dexInfo(save, 'rin', 'nobody').fights === 0);
+}
+
 // 整場：分出勝負、Boss 換過目標、同種子結果相同
 let wins = 0;
 const ids = ['magmus', 'ronin', 'thor', 'deviljho', 'margit', 'zeus'];

@@ -226,8 +226,8 @@
       // 只有帶反應招的武器才搶時機：b.react（狩獵模式各武器，例如片手劍防禦）或太刀的彈刀（b.pick(0)）
       if ((b.react || b.pick) && b.canAct()) for (const th of c.scanThreats()) {
         if (th.glow) continue;
-        if (!jit.has(th.key)) jit.set(th.key, c.rng.range(-0.05, 0.05));
-        if (th.left <= 0.1 + jit.get(th.key)) { const sk = b.react ? b.react(th) : b.pick(0); if (sk && b.startSkill(sk)) return; }
+        if (!jit.has(th.key)) jit.set(th.key, b.reactAt ? b.reactAt(th) : 0.1 + c.rng.range(-0.05, 0.05)); // 狩獵模式的獵人大腦自己決定時機（reactAt / onReact）
+        if (th.left <= jit.get(th.key)) { const sk = b.react ? b.react(th) : b.pick(0); if (sk && b.startSkill(sk)) { if (b.onReact) b.onReact(th); return; } }
       }
       ai(dt);
     };

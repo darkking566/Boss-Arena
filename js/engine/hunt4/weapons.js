@@ -123,7 +123,7 @@
     hs.focus = spec.focus ? BD.prepSkill(spec.focus) : null;
     hs.D = D || null; hs.drv = D && D.init ? D.init(h) : {};
     if (!c._choose0) c._choose0 = c.chooseSkill.bind(c);
-    c.chooseSkill = (d, win) => (hs.D && hs.D.choose(h, d, win)) || c._choose0(d, win);
+    c.chooseSkill = (d, win) => { const s = (hs.D && hs.D.choose(h, d, win)) || c._choose0(d, win); return s && h.brain ? h.brain.gate(s, d) : s; }; // 獵人大腦決定出手或等待
     if (D && D.react) h.react = () => D.react(h); else delete h.react;
   }
   // 招式剛結束 → 問驅動要不要接下一招（每次結束只問一次）

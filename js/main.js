@@ -78,6 +78,32 @@
       <div class="ult">大招【${def.ultimate.name}${def.ultimate.name2 ? '／' + def.ultimate.name2 : ''}】：${def.ultimate.desc}</div>
       <div class="p2">二階段（HP 50%）：${BD.describePhase2(def)}</div></div>`;
   }
+  // 狩獵：獵人的熟練度與對這位 Boss 的圖鑑（招式摸熟幾招、最軟部位、被追比例、戰績）
+  const PART_NAME = { head: '頭', legs: '腳', body: '身', tail: '尾' };
+  function h4Line(h, bossId) {
+    const H = BD.H4Brain, sv = state.h4save, x = H.dexInfo(sv, h.id, bossId);
+    const ms = h.weapons.filter((wp) => BD.HUNT4.WEAPON_SPECS[wp]).map((wp) => `${BD.HUNT4.WEAPON_NAMES[wp]} ${Math.round(H.mastery(sv, h.id, wp) * 100)}%`).join('、');
+    return `<div class="d"><b style="color:${h.color}">${h.title}・${h.name}</b>：${h.desc}<br>熟練：${ms}｜圖鑑：招式 ${x.known}/${x.all}` +
+      (x.soft ? `・最軟 ${PART_NAME[x.soft]}` : '') + (x.fights ? `・被追 ${Math.round(x.chased * 100)}%・戰績 ${x.wins}/${x.fights}` : '・尚未交手') + '</div>';
+  }
+  const H4KEY = 'bd.hunt4.save';
+  state.h4save = (() => { try { return BD.H4Brain.sanitize(JSON.parse(localStorage.getItem(H4KEY))); } catch (e) { return BD.H4Brain.newSave(); } })();
+  function h4Store() { try { localStorage.setItem(H4KEY, JSON.stringify(state.h4save)); } catch (e) { /* file:// 下可能不可用：本次開啟期間仍記得 */ } }
+  $('#detail').addEventListener('click', (e) => {
+    const k = e.target.dataset && e.target.dataset.h4;
+    if (k === 'export') {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state.h4save)], { type: 'application/json' }));
+      a.download = 'hunt4-save.json'; a.click(); URL.revokeObjectURL(a.href);
+    } else if (k === 'import') {
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+      inp.onchange = () => inp.files[0] && inp.files[0].text().then((t) => {
+        let o = null; try { o = JSON.parse(t); } catch (err) { /* 下面統一提示 */ }
+        if (!o || o.v !== BD.H4Brain.V) { alert('這不是可用的狩獵學習存檔'); return; }
+        state.h4save = BD.H4Brain.sanitize(o); h4Store(); showDetail(1, state.pick[1]);
+      });
+      inp.click();
+    } else if (k === 'reset' && confirm('確定要清除四位獵人的所有學習紀錄嗎？')) { state.h4save = BD.H4Brain.newSave(); h4Store(); showDetail(1, state.pick[1]); }
+  });
   function showDetail(side, id) {
     const a = side === 0 ? id : state.pick[0], b = side === 1 ? id : state.pick[1];
     if (state.mode === 'train') { // 訓練場：只顯示所選 Boss 與訓練假人說明
@@ -89,8 +115,9 @@
     }
     if (state.mode === 'hunt4') { // 狩獵：顯示目標 Boss（右側選的）與獵人隊
       $('#detail').innerHTML = detailHtml(BD.bossById[b], 1).replace('紅方：', '目標：') +
-        `<div><h3>獵人隊（4 人，AI 操控）</h3>${BD.HUNT4.HUNTERS.map((h) => `<div class="d"><b style="color:${h.color}">${h.title}・${h.name}</b>：${h.desc}</div>`).join('')}
-        <div class="d">Boss 生命 ×${BD.HUNT4.BOSS_HP_MUL}；全隊共用 ${BD.HUNT4.CARTS} 次力竭，用完即失敗。</div></div>`;
+        `<div><h3>獵人隊（4 人，AI 操控）· 已累積 ${state.h4save.matches} 場</h3>${BD.HUNT4.HUNTERS.map((h) => h4Line(h, b)).join('')}
+        <div class="d">Boss 生命 ×${BD.HUNT4.BOSS_HP_MUL}；全隊共用 ${BD.HUNT4.CARTS} 次力竭，用完即失敗。獵人會跨場學習：武器越用越熟、對每位 Boss 的招式越來越了解。</div>
+        <div class="d"><button data-h4="export">匯出學習存檔</button> <button data-h4="import">匯入</button> <button data-h4="reset">重置學習</button></div></div>`;
       return;
     }
     if (state.mode === 'team') { // 3v3：顯示游標所在的 Boss 與雙方陣容
@@ -297,7 +324,7 @@
 
   // 狩獵模式（4v1）：四位 AI 獵人討伐一位 Boss
   function startHunt4(bossId, mapId) {
-    const w = new BD.World(BD.Hunt4.team(), BD.bossById[bossId], { input, pace: 'heavy', map: mapId || state.map, hunt4: true });
+    const w = new BD.World(BD.Hunt4.team(), BD.bossById[bossId], { input, pace: 'heavy', map: mapId || state.map, hunt4: true, h4save: state.h4save });
     w.speed = 1;
     state.world = w; state.resultShown = false; state.hunt4 = { boss: bossId, map: mapId || state.map };
     view.player = null; view.focus = null;
@@ -306,14 +333,16 @@
   }
   state.startHunt4 = startHunt4;
   function showHunt4Result(w) {
-    state.resultShown = true; state.resultKind = 'hunt4';
+    state.resultShown = true; state.resultKind = 'hunt4'; h4Store(); // 這場學到的已寫進 state.h4save（戰鬥中直接累積）
     const st = w.hunt4, boss = st.boss, win = w.winner && w.winner.team === 0, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
     $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 討伐成功！` : '狩獵失敗…';
     $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS} · 怯 ${st.flinches} 次 · 倒地 ${st.topples} 次` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
     const rows = [['造成傷害', (h) => Math.round(h.stats.dealt)], ['承受傷害', (h) => Math.round(h.stats.taken)], ['力竭', (h) => st.faintsBy.get(h)],
       ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['相殺 / 力量對抗 / 完美防禦', (h) => `${h.stats.h4.offsets} / ${h.stats.h4.clashes} / ${h.stats.h4.pguards}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`],
       ['傷口破壞 / 部位破壞', (h) => `${h.stats.h4.pops} / ${h.stats.h4.breaks}`], ['異常觸發', (h) => h.stats.h4.procs], ['換武器', (h) => h.stats.h4.switches],
-      ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`]];
+      ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`],
+      ['反應 / 翻滾成功', (h) => h.brain.res.react.concat(h.brain.res.dodge).reduce((s, v, i) => s + (i % 2 ? `/${v}` : (i ? '　' : '') + v), '')],
+      ['熟練度', (h) => `${Math.round(BD.H4Brain.mastery(state.h4save, h.def.hunter, h.def.weapon) * 100)}%`]];
     $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +
       rows.map(([n, f]) => `<tr><td>${n}</td>${st.hunters.map((h) => `<td>${f(h)}</td>`).join('')}</tr>`).join('');
     $('#btnRematch').textContent = '🔁 再狩獵一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回選單';

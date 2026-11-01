@@ -13,6 +13,9 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, 9 + 4 * k, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = 'rgba(255,40,60,0.85)'; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
     }
+    if (!R.aiDebug) return; // F6：獵人大腦最近一次的決定（出手 / 等待＋情境、反應、翻滾方向）
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.font = `bold 14px ${FONT}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+    for (const h of st.hunters) if (h.brain && h.state !== 'dead' && h.brain.last) { const s = h.name + '｜' + h.brain.last; ctx.strokeText(s, h.x, h.y - h.r - 40); ctx.fillStyle = h.def.color; ctx.fillText(s, h.x, h.y - h.r - 40); }
   };
 
   // 部位列：頭 / 腳 / 身 / 尾 各一格（紅＝傷口、灰＝疤、金框＝已破壞），右側列出 Boss 身上的異常與疲勞

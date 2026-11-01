@@ -65,7 +65,7 @@
     h.def = def; h.skills = def.skills.map(BD.prepSkill); h.traits = def.traits.map(BD.trait); h.controller.p = def.ai;
     h.dmgMul = h.hunt.baseDmg; BD.huntWeapon(h);
     hs.spec = H4.WEAPON_SPECS[def.weapon]; hs.sharp = hs.sharps[hs.wi]; hs.wT = w.time; BD.H4Weapons.equip(h);
-    h.stats.h4.switches++; h.setState('recover', 1); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
+    h.stats.h4.switches++; h.brain.used.add(def.weapon); h.setState('recover', 1); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
   }
   const use = (w, h, dur, text) => { h.setState('recover', dur); w.fx.text(h.x, h.y - h.r - 24, text, '#e8f4ff', 16); };
   // 每 0.25 秒判斷一次（只在手上沒事時）：粉塵 → 閃光 → 回復藥 → 磨刀 → 換武器 → 集中弱點攻擊
@@ -106,12 +106,12 @@
       st.aggro.set(h, st.aggro.get(h) * k + h.stats.dealt - st.dealt.get(h)); st.dealt.set(h, h.stats.dealt);
       if (!w.winner && h.state !== 'dead') { act(w, st, h); BD.H4Weapons.step(h, dt); h.h4.sharps[h.h4.wi] = h.h4.sharp; }
     }
-    BD.H4Combat.tick(w, st, dt, st.orig);
-    if (w.winner && !st.done) { st.done = true; if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
+    BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt);
+    if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
     if (!w.winner && w.time >= H4.TIME_LIMIT) fail(w, st, '時間到');
   }
 
-  BD.setupHunt4 = function (w) {
+  BD.setupHunt4 = function (w, opts) {
     const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
     for (const h of hunters) {
       BD.huntUnit(h, true);
@@ -126,7 +126,7 @@
     w.enrageAt = Infinity; // 以時限取代狂暴
     BD.applyStatus(boss, 'kdGuard', { dur: Infinity }, w); // Boss 不會被單一重擊打倒，只有架勢累積崩潰才倒地（combat.js 的倒地）
     const st = w.hunt4 = { boss, hunters, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };
-    BD.H4Combat.init(w, st);
+    BD.H4Combat.init(w, st); BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); // 沒給存檔 = 全新的獵人
     const retarget = w.retarget.bind(w), step = w.step.bind(w), orig = st.orig = w.damageBoss.bind(w);
     w.retarget = (b) => (b === boss ? aggroTarget(w, st) : retarget(b));
     w.damageBoss = (src, b, p) => { // 獵人（或其投射物）打 Boss → 走狩獵戰鬥管線
