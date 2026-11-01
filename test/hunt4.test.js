@@ -70,7 +70,7 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   rin.hp = rin.maxHp * 0.3; rin.h4.items.flash = 0; rin.hunt.hpPotions = 0; b._target = rin; st.switchT = 1e9; rin.state = 'idle';
   run(w, 0.3);
   assert.ok(rin.def.weapon === 'bow' && rin.skills.some((s) => s.id === 'bow_s1'), '換成弓');
-  run(w, 7); b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(st.hunters[1], b, { dmg: 10, posture: 10 }); run(w, 3);
+  run(w, 7); b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(st.hunters[1], b, { dmg: 10, posture: 10, ignoreIframe: true }); run(w, 0.05); rin.state = 'idle'; rin.h4.nextAct = 0; run(w, 3); // 弓的連段會一直接下去，手動空出 act 的時機
   assert.ok(rin.def.weapon === 'katana' && rin.maxSpirit > 0, '倒地時換回太刀');
 }
 

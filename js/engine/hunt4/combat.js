@@ -29,8 +29,13 @@
     if (busy(b)) return false;
     b.setState(state, dur); w.fx.text(b.x, b.y - b.r - 34, text, color, 24); return true;
   }
+  function armored(w, st, b, state, dur, text, color) { // 霸體：出招中只記下（暈眩優先於怯），收招後 tick 補上
+    if (b.state !== 'skill') return cc(w, b, state, dur, text, color);
+    if (!st.pend || state === 'stun') st.pend = { state, dur, text, color };
+    return false;
+  }
   function flinch(w, st, b, dur) {
-    if (b.state === 'knockdown' || b.state === 'stun' || !cc(w, b, 'stagger', dur, '怯！', '#ffd0a0')) return;
+    if (b.state === 'knockdown' || b.state === 'stun' || !armored(w, st, b, 'stagger', dur, '怯！', '#ffd0a0')) return;
     st.flinches++;
   }
 
@@ -99,7 +104,7 @@
     }
     if ((st.flinchAcc += dealt) >= st.flinchAt) { st.flinchAcc = 0; st.flinchAt *= H4.FLINCH.grow; flinch(w, st, b, H4.FLINCH.dur); }
     if (spec.dtype === 'blunt' && P.id === 'head' && (st.stunAcc += dealt * BD.H4Gear.mul(h, 'ko')) >= st.stunAt) {
-      st.stunAcc = 0; st.stunAt *= H4.STUN.grow; if (cc(w, b, 'stun', H4.STUN.dur, '暈眩！', '#ffe27a')) w.log(h, '把 ' + b.name + ' 打暈了！', true);
+      st.stunAcc = 0; st.stunAt *= H4.STUN.grow; if (armored(w, st, b, 'stun', H4.STUN.dur, '暈眩！', '#ffe27a')) w.log(h, '把 ' + b.name + ' 打暈了！', true);
     }
     return r;
   }
@@ -109,6 +114,10 @@
     if (b.state === 'dead' || w.winner) return;
     for (const P of st.parts) if (P.wound && w.time - P.wound > H4.WOUND.life) P.wound = 0;
     if (st.asleep && b.state !== 'stun') st.asleep = false;
+    if (st.pend && b.state !== 'skill') { // 收招：補上出招中記下的怯 / 暈眩；已倒地 / 暈眩就作廢
+      const q = st.pend; st.pend = null;
+      if (b.state !== 'knockdown' && b.state !== 'stun' && cc(w, b, q.state, q.dur, q.text, q.color)) { if (q.state === 'stagger') st.flinches++; else w.log(b, '收招後暈眩了！', true); }
+    }
     if (st.poisonT > 0) {
       st.poisonT -= dt; st.poisonAcc += dt;
       if (st.poisonAcc >= 1) { st.poisonAcc -= 1; orig(st.poisonBy, b, { dmg: H4.AILMENTS.poison.dps * b.maxHp * (st.poisonBy && st.poisonBy.h4 ? BD.H4Gear.mul(st.poisonBy, 'poison') : 1), dot: true, posture: 0, unblockable: true, ignoreIframe: true }); }

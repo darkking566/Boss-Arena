@@ -96,7 +96,7 @@
       }
     }
     const t = b._target;
-    if (I.flash > 0 && t && t !== h && t.state !== 'dead' && t.hp < t.maxHp * 0.35 && b.state !== 'stun' && b.state !== 'knockdown' && b.state !== 'transition' && w.rng() < 0.3 + 0.6 * p.care) {
+    if (I.flash > 0 && t && t !== h && t.state !== 'dead' && t.hp < t.maxHp * H4.ITEMS.flashAt && b.state !== 'stun' && b.state !== 'knockdown' && b.state !== 'transition' && w.rng() < 0.3 + 0.6 * p.care) {
       I.flash--; h.stats.h4.flashes++; use(w, h, 0.4, '閃光彈！');
       const dur = H4.ITEMS.flashDur * Math.pow(H4.ITEMS.flashFade, st.flashes++) * BD.H4Gear.mul(h, 'fdur');
       b.setState('stun', dur); w.fx.text(b.x, b.y - b.r - 34, '目眩！', '#ffffff', 24); w.fx.ring(h.x, h.y, 10, 160, 0.3, '#ffffff', 8);

@@ -32,7 +32,8 @@
   H4.WOUND = { at: 0.035, life: 60, scar: 40, hz: 0.1, popDmg: 160, popPosture: 40 };
   // 怯：累積傷害達最大生命 at 比例 → 硬直 dur 秒，每次門檻 ×grow；暈眩：打擊打頭累積；倒地：架勢崩潰改為倒地 dur 秒、之後架勢上限 ×grow
   H4.FLINCH = { at: 0.12, dur: 0.7, grow: 1.5 };
-  H4.STUN = { at: 0.12, dur: 4, grow: 2 };
+  // 霸體：Boss 出招中（state skill）怯 / 暈眩只記下，收招後才生效；倒地 / 麻痺 / 睡眠 / 閃光彈照樣打斷
+  H4.STUN = { at: 0.12, dur: 2.5, grow: 2 };
   H4.TOPPLE = { dur: 3.5, grow: 2 };
   H4.HEAVY_KB = 300; // 擊退：只有打擊類且 kb ≥ 此值的重擊（大錘蓄力 III）能推動 Boss，其餘命中 kb 歸零
   H4.FATIGUE = { every: 150, dur: 25 }; // 每 every 秒進入 dur 秒疲勞（變慢、傷害降低）
@@ -48,7 +49,7 @@
   H4.SHARP = { bands: [{ at: 0.75, name: '白', color: '#f4f4f4', mul: 1.25 }, { at: 0.45, name: '藍', color: '#3a8bff', mul: 1.15 },
     { at: 0.25, name: '綠', color: '#5fd47a', mul: 1.05 }, { at: 0.1, name: '黃', color: '#ffe14a', mul: 1 }, { at: 0, name: '橙', color: '#ff8a3a', mul: 0.8 }],
   bounceFrom: 3, bounceHz: 0.45, hardCost: 2, whetAt: 0.3, whetTime: 1.6 };
-  H4.ITEMS = { flashDur: 2.6, flashFade: 0.6, dustHeal: 0.3, dustR: 500 };
+  H4.ITEMS = { flashAt: 0.25, flashDur: 2.6, flashFade: 0.6, dustHeal: 0.3, dustR: 500 };
 
   // 各武器的狩獵屬性：dtype 傷害類型、sharp 銳利度上限（命中次數；遠程為 0）、focus 集中弱點攻擊（打破傷口）
   H4.WEAPON_SPECS = {
