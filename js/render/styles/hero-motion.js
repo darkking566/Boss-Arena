@@ -18,16 +18,27 @@
   const CHOP = (h) => [P({ a: -2.3 * (h || 1), reach: -0.25, lean: -0.1 }), P({ a: -0.25, lean: 0.2 }), P({ a: 0.25, lean: 0.25, sq: 1 })];
   const THRUST = (len, ang) => [P({ a: ang || 0, reach: -0.4, lean: -0.1 }), P({ a: ang || 0, reach: len * 0.8, lean: 0.25 }), P({ a: ang || 0, reach: len, lean: 0.25 })];
   const SHOVE = () => [P({ a: -0.9, shield: 0.6, lean: -0.05 }), P({ a: -0.9, shield: 1.3, lean: 0.25 }), P({ a: -0.9, shield: 1.4, lean: 0.25 })]; // 盾往前推
-  const KIND = { slash: (i, p) => SLASH(i % 2 ? -p.side : p.side, p.w), chop: (i, p) => CHOP(p.h), thrust: (i, p) => THRUST(p.len || 0.6, p.ang), shove: () => SHOVE() };
+  const glow = (q, g) => Object.assign({}, q, { glow: g });
+  // 每段命中的動作：n＝這是第幾個斬（左右來回用）、prev＝上一段甩出的姿勢（瓶爆等「原地再爆一次」用）
+  const KIND = {
+    slash: (n, p) => SLASH(n % 2 ? -(p.side || 1) : p.side || 1, p.w), chop: (n, p) => CHOP(p.h), thrust: (n, p) => THRUST(p.len || 0.6, p.ang), shove: () => SHOVE(),
+    up: () => [P({ a: 2.0, reach: -0.2, lean: -0.05 }), P({ a: 0, lean: 0.2 }), P({ a: -1.0, lean: 0.15 })], // 上撈：從身後低處往前上方撈起
+    back: () => [P({ a: -0.6, lean: 0.05 }), P({ a: 2.4, lean: -0.15 }), P({ a: 2.9, lean: -0.2, sq: 1 })], // 往身後砸
+    shot: (n, p) => { const k = p.kick || 1, a = p.ang || 0; return [P({ a }), P({ a, reach: -0.25 * k, lean: -0.12 * k, glow: 1 }), P({ a, reach: -0.15 * k, lean: -0.08 * k, glow: 0.3 })]; }, // 砲擊後座
+    jab: () => [P({ reach: 0.45, glow: 0.4, lean: 0.15 }), P({ reach: 0.7, glow: 0.9, lean: 0.2 }), P({ reach: 0.55, glow: 0.5, lean: 0.2 })], // 插住不拔、一下一下灌入
+    flash: (n, p, prev) => [prev, glow(prev, 1), glow(prev, 0.2)], // 原地爆一下（瓶爆）
+  };
 
   // 模板：回傳關鍵影格 [時間, 姿勢, 這段的緩動]，最後一格固定回到待機
   const T = {
     // 單擊（slash / chop / thrust / shove）；多段命中就左右來回
     hit(H, D, p) {
-      const keys = [[0, P({}), 'io']], mk = KIND[p.kind || 'slash'];
+      const keys = [[0, P({}), 'io']];
+      let prev = P({}), n = 0;
       H.forEach((t0, i) => {
         const gap = i ? t0 - H[i - 1] : t0, lead = Math.min(LEAD, gap * 0.5), fol = i < H.length - 1 ? Math.min(FOLLOW, (H[i + 1] - t0) * 0.4) : FOLLOW;
-        const [f, m, e] = mk(i, p); strike(keys, t0, lead, fol, f, m, e);
+        const kind = (p.kinds && p.kinds[Math.min(i, p.kinds.length - 1)]) || p.kind || 'slash';
+        const [f, m, e] = KIND[kind](n, p, prev); strike(keys, t0, lead, fol, f, m, e); prev = e; if (kind === 'slash') n++;
       });
       return keys;
     },
@@ -49,11 +60,18 @@
       return [[0, P({}), 'io'], [Math.min(0.12, t0 * 0.5), P({ a: p.holdA != null ? p.holdA : 0.7, lean: 0.35, air: p.air || 0 }), 'out']].concat(rel);
     },
     // 防禦：整招舉盾 / 武器擋在前方
+    // 非攻擊動作（鬼人化、裝瓶、放獵蟲、裝填、演奏）：擺一個姿勢撐住，sway＝左右晃（演奏）
+    item(H, D, p) {
+      const q = P(p.pose), keys = [[0, P({}), 'io'], [Math.min(0.1, D * 0.3), q, 'out']], n = p.sway ? 4 : 0;
+      for (let k = 1; k <= n; k++) keys.push([0.1 + (D - 0.25) * k / (n + 1), Object.assign({}, q, { a: q.a + (k % 2 ? 1 : -1) * p.sway }), 'io']);
+      keys.push([Math.max(0.12, D - 0.12), q, 'io']);
+      return keys;
+    },
     guard(H, D) { return [[0, P({}), 'io'], [0.06, P({ a: -0.7, reach: -0.15, lean: -0.05 }), 'out'], [D - 0.1, P({ a: -0.7, reach: -0.15, lean: -0.05 }), 'lin']]; },
   };
   const air = (keys, amt) => keys.map((k, i) => (i && i < keys.length - 1 ? [k[0], Object.assign({}, k[1], { air: amt }), k[2]] : k)); // 騰空：中間各格放大
 
-  // ── 招式 → 模板（M1：太刀、大劍、片手劍；之後的武器見設計文件 §4）──
+  // ── 招式 → 模板（M1 太刀 / 大劍 / 片手劍、M2 其餘近戰；遠程見設計文件 §4）──
   const red = { trail: '#ff8a7a' };
   const MOTIONS = {
     // 太刀
@@ -78,6 +96,60 @@
     sns_counter: { t: 'hit', kind: 'thrust', len: 0.7 },
     sns_rush: { t: 'rush', then: { t: 'spin', turns: 2 } },
     h4_focus_sns: { t: 'hit', kind: 'thrust', len: 0.8 },
+    // 雙刀（鬼人系殘影紅）
+    db_a1: { t: 'hit', side: 1, w: 0.9 }, db_a2: { t: 'hit', side: -1, w: 0.9 }, db_a3: { t: 'spin' },
+    db_demon: { t: 'item', pose: { a: -0.7, reach: 0.1, glow: 0.7 } }, // 雙刀在胸前交叉
+    db_d1: { t: 'hit', side: 1, w: 0.9, trail: '#ff6a5a' }, db_d2: { t: 'spin', turns: 2, trail: '#ff6a5a' }, db_flurry: { t: 'spin', turns: 3, trail: '#ff6a5a' },
+    db_dash: { t: 'rush', trail: '#ff6a5a', then: { t: 'hit', side: 1, w: 0.9 } },
+    h4_focus_db: { t: 'rush', then: { t: 'spin' } },
+    // 大錘：錘頭拖在身後蓄力
+    ham_c1: { t: 'charge', lv: 1, holdA: 2.2, then: { t: 'hit', kind: 'up' } },
+    ham_side: { t: 'hit', side: 1, w: 1.3 },
+    ham_c2: { t: 'charge', lv: 2, holdA: 2.3, then: { t: 'hit', kind: 'chop' } },
+    ham_c3: { t: 'charge', lv: 3, holdA: 2.4, then: { t: 'hit', kind: 'chop', h: 1.2 } },
+    ham_spin: { t: 'spin', turns: 2 },
+    ham_offset: { t: 'hit', kind: 'up', trail: '#e8f4ff' },
+    h4_focus_hammer: { t: 'hit', kind: 'chop', h: 1.1 },
+    // 狩獵笛：殘影顏色＝音色（紅 / 藍 / 綠）
+    horn_l: { t: 'hit', side: -1, w: 1.2, trail: '#ff6a5a' }, horn_r: { t: 'hit', side: 1, w: 1.2, trail: '#6aa8ff' },
+    horn_dash: { t: 'rush', trail: '#ff6a5a', then: { t: 'hit', kind: 'chop' } },
+    horn_back: { t: 'hit', kind: 'back', trail: '#6ad48a' },
+    horn_play: { t: 'item', pose: { a: -1.6, reach: -0.15, air: 0.06, glow: 0.4 }, sway: 0.45 }, // 笛舉起來左右晃（旋律效果由文字 / 光環表示）
+    horn_echo: { t: 'spin', turns: 1.5, trail: '#c8f0ff' }, h4_focus_horn: { t: 'spin' },
+    // 長槍：身體幾乎不動，只有槍伸縮
+    lance_p1: { t: 'hit', kind: 'thrust', len: 0.8 }, lance_p2: { t: 'hit', kind: 'thrust', len: 0.8, ang: 0.12 }, lance_p3: { t: 'hit', kind: 'thrust', len: 0.8, ang: -0.3 },
+    lance_charge: { t: 'rush', holdA: 0, then: { t: 'hit', kind: 'thrust', len: 0.7 } },
+    lance_guard: { t: 'guard' }, lance_counter: { t: 'hit', kind: 'thrust', len: 0.9 }, h4_focus_lance: { t: 'hit', kind: 'thrust', len: 0.9 },
+    // 銃槍：刺＋砲擊後座
+    gl_p1: { t: 'hit', kind: 'thrust', len: 0.7 }, gl_shell: { t: 'hit', kind: 'shot' },
+    gl_lunge: { t: 'rush', holdA: 0, then: { t: 'hit', kind: 'thrust', len: 0.7 } },
+    gl_p2: { t: 'hit', kind: 'up' }, gl_slam: { t: 'hit', kind: 'chop' },
+    gl_burst: { t: 'hit', kinds: ['chop', 'flash'] }, // 砸地後槍口連爆
+    gl_wf: { t: 'charge', lv: 3, holdA: 0, holdReach: -0.1, then: { t: 'hit', kind: 'shot', kick: 2.2 } },
+    gl_reload: { t: 'item', pose: { a: 0.9, reach: -0.25 } }, gl_guard: { t: 'guard' },
+    h4_focus_gunlance: { t: 'hit', kinds: ['thrust', 'shot'], len: 0.6 },
+    // 斬擊斧：斧重而寬、劍快；變形招在命中瞬間換形態
+    sa_axe1: { t: 'hit', kind: 'chop' }, sa_lunge: { t: 'rush', then: { t: 'hit', kind: 'chop' } }, sa_axe2: { t: 'hit', side: 1, w: 1.3 },
+    sa_wild: { t: 'hit', w: 1.4, side: 1 },
+    sa_morph: { t: 'hit', side: 1, w: 1.3, morph: 'axe', trail: '#c8b8ff' }, sa_morph_axe: { t: 'hit', kind: 'chop', morph: 'sword' },
+    sa_sw1: { t: 'hit', kind: 'chop', h: 0.9 }, sa_sw2: { t: 'hit', side: -1 }, sa_sw3: { t: 'hit', side: 1 },
+    sa_zsd: { t: 'hit', kinds: ['jab', 'jab', 'jab', 'jab', 'jab', 'jab', 'chop'], trail: '#ff7aff' }, // 插住、一下一下灌入，最後爆開
+    h4_focus_switchaxe: { t: 'hit', kind: 'chop', h: 1.1 },
+    // 充能斧：劍盾 → 斧（解放斬命中瞬間變斧），瓶爆在原地再閃一下
+    cb_s1: { t: 'rush', holdA: 0.3, then: { t: 'hit', kind: 'thrust', len: 0.6 } }, cb_s2: { t: 'hit', kind: 'chop', h: 0.9 }, cb_s3: { t: 'spin' },
+    cb_charge: { t: 'item', pose: { a: -1.5, reach: -0.3, glow: 0.6 } }, cb_guard: { t: 'guard' }, // 劍插回盾裡裝瓶
+    cb_ed1: { t: 'hit', kinds: ['slash', 'flash'], side: 1, w: 1.3, morph: 'sword' },
+    cb_ed2: { t: 'hit', kinds: ['slash', 'flash', 'slash', 'flash'], side: -1, w: 1.3, morph: 'sword' },
+    cb_aed: { t: 'hit', kinds: ['chop', 'flash'], h: 1.2 },
+    cb_saed: { t: 'charge', lv: 2, then: { t: 'hit', kind: 'chop', h: 1.2 } },
+    h4_focus_chargeblade: { t: 'hit', kinds: ['chop', 'flash'] },
+    // 操蟲棍：輕盈、跳躍系整招騰空
+    ig_a1: { t: 'hit', side: 1 }, ig_a2: { t: 'hit', kind: 'thrust', len: 0.6 }, ig_a3: { t: 'spin' },
+    ig_red: { t: 'hit', side: 1, w: 1.2, trail: '#ff6a5a' },
+    ig_vault: { t: 'rush', air: 1, airAll: 1, then: { t: 'hit', kind: 'chop', h: 0.8 } },
+    ig_air: { t: 'spin', airAll: 1 }, ig_kinsect: { t: 'item', pose: { a: -0.3, reach: 0.35 } },
+    ig_dive: { t: 'rush', air: 1, airAll: 1, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
+    h4_focus_glaive: { t: 'spin', airAll: 0.5 },
   };
 
   // 每招的關鍵影格只算一次（依招式版本 v 快取）
@@ -90,6 +162,7 @@
     if (m.at != null || !H.length) H = [D * (m.at != null ? m.at : 0.45)]; // 沒有攻擊動作的招（見切、居合）：用比例時間當出手點
     k = T[m.t](H, D, m);
     if (m.airAll) k = air(k, m.airAll);
+    k.H0 = H[0]; // 變形武器：第一擊前畫舊形態
     const last = k[k.length - 1];
     if (last[0] < D - 1e-6) k.push([D, P({ a: REST.a + TAU * Math.round((last[1].a - REST.a) / TAU) }), 'io']); // 收招回待機（轉過整圈的接同角度，不倒轉）
     cache.set(v, k);
@@ -109,6 +182,8 @@
     if (!i || o.state !== 'skill' || !MOTIONS[i.skill.id]) return null;
     const p = poseAt(keysOf(i.skill, i.v), Math.max(0, i.t - (dt || 0)));
     if (p.shake) p.a += Math.sin(i.t * 55) * 0.035 * p.shake;
+    const m = MOTIONS[i.skill.id];
+    if (m.morph && i.t < keysOf(i.skill, i.v).H0) p.form = m.morph; // 驅動在招式開始就切形態；畫面等揮到命中才換
     return p;
   }
 
@@ -135,7 +210,7 @@
   }
   // 手：畫在武器座標（hero.js 存下的變換）上；雙手武器第二隻手握在柄上
   const HANDS = { katana: [0, 0.32], gs: [0, 0.5], greatsword: [0, 0.5], hammer: [0, 0.55], horn: [0, 0.55], switchaxe: [0, 0.5], greataxe: [0, 0.5], staff: [0, 0.5],
-    glaive: [0.7, 1.6], lightxbow: [0.1, 0.9], heavyxbow: [0.1, 1.0], bow: [1.3], sns: [0], lance: [0], gunlance: [0] };
+    glaive: [0, 0.6], lightxbow: [0.1, 0.9], heavyxbow: [0.1, 1.0], bow: [1.3], sns: [0], lance: [0], gunlance: [0] };
   function hands(ctx, m, def, o, r) {
     const d = o.h4 && o.h4.drv, w = def.weapon;
     const xs = w === 'chargeblade' ? (d && d.mode === 'axe' ? [0, 0.5] : [0]) : HANDS[w] || [0];

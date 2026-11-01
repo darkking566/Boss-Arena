@@ -25,7 +25,7 @@
       el.className = 'g-cell'; cv.width = CW; cv.height = CH;
       el.innerHTML = `<div class="g-row"><span class="nm">${sk.name}</span><span class="id">${sk.id}</span><span class="tag">${isNew ? '新動作' : '舊擺法'}</span></div>`;
       el.prepend(cv);
-      const o = { x: 0, y: 0, face: 0, r: def.r || 20, def, state: 'skill', inst: { skill: sk, v: sk.v1, t: 0 }, h4: { drv: {} }, statuses: [] };
+      const o = { x: 0, y: 0, face: 0, r: def.r || 20, def, state: 'skill', inst: { skill: sk, v: sk.v1, t: 0 }, h4: { drv: { mode: sk.mode || (id === 'chargeblade' ? 'sword' : 'axe') } }, statuses: [] }; // 變形武器：照招式標的形態畫
       const c = { o, ctx: cv.getContext('2d'), sk, hits: sk.v1.actions.filter((a) => a.do === 'hit' || a.do === 'proj').map((a) => a.at), clock: 0 };
       el.addEventListener('click', () => { c.clock = 0; });
       grid.appendChild(el); cells.push(c);

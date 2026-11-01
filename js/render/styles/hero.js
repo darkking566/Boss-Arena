@@ -102,6 +102,7 @@
   R.defineBossStyle('hero', {
     body(ctx, o, t, { def, r }) {
       const s = swing(o), M = R.heroMotion, m = M && M.pose(o); // m：有動作表的招式姿勢（hero-motion.js）；沒有就用舊的 sw 擺法
+      const fd = m && m.form && o.h4 && o.h4.drv, form0 = fd && fd.mode; if (fd) fd.mode = m.form; // 變形招：命中前先照舊形態畫（畫完還原，不影響戰鬥）
       if (m) { const k = 1 + 0.15 * m.air; ctx.translate(m.lean * r, 0); ctx.scale(k * (1 - 0.08 * m.sq), k * (1 + 0.08 * m.sq)); M.trail(ctx, o, r, def.weapon); }
       // 武器：握在身體右側（區域 y 軸正向），出招時以 s 擺動
       const sw = o.state === 'skill' && o.inst.skill.sw; // 太刀連斬各式的揮刀動作
@@ -138,6 +139,7 @@
       ctx.fillStyle = '#d7e6f2'; ctx.beginPath(); ctx.arc(r * 0.15, 0, r * 0.52, 0, U.TAU); ctx.fill();
       ctx.fillStyle = def.color; ctx.beginPath(); ctx.arc(-r * 0.05, 0, r * 0.52, Math.PI * 0.6, Math.PI * 1.4); ctx.fill();
       if (M && hand) M.hands(ctx, hand, def, o, r); // 手畫在披肩上面，才看得出怎麼握武器
+      if (fd) fd.mode = form0;
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);
