@@ -74,7 +74,7 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
 }
 
 // P3 武器：每一招（含連段變體、集中弱點攻擊、額外招）都能施放並打到身旁的 Boss
-for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }]) {
+for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }, { rin: 'switchaxe', mari: 'chargeblade', yuzu: 'glaive', selena: 'sns' }]) {
   const w = new BD.World(BD.Hunt4.team(mains), BD.bossById.ronin, { seed: 5, pace: 'heavy', hunt4: true, intro: 0.5 }), st = w.hunt4, b = st.boss;
   run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {}; // 全員不自己行動，只放指定的招
   for (const h of st.hunters) {
@@ -158,6 +158,32 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   P.hz.cut = 0.9; hp = b.hp; BD.H4Combat.hit(w, st, gl, gl, b, { dmg: 62, fixed: true }, st.orig); P.hz.cut = hz0;
   assert.ok(d1 > 0 && Math.abs((hp - b.hp) / d1 - 1) < 0.2, `固定傷害不吃肉質 ${d1} ${hp - b.hp}`); // 世界傷害本身有 ±8% 亂數；沒有 fixed 時肉質 0.1 對 0.9 會差 9 倍
   gd.shells = 0; gl.cancelSkill(); gl.state = 'idle'; gl.startSkill(gl.h4.kv.gl_reload, { force: true }); run(w, 0.1); assert.strictEqual(gd.shells, 5, '裝填');
+}
+
+// P7 第三批武器：斬擊斧變形 / 斧槽 / 屬性解放、充能斧裝瓶 / 超解瓶爆 / 盾強化、操蟲棍精華 / 急襲突刺消耗
+{
+  const w = new BD.World(BD.Hunt4.team({ rin: 'switchaxe', mari: 'chargeblade', yuzu: 'glaive', selena: 'sns' }), BD.bossById.ronin, { seed: 8, pace: 'heavy', hunt4: true, intro: 0.5 });
+  const st = w.hunt4, b = st.boss, [sa, cb, ig] = st.hunters;
+  run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {};
+  const go = (h, id, sec) => { // 只跑指定秒數（不超過招式本身，避免接到下一招）
+    h.cancelSkill(); h.state = 'idle'; h.x = 3000 - 70; h.y = 1800; h.face = 0; h.sta = h.maxSta; assert.ok(h.startSkill(h.h4.kv[id], { force: true }), id);
+    for (let i = 0; i < Math.round(sec * 60); i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); }
+  };
+  const sd = sa.h4.drv; sd.gauge = 50;
+  go(sa, 'sa_morph', 0.05); assert.ok(sd.mode === 'sword' && sd.gauge === 38, '斬擊斧變劍、耗斧槽 ' + sd.gauge);
+  sd.amp = 95; go(sa, 'sa_sw1', sa.h4.kv.sa_sw1.v1.dur); assert.ok(sd.amped && sa.dmgMul > sa.hunt.baseDmg, '劍命中 → 屬性解放、傷害提高');
+  go(sa, 'sa_zsd', 0.05); assert.ok(!sd.amped, '零距離解放突刺消耗解放');
+  const g0 = sd.gauge; go(sa, 'sa_axe1', 0.05); assert.ok(sd.mode === 'axe' && sd.gauge === g0 + 15, '斧招回斧槽');
+  const cd = cb.h4.drv; cd.energy = 60; cd.phials = 0;
+  go(cb, 'cb_charge', 0.05); assert.ok(cd.phials === 3 && cd.energy === 0, '充能斧裝瓶 ' + cd.phials);
+  const saed = (n) => { cd.phials = n; const hp = b.hp; go(cb, 'cb_saed', cb.h4.kv.cb_saed.v1.dur); b.hp = Math.max(b.hp, b.maxHp * 0.6); return hp - b.hp; };
+  const d0 = saed(0), d3 = saed(3); assert.ok(cd.phials === 0 && d3 - d0 > 150, `超解每瓶瓶爆 ${d0} ${d3}`);
+  cd.phials = 2; cd.shieldUntil = 0; go(cb, 'cb_aed', 0.7);
+  assert.ok(cd.phials === 0 && cd.shieldUntil > w.time && cd.guardChip === BD.HUNT4.CHARGE.shieldChip, '大解放斬耗瓶並盾強化');
+  for (const c of ['red', 'white', 'orange']) BD.removeStatus(ig, 'h4' + c, 'test', w);
+  for (let k = 0; k < 3; k++) go(ig, 'ig_kinsect', 0.05);
+  assert.ok(['red', 'white', 'orange'].every((c) => BD.hasStatus(ig, 'h4' + c)), '獵蟲依序取得三色精華');
+  go(ig, 'ig_dive', 0.05); assert.ok(!['red', 'white', 'orange'].some((c) => BD.hasStatus(ig, 'h4' + c)), '急襲突刺消耗精華');
 }
 
 // P4 獵人大腦：存檔防呆、學習會寫進存檔、同存檔 + 同種子結果相同、熟練度隨場數上升

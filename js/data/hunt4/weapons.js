@@ -3,6 +3,7 @@
 // 驅動邏輯（連段、蓄力、鬼人化、防禦…）在 js/engine/hunt4/weapons.js。數值皆為沉重節奏最終值。
 // 招式旗標：offset＝[起, 迄] 秒的相殺判定窗、guard＝{ perfect, chip?, block? } 防禦（整招期間；開頭 perfect 秒為完美防禦；chip 覆寫擋下後承受比例；block＝一般防禦也接反擊）、
 // armor＝受擊減傷比例（鐵壁，不被打斷）、dtype＝覆寫傷害類型、focus＝集中弱點攻擊；命中參數 fixed＝固定傷害（砲擊：不吃肉質 / 銳利度 / 屬性）
+// mode＝變形武器的形態（招式開始時切換到該形態：斬擊斧 axe / sword、充能斧 sword / axe）
 (function (G) {
   const BD = G.BD, H4 = BD.HUNT4, { D, flurry } = BD.DataKit;
   const hit = (at, shape, p) => Object.assign({ do: 'hit', at }, shape, p);
@@ -151,7 +152,66 @@
       sk('gl_guard', '防禦', '防禦', ['defensive'], [0, 400], { cost: 0, track: 12, recovery: 0.7, guard: { perfect: 0.2, chip: 0.2 } }, []),
     ] };
 
-  H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance }; // katana / bow / lightxbow 用獵魂的武器物件
+  // ── 斬擊斧：斧形態攻擊回充斬擊槽 → 變形成劍（耗槽、命中累積解放槽）→ 解放槽滿進入「屬性解放」（劍傷害提高）→ 零距離屬性解放突擊收尾 ──
+  const axe = (id, name, short, o, actions) => sk(id, name, short, ['melee'], [0, 165], Object.assign({ cost: 0, mode: 'axe' }, o), actions);
+  const swd = (id, name, short, o, actions) => sk(id, name, short, ['melee'], [0, 150], Object.assign({ cost: 0, mode: 'sword' }, o), actions);
+  const switchaxe = { id: 'switchaxe', name: '斬擊斧', el: 'physical', ai: [50, 160], bonus: {}, traits: [],
+    skills: [
+      axe('sa_axe1', '斧：縱斬', '縱斬', { sw: 'down', recovery: 0.4 }, [hit(0.32, cone(165, 60), { dmg: 90, posture: 25, kb: 160, fx: { id: 'slash', scale: 1.3 } })]),
+      axe('sa_lunge', '斧：突進斬', '突進', { sw: 'down', track: 9, recovery: 0.4, tags: ['melee', 'gap'], range: [140, 320] },
+        [dash(0.08, 180, 0.25), hit(0.38, cone(165, 60), { dmg: 85, posture: 25, kb: 180, fx: 'slash' })]),
+    ],
+    variants: [
+      axe('sa_axe2', '斧：橫斬', '橫斬', { sw: 'cw', recovery: 0.35 }, [hit(0.26, cone(165, 110), { dmg: 80, posture: 22, kb: 160, fx: 'slash' })]),
+      axe('sa_wild', '斧：狂斧', '狂斧', { sw: 'spin', creep: 0.5, recovery: 0.4 }, flurry(0.15, 6, 0.12, cone(160, 100), { dmg: 26, posture: 7, kb: 30 }, 'slash')),
+      swd('sa_morph', '變形斬（劍）', '變形', { sw: 'cw', recovery: 0.3 }, [hit(0.25, cone(150, 100), { dmg: 95, posture: 25, kb: 140, fx: 'slash' })]),
+      swd('sa_sw1', '劍：縱斬', '劍縱', { sw: 'down', recovery: 0.25 }, [hit(0.18, cone(150, 60), { dmg: 72, posture: 16, kb: 90, fx: 'slash' })]),
+      swd('sa_sw2', '劍：橫斬', '劍橫', { sw: 'ccw', recovery: 0.25 }, [hit(0.18, cone(150, 100), { dmg: 70, posture: 16, kb: 90, fx: 'slash' })]),
+      swd('sa_sw3', '劍：二連斬', '二連', { sw: 'cw', recovery: 0.3 }, [hit(0.16, cone(150, 90), { dmg: 44, posture: 12, kb: 60 }), hit(0.32, cone(150, 90), { dmg: 50, posture: 14, kb: 120, fx: 'slash' })]),
+      swd('sa_zsd', '零距離屬性解放突擊', '零解', { sw: 'thrust', track: 8, recovery: 0.7 },
+        [dash(0.05, 80, 0.12)].concat(flurry(0.25, 6, 0.1, rect(140, 70), { dmg: 36, posture: 10, kb: 0 }, 'thrust'), [hit(0.95, circle(170), { dmg: 220, posture: 70, kb: 360, fx: { id: 'whirl', scale: 1.6 } })])),
+      axe('sa_morph_axe', '變形斬（斧）', '回斧', { sw: 'down', recovery: 0.35 }, [hit(0.3, cone(165, 60), { dmg: 80, posture: 24, kb: 160, fx: 'slash' })]),
+    ] };
+
+  // ── 充能斧：劍盾形態命中累積能量 → 裝瓶（能量轉成瓶）→ 斧形態屬性解放斬 I / II / 大解放斬（每段帶瓶爆）→ 有瓶時大解放斬後盾強化；超解（消耗全部瓶） ──
+  const cbS = (id, name, short, o, actions) => sk(id, name, short, ['melee'], [0, 150], Object.assign({ cost: 0, mode: 'sword' }, o), actions);
+  const cbA = (id, name, short, o, actions) => sk(id, name, short, ['melee'], [0, 170], Object.assign({ cost: 6, mode: 'axe' }, o), actions);
+  const phial = (t, dmg) => hit(t, cone(170, 60), { dmg, fixed: true, posture: 12, kb: 60, fx: { id: 'whirl', scale: 0.9 } });
+  const chargeblade = { id: 'chargeblade', name: '充能斧', el: 'physical', ai: [50, 155], bonus: {}, traits: [],
+    skills: [
+      cbS('cb_s1', '劍：突進斬', '突進', { sw: 'thrust', track: 9, recovery: 0.3, tags: ['melee', 'gap'], range: [120, 300] },
+        [dash(0.06, 160, 0.2), hit(0.26, cone(150, 70), { dmg: 60, posture: 15, kb: 90, fx: 'slash' })]),
+      cbS('cb_s2', '劍：縱斬', '縱斬', { sw: 'down', recovery: 0.25 }, [hit(0.18, cone(150, 70), { dmg: 58, posture: 15, kb: 90, fx: 'slash' })]),
+    ],
+    variants: [
+      cbS('cb_s3', '劍：迴旋斬', '迴旋', { sw: 'spin', recovery: 0.3 }, [hit(0.22, circle(150), { dmg: 66, posture: 18, kb: 140, fx: 'whirl' })]),
+      cbS('cb_charge', '裝瓶', '裝瓶', { tags: ['buff'], range: [0, 600], track: 0, recovery: 0.55 }, []),
+      cbS('cb_guard', '防禦', '防禦', { tags: ['defensive'], range: [0, 400], track: 12, recovery: 0.7, guard: { perfect: 0.2, chip: 0.2 } }, []),
+      cbA('cb_ed1', '屬性解放斬 I', '解放I', { sw: 'cw', recovery: 0.4 }, [hit(0.3, cone(170, 90), { dmg: 85, posture: 25, kb: 120, fx: 'slash' }), phial(0.36, 30)]),
+      cbA('cb_ed2', '屬性解放斬 II', '解放II', { sw: 'ccw', recovery: 0.45 },
+        [hit(0.28, cone(170, 90), { dmg: 70, posture: 22, kb: 60 }), phial(0.34, 25), hit(0.5, cone(170, 90), { dmg: 75, posture: 22, kb: 160, fx: 'slash' }), phial(0.56, 25)]),
+      cbA('cb_aed', '大解放斬', '大解放', { sw: 'down', recovery: 0.7 }, [hit(0.55, cone(175, 70), { dmg: 200, posture: 60, kb: 300, fx: { id: 'slash', scale: 1.6 } }), phial(0.62, 70)]),
+      cbA('cb_saed', '超解放斬', '超解', { sw: 'down', track: 5, recovery: 0.9 }, [hit(0.7, cone(180, 60), { dmg: 160, posture: 50, kb: 200, fx: { id: 'slash', scale: 1.8 } })]), // 瓶爆由驅動依瓶數追加
+    ] };
+
+  // ── 操蟲棍：放獵蟲採集紅 / 白 / 橙三色精華（攻擊 / 移動 / 防禦強化），三色齊全可放急襲突刺（消耗精華）；跳躍迴避接空中連斬 ──
+  const glaive = { id: 'glaive', name: '操蟲棍', el: 'physical', ai: [50, 160], bonus: {}, traits: [],
+    skills: [
+      sk('ig_a1', '袈裟斬', '袈裟', ['melee', 'fast'], [0, 160], { cost: 0, sw: 'cw', creep: 0.4, recovery: 0.25 }, [hit(0.18, cone(160, 100), { dmg: 58, posture: 14, kb: 90, fx: 'slash' })]),
+      sk('ig_vault', '跳躍', '跳躍', ['melee', 'gap'], [130, 340], { cost: 12, sw: 'down', track: 9, recovery: 0.3 },
+        [dash(0.05, 200, 0.3, { iframe: true }), hit(0.4, cone(150, 90), { dmg: 70, posture: 18, kb: 120, fx: 'slash' })]),
+    ],
+    variants: [
+      sk('ig_a2', '突刺', '突刺', ['melee', 'fast'], [0, 165], { cost: 0, sw: 'thrust', recovery: 0.25 }, [hit(0.16, rect(165, 50), { dmg: 58, posture: 14, kb: 90, fx: 'thrust' })]),
+      sk('ig_a3', '迴轉斬', '迴轉', ['melee'], [0, 160], { cost: 0, sw: 'spin', recovery: 0.3 }, [hit(0.22, circle(160), { dmg: 72, posture: 20, kb: 150, fx: 'whirl' })]),
+      sk('ig_red', '紅精華連斬', '紅連', ['melee'], [0, 165], { cost: 6, sw: 'spin', creep: 0.4, recovery: 0.35 }, flurry(0.14, 4, 0.1, cone(165, 110), { dmg: 40, posture: 11, kb: 60 }, 'slash')),
+      sk('ig_air', '空中迴轉斬', '空斬', ['melee'], [0, 160], { cost: 8, sw: 'spin', recovery: 0.3 }, [dash(0.02, 60, 0.15, { iframe: true }), hit(0.15, circle(150), { dmg: 50, posture: 12, kb: 60 }), hit(0.3, circle(150), { dmg: 55, posture: 14, kb: 140, fx: 'whirl' })]),
+      sk('ig_kinsect', '放獵蟲', '獵蟲', ['buff'], [0, 600], { cost: 0, track: 4, recovery: 0.3 }, []),
+      sk('ig_dive', '急襲突刺', '急襲', ['melee'], [0, 200], { cost: 10, sw: 'thrust', track: 9, recovery: 0.6 },
+        [dash(0.1, 140, 0.2, { iframe: true }), hit(0.35, rect(200, 70), { dmg: 240, posture: 60, kb: 340, fx: { id: 'thrust', scale: 1.6 } })]),
+    ] };
+
+  H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive }; // katana / bow / lightxbow 用獵魂的武器物件
   Object.assign(H4.WEAPON_SPECS, {
     katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm } }),
     gs: { dtype: 'cut', sharp: 90,
@@ -176,6 +236,23 @@
       focus: sk('h4_focus_gunlance', '爆傷・砲突', '爆傷', ['melee'], [0, 180], { cd: 6, sw: 'thrust', track: 9, recovery: 0.45 },
         [hit(0.2, rect(180, 60), { dmg: 60, posture: 20, kb: 80, fx: 'thrust' }), hit(0.4, cone(160, 50), { dmg: 70, fixed: true, posture: 25, kb: 200, focus: true, fx: 'whirl' })]) },
   });
+  Object.assign(H4.WEAPON_SPECS, {
+    switchaxe: { dtype: 'cut', sharp: 150,
+      focus: sk('h4_focus_switchaxe', '裂傷・變形斬', '裂傷', ['melee'], [0, 170], { cd: 6, sw: 'down', track: 8, recovery: 0.5 },
+        [hit(0.35, cone(170, 60), { dmg: 130, posture: 40, kb: 200, focus: true, fx: { id: 'slash', scale: 1.4 } })]) },
+    chargeblade: { dtype: 'cut', sharp: 140,
+      focus: sk('h4_focus_chargeblade', '瓶爆・穿傷', '瓶爆', ['melee'], [0, 170], { cd: 6, sw: 'down', track: 8, recovery: 0.5 },
+        [hit(0.35, cone(170, 60), { dmg: 90, posture: 30, kb: 120 }), hit(0.42, cone(170, 60), { dmg: 50, fixed: true, posture: 20, kb: 200, focus: true, fx: 'whirl' })]) },
+    glaive: { dtype: 'cut', sharp: 140,
+      focus: sk('h4_focus_glaive', '蟲穿・旋斬', '蟲穿', ['melee'], [0, 180], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
+        [dash(0.05, 90, 0.15, { iframe: true }), hit(0.3, circle(160), { dmg: 110, posture: 35, kb: 180, focus: true, fx: 'whirl' })]) },
+  });
+  // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽
+  H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.2, ampDrain: 2.5, lowAt: 20, morphAt: 55 };
+  // 充能斧：劍命中加能量、每 20 能量裝 1 瓶、最多 5 瓶、超解每瓶瓶爆傷害、盾強化秒數 / 防禦承受 / 斧傷害倍率
+  H4.CHARGE = { energyPerHit: 10, perPhial: 20, maxPhials: 5, saedPhial: 70, shieldDur: 45, shieldChip: 0.1, shieldDmg: 1.15 };
+  // 操蟲棍：精華秒數；紅 = 傷害、白 = 移動、橙 = 減傷
+  H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
   H4.HORN = { range: 600, dur: 45, heal: 0.15, allHeal: 0.08, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
   H4.DEMON = { drain: 7, exitAt: 0.25, gaugePerHit: 2.2, archDrain: 2, flurryCost: 30, dmgMul: 1.15 }; // 雙刀：鬼人化每秒耗體力、體力低於此比例自動解除（留翻滾的體力）、每次命中加鬼人槽、鬼人強化每秒掉槽、亂舞耗槽、鬼人化傷害倍率
   H4.GUARD = { chip: 0.25, staPerDmg: 0.35, kbMul: 0.3 }; // 一般防禦：承受傷害比例、每點傷害耗體力、擊退倍率

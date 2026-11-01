@@ -39,6 +39,13 @@
     }
     w.fx.text(h.x, h.y - h.r - 30, '♪ ' + MEL_NAME[mel], '#c8f0ff', 20); w.fx.ring(h.x, h.y, 20, Hn.range, 0.6, '#c8f0ff', 4); w.log(h, '演奏：' + MEL_NAME[mel]);
   }
+  BD.defineStatus('h4red', { name: '紅精華', tags: ['buff'], stacking: 'refresh', modifiers: { dmgDealtMul: 1.1 } }); // 操蟲棍
+  BD.defineStatus('h4white', { name: '白精華', tags: ['buff'], stacking: 'refresh', modifiers: { speedMul: 1.15 } });
+  BD.defineStatus('h4orange', { name: '橙精華', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.9 } });
+  const EXTRACT_NAME = { red: '紅精華', white: '白精華', orange: '橙精華' };
+  // 變形武器：招式開始時切到該招的形態（AI 備援挑到另一形態的招 = 順勢變形）
+  const startOnce = (h) => { const i = h.inst; if (!i || i.h4done) return null; i.h4done = true; if (i.skill.mode) h.h4.drv.mode = i.skill.mode; return i.skill.id; };
+  const gotDealt = (s, h) => { const g = h.stats.dealt - s.dealt; s.dealt = h.stats.dealt; return g; }; // 這幀自己打出的傷害
   // 槍系：防禦 → 完美防禦（或長槍的一般防禦）立刻收盾接反擊；攻擊將至時舉盾
   const guardTick = (h) => { if (h.h4.drv.counter && h.inst && h.inst.skill.guard) h.comboCancel(); };
 
@@ -233,6 +240,106 @@
       },
       gauge: (h) => { const s = h.h4.drv; return { v: s.shells / h.h4.spec.shells, color: h.world.time >= s.wfAt ? '#ff8a3a' : '#c0c8d0' }; },
     },
+    // 斬擊斧：斧回槽 → 槽夠就變形成劍（耗槽、命中累積解放槽）→ 解放（劍傷害提高、慢慢掉）→ Boss 有破綻放零距離屬性解放突擊；槽見底變回斧
+    switchaxe: {
+      init: () => ({ mode: 'axe', gauge: 100, amp: 0, amped: false, dealt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv, S = H4.SWITCH;
+        if (s.mode === 'axe') {
+          if (d > 165) return pick(h, d, 'sa_lunge');
+          if (s.gauge >= S.morphAt && (open(h) || rng(h)() < 0.3 + 0.5 * h.def.persona.risk)) return pick(h, d, 'sa_morph');
+          return pick(h, d, 'sa_axe1');
+        }
+        if (s.gauge < S.lowAt) return pick(h, d, 'sa_morph_axe');
+        if (s.amped && open(h)) { const z = pick(h, d, 'sa_zsd'); if (z) return z; }
+        return pick(h, d, 'sa_sw1') || false; // 劍形態沒有突進招：走過去，不讓備援挑斧招變回斧
+      },
+      next(h, d) {
+        const s = h.h4.drv, S = H4.SWITCH, id = h.lastSkillId;
+        if (threatIn(h) < 0.35 || !keepGoing(h, 0.55 + 0.3 * h.def.persona.risk)) return null;
+        if (s.mode === 'axe') return pick(h, d, { sa_axe1: 'sa_axe2', sa_lunge: 'sa_axe2', sa_morph_axe: 'sa_axe2', sa_axe2: s.gauge < 60 ? 'sa_wild' : 'sa_morph', sa_wild: 'sa_morph' }[id] || '');
+        if (s.gauge < S.lowAt) return pick(h, d, 'sa_morph_axe');
+        if (s.amped && open(h) && id !== 'sa_zsd') { const z = pick(h, d, 'sa_zsd'); if (z) return z; }
+        return pick(h, d, { sa_morph: 'sa_sw2', sa_sw1: 'sa_sw2', sa_sw2: 'sa_sw3', sa_sw3: 'sa_sw1' }[id] || '');
+      },
+      tick(h, dt) {
+        const s = h.h4.drv, S = H4.SWITCH, id = startOnce(h);
+        if (id) {
+          if (s.mode === 'sword') s.gauge = Math.max(0, s.gauge - S.swordCost); else s.gauge = Math.min(100, s.gauge + (id === 'sa_wild' ? S.wildGain : S.axeGain));
+          if (id === 'sa_zsd') { s.amped = false; s.amp = 0; }
+        }
+        if (s.mode === 'sword' && gotDealt(s, h) > 0 && !s.amped && (s.amp += S.ampPerHit) >= 100) { s.amped = true; s.amp = 100; h.world.fx.text(h.x, h.y - h.r - 24, '屬性解放！', '#ff7aff', 18); }
+        else gotDealt(s, h);
+        if (s.amped && (s.amp -= S.ampDrain * dt) <= 0) { s.amped = false; s.amp = 0; }
+        h.dmgMul = h.hunt.baseDmg * (s.amped && s.mode === 'sword' ? S.ampDmg : 1);
+      },
+      gauge: (h) => { const s = h.h4.drv; return { v: s.amped ? s.amp / 100 : s.gauge / 100, color: s.amped ? '#ff7aff' : s.mode === 'sword' ? '#8ad0ff' : '#c0a060' }; },
+    },
+    // 充能斧：劍命中攢能量 → 安全時裝瓶 → 有瓶就變斧放屬性解放斬 I → II → 大解放斬（有瓶且沒盾強化時順便盾強化）；瓶多又有破綻放超解；劍形態舉盾
+    chargeblade: {
+      init: () => ({ mode: 'sword', energy: 0, phials: 0, shieldUntil: 0, dealt: 0, counter: false, guardChip: null }),
+      choose(h, d) {
+        const s = h.h4.drv;
+        if (s.energy >= 60 && s.phials < H4.CHARGE.maxPhials && threatIn(h) > 1) return kv(h, 'cb_charge');
+        if (s.phials >= 3 && open(h)) { const x = pick(h, d, 'cb_saed'); if (x) return x; }
+        if (s.phials >= (open(h) ? 1 : 2) && rng(h)() < (open(h) ? 1 : 0.4)) { const x = pick(h, d, 'cb_ed1'); if (x) return x; }
+        return d > 150 ? pick(h, d, 'cb_s1') : pick(h, d, 'cb_s2');
+      },
+      next(h, d) {
+        const s = h.h4.drv, id = h.lastSkillId;
+        if (s.counter) { s.counter = false; return pick(h, d, s.phials ? 'cb_ed1' : 'cb_s3'); }
+        if (s.mode === 'sword' && threatIn(h) < 0.35) return pick(h, null, 'cb_guard');
+        if (threatIn(h) < 0.35 || !keepGoing(h, (s.mode === 'axe' ? 0.75 : 0.55) + 0.3 * h.def.persona.risk)) return null; // 解放斬連段比較捨不得斷
+        const nx = { cb_s1: 'cb_s2', cb_s2: 'cb_s3', cb_s3: s.energy >= 60 ? 'cb_charge' : 'cb_s2', cb_ed1: 'cb_ed2', cb_ed2: 'cb_aed', cb_charge: s.phials ? 'cb_ed1' : '' }[id];
+        return nx ? pick(h, nx === 'cb_charge' ? null : d, nx) : null;
+      },
+      react: (h) => (h.h4.drv.mode === 'sword' ? kv(h, 'cb_guard') : null),
+      tick(h) {
+        guardTick(h);
+        const s = h.h4.drv, C = H4.CHARGE, w = h.world, i = h.inst, id = startOnce(h);
+        if (id === 'cb_charge') { const n = Math.min(C.maxPhials - s.phials, Math.floor(s.energy / C.perPhial)); s.phials += n; s.energy = 0; w.fx.text(h.x, h.y - h.r - 24, '裝瓶 ×' + n, '#ffd08a', 16); }
+        else if (id === 'cb_ed1' || id === 'cb_ed2' || id === 'cb_aed') s.phials = Math.max(0, s.phials - 1);
+        if (i && i.skill.id === 'cb_aed' && !i.h4b && i.t >= 0.6) { // 大解放斬後：有瓶就盾強化
+          i.h4b = true;
+          if (s.phials > 0 && w.time >= s.shieldUntil) { s.phials--; s.shieldUntil = w.time + C.shieldDur; w.fx.text(h.x, h.y - h.r - 24, '盾強化', '#ffd34a', 18); }
+        }
+        if (i && i.skill.id === 'cb_saed' && !i.h4b && i.t >= 0.72) { // 超解：每瓶一次瓶爆（固定傷害）
+          i.h4b = true; const b = h.enemy;
+          if (U.dist(h, b) < 230 + b.r) for (let k = 0; k < s.phials; k++) w.damageBoss(h, b, { dmg: C.saedPhial, fixed: true, posture: 20, kb: 0, unblockable: true, noPerfect: true });
+          if (s.phials) w.fx.text(b.x, b.y - b.r - 40, `瓶爆 ×${s.phials}`, '#ff9a3c', 22);
+          s.phials = 0;
+        }
+        if (s.mode === 'sword' && gotDealt(s, h) > 0) s.energy = Math.min(100, s.energy + C.energyPerHit); else gotDealt(s, h);
+        const sh = w.time < s.shieldUntil;
+        s.guardChip = sh ? C.shieldChip : null; h.dmgMul = h.hunt.baseDmg * (sh && s.mode === 'axe' ? C.shieldDmg : 1);
+      },
+      gauge: (h) => { const s = h.h4.drv; return { v: s.phials / H4.CHARGE.maxPhials, color: h.world.time < s.shieldUntil ? '#ffd34a' : s.energy >= 60 ? '#ff6a3a' : '#c0a060' }; },
+    },
+    // 操蟲棍：缺精華且安全就放獵蟲（依序紅 → 白 → 橙）；三色齊全又有破綻放急襲突刺（消耗精華）；遠了跳躍接空中迴轉斬
+    glaive: {
+      init: () => ({ kinAt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv, miss = H4.KINSECT.order.find((c) => BD.statusRemaining(h, 'h4' + c) < 5);
+        if (miss && threatIn(h) > 1 && h.world.time >= s.kinAt) return kv(h, 'ig_kinsect');
+        if (!miss && open(h)) { const x = pick(h, d, 'ig_dive'); if (x) return x; }
+        if (d > 160) return pick(h, d, 'ig_vault');
+        return pick(h, d, BD.hasStatus(h, 'h4red') && rng(h)() < 0.4 ? 'ig_red' : 'ig_a1');
+      },
+      next(h, d) {
+        if (threatIn(h) < 0.35 || !keepGoing(h, 0.55 + 0.3 * h.def.persona.risk)) return null;
+        const red = BD.hasStatus(h, 'h4red');
+        return pick(h, d, { ig_a1: 'ig_a2', ig_a2: red ? 'ig_red' : 'ig_a3', ig_a3: 'ig_a1', ig_vault: 'ig_air', ig_air: 'ig_a2', ig_red: 'ig_a3' }[h.lastSkillId] || '');
+      },
+      tick(h) {
+        const s = h.h4.drv, w = h.world, id = startOnce(h);
+        if (id === 'ig_kinsect') {
+          const c = H4.KINSECT.order.find((x) => BD.statusRemaining(h, 'h4' + x) < 5);
+          if (c) { BD.applyStatus(h, 'h4' + c, { dur: H4.KINSECT.dur }, w); w.fx.text(h.x, h.y - h.r - 24, EXTRACT_NAME[c], { red: '#ff6a5a', white: '#ffffff', orange: '#ffaa4a' }[c], 16); }
+          s.kinAt = w.time + 2;
+        } else if (id === 'ig_dive') for (const c of H4.KINSECT.order) BD.removeStatus(h, 'h4' + c, 'consume', w);
+      },
+      gauge: (h) => { const n = H4.KINSECT.order.filter((c) => BD.hasStatus(h, 'h4' + c)).length; return { v: n / 3, color: n === 3 ? '#ffe27a' : '#a0d0a0' }; },
+    },
   };
 
   // 武器上手：建招式表、掛驅動（choose 包住 AI 的 chooseSkill；react 給 agentize）
@@ -245,7 +352,7 @@
     hs.focus = spec.focus ? BD.prepSkill(spec.focus) : null;
     hs.D = D || null; hs.drv = D && D.init ? D.init(h) : {};
     if (!c._choose0) c._choose0 = c.chooseSkill.bind(c);
-    c.chooseSkill = (d, win) => { const s = (hs.D && hs.D.choose(h, d, win)) || c._choose0(d, win); return s && h.brain ? h.brain.gate(s, d) : s; }; // 獵人大腦決定出手或等待
+    c.chooseSkill = (d, win) => { const r = hs.D && hs.D.choose(h, d, win), s = r === false ? null : r || c._choose0(d, win); return s && h.brain ? h.brain.gate(s, d) : s; }; // 驅動回 false＝這次不出招也不用備援；獵人大腦決定出手或等待
     if (D && D.react) h.react = () => D.react(h); else delete h.react;
   }
   // 招式剛結束 → 問驅動要不要接下一招（每次結束只問一次）
@@ -291,7 +398,8 @@
         }
         const G2 = H4.GUARD; b.sta = Math.max(0, b.sta - p.dmg * G2.staPerDmg);
         if (s.guard.block && b.sta > 0) b.h4.drv.counter = true; // 長槍：擋下就反擊
-        p.dmg *= b.sta > 0 ? (s.guard.chip != null ? s.guard.chip : G2.chip) : 0.6; p.kb = (p.kb || 0) * G2.kbMul; p.posture = (p.posture || 0) * 0.5; // 體力被削光＝防禦被破
+        const chip = b.h4.drv.guardChip != null ? b.h4.drv.guardChip : s.guard.chip != null ? s.guard.chip : G2.chip; // 驅動可臨時覆寫（充能斧盾強化）
+        p.dmg *= b.sta > 0 ? chip : 0.6; p.kb = (p.kb || 0) * G2.kbMul; p.posture = (p.posture || 0) * 0.5; // 體力被削光＝防禦被破
         return null;
       }
       if (s.armor) { p.dmg *= 1 - s.armor; p.kb = 0; p.posture = (p.posture || 0) * 0.3; BD.applyStatus(b, 'kdGuard', { dur: 0.3 }, w); }
