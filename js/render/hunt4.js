@@ -1,5 +1,5 @@
 'use strict';
-// 狩獵模式（4v1）繪圖：Boss 身上的傷口標記（世界座標）、部位狀態列（畫面座標，競技場右上角）
+// 狩獵模式（4v1）繪圖：Boss 身上的傷口 / 弓的誘導箭與殘留觸發箭標記（世界座標）、曲射落箭、部位狀態列（畫面座標，競技場右上角）
 (function (G) {
   const BD = G.BD, R = BD.Render, FONT = R.FONT, H4 = BD.HUNT4;
 
@@ -13,9 +13,34 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, 9 + 4 * k, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = 'rgba(255,40,60,0.85)'; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
     }
+    for (const h of st.hunters) { // 弓：誘導箭標記（青色旋轉菱框，快到期時閃）、殘留觸發箭（插在 Boss 身上的短箭）
+      const s = h.def.weapon === 'bow' && h.h4.drv;
+      if (!s) continue;
+      if (s.tracer) {
+        const p = BD.H4Combat.partPos(b, st.parts.find((P) => P.id === s.tracer.part) || st.parts[0]), left = s.tracer.until - w.time;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(t * 2.5); ctx.globalAlpha = left < 2 ? 0.45 + 0.55 * Math.abs(Math.sin(t * 12)) : 1;
+        ctx.strokeStyle = '#7dffe0'; ctx.lineWidth = 3; ctx.strokeRect(-11, -11, 22, 22); ctx.fillStyle = 'rgba(125,255,224,0.85)'; ctx.fillRect(-3, -3, 6, 6);
+        ctx.restore();
+      }
+      ctx.strokeStyle = '#d8f0ff'; ctx.lineWidth = 2;
+      for (let k = 0; k < s.marks; k++) {
+        const a = b.face + k * 2.4, d = b.r * (0.35 + 0.08 * (k % 4)), x = b.x + Math.cos(a) * d, y = b.y + Math.sin(a) * d;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 5, y - 12); ctx.stroke();
+      }
+    }
     if (!R.aiDebug) return; // F6：獵人大腦最近一次的決定（出手 / 等待＋情境、反應、翻滾方向）
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.font = `bold 14px ${FONT}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
     for (const h of st.hunters) if (h.brain && h.state !== 'dead' && h.brain.last) { const s = h.name + '｜' + h.brain.last; ctx.strokeText(s, h.x, h.y - h.r - 40); ctx.fillStyle = h.def.color; ctx.fillText(s, h.x, h.y - h.r - 40); }
+  };
+
+  // 曲射的箭：從高空斜斜落下的箭（箭頭朝落點）
+  R.lobStyles = R.lobStyles || {};
+  R.lobStyles.h4arrow = function (ctx, l, x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(l.y1 - l.y0, l.x1 - l.x0));
+    ctx.strokeStyle = 'rgba(143,227,255,0.5)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-30, 0); ctx.stroke();
+    ctx.strokeStyle = '#eef7ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(7, 3.5); ctx.lineTo(7, -3.5); ctx.closePath(); ctx.fill();
+    ctx.restore();
   };
 
   // 部位列：頭 / 腳 / 身 / 尾 各一格（紅＝傷口、灰＝疤、金框＝已破壞），右側列出 Boss 身上的異常與疲勞

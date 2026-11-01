@@ -4,6 +4,7 @@
 // 招式旗標：offset＝[起, 迄] 秒的相殺判定窗、guard＝{ perfect, chip?, block? } 防禦（整招期間；開頭 perfect 秒為完美防禦；chip 覆寫擋下後承受比例；block＝一般防禦也接反擊）、
 // armor＝受擊減傷比例（鐵壁，不被打斷）、dtype＝覆寫傷害類型、focus＝集中弱點攻擊；命中參數 fixed＝固定傷害（砲擊：不吃肉質 / 銳利度 / 屬性）
 // mode＝變形武器的形態（招式開始時切換到該形態：斬擊斧 axe / sword、充能斧 sword / axe）
+// evade＝{ win, perfect? } 招式開頭 win 秒迴避攻擊、perfect 秒內＝看破迴避（弓的蓄力墊步 / 飛燕射擊）
 (function (G) {
   const BD = G.BD, H4 = BD.HUNT4, { D, flurry } = BD.DataKit;
   const hit = (at, shape, p) => Object.assign({ do: 'hit', at }, shape, p);
@@ -213,19 +214,34 @@
         [dash(0.1, 140, 0.2, { iframe: true }), hit(0.35, rect(200, 70), { dmg: 240, posture: 60, kb: 340, fx: { id: 'thrust', scale: 1.6 } })]),
     ] };
 
-  // ── 遠程：招式不耗體力，由驅動管彈藥 / 塗料瓶 ──
+  // ── 遠程：弩的招式不耗體力，由驅動管彈藥；弓的蓄力 / 剛射 / 墊步耗體力 ──
   const shot = (at, p) => Object.assign({ do: 'proj', at, n: 1, life: 1.2 }, p);
   const rs = (id, name, short, o, actions) => sk(id, name, short, ['ranged'], [0, 850], Object.assign({ cost: 0 }, o), actions);
   const arrow = (dmg, n, extra) => Object.assign({ n, spread: n > 1 ? 0.07 : 0, speed: 1100, r: 7, dmg, posture: dmg * 0.25, kb: 40, kind: 'arrow' }, extra);
-  // ── 弓：蓄力射擊 I → II → III → 剛射（越射蓄力段數越高、箭數越多）；強擊瓶塗料提高傷害（有限支數，用完找空檔換瓶）；Boss 有破綻放龍之一矢 ──
-  const bow = { id: 'bow', name: '弓', el: 'physical', ai: [380, 700], bonus: {}, traits: [],
-    skills: [rs('bow_s1', '蓄力射擊 I', '射擊I', { track: 9, recovery: 0.2 }, [shot(0.22, arrow(42, 1))])],
+  // ── 弓（荒野式）：三階蓄力（射擊連射 / 長按蓄力）、迅雷閃擊、剛射 → 剛連射、蓄力墊步（看破迴避）→ 飛燕射擊、特殊箭量表（瓶 / 誘導箭共用）、
+  //    八種瓶、曲射（殘留觸發箭）、龍之一矢 / 剎那 / 龍之千矢（引爆誘導箭與殘留觸發箭）、集中射擊【箭雨】。招式耗體力；段數、量表、瓶由驅動管。
+  //    箭的額外命中參數放 extra（tracer＝誘導箭、det＝引爆、focus＝打破傷口）；evade＝{ win, perfect? } 開頭 win 秒迴避攻擊、perfect 秒內＝看破迴避
+  const L3 = [1, 2, 3], RN = ['', 'I', 'II', 'III'], DET = { det: true };
+  const pierceBolt = (dmg, speed, rehit, extra) => Object.assign({ speed, r: 13, dmg, posture: dmg * 0.25, kb: 20, pierce: true, rehit, life: 1.1, kind: 'bolt', extra: DET }, extra); // 貫穿重箭：每 rehit 秒對 Boss 再判定一次（身體越長打越多段）
+  const bow = { id: 'bow', name: '弓', el: 'physical', ai: [220, 460], bonus: {}, traits: [],
+    skills: [rs('bow_s1', '射擊 I', '射擊I', { track: 9, recovery: 0.2 }, [shot(0.22, arrow(42, 1))])],
     variants: [
-      rs('bow_s2', '蓄力射擊 II', '射擊II', { track: 9, recovery: 0.22 }, [shot(0.28, arrow(36, 2))]),
-      rs('bow_s3', '蓄力射擊 III', '射擊III', { track: 9, recovery: 0.25 }, [shot(0.34, arrow(34, 3, { pierce: true }))]),
-      rs('bow_volley', '剛射', '剛射', { track: 8, recovery: 0.35 }, [shot(0.3, arrow(30, 5, { spread: 0.1 }))]),
-      rs('bow_dragon', '龍之一矢', '龍矢', { track: 5, recovery: 0.6 }, [shot(1.0, { speed: 1700, r: 13, dmg: 260, posture: 90, kb: 260, pierce: true, kind: 'bolt' })]),
-      rs('bow_coat', '換塗料瓶', '換瓶', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.6 }, []),
+      rs('bow_s2', '射擊 II', '射擊II', { track: 9, recovery: 0.22 }, [shot(0.28, arrow(36, 2))]),
+      rs('bow_s3', '射擊 III', '射擊III', { track: 9, recovery: 0.25 }, [shot(0.34, arrow(34, 3))]),
+      rs('bow_c2', '蓄力射擊 II', '蓄II', { cost: 8, track: 9, recovery: 0.22 }, [shot(0.55, arrow(36, 2))]),
+      rs('bow_c3', '蓄力射擊 III', '蓄III', { cost: 14, track: 9, recovery: 0.25 }, [shot(0.85, arrow(34, 3))]),
+      rs('bow_quick', '迅雷閃擊', '迅雷', { range: [0, 380], track: 10, recovery: 0.2 }, [shot(0.14, arrow(24, 3, { spread: 0.16, life: 0.4 }))]),
+      ...L3.map((l) => rs('bow_p' + l, '剛射 ' + RN[l], '剛射', { cost: 10, range: [0, 600], track: 8, recovery: 0.32 }, [shot(0.26, arrow([26, 26, 30][l - 1], [4, 5, 5][l - 1], { spread: 0.11, life: 0.65 }))])),
+      ...L3.map((l) => rs('bow_v' + l, '剛連射 ' + RN[l], '剛連', { cost: 14, range: [0, 600], track: 8, recovery: 0.5 }, [shot(0.3, arrow([28, 28, 32][l - 1], [5, 6, 6][l - 1], { spread: 0.1, life: 0.65 }))])),
+      rs('bow_step', '蓄力墊步', '墊步', { tags: ['ranged', 'defensive'], cost: 14, track: 12, recovery: 0.12, evade: { win: 0.26, perfect: 0.12 } }, [dash(0.02, 120, 0.2, { dir: 'side' })]),
+      ...L3.map((l) => rs('bow_sw' + l, '飛燕射擊 ' + RN[l], '飛燕', { cost: 10, range: [0, 600], track: 9, recovery: 0.3, evade: { win: 0.3 } }, [dash(0.02, 170, 0.3, { dir: 'side' }), shot(0.24, arrow(30, l + 2, { spread: 0.09 }))])),
+      rs('bow_tracer', '誘導箭', '誘導', { track: 10, recovery: 0.25 }, [shot(0.3, arrow(40, 1, { speed: 1300, life: 1.5, extra: { tracer: true } }))]),
+      rs('bow_load', '裝填瓶', '裝瓶', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.45 }, []),
+      rs('bow_arc', '曲射', '曲射', { cost: 12, range: [120, 700], track: 6, recovery: 0.45 }, [{ do: 'h4arc', at: 0.45, n: 9, flight: 0.5, scatter: 70, dmg: 32, posture: 8 }]),
+      rs('bow_dragon', '龍之一矢', '龍矢', { cost: 20, track: 5, recovery: 0.7 }, [shot(1.0, pierceBolt(62, 950, 0.035))]),
+      rs('bow_dragon_q', '龍之一矢・剎那', '剎那', { cost: 16, track: 7, recovery: 0.5 }, [shot(0.45, pierceBolt(48, 1100, 0.045, { r: 11, life: 0.9 }))]),
+      rs('bow_thousand', '龍之千矢', '千矢', { cost: 20, range: [0, 300], track: 8, recovery: 0.8 }, [shot(0.5, arrow(34, 13, { spread: 0.075, speed: 1000, life: 0.35, extra: DET }))]),
+      rs('bow_focus_dragon', '集中射擊・龍之一矢', '追龍', { track: 9, recovery: 0.6 }, [shot(0.35, pierceBolt(70, 1000, 0.035, { homing: 4 }))]),
     ] };
   // ── 輕弩：通常彈 / 貫通彈 / 速射彈三種彈各自計數，打空了找空檔裝填；Boss 有破綻用速射 ──
   const bullet = (dmg, extra) => Object.assign({ speed: 1300, r: 7, dmg, posture: dmg * 0.25, kb: 50, kind: 'bolt' }, extra);
@@ -281,9 +297,52 @@
       focus: sk('h4_focus_glaive', '蟲穿・旋斬', '蟲穿', ['melee'], [0, 180], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
         [dash(0.05, 90, 0.15, { iframe: true }), hit(0.3, circle(160), { dmg: 110, posture: 35, kb: 180, focus: true, fx: 'whirl' })]) },
   });
-  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0, taken: 1.3 } }); // 遠程沒有集中弱點攻擊（投射物不開 / 不打破傷口）
-  // 弓：強擊瓶支數 / 傷害倍率、龍之一矢冷卻；輕弩：各彈種彈數；重弩：彈匣、狙擊 / 架設冷卻
-  H4.BOW = { coats: 12, coatDmg: 1.25, dragonCd: 30 };
+  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0, taken: 1.3 } }); // 弩沒有集中弱點攻擊
+  H4.WEAPON_SPECS.bow.focus = sk('h4_focus_bow', '集中射擊【箭雨】', '箭雨', ['ranged'], [0, 700], { cd: 6, track: 6, recovery: 0.5 }, // 追蹤箭雨：每支命中打破一處傷口，有打破就接強化龍之一矢
+    [shot(0.55, arrow(40, 3, { spread: 0.35, homing: 8, life: 1.6, extra: { focus: true, det: true } }))]);
+  // 弓：一組瓶 coatShots 次射擊；trickMax 特殊箭量表格數；gain＝量表回復（長按蓄力 II / III、每支箭命中、看破迴避 / 精準看破＝墊步開頭 preciseT 秒內）、discernSta＝看破回體力；
+  // tracer＝誘導箭（秒數、追蹤轉向率、射程加長、引爆基礎傷害 / 每支追蹤箭命中加成 / 加成上限）；mark＝殘留觸發箭（秒數、上限、每支引爆傷害）；
+  // band＝適正距離（箭飛行距離在 [近, 遠] 內全傷害，外面乘 lo）；decay＝多久沒動作蓄力段數歸零
+  H4.BOW = { coatShots: 10, trickMax: 3, gain: { c2: 0.25, c3: 0.45, hit: 0.04, discern: 1, perfect: 1.5, preciseT: 0.05 }, discernSta: 40,
+    tracer: { dur: 10, home: 7, reach: 200, det: 60, perHit: 10, maxHits: 15 }, mark: { dur: 20, max: 12, det: 28 }, band: { near: 60, far: 520, lo: 0.75 }, decay: 1.2,
+    coatList: ['power', 'close', 'pierce', 'para', 'sleep', 'poison', 'blast', 'exhaust'], // 這把弓能裝的瓶（之後可依武器改）
+    coatFx: { // dmg 傷害倍率、band 覆寫適正距離、pierce / rehit 貫穿多段、ail / sv 異常累積、posture 架勢倍率（減氣）
+      power: { name: '強擊瓶', color: '#ff8a6a', dmg: 1.3 },
+      close: { name: '接擊瓶', color: '#ffb84a', dmg: 1.45, band: [0, 260] },
+      pierce: { name: '貫通瓶', color: '#9fd8ff', dmg: 0.5, pierce: true, rehit: 0.06 },
+      para: { name: '麻痺瓶', color: '#ffe14a', ail: 'paralysis', sv: 20 },
+      sleep: { name: '睡眠瓶', color: '#8fb8ff', ail: 'sleep', sv: 20 },
+      poison: { name: '毒瓶', color: '#b86bff', ail: 'poison', sv: 22 },
+      blast: { name: '爆破瓶', color: '#ff9a3c', ail: 'blast', sv: 18 },
+      exhaust: { name: '減氣瓶', color: '#c8f0a0', posture: 2.2 },
+    } };
+  // 弓連招表：AI 依情境（Boss 狀態 when、需求 need）挑一套，獵人大腦記住每個情境下哪套回報高。
+  // 步驟：shot 射擊（依段數 I→II→III）、charge 長按蓄力到 III、quick 迅雷閃擊、power 剛射、volley 剛連射、step 蓄力墊步、swallow 飛燕射擊、
+  //       tracer 誘導箭、load 裝瓶、arc 曲射、dragon 龍之一矢、dragon_q 剎那、thousand 龍之千矢。做不到的步驟（距離 / 體力 / 量表）跳過。
+  // need：near 近身（< 300）、trick 量表格數、noTracer / tracer 誘導箭狀態、coatless 沒瓶、det 有可引爆的標記、lowSta 體力少；prior 先驗回報、risk 越愛冒險越想用
+  H4.BOW_COMBOS = [
+    { id: 'basic', name: '基本高蓄力循環', when: ['idle', 'move', 'open', 'atk'], prior: 0.6, seq: ['shot', 'shot', 'shot', 'power', 'step', 'shot', 'power', 'step', 'shot', 'power'] },
+    { id: 'quick', name: '快速起手', when: ['idle', 'move', 'open', 'atk'], need: { near: true }, prior: 0.45, risk: 0.4, seq: ['quick', 'power', 'volley'] },
+    { id: 'charge', name: '長按蓄力起手', when: ['idle', 'open'], prior: 0.5, risk: 0.2, seq: ['charge', 'power', 'step', 'shot', 'power'] },
+    { id: 'poke', name: '試探射擊', when: ['idle', 'move', 'atk'], prior: 0.4, risk: -0.3, seq: ['shot', 'shot', 'step'] },
+    { id: 'greed', name: '剛連射連段', when: ['idle', 'open'], prior: 0.5, risk: 0.5, seq: ['shot', 'shot', 'shot', 'power', 'volley'] },
+    { id: 'save', name: '節省體力', when: ['idle', 'move', 'open', 'atk', 'down'], need: { lowSta: true }, prior: 0.7, seq: ['quick', 'shot', 'shot'] },
+    { id: 'load', name: '補瓶再射', when: ['idle', 'move', 'open', 'atk'], need: { trick: 1, coatless: true }, prior: 0.85, seq: ['load', 'shot', 'power'] },
+    { id: 'tracerChase', name: '誘導箭追擊', when: ['idle', 'move', 'atk'], need: { trick: 1, noTracer: true }, prior: 0.55, seq: ['tracer', 'shot', 'power', 'step', 'shot', 'power'] },
+    { id: 'tracerBurst', name: '誘導箭爆發', when: ['open', 'down'], need: { trick: 1, noTracer: true }, prior: 0.6, risk: 0.3, seq: ['tracer', 'shot', 'power', 'volley', 'dragon_q'] },
+    { id: 'tracerRide', name: '誘導箭持續輸出', when: ['idle', 'move', 'open', 'atk'], need: { tracer: true }, prior: 0.7, seq: ['shot', 'power', 'step', 'shot', 'power', 'step', 'shot', 'power'] },
+    { id: 'tracerCharge', name: '蓄力誘導', when: ['idle'], need: { trick: 2, noTracer: true }, prior: 0.5, seq: ['tracer', 'charge', 'power', 'step', 'shot', 'power', 'volley'] },
+    { id: 'swallow', name: '飛燕追擊', when: ['move', 'atk'], prior: 0.45, risk: 0.2, seq: ['shot', 'power', 'step', 'swallow', 'power'] },
+    { id: 'stagger', name: '硬直剎那', when: ['open'], prior: 0.55, seq: ['shot', 'power', 'dragon_q'] },
+    { id: 'detonate', name: '引爆連段', when: ['open', 'down'], need: { det: true }, prior: 0.65, seq: ['shot', 'power', 'dragon_q'] },
+    { id: 'arcQuick', name: '曲射接剎那', when: ['open', 'down'], prior: 0.45, seq: ['arc', 'shot', 'power', 'dragon_q'] },
+    { id: 'arcBurst', name: '曲射爆發', when: ['down'], prior: 0.55, risk: 0.2, seq: ['arc', 'arc', 'dragon'] },
+    { id: 'tracerArc', name: '誘導曲射一矢', when: ['down'], need: { trick: 1, noTracer: true }, prior: 0.55, risk: 0.3, seq: ['tracer', 'arc', 'shot', 'power', 'dragon'] },
+    { id: 'downFull', name: '倒地全力', when: ['down'], prior: 0.65, risk: 0.3, seq: ['shot', 'power', 'volley', 'shot', 'power', 'volley', 'step', 'shot', 'power', 'volley'] },
+    { id: 'thousand', name: '龍之千矢', when: ['down'], need: { near: true }, prior: 0.55, risk: 0.5, seq: ['shot', 'power', 'thousand'] },
+    { id: 'dragon', name: '龍之一矢', when: ['down'], prior: 0.45, risk: 0.3, seq: ['dragon'] },
+  ];
+  H4.BOW_DISCERN = { id: 'discern', name: '看破迴避反擊', seq: ['shot', 'power', 'volley'] }; // 看破迴避成功後直接接（不經挑選）
   H4.LBG = { mag: { n: 8, p: 4, rapid: 3 } };
   H4.HBG = { mag: 6, snipeCd: 25, siegeCd: 14 };
   // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽

@@ -65,6 +65,7 @@
     let mul = p.fixed ? 1 : hz / 0.5, bounce = false; // fixed：砲擊等固定傷害，不吃肉質 / 銳利度 / 屬性
     if (!p.fixed) BD.H4Brain.partHit(h, P.id, mul);
     mul *= BD.H4Gear.atkMul(w, st, h, P, hz);
+    if (hs.D && hs.D.hitMul) mul *= hs.D.hitMul(h, p); // 武器自己的倍率（弓：適正距離）
     if (spec.sharp && src === h && !p.fixed) { const band = sharpBand(hs); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz; if (bounce) mul *= 0.6; }
     if (st.asleep && p.dmg >= 20) mul *= H4.AILMENTS.sleep.wakeMul;
     let dmg = p.dmg * mul;
@@ -78,8 +79,10 @@
       if (bounce && h.state === 'skill') { h.setState('recover', 0.35); w.fx.text(h.x, h.y - h.r - 24, '被彈開', '#cccccc', 16); }
     }
     BD.H4Gear.onHit(w, st, h, dealt, orig);
+    if (hs.D && hs.D.onHit) hs.D.onHit(h, p, P, orig); // 武器命中後（弓：誘導箭標記、殘留觸發箭、引爆、量表）
     if (b.state === 'dead' || w.winner) return r;
-    if (mod.ail && w.rng() < H4.AILMENT_RATE) { const s = st.ail[mod.ail]; s.acc += mod.sv; if (s.acc >= s.at) ailment(w, st, h, b, mod.ail, orig); }
+    const ail = p.ail || mod.ail, sv = p.ail ? p.sv : mod.sv; // 命中參數帶的異常（弓的瓶）優先於武器本身
+    if (ail && w.rng() < H4.AILMENT_RATE) { const s = st.ail[ail]; s.acc += sv; if (s.acc >= s.at) ailment(w, st, h, b, ail, orig); }
     // 傷口：打出來 / 集中弱點攻擊打破（打到哪都會破最近的傷口——集中模式代表瞄準）
     if (!P.wound && w.time >= P.scarUntil && (P.woundAcc += dealt) >= H4.WOUND.at * b.maxHp) {
       P.wound = w.time; P.woundAcc = 0; const at = partPos(b, P);

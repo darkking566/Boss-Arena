@@ -49,6 +49,75 @@
   const gotDealt = (s, h) => { const g = h.stats.dealt - s.dealt; s.dealt = h.stats.dealt; return g; }; // 這幀自己打出的傷害
   // 槍系：防禦 → 完美防禦（或長槍的一般防禦）立刻收盾接反擊；攻擊將至時舉盾
   const guardTick = (h) => { if (h.h4.drv.counter && h.inst && h.inst.skill.guard) h.comboCancel(); };
+  // ── 弓 ──
+  // 蓄力段數：射擊連射 I→II→III、長按蓄力直接到 III；III 再射一發掉回 II，蓄力墊步升一階、在 III 時保住（hot）；decay 秒沒動作歸零。誘導箭期間射擊一律視同 III。
+  // 特殊箭量表 0~3：長按蓄力、箭命中慢慢回，看破迴避大量回；裝瓶 / 誘導箭各耗 1。
+  const BOW_SHOTS = new Set(['bow_s1', 'bow_s2', 'bow_s3', 'bow_c2', 'bow_c3', 'bow_quick', 'bow_p1', 'bow_p2', 'bow_p3', 'bow_v1', 'bow_v2', 'bow_v3', 'bow_tracer']); // 收招可取消墊步的招
+  const bowSit = (h) => { const b = h.enemy; return DOWN.has(b.state) ? 'down' : open(h) ? 'open' : b.state === 'skill' ? 'atk' : Math.hypot(b.vx, b.vy) > 60 ? 'move' : 'idle'; };
+  function bowOk(h, c, d, sit) {
+    const s = h.h4.drv, n = c.need || {};
+    return c.when.includes(sit) && (!n.near || d < 300) && s.trick >= (n.trick || 0) && (!n.noTracer || !s.tracer) && (!n.tracer || s.tracer) && (!n.coatless || s.coatN <= 0) && (!n.det || s.tracer || s.marks) && (!n.lowSta || h.sta < 35);
+  }
+  function bowTok(h, tok) { // 連招步驟 → 招式 id（依目前段數 / 量表）
+    const s = h.h4.drv, L = s.tracer ? 3 : s.lvl;
+    if (tok === 'shot') return L >= 3 ? (s.hot || s.tracer ? 'bow_s3' : 'bow_s2') : 'bow_s' + (L + 1);
+    if (tok === 'charge') return L >= 2 ? bowTok(h, 'shot') : 'bow_c3';
+    if (tok === 'power' || tok === 'volley' || tok === 'swallow') return { power: 'bow_p', volley: 'bow_v', swallow: 'bow_sw' }[tok] + Math.max(1, L);
+    if (tok === 'tracer') return s.trick >= 1 && !s.tracer ? 'bow_tracer' : null;
+    if (tok === 'load') return s.trick >= 1 ? 'bow_load' : null;
+    return 'bow_' + tok;
+  }
+  function bowNext(h, d) { // 連招下一步；做不到的步驟跳過（最多連跳 3 個），走完或卡住就結束
+    const s = h.h4.drv, c = s.combo;
+    for (let skip = 0; s.ci < c.seq.length && skip < 3; skip++) {
+      const id = bowTok(h, c.seq[s.ci++]), sk = id && kv(h, id);
+      if (ready(h, sk, sk && sk.tags.includes('defensive') ? null : d)) return sk;
+    }
+    s.combo = null; return null;
+  }
+  function bowCoat(h) { // 選瓶：獵人大腦依 Boss 學哪種瓶划算；先驗＝Boss 還沒中過的控場異常優先、體型大用貫通、愛冒險用接擊
+    const s = h.h4.drv, B = H4.BOW, st = h.world.hunt4, p = h.def.persona, fresh = (a) => !st.ail[a].procs && !s.used[B.coatList.find((c) => B.coatFx[c].ail === a)];
+    const PRI = { power: 0.6, close: 0.45 + 0.4 * (p.risk - 0.5), pierce: h.enemy.r >= 60 ? 0.65 : 0.35, para: fresh('paralysis') ? 0.75 : 0.25, sleep: fresh('sleep') ? 0.6 : 0.2,
+      poison: st.poisonT > 0 ? 0.2 : 0.45, blast: 0.45, exhaust: 0.4 };
+    const opts = B.coatList.map((c) => ({ id: c, name: B.coatFx[c].name, prior: PRI[c] }));
+    return h.brain ? h.brain.pick('coat', h.enemy.def.id, opts) : opts.reduce((a, x) => (x.prior > a.prior ? x : a)).id;
+  }
+  function bowStart(h, s, id) { // 招式開始：段數、量表、瓶
+    const B = H4.BOW, w = h.world;
+    s.lastAct = w.time;
+    if (/^bow_[sc]\d$/.test(id)) { s.lvl = +id.slice(-1); s.hot = false; if (id[4] === 'c') s.trick = Math.min(B.trickMax, s.trick + B.gain[id.slice(4)]); }
+    else if (id === 'bow_quick') s.lvl = Math.max(s.lvl, 1);
+    else if (id === 'bow_step') { if (s.lvl) { s.lvl = Math.min(3, s.lvl + 1); s.hot = s.lvl === 3; } } // 沒建立蓄力時墊步不升階
+    else if (id.startsWith('bow_sw')) s.hot = false; // 飛燕射擊不保留 III
+    else if (id === 'bow_dragon' || id === 'bow_thousand') { s.lvl = 0; s.hot = false; }
+    else if (id === 'bow_tracer') s.trick = Math.max(0, s.trick - 1);
+    else if (id === 'bow_load') {
+      s.trick = Math.max(0, s.trick - 1); s.coat = bowCoat(h); s.coatN = B.coatShots; s.used[s.coat] = true; s.stat.loads++;
+      w.fx.text(h.x, h.y - h.r - 24, B.coatFx[s.coat].name, B.coatFx[s.coat].color, 16);
+    }
+  }
+  function bowDetonate(h, orig, text) { // 引爆誘導箭（基礎 + 追蹤箭命中數加成）與殘留觸發箭
+    const s = h.h4.drv, B = H4.BOW, b = h.enemy, w = h.world;
+    const dmg = (s.tracer ? B.tracer.det + B.tracer.perHit * Math.min(s.tracer.hits, B.tracer.maxHits) : 0) + s.marks * B.mark.det;
+    s.tracer = null; s.marks = 0;
+    if (!dmg || b.state === 'dead' || w.winner) return;
+    s.stat.dets++;
+    orig(h, b, { dmg, posture: dmg * 0.3, unblockable: true, noPerfect: true, ignoreIframe: true });
+    w.fx.text(b.x, b.y - b.r - 50, `${text} ${Math.round(dmg)}`, '#7dffe0', 22); w.fx.ring(b.x, b.y, 10, b.r + 60, 0.4, '#7dffe0', 6);
+  }
+  // 曲射：箭射上天，flight 秒後落在目標附近（照目標移動預判一點）；落在 Boss 身上的箭造成傷害並留下殘留觸發箭（mark）
+  BD.defineAction('h4arc', (w, b, inst, a) => {
+    const t = b.enemy, cx = t.x + (t.vx || 0) * a.flight * 0.5, cy = t.y + (t.vy || 0) * a.flight * 0.5;
+    for (let k = 0; k < a.n; k++) {
+      const an = w.rng() * U.TAU, rr = Math.sqrt(w.rng()) * a.scatter, x = cx + Math.cos(an) * rr, y = cy + Math.sin(an) * rr, fl = a.flight + k * 0.04;
+      w.lobs.push({ x0: x - 90, y0: y - 520, x1: x, y1: y, t: 0, dur: fl, kind: 'h4arrow', sky: true });
+      w.later(fl, () => {
+        if (w.winner || b.state === 'dead' || t.state === 'dead') return;
+        if (Math.hypot(t.x - x, t.y - y) < t.r + 8) w.damageBoss(b, t, { dmg: a.dmg, posture: a.posture, kb: 0, mark: true });
+        BD.spawnFx(w, 'projhit', x, y, { el: 'physical' });
+      });
+    }
+  }, { active: true });
 
   const DRIVERS = {
     // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；見切反擊命中接大回旋；紅刃見破綻（或 Boss 倒地時白 / 黃刃）放兜割，紅刃兜割再接無雙斬
@@ -347,27 +416,79 @@
       },
       gauge: (h) => { const n = H4.KINSECT.order.filter((c) => BD.hasStatus(h, 'h4' + c)).length; return { v: n / 3, color: n === 3 ? '#ffe27a' : '#a0d0a0' }; },
     },
-    // 弓：蓄力射擊 I → II → III → 剛射；強擊瓶用完找空檔換瓶；Boss 有破綻且冷卻好了放龍之一矢
+    // 弓（荒野式）：照連招表 H4.BOW_COMBOS 出招，獵人大腦依情境學哪套回報高（見 bowCombo）；攻擊將至就蓄力墊步（收招中也能取消），躲在開頭＝看破迴避
     bow: {
-      init: () => ({ coat: H4.BOW.coats, dragonAt: 0 }),
+      init: () => ({ lvl: 0, hot: false, lastAct: -9, trick: 1, coat: null, coatN: 0, used: {}, tracer: null, marks: 0, marksUntil: 0, combo: null, ci: 0, pops: 0,
+        stat: { discern: 0, tracers: 0, dets: 0, loads: 0 } }),
       choose(h, d) {
-        const s = h.h4.drv;
-        if (!s.coat && threatIn(h) > 1) return kv(h, 'bow_coat');
-        if (open(h) && h.world.time >= s.dragonAt) { const x = pick(h, d, 'bow_dragon'); if (x) return x; }
-        return pick(h, d, 'bow_s1');
+        const s = h.h4.drv, sit = bowSit(h), rk = h.def.persona.risk - 0.5, list = H4.BOW_COMBOS.filter((c) => bowOk(h, c, d, sit));
+        if (!list.length) return null;
+        const opts = list.map((c) => ({ id: c.id, name: c.name, prior: c.prior + (c.risk || 0) * rk })), key = `${sit}|${s.trick >= 1 ? 'g' : 'n'}|${d < 300 ? 'near' : 'mid'}`;
+        const id = h.brain ? h.brain.pick('combo', key, opts) : opts[0].id;
+        s.combo = list.find((c) => c.id === id); s.ci = 0;
+        return bowNext(h, d);
       },
       next(h, d) {
-        if (threatIn(h) < 0.35 || !keepGoing(h, 0.6 + 0.3 * h.def.persona.risk)) return null;
-        return pick(h, d, { bow_s1: 'bow_s2', bow_s2: 'bow_s3', bow_s3: 'bow_volley', bow_coat: 'bow_s1' }[h.lastSkillId] || '');
+        const s = h.h4.drv;
+        if (h.lastSkillId === 'h4_focus_bow') { s.combo = null; return h.stats.h4.pops > s.pops ? pick(h, null, 'bow_focus_dragon') : null; } // 集中射擊打破傷口 → 追加強化龍之一矢
+        if (!s.combo) return null;
+        if (threatIn(h) < 0.18 && h.lastSkillId !== 'bow_step') return pick(h, null, 'bow_step'); // 攻擊將至：墊步，連招之後接著打
+        if (s.combo !== H4.BOW_DISCERN && !keepGoing(h, 0.85 + 0.1 * h.def.persona.risk)) { s.combo = null; return null; }
+        return bowNext(h, d);
       },
+      react: (h) => kv(h, 'bow_step'),
       tick(h) {
-        const s = h.h4.drv, B = H4.BOW, w = h.world, id = startOnce(h);
-        if (id === 'bow_coat') { s.coat = B.coats; w.fx.text(h.x, h.y - h.r - 24, '強擊瓶', '#ff8a6a', 16); }
-        else if (id === 'bow_dragon') s.dragonAt = w.time + B.dragonCd;
-        else if (id && s.coat) s.coat--;
-        h.dmgMul = h.hunt.baseDmg * (s.coat ? B.coatDmg : 1); // shortcut: 塗料效果看「現在還有沒有瓶」，最後一瓶射出後還在飛的箭不加成
+        const s = h.h4.drv, B = H4.BOW, w = h.world, i = h.inst, id = startOnce(h);
+        if (id) bowStart(h, s, id);
+        if (i && i.skill.id.startsWith('bow_sw')) h.face = U.angTo(h, h.enemy); // 飛燕射擊：跳躍中一直對著 Boss 射（招式的追蹤只在起手）
+        if (i && i.skill.id === 'h4_focus_bow' && i.pops == null) { i.pops = s.pops = h.stats.h4.pops; s.combo = null; }
+        // 收招中攻擊將至：取消收招墊步（荒野的射擊 → × 派生）
+        if (i && BOW_SHOTS.has(i.skill.id) && h.skillPhase() === 'recovery' && h.sta >= kv(h, 'bow_step').cost && threatIn(h) < 0.15) { h.comboCancel(); h.startSkill(kv(h, 'bow_step'), { quiet: true }); }
+        if (h.state !== 'skill' && w.time - s.lastAct > B.decay) { s.lvl = 0; s.hot = false; }
+        if (s.tracer && w.time >= s.tracer.until) bowDetonate(h, w.hunt4.orig, '誘導箭爆炸');
+        if (s.marks && w.time >= s.marksUntil) s.marks = 0;
+        h.dmgMul = h.hunt.baseDmg;
       },
-      gauge: (h) => ({ v: h.h4.drv.coat / H4.BOW.coats, color: '#ff8a6a' }),
+      onProj(h, p) { // 剛射出的箭：套用瓶（每招只扣一次）、誘導箭期間追蹤並加長射程
+        const s = h.h4.drv, i = h.inst, B = H4.BOW;
+        if (p.kind !== 'arrow') return;
+        p.band = [B.band.near, B.band.far];
+        if (s.coat && i && (i.coated || s.coatN > 0)) {
+          if (!i.coated) { i.coated = true; s.coatN--; }
+          const c = B.coatFx[s.coat];
+          p.coat = s.coat; p.dmg *= c.dmg || 1; p.posture *= c.posture || 1;
+          if (c.band) p.band = c.band.slice();
+          if (c.pierce) { p.pierce = true; p.rehit = c.rehit; }
+          if (c.ail) p.extra = Object.assign({ ail: c.ail, sv: c.sv }, p.extra);
+        }
+        if (s.tracer) { p.traced = true; p.homing = Math.max(p.homing, B.tracer.home); p.band[1] += B.tracer.reach; p.life += B.tracer.reach / Math.hypot(p.vx, p.vy); }
+      },
+      hitMul(h, p) { // 適正距離：箭飛行距離在範圍內才是全傷害
+        const q = p.proj;
+        if (!q || !q.band) return 1;
+        const td = q.t * Math.hypot(q.vx, q.vy);
+        return td >= q.band[0] && td <= q.band[1] ? 1 : H4.BOW.band.lo;
+      },
+      onHit(h, p, P, orig) {
+        const s = h.h4.drv, B = H4.BOW, w = h.world;
+        if (p.proj && p.proj.kind === 'arrow') s.trick = Math.min(B.trickMax, s.trick + B.gain.hit);
+        if (p.tracer) { s.tracer = { until: w.time + B.tracer.dur, part: P.id, hits: 0 }; s.stat.tracers++; w.fx.text(h.enemy.x, h.enemy.y - h.enemy.r - 40, '誘導箭', '#7dffe0', 18); }
+        else if (s.tracer && p.proj && p.proj.traced) s.tracer.hits++;
+        if (p.mark) { s.marks = Math.min(B.mark.max, s.marks + 1); s.marksUntil = w.time + B.mark.dur; }
+        if (p.det && (s.tracer || s.marks)) bowDetonate(h, orig, '引爆！');
+      },
+      onEvade(h, perfect) { // 墊步 / 飛燕射擊躲過攻擊；perfect＝蓄力墊步開頭（看破迴避）：回體力、量表，接看破反擊
+        const s = h.h4.drv, B = H4.BOW, w = h.world, i = h.inst;
+        if (!perfect || i.discerned) { if (!i.evaded) { i.evaded = true; w.fx.text(h.x, h.y - h.r - 14, '閃避', '#ccffdd', 14); } return; }
+        i.discerned = true; s.stat.discern++; h.stats.perfect++;
+        const prec = i.t <= B.gain.preciseT; // 越貼近完美時機回越多
+        s.trick = Math.min(B.trickMax, s.trick + (prec ? B.gain.perfect : B.gain.discern)); h.sta = Math.min(h.maxSta, h.sta + B.discernSta);
+        if (s.lvl < 3) s.lvl = Math.max(2, s.lvl + 1); s.hot = s.lvl === 3;
+        s.combo = H4.BOW_DISCERN; s.ci = 0;
+        w.fx.text(h.x, h.y - h.r - 30, prec ? '看破迴避・精準！' : '看破迴避！', '#7dffe0', 20); w.log(h, '看破迴避');
+        w.slowmo = Math.max(w.slowmo, 0.15); BD.spawnFx(w, 'parry', h.x, h.y, { src: h });
+      },
+      gauge: (h) => { const s = h.h4.drv; return { v: s.trick / H4.BOW.trickMax, color: s.coatN > 0 ? H4.BOW.coatFx[s.coat].color : s.tracer ? '#7dffe0' : '#a0a0a0' }; },
     },
     // 輕弩：三種彈各自計數；有破綻用速射、偶爾貫通彈、平常通常彈；打空了裝填（全部補滿）
     lightxbow: {
@@ -429,6 +550,7 @@
     if (!c._choose0) c._choose0 = c.chooseSkill.bind(c);
     c.chooseSkill = (d, win) => { const r = hs.D && hs.D.choose(h, d, win), s = r === false ? null : r || c._choose0(d, win); return s && h.brain ? h.brain.gate(s, d) : s; }; // 驅動回 false＝這次不出招也不用備援；獵人大腦決定出手或等待
     if (D && D.react) h.react = () => D.react(h); else delete h.react;
+    h.onProj = D && D.onProj ? (p, a) => D.onProj(h, p, a) : null;
   }
   // 招式剛結束 → 問驅動要不要接下一招（每次結束只問一次）
   function step(h, dt) {
@@ -459,6 +581,7 @@
       const i = b.inst, boss = src && (src.isBoss ? src : null);
       if (!i || !src || p.dot) return null;
       const s = i.skill;
+      if (s.evade && !p.undodgeable && i.t <= s.evade.win) { b.h4.D.onEvade(b, s.evade.perfect != null && i.t <= s.evade.perfect); return 'dodged'; } // 弓：墊步 / 飛燕射擊
       if (s.offset && boss && !p.unblockable && i.t >= s.offset[0] && i.t <= s.offset[1]) {
         b.stats.h4.offsets++; w.hitstop = Math.max(w.hitstop, 0.09); BD.spawnFx(w, 'parry', b.x, b.y, { src: b });
         if (p.dmg >= H4.CLASH.dmg && boss.state === 'skill') clash(w, b, boss);

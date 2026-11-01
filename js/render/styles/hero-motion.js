@@ -162,11 +162,22 @@
     ig_air: { t: 'spin', airAll: 1 }, ig_kinsect: { t: 'item', pose: { a: -0.3, reach: 0.35 } },
     ig_dive: { t: 'rush', air: 1, airAll: 1, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     h4_focus_glaive: { t: 'spin', airAll: 0.5 },
-    // 弓：拉弦越來越深、搭箭越來越多；龍之一矢後仰瞄準
+    // 弓：拉弦越來越深、搭箭越來越多（長按蓄力拉得最滿）；剛射 / 剛連射 / 千矢一次搭多支；墊步側跳、飛燕射擊騰空拉弓；曲射後仰朝天；誘導箭 / 龍之一矢 / 集中射擊帶瞄準線
     bow_s1: { t: 'draw', pull: 0.45, arrows: 1 }, bow_s2: { t: 'draw', pull: 0.7, arrows: 2 }, bow_s3: { t: 'draw', pull: 1, arrows: 3 },
-    bow_volley: { t: 'draw', pull: 1, arrows: 5, kick: 0.6 },
+    bow_c2: { t: 'draw', pull: 0.9, arrows: 2 }, bow_c3: { t: 'draw', pull: 1.2, arrows: 3, kick: 0.5 },
+    bow_quick: { t: 'draw', pull: 0.3, arrows: 3, kick: 0.3 },
+    bow_p1: { t: 'draw', pull: 1, arrows: 4, kick: 0.6 }, bow_p2: { t: 'draw', pull: 1, arrows: 5, kick: 0.6 }, bow_p3: { t: 'draw', pull: 1.05, arrows: 5, kick: 0.7 },
+    bow_v1: { t: 'draw', pull: 1.1, arrows: 5, kick: 0.8 }, bow_v2: { t: 'draw', pull: 1.1, arrows: 6, kick: 0.8 }, bow_v3: { t: 'draw', pull: 1.15, arrows: 6, kick: 0.9 },
+    bow_step: { t: 'item', pose: { a: 0.2, lean: -0.15, air: 0.04 } },
+    bow_sw1: { t: 'rush', holdA: 0, air: 1, airAll: 1, then: { t: 'draw', pull: 0.9, arrows: 3 } }, bow_sw2: { t: 'rush', holdA: 0, air: 1, airAll: 1, then: { t: 'draw', pull: 1, arrows: 4 } },
+    bow_sw3: { t: 'rush', holdA: 0, air: 1, airAll: 1, then: { t: 'draw', pull: 1.1, arrows: 5 } },
+    bow_tracer: { t: 'draw', pull: 0.8, arrows: 1, aim: true },
+    bow_load: { t: 'item', pose: { a: 1.1, reach: -0.3 } }, // 弓垂到身側裝瓶
+    bow_arc: { t: 'draw', pull: 1, arrows: 3, lean: 0.25, kick: 0.5 },
     bow_dragon: { t: 'draw', pull: 1.3, arrows: 1, aim: true, lean: 0.15, kick: 2 },
-    bow_coat: { t: 'item', pose: { a: 1.1, reach: -0.3 } }, // 弓垂到身側換瓶
+    bow_dragon_q: { t: 'draw', pull: 1.15, arrows: 1, aim: true, lean: 0.08, kick: 1.4 }, bow_focus_dragon: { t: 'draw', pull: 1.2, arrows: 1, aim: true, lean: 0.1, kick: 1.6 },
+    bow_thousand: { t: 'draw', pull: 1.2, arrows: 7, kick: 1.6 },
+    h4_focus_bow: { t: 'draw', pull: 1, arrows: 3, aim: true, kick: 0.6 },
     // 輕弩：小後座、速射連三下
     lbg_n: { t: 'hit', kind: 'shot', kick: 0.5 }, lbg_p: { t: 'hit', kind: 'shot', kick: 0.8 }, lbg_rapid: { t: 'hit', kind: 'shot', kick: 0.5 },
     lbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.25 } },

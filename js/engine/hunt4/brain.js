@@ -4,6 +4,7 @@
 //   武器策略 strat[武器][距離段|Boss 狀態] → 出手 / 按兵不動
 //   Boss 圖鑑 dex[Boss].sk[招式].lead → 反應招提早多少秒按（早 / 中 / 晚）；.dir → 翻滾方向（照 AI 原方向 / 偏左 / 偏右）
 //   熟練度 xp[武器]：場數 × 個性的學習力 → 反應抖動變小、探索變少
+//   武器選項 combo[武器][種類|情境] → 驅動給的選項（弓：哪套連招、哪種瓶），回報同武器策略
 // 戰鬥內的探索亂數用 (存檔場數, 種子) 決定：同一份存檔 + 同一種子結果相同。
 (function (G) {
   const BD = G.BD, U = BD.U, H4 = BD.HUNT4;
@@ -11,7 +12,7 @@
   const LEAD = { e: 0.2, m: 0.1, l: 0.04 }, DIR = { a: 0, l: 1.1, r: -1.1 };
   const ZH = { near: '近', mid: '中距', far: '遠', lo: '低血', open: 'Boss 有破綻', atk: 'Boss 出招中', idle: 'Boss 待機', a: '照原方向', l: '偏左', r: '偏右', }; // F6 顯示用
   const JIT = [0.12, 0.03]; // 反應抖動：新手 → 熟練
-  const WIN = { strat: 2.5, react: 0.8, dodge: 0.8 }; // 結算回報的觀察時間（秒）
+  const WIN = { strat: 2.5, react: 0.8, dodge: 0.8, combo: 4, coat: 8 }; // 結算回報的觀察時間（秒）
 
   const newSave = () => ({ v: V, matches: 0, hunters: {} });
   const mem = (save, id) => save.hunters[id] || (save.hunters[id] = { xp: {}, strat: {}, dex: {} });
@@ -56,7 +57,7 @@
       const h = o.hunters && o.hunters[hd.id];
       if (!h || typeof h !== 'object') continue;
       const xp = {}; for (const k in h.xp || {}) if (key(k)) xp[k] = Math.round(num(h.xp[k], 0, 1e5));
-      out.hunters[hd.id] = { xp, strat: table(h.strat, (wp) => table(wp, arms)),
+      out.hunters[hd.id] = { xp, strat: table(h.strat, (wp) => table(wp, arms)), ...(h.combo ? { combo: table(h.combo, (wp) => table(wp, arms)) } : {}),
         dex: table(h.dex, (d) => ({ fights: Math.round(num(d.fights, 0, 1e7)), wins: Math.round(num(d.wins, 0, 1e7)), chased: num(d.chased, 0, 1),
           soft: arms(d.soft), sk: table(d.sk, (s) => ({ lead: arms(s.lead), dir: arms(s.dir) })) })) };
       if (h.gear) out.hunters[hd.id].gear = BD.H4Gear.sanitize(h.gear);
@@ -86,6 +87,15 @@
         B.last = (k === 'go' ? '出手：' : '退開等待：') + (band + '|' + bs).split('|').map((x) => ZH[x]).join('・');
         if (k === 'go') return s;
         B.holdUntil = w.time + 0.5; h.controller.mode = 'retreat'; h.controller.modeT = 0.5; return null; // 等待 = 退開觀察
+      };
+      // 武器選項：驅動給一組 { id, name, prior }（例如弓的連招 / 瓶），在 kind|key 情境下挑回報最高的（ε-貪婪），回報在 WIN[kind] 秒後結算
+      B.pick = (kind, key, opts) => {
+        const tab = sub(sub(sub(M, 'combo'), h.def.weapon), kind + '|' + key), prior = {};
+        for (const o of opts) prior[o.id] = o.prior;
+        const k = choose(tab, prior, eps(), rng);
+        trial(kind, arm(tab, k), { wt });
+        B.last = (kind === 'coat' ? '選瓶：' : '連招：') + opts.find((o) => o.id === k).name;
+        return k;
       };
       // 圖鑑：反應招（彈刀 / 防禦 / 衝撞）的時機；熟練 + 熟悉這招 → 抖動變小
       const pend = new Map();
@@ -118,7 +128,7 @@
       if (st.boss._target === h) B.chasedT += dt;
       for (let i = B.trials.length - 1; i >= 0; i--) {
         const t = B.trials[i], hurt = h.stats.taken - t.taken;
-        if (t.kind === 'strat') { if (h.state === 'dead') upd(t.a, -3); else if (w.time < t.until && !w.winner) continue; else upd(t.a, U.clamp((h.stats.dealt - t.dealt - hurt * t.wt) / 300, -3, 3)); } // 期間力竭：重罰
+        if (t.kind === 'strat' || t.kind === 'combo' || t.kind === 'coat') { if (h.state === 'dead') upd(t.a, -3); else if (w.time < t.until && !w.winner) continue; else upd(t.a, U.clamp((h.stats.dealt - t.dealt - hurt * t.wt) / 300, -3, 3)); } // 期間力竭：重罰
         else if (hurt > h.maxHp * 0.02) { upd(t.a, 0); B.res[t.kind][1]++; }
         else if (w.time >= t.until || w.winner) { upd(t.a, 1); B.res[t.kind][0]++; B.res[t.kind][1]++; }
         else continue;
