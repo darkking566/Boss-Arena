@@ -270,7 +270,7 @@
     sel.addEventListener('change', () => setPace(sel.value));
     setPace(BD.DEFAULT_PACE);
   })();
-  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : start(state.last.a, state.last.b, state.last.opts)));
+  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent, state.hunt.arms) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : start(state.last.a, state.last.b, state.last.opts)));
   $('#btnSwap').addEventListener('click', () => start(state.last.b, state.last.a, state.last.opts));
   $('#btnMenu').addEventListener('click', () => show(state.resultKind === 'hunt' ? 'hunt' : 'select'));
   $('#modeHunt').addEventListener('click', () => show('hunt'));
@@ -317,10 +317,11 @@
   state.startTraining = startTraining;
 
   // 獵魂模式：存檔中的主角（沉重節奏）挑戰所選 Boss；擊敗後在結算畫面發放靈魂
-  function startHunt(bossId, mapId, agent) {
-    const w = new BD.World(BD.Hunt.buildHero(BD.HuntUI.getSave(), 'heavy'), BD.bossById[bossId], { player: agent ? undefined : 0, input, pace: 'heavy', map: mapId || state.map, hunt: true, agent: !!agent });
+  function startHunt(bossId, mapId, agent, arms) { // arms：代理改拿的狩獵武器 id（只限代理）
+    arms = agent && arms; const save = BD.HuntUI.getSave();
+    const w = new BD.World(arms ? BD.Hunt4.soloHero(save, arms) : BD.Hunt.buildHero(save, 'heavy'), BD.bossById[bossId], { player: agent ? undefined : 0, input, pace: 'heavy', map: mapId || state.map, hunt: true, agent: !!agent, h4solo: !!arms });
     w.speed = 1;
-    state.world = w; state.resultShown = false; state.hunt = { boss: bossId, map: mapId || state.map, agent };
+    state.world = w; state.resultShown = false; state.hunt = { boss: bossId, map: mapId || state.map, agent, arms };
     view.player = 0;
     show('game');
     return w;

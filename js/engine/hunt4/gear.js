@@ -54,11 +54,13 @@
   }
 
   // ── 戰鬥內 ──
+  const live = (E, eq) => Object.assign(E, { eq, hits: 0, combo: 0, lastHit: -9, ogUntil: 0, bonus: false, ev: 0, perf: 0, undying: false, got: null, made: [] });
+  const blank = () => live(build({ w: {}, a: {} }, {}), {}); // 沒有裝備（獵魂代理）
   function install(w, st) {
     const bid = st.boss.def.id;
     for (const h of st.hunters) {
       const hs = h.h4, hd = armed(h), g = gearOf(st.save, hd.id), eq = g.eq = choose(g, hd, bid), E = build(g, eq);
-      hs.gear = Object.assign(E, { eq, hits: 0, combo: 0, lastHit: -9, ogUntil: 0, bonus: false, ev: 0, perf: 0, undying: false, got: null, made: [] });
+      hs.gear = live(E, eq);
       if (E.mod) hs.mods[0] = hs.mod = E.mod;
       if (hs.specs[0].sharp && E.sharp !== 1) { hs.specs[0] = hs.spec = Object.assign({}, hs.spec, { sharp: Math.round(hs.spec.sharp * E.sharp) }); hs.sharp = hs.sharps[0] = hs.spec.sharp; }
       const ev = E.sk.evade, d0 = h.tryDodge;
@@ -180,5 +182,5 @@
     return g;
   }
 
-  BD.H4Gear = { choose, build, install, atkMul, postureMul, sharpCost, onHit, onPop, takenMul, undying, tick, end, sanitize, gearOf, itemName };
+  BD.H4Gear = { blank, choose, build, install, atkMul, postureMul, sharpCost, onHit, onPop, takenMul, undying, tick, end, sanitize, gearOf, itemName };
 })(typeof window !== 'undefined' ? window : globalThis);

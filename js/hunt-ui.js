@@ -32,6 +32,7 @@
         <b style="color:${b.color}">${b.name}</b><span>${b.title}</span><span class="dim">HP ${b.maxHp}　已擊敗 ${ui.save.kills[b.id] || 0} 次</span><span>👻 ${souls(b.id)}</span></div>`).join('')}</div>
       <div class="opts"><label>地圖 <select id="hMap">${maps}</select></label>
       <label title="由 AI 操控主角，與玩家同樣限制（需在揮刀窗內彈刀）"><input type="checkbox" id="hAgent"${ui.agent ? ' checked' : ''}> 代理（AI 自動戰鬥）</label>
+      ${ui.agent ? `<label title="代理可改拿狩獵模式的武器（連同部位肉質、銳利度、異常等狩獵戰鬥系統）">代理武器 <select id="hArms"><option value="">${wp.icon} ${wp.name}（獵魂）</option>${Object.keys(BD.HUNT4.WEAPON_SPECS).map((id) => `<option value="${id}"${id === ui.arms ? ' selected' : ''}>狩獵・${BD.HUNT4.WEAPON_NAMES[id]}</option>`).join('')}</select></label>` : ''}
       <button class="primary" id="hGo">⚔ 挑戰 ${ui.target ? def(ui.target).name : '（請先選擇 Boss）'}</button></div>`;
   }
   function viewWeapon() {
@@ -95,7 +96,7 @@
       if (!el) return;
       const d = el.dataset, S = ui.save;
       if (el.id === 'hBack') { hooks.onBack(); return; }
-      if (el.id === 'hGo') { if (ui.target) hooks.onStart(ui.target, ui.map, ui.agent); return; }
+      if (el.id === 'hGo') { if (ui.target) hooks.onStart(ui.target, ui.map, ui.agent, ui.agent && ui.arms); return; }
       if (d.tab) { ui.tab = d.tab; ui.msg = ''; } else if (d.target) ui.target = d.target;
       else if (d.weapon) { S.loadout.weapon = d.weapon; persist(); } else if (d.boss) ui.boss = d.boss; else if (d.pay) ui.pay = d.pay;
       else if (d.unlock) return act(Hunt.unlock(S, d.unlock)); else if (d.toggle) return act(Hunt.toggle(S, d.toggle));
@@ -104,7 +105,7 @@
       else if (d.upg) return act(Hunt.upgrade(S, d.upg, ui.pay || BD.bosses.slice().sort((a, b) => souls(b.id) - souls(a.id))[0].id));
       render();
     });
-    r.addEventListener('change', (e) => { if (e.target.id === 'hMap') ui.map = e.target.value; else if (e.target.id === 'hAgent') ui.agent = e.target.checked; });
+    r.addEventListener('change', (e) => { if (e.target.id === 'hMap') ui.map = e.target.value; else if (e.target.id === 'hAgent') { ui.agent = e.target.checked; render(); } else if (e.target.id === 'hArms') ui.arms = e.target.value; });
   }
   BD.HuntUI = {
     create, render, getSave: () => ui.save, persist, hide() { ui.root.classList.add('hidden'); },

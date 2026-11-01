@@ -6,14 +6,21 @@
   const BD = G.BD, U = BD.U, H4 = BD.HUNT4;
 
   // 獵人 = 獵魂的 hero 定義換上名字 / 配色 / 個性；個性換算成底層 AI 參數（P4 的獵人大腦會直接讀 persona）
+  const aiOf = (def, p, wp) => Object.assign({}, def.ai, { aggression: 0.35 + 0.5 * p.risk, patience: p.patience, retreat: 0.1 + 0.4 * (1 - p.risk), punish: 0.5 + 0.4 * p.show, nervous: 0.3 * (1 - p.risk) }, wp.aiMod);
+  const wpOf = (id) => H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id];
   function buildHunter(h, paceId, weapon) {
     const s = BD.Hunt.newSave(), id = weapon || h.weapons[0]; s.loadout.weapon = 'katana'; // 狩獵專用武器（大劍 / 雙刀 / 片手劍）以武器物件傳入
-    const wp = H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id], def = BD.Hunt.buildHero(s, paceId || 'heavy', wp), p = h.persona;
+    const wp = wpOf(id), def = BD.Hunt.buildHero(s, paceId || 'heavy', wp), p = h.persona;
     return Object.assign(def, {
       id: 'h4_' + h.id, hunter: h.id, persona: p, name: h.name, title: h.title, desc: h.desc, color: h.color, color2: h.color2, glow: h.glow,
-      traits: def.traits.concat('hunt4', 'h4arms'),
-      ai: Object.assign({}, def.ai, { aggression: 0.35 + 0.5 * p.risk, patience: p.patience, retreat: 0.1 + 0.4 * (1 - p.risk), punish: 0.5 + 0.4 * p.show, nervous: 0.3 * (1 - p.risk) }, wp.aiMod),
+      traits: def.traits.concat('hunt4', 'h4arms'), ai: aiOf(def, p, wp),
     });
+  }
+  // 獵魂代理：存檔裡的獵魂者拿狩獵武器（沒有 'hunt4' 特性＝不會力竭歸隊，照獵魂規則死亡）
+  const SOLO_P = { risk: 0.6, patience: 0.6, team: 0.5, show: 0.6, care: 0.4, learn: 0.5 };
+  function soloHero(save, weapon) {
+    const wp = wpOf(weapon), def = BD.Hunt.buildHero(save, 'heavy', wp);
+    return Object.assign(def, { persona: SOLO_P, traits: def.traits.concat('h4arms'), ai: aiOf(def, SOLO_P, wp) });
   }
   // mains：{ 獵人 id: 主武器 }（選單可換）；武器清單 = 主武器 + 原本的其他武器（第一把已實作的當副武器）
   const ARMS = (h, main) => [main].concat(h.weapons.filter((x) => x !== main));
@@ -110,34 +117,49 @@
       if (!w.winner && h.state !== 'dead') { BD.H4Weapons.step(h, dt); act(w, st, h); h.h4.sharps[h.h4.wi] = h.h4.sharp; } // 先讓武器接連段，道具 / 集中攻擊不插進連段空檔
     }
     BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt); BD.H4Gear.tick(w, st);
+    if (st.solo) return; // 獵魂代理：勝負與結算照獵魂規則
     if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); BD.H4Gear.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
     if (!w.winner && w.time >= H4.TIME_LIMIT) fail(w, st, '時間到');
   }
 
-  BD.setupHunt4 = function (w, opts) {
-    const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
+  // 狩獵戰鬥系統（武器驅動、部位 / 銳利度 / 異常管線、道具判斷）；4v1 與獵魂代理共用。hd：獵人資料（獵魂代理沒有）
+  function arm(w, hunters, boss, solo) {
     for (const h of hunters) {
-      BD.huntUnit(h, true);
-      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = (h.def.h4weapons || hd.weapons).slice(1).find((id) => (H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id]) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
-      const spec = H4.WEAPON_SPECS[h.def.weapon];
-      h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, specs: [spec, sub && H4.WEAPON_SPECS[sub]], mod: hd.mod || {}, mods: [hd.mod || {}, hd.mod || {}], sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
-        items: Object.assign({}, hd.items), nextAct: 0 };
+      const hd = !solo && H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = hd && (h.def.h4weapons || hd.weapons).slice(1).find((id) => wpOf(id) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
+      const spec = H4.WEAPON_SPECS[h.def.weapon], mod = (hd && hd.mod) || {};
+      h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, specs: [spec, sub && H4.WEAPON_SPECS[sub]], mod, mods: [mod, mod], sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
+        items: Object.assign({ flash: 0, dust: 0 }, hd && hd.items), nextAct: 0 };
       h.stats.h4 = { pops: 0, breaks: 0, procs: 0, whets: 0, flashes: 0, dusts: 0, switches: 0, offsets: 0, pguards: 0, clashes: 0 };
       BD.H4Weapons.equip(h);
     }
-    boss.maxHp = boss.hp = boss.hpTrail = Math.round(boss.maxHp * H4.BOSS_HP_MUL); boss.maxPosture *= H4.POSTURE_MUL;
-    boss.r *= H4.BOSS_SIZE; boss.sizeMul = H4.BOSS_SIZE;
-    w.enrageAt = Infinity; // 以時限取代狂暴
     BD.applyStatus(boss, 'kdGuard', { dur: Infinity }, w); // Boss 不會被單一重擊打倒，只有架勢累積崩潰才倒地（combat.js 的倒地）
-    const st = w.hunt4 = { boss, hunters, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };
-    BD.H4Combat.init(w, st); BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); BD.H4Gear.install(w, st); // 沒給存檔 = 全新的獵人（沒有裝備）
-    const retarget = w.retarget.bind(w), step = w.step.bind(w), orig = st.orig = w.damageBoss.bind(w);
-    w.retarget = (b) => (b === boss ? aggroTarget(w, st) : retarget(b));
+    const st = w.hunt4 = { boss, hunters, solo, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };
+    BD.H4Combat.init(w, st);
+    const step = w.step.bind(w), orig = st.orig = w.damageBoss.bind(w);
     w.damageBoss = (src, b, p) => { // 獵人（或其投射物）打 Boss → 走狩獵戰鬥管線
       const h = src && (src.isBoss ? src : src.owner);
       return b === boss && h && h.h4 && !p.dot ? BD.H4Combat.hit(w, st, h, src, b, p, orig) : orig(src, b, p);
     };
     w.step = (dt) => { step(dt); tick(w, st, dt); };
+    return st;
+  }
+
+  BD.setupHunt4 = function (w, opts) {
+    const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
+    for (const h of hunters) BD.huntUnit(h, true);
+    boss.maxHp = boss.hp = boss.hpTrail = Math.round(boss.maxHp * H4.BOSS_HP_MUL); boss.maxPosture *= H4.POSTURE_MUL;
+    boss.r *= H4.BOSS_SIZE; boss.sizeMul = H4.BOSS_SIZE;
+    w.enrageAt = Infinity; // 以時限取代狂暴
+    const st = arm(w, hunters, boss, false);
+    BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); BD.H4Gear.install(w, st); // 沒給存檔 = 全新的獵人（沒有裝備）
+    const retarget = w.retarget.bind(w);
+    w.retarget = (b) => (b === boss ? aggroTarget(w, st) : retarget(b));
   };
-  BD.Hunt4 = { buildHunter, team, ARMS };
+  // 獵魂代理（opts.h4solo，主角由 soloHero 建）：只掛戰鬥系統，不放大 Boss、沒有仇恨 / 力竭 / 時限；不學習、不帶狩獵裝備
+  // shortcut: 獵人大腦不裝（沒有跨場存檔），出手 / 反應時機用武器驅動的預設；要學習時給獵魂另存一份 H4Brain 存檔
+  BD.setupHunt4Solo = function (w) {
+    const st = arm(w, [w.bosses[0]], w.bosses[1], true);
+    for (const h of st.hunters) h.h4.gear = BD.H4Gear.blank();
+  };
+  BD.Hunt4 = { buildHunter, soloHero, team, ARMS };
 })(typeof window !== 'undefined' ? window : globalThis);

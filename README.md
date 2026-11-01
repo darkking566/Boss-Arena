@@ -44,6 +44,7 @@
   - **鍛造**該 Boss 的裝備：頭盔 / 胸甲 / 護腿 / 鞋子各 1 顆靈魂；同一位 Boss 穿滿 2 件、4 件有套裝獎勵（`js/data/hunt.js` 的 `BOSS_META`）。
   - **強化**基礎數值：生命 / 體力 / 法力 / 攻擊 / 魂力 / 藥水容量（可用任一位 Boss 的靈魂支付）。
 - **架構**：主角是不進註冊表的 hero 定義（`BD.Hunt.buildHero(save)`，`js/engine/hunt.js`），沿用同一個 Boss 引擎與 `PlayerController`；`new BD.World(hero, boss, { player: 0, hunt: true })` 啟用（`BD.setupHunt`）。法力（`def.mana`、招式 `res: 'mana'`）、吸血（`b.lifesteal`）是對 Boss 引擎的小型通用掛勾，一般對戰不受影響。資料在 `js/data/hunt.js`，介面在 `js/hunt-ui.js`，繪圖在 `js/render/hunt.js`、`js/render/styles/hero.js`。測試：`npm run test:hunt`。
+- **代理武器**：勾選「代理」後可改拿狩獵模式的 14 把武器（`BD.Hunt4.soloHero(save, id)`、World `opts.h4solo` → `BD.setupHunt4Solo`）。只掛狩獵戰鬥系統（武器驅動、部位肉質、銳利度 / 磨刀、異常、傷口），Boss 不放大、沒有仇恨 / 力竭 / 時限，勝負與靈魂結算照獵魂；不裝獵人大腦、不帶狩獵裝備。只限 AI 代理，玩家操作這些武器尚未支援。
 - 新增 Boss 時要在 `js/data/hunt.js` 的 `BOSS_META` 補上一筆（簡稱、裝備原型、被動、二件 / 四件套裝），否則 `test/hunt.test.js` 會失敗。
 
 ## 狩獵模式（4v1，開發中）

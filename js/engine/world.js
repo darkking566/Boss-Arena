@@ -57,6 +57,7 @@
       });
       if (opts.training && BD.setupTraining) BD.setupTraining(this, opts); else this.training = null;
       if (opts.hunt && BD.setupHunt) BD.setupHunt(this, opts);
+      if (opts.hunt && opts.h4solo && BD.setupHunt4Solo) BD.setupHunt4Solo(this);
       if (opts.hunt4 && BD.setupHunt4) BD.setupHunt4(this, opts);
     }
     tick(realDt) {

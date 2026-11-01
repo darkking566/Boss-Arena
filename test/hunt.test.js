@@ -172,5 +172,19 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   console.log(`AI 主角 ${n} 場完整對戰完成（主角勝 ${heroWins}）`);
 }
 
+// ── 6. 代理拿狩獵模式的 14 把武器（opts.h4solo）：掛上狩獵戰鬥系統、Boss 不放大、整場不丟例外、會出招打中 ──
+{
+  const s = Hunt.newSave(), ids = Object.keys(BD.HUNT4.WEAPON_SPECS);
+  eq(ids.length, 14, '狩獵武器數量');
+  ids.forEach((id, i) => {
+    const boss = BD.bosses[i % BD.bosses.length].id;
+    const w = new BD.World(BD.Hunt4.soloHero(s, id), BD.bossById[boss], { seed: 200 + i, pace: 'heavy', hunt: true, agent: true, h4solo: true }), h = w.bosses[0];
+    check(w.hunt4 && w.hunt4.solo && h.h4.D && h.h4.gear, `${id}：沒有掛上狩獵武器驅動`);
+    eq(w.bosses[1].maxHp, BD.applyPace(BD.bossById[boss], 'heavy').maxHp, `${id}：Boss 生命不放大`);
+    for (let k = 0; k < 60 * 60 && !w.winner; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); }
+    check(h.stats.dealt > 0, `${id} 對 ${boss}：一分鐘內沒打中`);
+  });
+}
+
 console.log(fails ? `HUNT FAIL（${fails} 項）` : 'HUNT PASS');
 process.exit(fails ? 1 : 0);
