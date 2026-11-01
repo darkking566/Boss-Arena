@@ -106,7 +106,10 @@
       const low = h.hp < h.maxHp * (0.35 + 0.25 * (1 - p.risk)), open = b.state === 'knockdown' || b.state === 'stun';
       if (w.time - hs.wT > 6 && (hs.wi === 0 ? low && chased : h.hp > h.maxHp * 0.7 || open)) { swap(w, h); return; } // 換過 6 秒內不再換，避免來回切
     }
-    if (hs.focus && st.parts.some((P) => P.wound) && d < hs.focus.range[1] + b.r * 0.5 && w.rng() < 0.3 + 0.4 * p.show) h.startSkill(hs.focus);
+    if (hs.focus && st.parts.some((P) => P.wound) && d < hs.focus.range[1] + b.r * 0.5 && w.rng() < 0.3 + 0.4 * p.show) {
+      const f = hs.D && hs.D.focus ? hs.D.focus(h) : hs.focus; // 武器可換成蓄力版或沒存量不放（輕弩集中攻擊彈）
+      if (f) h.startSkill(f);
+    }
   }
 
   function tick(w, st, dt) {

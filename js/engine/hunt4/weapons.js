@@ -67,10 +67,10 @@
     if (tok === 'load') return s.trick >= 1 ? 'bow_load' : null;
     return 'bow_' + tok;
   }
-  function bowNext(h, d) { // 連招下一步；做不到的步驟跳過（最多連跳 3 個），走完或卡住就結束
+  function comboNext(h, d, tok) { // 連招下一步（tok：步驟 → 招式 id）；做不到的步驟跳過（最多連跳 3 個），走完或卡住就結束
     const s = h.h4.drv, c = s.combo;
     for (let skip = 0; s.ci < c.seq.length && skip < 3; skip++) {
-      const id = bowTok(h, c.seq[s.ci++]), sk = id && kv(h, id);
+      const id = tok(h, c.seq[s.ci++]), sk = id && kv(h, id);
       if (ready(h, sk, sk && sk.tags.includes('defensive') ? null : d)) return sk;
     }
     s.combo = null; return null;
@@ -118,6 +118,75 @@
       });
     }
   }, { active: true });
+
+  // ── 輕弩：招式 id＝lbg_<動作>_<彈種>；速射系動作只在速射模式、普通系只在普通模式 ──
+  const LBG_RE = /^lbg_(shot|chase|rapid|rchase|burst|reload)_([nps])$/, LBG_CANCEL = /^lbg_(shot|chase|rapid|rchase)_/;
+  const LBG_RAPID = new Set(['rapid', 'rchase', 'burst']);
+  const brainPick = (h, kind, opts) => (h.brain ? h.brain.pick(kind, h.enemy.def.id, opts) : opts.reduce((a, x) => (x.prior > a.prior ? x : a)).id);
+  function lbgArm(h, s) { // 第一次用到時決定主力彈與特殊彈（獵人大腦依 Boss 學）：大體型偏貫通、愛冒險偏散彈 / 起爆龍彈
+    if (s.am) return;
+    const rk = h.def.persona.risk - 0.5;
+    s.am = brainPick(h, 'ammo', [{ id: 'n', name: '通常彈', prior: 0.55 }, { id: 'p', name: '貫通彈', prior: h.enemy.def.radius >= 34 ? 0.6 : 0.35 }, { id: 's', name: '散彈', prior: 0.35 + 0.5 * rk }]);
+    s.spType = brainPick(h, 'special', [{ id: 'adh', name: '附著龍彈', prior: 0.6 }, { id: 'wyv', name: '起爆龍彈', prior: 0.45 + 0.3 * rk }]);
+    h.controller.p.prefRange = H4.LBG.pref[s.am].slice(); // 站位跟著主力彈的適正距離（散彈要貼近）
+  }
+  function lbgOk(h, c, d, sit) {
+    const s = h.h4.drv, L = H4.LBG, n = c.need || {};
+    return c.when.includes(sit) && (c.mode === 'r') === s.rapid && s.en >= (n.en || 0) && (!n.lowEn || s.en < L.en.early) && (!n.magLow || s.mag[s.am] <= 1)
+      && (!n.sp || s.sp >= 1) && (!n.spType || s.spType === n.spType) && (!n.near || d < 350);
+  }
+  function lbgTok(h, tok) { // 連招步驟 → 招式 id；彈匣空時需要彈的步驟改成裝填（速射模式＝墊步裝填）
+    const s = h.h4.drv, am = s.am, L = H4.LBG, empty = s.mag[am] <= 0;
+    if (tok === 'on') return !s.rapid && s.en >= L.en.on ? 'lbg_mode' : null;
+    if (tok === 'off') return s.rapid ? 'lbg_mode' : null;
+    if (tok === 'step' || tok === 'slide') return 'lbg_' + tok;
+    if (tok === 'special') return s.sp >= 1 ? 'lbg_' + s.spType : null;
+    if (tok === 'reload') return s.mag[am] >= L.mag[am] ? null : s.rapid ? (empty ? 'lbg_sreload' : null) : 'lbg_reload_' + am;
+    if (empty) return s.rapid ? 'lbg_sreload' : 'lbg_reload_' + am;
+    if (LBG_RAPID.has(tok) !== s.rapid || s.rapid && s.en <= 0) return null;
+    return `lbg_${tok}_${am}`;
+  }
+  function lbgDodge(h) { // 迴避：速射模式有彈有能量＝速射墊步射擊、彈匣空＝墊步裝填，否則射擊後墊步
+    const s = h.h4.drv;
+    if (s.rapid && s.am) return kv(h, s.mag[s.am] <= 0 ? 'lbg_sreload' : s.en > 0 ? 'lbg_burst_' + s.am : 'lbg_step');
+    return kv(h, 'lbg_step');
+  }
+  function lbgStart(h, s, id) { // 招式開始：扣彈、扣能量、切模式、裝填、特殊彈 / 集中攻擊彈存量
+    const L = H4.LBG, w = h.world, m = LBG_RE.exec(id), say = (t, c) => w.fx.text(h.x, h.y - h.r - 24, t, c, 16);
+    if (m) {
+      const [, act, am] = m;
+      if (act === 'reload') { s.mag[am] = L.mag[am]; say('裝填', '#cfe0ff'); return; }
+      s.mag[am] = Math.max(0, s.mag[am] - 1);
+      if (LBG_RAPID.has(act)) { s.en = Math.max(0, s.en - L.en.cost[am]); s.stat.rapid++; } else if (act === 'chase') s.stat.chase++;
+    } else if (id === 'lbg_mode') { s.rapid = !s.rapid; say(s.rapid ? '速射模式' : '普通模式', s.rapid ? '#ff9a3c' : '#8ad0ff'); }
+    else if (id === 'lbg_sreload') { s.mag[s.am] = L.mag[s.am]; s.stat.sreload++; say('墊步裝填', '#cfe0ff'); }
+    else if (id === 'lbg_adh' || id === 'lbg_wyv') {
+      s.sp = Math.max(0, s.sp - 1);
+      if (id === 'lbg_wyv') { const a = U.angTo(h, h.enemy); s.wyv = { x: h.x + Math.cos(a) * 120, y: h.y + Math.sin(a) * 120, until: w.time + L.sp.wyv.life, n: L.sp.wyv.n, cd: 0 }; s.stat.wyv++; } // 設在前方地面（腳下會被自己剛射出的彈引爆）
+    } else if (id === 'h4_focus_lbg' || id === 'lbg_focus1' || id === 'lbg_focus2') s.fs = Math.max(0, s.fs - 1);
+  }
+  function lbgAdhBoom(h, orig) { // 附著龍彈引爆：依同部位命中數決定階段 → 連續斬擊 → 爆炸，回速射能量
+    const s = h.h4.drv, A = H4.LBG.sp.adh, w = h.world, b = h.enemy, a = s.adh, alive = () => b.state !== 'dead' && !w.winner;
+    s.adh = null;
+    if (!a || !alive()) return;
+    const lv = A.need.filter((x) => a.pts >= x).length - 1, n = A.slash[lv], P = { unblockable: true, noPerfect: true, ignoreIframe: true, kb: 0 };
+    for (let k = 0; k < n; k++) w.later(k * 0.04, () => { if (alive()) orig(h, b, Object.assign({ dmg: A.slashDmg, posture: 3 }, P)); });
+    w.later(n * 0.04 + 0.1, () => {
+      if (!alive()) return;
+      orig(h, b, Object.assign({ dmg: A.boom, posture: 30 }, P)); s.en = Math.min(H4.LBG.en.max, s.en + A.gain);
+      w.fx.text(b.x, b.y - b.r - 50, `附著龍彈 ${['I', 'II', 'III'][lv]}`, '#ffb84a', 22); w.fx.ring(b.x, b.y, 10, b.r + 50, 0.4, '#ffb84a', 6);
+    });
+  }
+  function lbgWyv(h, s, w, orig) { // 起爆龍彈：Boss 踩到、被自己的彈打中、或時間到就爆；可爆 n 次，範圍內的 Boss 受傷
+    const W = H4.LBG.sp.wyv, d = s.wyv, b = h.enemy;
+    let trig = w.time >= d.until || U.dist(d, b) < b.r + 20;
+    if (!trig) for (const p of w.projectiles) if (p.owner === h && Math.hypot(p.x - d.x, p.y - d.y) < W.trig) { trig = true; break; }
+    if (!trig || w.time < d.cd) return;
+    d.cd = w.time + W.cd; d.n--;
+    if (U.dist(d, b) < W.r + b.r && b.state !== 'dead' && !w.winner) orig(h, b, { dmg: W.dmg, posture: 35, kb: 0, unblockable: true, noPerfect: true, ignoreIframe: true });
+    w.fx.ring(d.x, d.y, 10, W.r, 0.35, '#ff9a3c', 6);
+    if (d.n <= 0 || w.time >= d.until) s.wyv = null;
+  }
 
   const DRIVERS = {
     // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；見切反擊命中接大回旋；紅刃見破綻（或 Boss 倒地時白 / 黃刃）放兜割，紅刃兜割再接無雙斬
@@ -426,7 +495,7 @@
         const opts = list.map((c) => ({ id: c.id, name: c.name, prior: c.prior + (c.risk || 0) * rk })), key = `${sit}|${s.trick >= 1 ? 'g' : 'n'}|${d < 300 ? 'near' : 'mid'}`;
         const id = h.brain ? h.brain.pick('combo', key, opts) : opts[0].id;
         s.combo = list.find((c) => c.id === id); s.ci = 0;
-        return bowNext(h, d);
+        return comboNext(h, d, bowTok);
       },
       next(h, d) {
         const s = h.h4.drv;
@@ -434,7 +503,7 @@
         if (!s.combo) return null;
         if (threatIn(h) < 0.18 && h.lastSkillId !== 'bow_step') return pick(h, null, 'bow_step'); // 攻擊將至：墊步，連招之後接著打
         if (s.combo !== H4.BOW_DISCERN && !keepGoing(h, 0.85 + 0.1 * h.def.persona.risk)) { s.combo = null; return null; }
-        return bowNext(h, d);
+        return comboNext(h, d, bowTok);
       },
       react: (h) => kv(h, 'bow_step'),
       tick(h) {
@@ -490,27 +559,75 @@
       },
       gauge: (h) => { const s = h.h4.drv; return { v: s.trick / H4.BOW.trickMax, color: s.coatN > 0 ? H4.BOW.coatFx[s.coat].color : s.tracer ? '#7dffe0' : '#a0a0a0' }; },
     },
-    // 輕弩：三種彈各自計數；有破綻用速射、偶爾貫通彈、平常通常彈；打空了裝填（全部補滿）
+    // 輕弩（荒野式）：普通模式射擊 / 追擊射擊回速射能量 → 切速射模式消耗能量（速射 / 速射追擊 / 速射墊步射擊）→ 能量低提早收手，耗盡強制解除有硬直。
+    //   彈匣每種彈各自、裝填只補當前彈；速射模式彈匣空＝墊步裝填。特殊彈（附著 / 起爆龍彈）約 100 秒一發；集中攻擊彈 3 發各 35 秒回。連招表 H4.LBG_COMBOS 由獵人大腦學
     lightxbow: {
-      init: () => Object.assign({}, H4.LBG.mag),
+      init: (h) => ({ am: null, spType: null, rapid: false, en: 50, mag: Object.assign({}, H4.LBG.mag), sp: H4.LBG.sp.max, fs: H4.LBG.focus.max, adh: null, wyv: null,
+        combo: null, ci: 0, pops: h.stats.h4 ? h.stats.h4.pops : 0, stat: { rapid: 0, exits: 0, chase: 0, sreload: 0, adh: 0, wyv: 0 } }),
       choose(h, d) {
-        const s = h.h4.drv;
-        if (!s.n && (threatIn(h) > 0.8 || !s.p && !s.rapid)) return kv(h, 'lbg_reload');
-        if (open(h) && s.rapid) { const x = pick(h, d, 'lbg_rapid'); if (x) return x; }
-        if (s.p && (open(h) || rng(h)() < 0.3)) { const x = pick(h, d, 'lbg_p'); if (x) return x; }
-        return s.n ? pick(h, d, 'lbg_n') : pick(h, d, s.p ? 'lbg_p' : 'lbg_rapid');
+        const s = h.h4.drv, sit = bowSit(h), rk = h.def.persona.risk - 0.5;
+        lbgArm(h, s);
+        const main = kv(h, 'lbg_shot_' + s.am);
+        if (d > main.range[1] + h.enemy.r * 0.4) return false; // 主力彈打不到：先走近（回 null 會退回預設選招、亂打通常彈）
+        const list = H4.LBG_COMBOS.filter((c) => lbgOk(h, c, d, sit));
+        if (!list.length) return false;
+        const opts = list.map((c) => ({ id: c.id, name: c.name, prior: c.prior + (c.risk || 0) * rk })), key = `${sit}|${s.rapid ? 'r' : 'n'}|${s.am}`;
+        const id = h.brain ? h.brain.pick('combo', key, opts) : opts[0].id;
+        s.combo = list.find((c) => c.id === id); s.ci = 0;
+        return comboNext(h, d, lbgTok) || false;
       },
       next(h, d) {
-        const s = h.h4.drv;
-        if (threatIn(h) < 0.35 || !keepGoing(h, 0.55 + 0.3 * h.def.persona.risk)) return null;
-        return s.n ? pick(h, d, 'lbg_n') : null;
+        const s = h.h4.drv, last = kv(h, h.lastSkillId);
+        if (!s.combo) return null;
+        if (threatIn(h) < 0.18 && !(last && last.evade)) return lbgDodge(h); // 攻擊將至：墊步，連招之後接著打
+        if (s.rapid && s.en < H4.LBG.en.early && rng(h)() > h.def.persona.risk * 0.6) { s.combo = null; return kv(h, 'lbg_mode'); } // 能量快見底：越謹慎越早手動收手，避開強制解除的空檔
+        if (!keepGoing(h, 0.85 + 0.1 * h.def.persona.risk)) { s.combo = null; return null; }
+        return comboNext(h, d, lbgTok);
       },
-      tick(h) {
-        const s = h.h4.drv, id = startOnce(h);
-        if (id === 'lbg_reload') { Object.assign(s, H4.LBG.mag); h.world.fx.text(h.x, h.y - h.r - 24, '裝填', '#cfe0ff', 16); }
-        else if (id) { const k = { lbg_n: 'n', lbg_p: 'p', lbg_rapid: 'rapid' }[id]; if (k) s[k] = Math.max(0, s[k] - 1); }
+      react: (h) => { lbgArm(h, h.h4.drv); return lbgDodge(h); },
+      focus(h) { // 集中攻擊彈：沒存量不放；Boss 倒地蓄二段、有破綻蓄一段，平常不蓄
+        if (h.h4.drv.fs < 1) return null;
+        return DOWN.has(h.enemy.state) ? kv(h, 'lbg_focus2') : open(h) ? kv(h, 'lbg_focus1') : h.h4.focus;
       },
-      gauge: (h) => ({ v: h.h4.drv.n / H4.LBG.mag.n, color: '#8ad0ff' }),
+      tick(h, dt) {
+        const s = h.h4.drv, L = H4.LBG, w = h.world, i = h.inst, id = startOnce(h);
+        lbgArm(h, s);
+        if (id) lbgStart(h, s, id);
+        if (i && i.skill.id.startsWith('lbg_burst')) h.face = U.angTo(h, h.enemy); // 速射墊步射擊：移動中一直對著 Boss 射
+        // 收招中攻擊將至：取消收招墊步（射擊 → × 派生）
+        if (i && LBG_CANCEL.test(i.skill.id) && h.skillPhase() === 'recovery' && threatIn(h) < 0.15) { h.comboCancel(); h.startSkill(lbgDodge(h), { quiet: true }); }
+        if (!s.rapid) s.en = Math.min(L.en.max, s.en + L.en.regen * dt);
+        else if (s.en <= 0 && h.state !== 'skill' && h.canAct()) { // 能量耗盡：強制解除速射，有一段空檔
+          s.rapid = false; s.combo = null; s.stat.exits++; h.setState('recover', L.en.exitLock); w.fx.text(h.x, h.y - h.r - 24, '速射解除', '#ff9a3c', 16);
+        }
+        if (h.stats.h4.pops > s.pops) { s.en = Math.min(L.en.max, s.en + L.focus.gain * (h.stats.h4.pops - s.pops)); s.pops = h.stats.h4.pops; } // 集中攻擊彈打破傷口回能量
+        s.sp = Math.min(L.sp.max, s.sp + dt / L.sp.regen); s.fs = Math.min(L.focus.max, s.fs + dt / L.focus.regen);
+        if (s.adh && w.time >= s.adh.until) lbgAdhBoom(h, w.hunt4.orig);
+        if (s.wyv) lbgWyv(h, s, w, w.hunt4.orig);
+        h.dmgMul = h.hunt.baseDmg;
+      },
+      onProj(h, p) { // 射擊類的彈：記下該彈種的適正距離
+        const m = h.inst && LBG_RE.exec(h.inst.skill.id);
+        if (m && p.kind === 'bolt') p.band = H4.LBG.band[m[2]].slice();
+      },
+      hitMul(h, p) { // 適正距離外乘 lo；貫通彈第二段起每段遞減
+        const q = p.proj, L = H4.LBG;
+        if (!q) return 1;
+        let mul = 1;
+        if (q.band) { const td = q.t * Math.hypot(q.vx, q.vy); if (td < q.band[0] || td > q.band[1]) mul = L.band.lo; }
+        if (q.pierce) { q.nHit = (q.nHit || 0) + 1; mul *= Math.max(L.pierce.min, 1 - L.pierce.fall * (q.nHit - 1)); }
+        return mul;
+      },
+      onHit(h, p, P, orig) { // 普通模式命中回能量（追擊射擊回較多）；附著龍彈附著 / 同部位命中累積階段，滿三階提早引爆
+        const s = h.h4.drv, L = H4.LBG, w = h.world;
+        if (p.proj && !s.rapid) s.en = Math.min(L.en.max, s.en + (p.chase ? L.en.chase : L.en.hit));
+        if (p.adh) {
+          if (s.adh) lbgAdhBoom(h, orig);
+          s.adh = { part: P.id, pts: 0, until: w.time + L.sp.adh.life }; s.stat.adh++; w.fx.text(h.enemy.x, h.enemy.y - h.enemy.r - 40, '附著龍彈', '#ffb84a', 18);
+        } else if (s.adh && p.proj && P.id === s.adh.part && ++s.adh.pts >= L.sp.adh.need[2]) lbgAdhBoom(h, orig);
+      },
+      onEvade(h) { const i = h.inst; if (!i.evaded) { i.evaded = true; h.world.fx.text(h.x, h.y - h.r - 14, '閃避', '#ccffdd', 14); } },
+      gauge: (h) => { const s = h.h4.drv; return { v: s.en / H4.LBG.en.max, color: s.rapid ? '#ff9a3c' : '#8ad0ff' }; },
     },
     // 重弩：彈匣打空就裝填；有破綻放狙擊彈；安全時架設連射（減傷、不倒）
     heavyxbow: {

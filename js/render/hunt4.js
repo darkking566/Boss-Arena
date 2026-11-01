@@ -13,6 +13,22 @@
       ctx.beginPath(); ctx.arc(p.x, p.y, 9 + 4 * k, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = 'rgba(255,40,60,0.85)'; ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
     }
+    for (const h of st.hunters) { // 輕弩：附著龍彈（橘色方塊，環數＝目前階段）、起爆龍彈裝置（地上的橘色圓盤，點數＝剩餘可爆次數）
+      const s = h.def.weapon === 'lightxbow' && h.h4.drv;
+      if (!s) continue;
+      if (s.adh) {
+        const p = BD.H4Combat.partPos(b, st.parts.find((P) => P.id === s.adh.part) || st.parts[0]), lv = H4.LBG.sp.adh.need.filter((x) => s.adh.pts >= x).length;
+        ctx.fillStyle = '#ffb84a'; ctx.fillRect(p.x - 5, p.y - 5, 10, 10);
+        ctx.strokeStyle = 'rgba(255,184,74,0.8)'; ctx.lineWidth = 2;
+        for (let k = 1; k <= lv; k++) { ctx.beginPath(); ctx.arc(p.x, p.y, 6 + k * 5, 0, Math.PI * 2); ctx.stroke(); }
+      }
+      if (s.wyv) {
+        const d = s.wyv, k = 0.5 + 0.5 * Math.sin(t * 9);
+        ctx.fillStyle = `rgba(255,154,60,${0.35 + 0.3 * k})`; ctx.beginPath(); ctx.arc(d.x, d.y, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ff9a3c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(d.x, d.y, 14, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#fff'; for (let n = 0; n < d.n; n++) ctx.fillRect(d.x - 7 + n * 6, d.y - 2, 3, 3);
+      }
+    }
     for (const h of st.hunters) { // 弓：誘導箭標記（青色旋轉菱框，快到期時閃）、殘留觸發箭（插在 Boss 身上的短箭）
       const s = h.def.weapon === 'bow' && h.h4.drv;
       if (!s) continue;

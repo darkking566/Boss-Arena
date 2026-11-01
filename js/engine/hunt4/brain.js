@@ -12,7 +12,8 @@
   const LEAD = { e: 0.2, m: 0.1, l: 0.04 }, DIR = { a: 0, l: 1.1, r: -1.1 };
   const ZH = { near: '近', mid: '中距', far: '遠', lo: '低血', open: 'Boss 有破綻', atk: 'Boss 出招中', idle: 'Boss 待機', a: '照原方向', l: '偏左', r: '偏右', }; // F6 顯示用
   const JIT = [0.12, 0.03]; // 反應抖動：新手 → 熟練
-  const WIN = { strat: 2.5, react: 0.8, dodge: 0.8, combo: 4, coat: 8 }; // 結算回報的觀察時間（秒）
+  const WIN = { strat: 2.5, react: 0.8, dodge: 0.8, combo: 4, coat: 8, ammo: 20, special: 20 }; // 結算回報的觀察時間（秒）
+  const PICKED = new Set(['strat', 'combo', 'coat', 'ammo', 'special']), PICK_ZH = { coat: '選瓶：', ammo: '主力彈：', special: '特殊彈：' }; // 依輸出 − 受傷結算的試驗
 
   const newSave = () => ({ v: V, matches: 0, hunters: {} });
   const mem = (save, id) => save.hunters[id] || (save.hunters[id] = { xp: {}, strat: {}, dex: {} });
@@ -94,7 +95,7 @@
         for (const o of opts) prior[o.id] = o.prior;
         const k = choose(tab, prior, eps(), rng);
         trial(kind, arm(tab, k), { wt });
-        B.last = (kind === 'coat' ? '選瓶：' : '連招：') + opts.find((o) => o.id === k).name;
+        B.last = (PICK_ZH[kind] || '連招：') + opts.find((o) => o.id === k).name;
         return k;
       };
       // 圖鑑：反應招（彈刀 / 防禦 / 衝撞）的時機；熟練 + 熟悉這招 → 抖動變小
@@ -128,7 +129,7 @@
       if (st.boss._target === h) B.chasedT += dt;
       for (let i = B.trials.length - 1; i >= 0; i--) {
         const t = B.trials[i], hurt = h.stats.taken - t.taken;
-        if (t.kind === 'strat' || t.kind === 'combo' || t.kind === 'coat') { if (h.state === 'dead') upd(t.a, -3); else if (w.time < t.until && !w.winner) continue; else upd(t.a, U.clamp((h.stats.dealt - t.dealt - hurt * t.wt) / 300, -3, 3)); } // 期間力竭：重罰
+        if (PICKED.has(t.kind)) { if (h.state === 'dead') upd(t.a, -3); else if (w.time < t.until && !w.winner) continue; else upd(t.a, U.clamp((h.stats.dealt - t.dealt - hurt * t.wt) / 300, -3, 3)); } // 期間力竭：重罰
         else if (hurt > h.maxHp * 0.02) { upd(t.a, 0); B.res[t.kind][1]++; }
         else if (w.time >= t.until || w.winner) { upd(t.a, 1); B.res[t.kind][0]++; B.res[t.kind][1]++; }
         else continue;

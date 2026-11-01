@@ -243,14 +243,39 @@
       rs('bow_thousand', '龍之千矢', '千矢', { cost: 20, range: [0, 300], track: 8, recovery: 0.8 }, [shot(0.5, arrow(34, 13, { spread: 0.075, speed: 1000, life: 0.35, extra: DET }))]),
       rs('bow_focus_dragon', '集中射擊・龍之一矢', '追龍', { track: 9, recovery: 0.6 }, [shot(0.35, pierceBolt(70, 1000, 0.035, { homing: 4 }))]),
     ] };
-  // ── 輕弩：通常彈 / 貫通彈 / 速射彈三種彈各自計數，打空了找空檔裝填；Boss 有破綻用速射 ──
+  // ── 輕弩（荒野式）：普通 / 速射兩種模式（lbg_mode 切換）。每種彈（通常 n / 貫通 p / 散彈 s）各有：射擊、追擊射擊、速射、速射追擊射擊、速射墊步射擊、裝填。
+  //    彈匣、速射能量、特殊彈、集中攻擊彈由驅動管；招式 id＝lbg_<動作>_<彈種>。evade 只有迴避窗、沒有看破（跟弓不同）
   const bullet = (dmg, extra) => Object.assign({ speed: 1300, r: 7, dmg, posture: dmg * 0.25, kb: 50, kind: 'bolt' }, extra);
+  const LBG_AMMO = { // dmg 單發傷害、ex 彈的額外參數、wind 射擊出手、rec 射擊收招、range 招式射程、chase / rapid 追擊 / 速射的段數、reload 裝填收招
+    n: { name: '通常彈', short: '通常', dmg: 32, ex: {}, wind: 0.16, rec: 0.2, range: [0, 650], chase: 3, rapid: 5, reload: 0.5 },
+    p: { name: '貫通彈', short: '貫通', dmg: 15, ex: { speed: 1600, pierce: true, rehit: 0.04, life: 0.9 }, wind: 0.22, rec: 0.3, range: [0, 800], chase: 2, rapid: 3, reload: 0.9 },
+    s: { name: '散彈', short: '散彈', dmg: 9, ex: { n: 6, spread: 0.1, life: 0.32, kb: 30 }, wind: 0.18, rec: 0.3, range: [0, 300], chase: 2, rapid: 2, reload: 0.7 },
+  };
+  const volleys = (a, t0, gap, k, mul, extra) => Array.from({ length: k }, (_, i) => shot(t0 + i * gap, bullet(Math.round(a.dmg * (typeof mul === 'function' ? mul(i) : mul)), Object.assign({}, a.ex, extra))));
+  const lbgAmmo = (am) => {
+    const a = LBG_AMMO[am], o = { range: a.range, track: 10 }, CH = { chase: true };
+    return [
+      rs('lbg_shot_' + am, a.name, a.short, Object.assign({}, o, { recovery: a.rec }), volleys(a, a.wind, 0, 1, 1)),
+      rs('lbg_chase_' + am, a.name + '・追擊射擊', '追擊', Object.assign({}, o, { recovery: 0.45 }), volleys(a, 0.2, 0.07, a.chase, 0.75, { extra: CH })), // 站定、命中回速射能量較多
+      rs('lbg_rapid_' + am, a.name + '・速射', '速射', Object.assign({}, o, { recovery: 0.3 }), volleys(a, 0.14, 0.07, a.rapid, 0.55)),
+      rs('lbg_rchase_' + am, a.name + '・速射追擊', '速追', Object.assign({}, o, { recovery: 0.6 }), volleys(a, 0.16, 0.07, a.rapid, (i) => (i === a.rapid - 1 ? 1.5 : 0.6))), // 最後一發有加成、硬直大
+      rs('lbg_burst_' + am, a.name + '・速射墊步射擊', '墊射', Object.assign({}, o, { tags: ['ranged', 'defensive'], recovery: 0.18, evade: { win: 0.2 } }),
+        [dash(0.02, 130, 0.18, { dir: 'side' })].concat(volleys(a, 0.08, 0.05, a.rapid, 0.5))),
+      rs('lbg_reload_' + am, '裝填' + a.name, '裝填', { tags: ['buff'], range: [0, 900], track: 0, recovery: a.reload }, []),
+    ];
+  };
   const lightxbow = { id: 'lightxbow', name: '輕弩', el: 'physical', ai: [320, 620], bonus: {}, traits: [],
-    skills: [rs('lbg_n', '通常彈', '通常', { track: 10, recovery: 0.2 }, [shot(0.16, bullet(50))])],
+    skills: [rs('lbg_shot_n', LBG_AMMO.n.name, LBG_AMMO.n.short, { range: LBG_AMMO.n.range, track: 10, recovery: LBG_AMMO.n.rec }, volleys(LBG_AMMO.n, LBG_AMMO.n.wind, 0, 1, 1))],
     variants: [
-      rs('lbg_p', '貫通彈', '貫通', { track: 9, recovery: 0.3 }, [shot(0.24, bullet(80, { speed: 1600, pierce: true }))]),
-      rs('lbg_rapid', '速射', '速射', { track: 10, recovery: 0.3 }, [0.14, 0.24, 0.34].map((t) => shot(t, bullet(34)))),
-      rs('lbg_reload', '裝填', '裝填', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.7 }, []),
+      ...['n', 'p', 's'].flatMap(lbgAmmo).filter((s) => s.id !== 'lbg_shot_n'),
+      rs('lbg_mode', '切換速射模式', '切換', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.2 }, []),
+      rs('lbg_sreload', '墊步裝填', '墊裝', { tags: ['ranged', 'defensive'], range: [0, 900], track: 0, recovery: 0.5, evade: { win: 0.2 } }, [dash(0.02, 130, 0.2, { dir: 'side' })]), // 速射模式彈匣空：邊移動邊裝填（固定時間）
+      rs('lbg_step', '射擊後墊步', '墊步', { tags: ['ranged', 'defensive'], range: [0, 900], track: 12, recovery: 0.1, evade: { win: 0.18 } }, [dash(0.02, 110, 0.16, { dir: 'side' })]),
+      rs('lbg_slide', '滑行', '滑行', { tags: ['ranged', 'defensive'], range: [0, 900], track: 0, recovery: 0.3, evade: { win: 0.12 } }, [dash(0.02, 220, 0.3, { dir: 'back' })]),
+      rs('lbg_adh', '附著龍彈', '附著', { track: 9, recovery: 0.4 }, [shot(0.35, bullet(30, { speed: 1400, r: 9, extra: { adh: true } }))]),
+      rs('lbg_wyv', '起爆龍彈', '起爆', { tags: ['ranged', 'buff'], range: [0, 400], track: 0, recovery: 0.4 }, []), // 設在腳下，驅動生成裝置
+      rs('lbg_focus1', '集中攻擊彈【射鵰】・蓄一段', '射鵰', { track: 6, recovery: 0.5 }, [shot(0.75, bullet(156, { speed: 1800, r: 11, kb: 120, extra: { focus: true } }))]),
+      rs('lbg_focus2', '集中攻擊彈【射鵰】・蓄二段', '射鵰', { track: 5, recovery: 0.55 }, [shot(1.1, bullet(204, { speed: 1800, r: 12, kb: 160, extra: { focus: true } }))]),
     ] };
   // ── 重弩：重彈一發一發慢慢打；架設＝站定連射（受擊減傷不倒、會被包夾）；Boss 有破綻用狙擊彈；彈匣打空要裝填 ──
   const heavyxbow = { id: 'heavyxbow', name: '重弩', el: 'physical', ai: [420, 760], bonus: {}, traits: [],
@@ -297,7 +322,7 @@
       focus: sk('h4_focus_glaive', '蟲穿・旋斬', '蟲穿', ['melee'], [0, 180], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
         [dash(0.05, 90, 0.15, { iframe: true }), hit(0.3, circle(160), { dmg: 110, posture: 35, kb: 180, focus: true, fx: 'whirl' })]) },
   });
-  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0, taken: 1.3 } }); // 弩沒有集中弱點攻擊
+  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0, taken: 1.3 } }); // 重弩沒有集中弱點攻擊
   H4.WEAPON_SPECS.bow.focus = sk('h4_focus_bow', '集中射擊【箭雨】', '箭雨', ['ranged'], [0, 700], { cd: 6, track: 6, recovery: 0.5 }, // 追蹤箭雨：每支命中打破一處傷口，有打破就接強化龍之一矢
     [shot(0.55, arrow(40, 3, { spread: 0.35, homing: 8, life: 1.6, extra: { focus: true, det: true } }))]);
   // 弓：一組瓶 coatShots 次射擊；trickMax 特殊箭量表格數；gain＝量表回復（長按蓄力 II / III、每支箭命中、看破迴避 / 精準看破＝墊步開頭 preciseT 秒內）、discernSta＝看破回體力；
@@ -343,7 +368,38 @@
     { id: 'dragon', name: '龍之一矢', when: ['down'], prior: 0.45, risk: 0.3, seq: ['dragon'] },
   ];
   H4.BOW_DISCERN = { id: 'discern', name: '看破迴避反擊', seq: ['shot', 'power', 'volley'] }; // 看破迴避成功後直接接（不經挑選）
-  H4.LBG = { mag: { n: 8, p: 4, rapid: 3 } };
+  H4.WEAPON_SPECS.lightxbow.focus = sk('h4_focus_lbg', '集中攻擊彈【射鵰】', '射鵰', ['ranged'], [0, 750], { cd: 6, track: 7, recovery: 0.45 }, // 不蓄力版；驅動依 Boss 狀態改放蓄一 / 二段（lbg_focus1 / 2）
+    [shot(0.4, bullet(120, { speed: 1800, r: 10, kb: 90, extra: { focus: true } }))]);
+  // 輕弩：mag 彈匣（每種彈各自）；en 速射能量（max、普通模式每秒 regen、普通模式每發命中 hit / 追擊射擊命中 chase、速射每招耗 cost、耗盡強制解除硬直 exitLock、低於 early 考慮提早收手）；
+  // band 適正距離（彈飛行距離 [近, 遠] 內全傷害，外面乘 lo）；pref AI 站位；pierce 貫通彈第二段起每段減 fall、最低 min；
+  // sp 特殊彈（regen 秒回一發、最多 max）：adh 附著龍彈（life 秒後自爆、need 各階段所需同部位命中數、slash 各階段斬擊次數 / 每下傷害、boom 爆炸、gain 回速射能量）、
+  //   wyv 起爆龍彈（life 秒後自爆、n 可爆次數、r 爆炸半徑、trig 被自己的彈打中的判定半徑、dmg、cd 兩次爆炸最短間隔）；focus 集中攻擊彈（max 存量、regen 秒回一發、gain 破傷口回能量）
+  H4.LBG = { mag: { n: 6, p: 4, s: 4 },
+    en: { max: 100, regen: 4, hit: 1.2, chase: 4, cost: { n: 12, p: 14, s: 14 }, exitLock: 0.8, early: 20, on: 45 },
+    band: { n: [60, 480], p: [180, 760], s: [0, 260], lo: 0.7 }, pierce: { fall: 0.15, min: 0.4 },
+    pref: { n: [250, 480], p: [320, 620], s: [70, 200] }, // AI 站位（prefRange）依主力彈
+    sp: { regen: 100, max: 1,
+      adh: { life: 25, need: [0, 10, 25], slash: [6, 12, 18], slashDmg: 12, boom: 120, gain: 35 },
+      wyv: { life: 15, n: 3, r: 170, trig: 40, dmg: 110, cd: 0.5 } },
+    focus: { max: 3, regen: 35, gain: 20 } };
+  // 輕弩連招表：步驟 shot 射擊、chase 追擊射擊、on / off 切到速射 / 普通模式、rapid 速射、rchase 速射追擊、burst 速射墊步射擊（彈匣空自動變墊步裝填）、
+  //   reload 裝填（速射模式＝墊步裝填）、step 墊步、slide 滑行、special 特殊彈。做不到的步驟跳過；彈匣空時需要彈的步驟改成裝填。
+  // mode：n＝普通模式才能挑、r＝速射模式才能挑；need：en 能量、lowEn 能量低、magLow 彈匣快空、sp 有特殊彈 / spType 特殊彈種類、near 近身（< 350）
+  H4.LBG_COMBOS = [
+    { id: 'charge', name: '普通模式回能循環', mode: 'n', when: ['idle', 'move', 'open', 'atk'], prior: 0.6, seq: ['shot', 'chase', 'step', 'shot', 'chase'] },
+    { id: 'poke', name: '試探射擊', mode: 'n', when: ['idle', 'move', 'atk'], prior: 0.4, risk: -0.3, seq: ['shot', 'shot', 'step'] },
+    { id: 'kite', name: '拉開距離', mode: 'n', when: ['atk', 'move'], prior: 0.35, risk: -0.4, seq: ['step', 'slide', 'shot'] },
+    { id: 'reload', name: '安全裝填', mode: 'n', when: ['idle', 'open', 'down'], need: { magLow: true }, prior: 0.7, seq: ['reload', 'shot', 'chase'] },
+    { id: 'burst', name: '速射爆發', mode: 'n', when: ['open', 'down'], need: { en: 50 }, prior: 0.6, risk: 0.2, seq: ['on', 'rapid', 'rchase'] },
+    { id: 'stepLoop', name: '速射墊步循環', mode: 'n', when: ['idle', 'move', 'open', 'atk'], need: { en: 55 }, prior: 0.55, seq: ['on', 'rapid', 'burst', 'burst', 'burst'] },
+    { id: 'downFull', name: '倒地全力', mode: 'n', when: ['down'], need: { en: 40 }, prior: 0.65, risk: 0.3, seq: ['on', 'rapid', 'rchase', 'rapid', 'rchase'] },
+    { id: 'adh', name: '附著龍彈循環', mode: 'n', when: ['idle', 'move', 'open'], need: { sp: true, spType: 'adh' }, prior: 0.65, seq: ['special', 'shot', 'shot', 'chase', 'shot', 'chase'] },
+    { id: 'wyv', name: '起爆龍彈', mode: 'n', when: ['idle', 'open', 'down'], need: { sp: true, spType: 'wyv', near: true }, prior: 0.6, seq: ['special', 'shot', 'shot', 'shot'] },
+    { id: 'ride', name: '速射持續輸出', mode: 'r', when: ['idle', 'move', 'open', 'atk', 'down'], prior: 0.6, seq: ['rapid', 'burst', 'rapid', 'burst'] },
+    { id: 'rDown', name: '速射追擊爆發', mode: 'r', when: ['open', 'down'], prior: 0.6, risk: 0.2, seq: ['rapid', 'rchase'] },
+    { id: 'sreload', name: '墊步裝填', mode: 'r', when: ['idle', 'move', 'open', 'atk'], need: { magLow: true }, prior: 0.6, seq: ['rapid', 'burst', 'burst'] },
+    { id: 'exit', name: '提早收手', mode: 'r', when: ['idle', 'move', 'atk'], need: { lowEn: true }, prior: 0.75, risk: -0.4, seq: ['off', 'shot', 'chase'] },
+  ];
   H4.HBG = { mag: 6, snipeCd: 25, siegeCd: 14 };
   // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽
   H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.25, ampDrain: 2.5, lowAt: 20, morphAt: 55 };

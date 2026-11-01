@@ -178,15 +178,23 @@
     bow_dragon_q: { t: 'draw', pull: 1.15, arrows: 1, aim: true, lean: 0.08, kick: 1.4 }, bow_focus_dragon: { t: 'draw', pull: 1.2, arrows: 1, aim: true, lean: 0.1, kick: 1.6 },
     bow_thousand: { t: 'draw', pull: 1.2, arrows: 7, kick: 1.6 },
     h4_focus_bow: { t: 'draw', pull: 1, arrows: 3, aim: true, kick: 0.6 },
-    // 輕弩：小後座、速射連三下
-    lbg_n: { t: 'hit', kind: 'shot', kick: 0.5 }, lbg_p: { t: 'hit', kind: 'shot', kick: 0.8 }, lbg_rapid: { t: 'hit', kind: 'shot', kick: 0.5 },
-    lbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.25 } },
+    // 輕弩：小後座（貫通 / 散彈大一點）；速射逐發小抖、速射追擊最後一發大後座；墊步射擊 / 墊步裝填側滑；集中攻擊彈帶瞄準線（招式由下面依彈種生成）
+    lbg_mode: { t: 'item', pose: { a: 0.4, reach: 0.1 } }, lbg_sreload: { t: 'item', pose: { a: 0.9, reach: -0.25, lean: -0.15 } },
+    lbg_step: { t: 'item', pose: { a: 0.2, lean: -0.15, air: 0.04 } }, lbg_slide: { t: 'item', pose: { a: 0.3, lean: -0.3 } },
+    lbg_adh: { t: 'hit', kind: 'shot', kick: 0.9 }, lbg_wyv: { t: 'item', pose: { a: 1.2, reach: -0.1, lean: 0.25 } },
+    h4_focus_lbg: { t: 'aim', then: { t: 'hit', kind: 'shot', kick: 1 } },
+    lbg_focus1: { t: 'aim', then: { t: 'hit', kind: 'shot', kick: 1.3 } }, lbg_focus2: { t: 'aim', then: { t: 'hit', kind: 'shot', kick: 1.7 } },
     // 重弩：大後座；狙擊先畫瞄準線；架設壓低身體、展開腳架
     hbg_n: { t: 'hit', kind: 'shot', kick: 1.3 },
     hbg_snipe: { t: 'aim', then: { t: 'hit', kind: 'shot', kick: 2.2 } },
     hbg_siege: { t: 'hit', kind: 'shot', kick: 0.35, hold: { brace: 1, sq: 0.5 } },
     hbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.3 } },
   };
+  for (const [am, k] of [['n', 0.5], ['p', 0.8], ['s', 0.9]]) Object.assign(MOTIONS, {
+    ['lbg_shot_' + am]: { t: 'hit', kind: 'shot', kick: k }, ['lbg_chase_' + am]: { t: 'hit', kind: 'shot', kick: k, hold: { sq: 0.3 } },
+    ['lbg_rapid_' + am]: { t: 'hit', kind: 'shot', kick: k * 0.6 }, ['lbg_rchase_' + am]: { t: 'hit', kind: 'shot', kick: k * 0.8, hold: { sq: 0.4 } },
+    ['lbg_burst_' + am]: { t: 'hit', kind: 'shot', kick: k * 0.5, hold: { lean: -0.15 } }, ['lbg_reload_' + am]: { t: 'item', pose: { a: 0.9, reach: -0.25 } },
+  });
 
   // 每招的關鍵影格只算一次（依招式版本 v 快取）
   const cache = new WeakMap();
