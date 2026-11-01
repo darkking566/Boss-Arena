@@ -409,6 +409,8 @@
   H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
   H4.HORN = { range: 600, dur: 45, heal: 0.05, allHeal: 0.03, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
   H4.DEMON = { drain: 7, exitAt: 0.25, gaugePerHit: 2.2, archDrain: 2, flurryCost: 30, dmgMul: 1.15 }; // 雙刀：鬼人化每秒耗體力、體力低於此比例自動解除（留翻滾的體力）、每次命中加鬼人槽、鬼人強化每秒掉槽、亂舞耗槽、鬼人化傷害倍率
+  // 普攻耗體力：原本 cost 0 的近戰招改耗 收招秒數 × perRec（至少 min）；skip＝獎勵 / 資源型招式維持免費（反擊、砲擊吃彈、龍擊砲吃冷卻）
+  H4.BASIC_STA = { perRec: 25, min: 4, skip: ['sns_counter', 'lance_counter', 'gl_shell', 'gl_wf'] };
   H4.GUARD = { chip: 0.25, staPerDmg: 0.35, kbMul: 0.3 }; // 一般防禦：承受傷害比例、每點傷害耗體力、擊退倍率
   H4.CLASH = { dmg: 120, lock: 1.2, win: 0.55, topple: 2.5 }; // 力量對抗：Boss 單擊傷害門檻、對峙時間、基礎勝率、勝利時 Boss 倒地秒數
 })(typeof window !== 'undefined' ? window : globalThis);
