@@ -66,10 +66,10 @@
     if (!p.fixed) BD.H4Brain.partHit(h, P.id, mul);
     mul *= BD.H4Gear.atkMul(w, st, h, P, hz);
     if (hs.D && hs.D.hitMul) mul *= hs.D.hitMul(h, p); // 武器自己的倍率（弓：適正距離）
-    if (spec.sharp && src === h && !p.fixed) { const band = sharpBand(hs); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz; if (bounce) mul *= 0.6; }
+    if (spec.sharp && src === h && !p.fixed) { const band = sharpBand(hs), eye = BD.H4Gear.fx(h, 'eye'); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz && eye < 3; if (bounce) mul *= 0.6 + 0.13 * eye; } // 心眼
     if (st.asleep && p.dmg >= 20) mul *= H4.AILMENTS.sleep.wakeMul;
     let dmg = p.dmg * mul;
-    if (mod.el && !p.fixed) dmg += mod.elv * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
+    if (mod.el && !p.fixed) dmg += mod.elv * BD.H4Gear.elMul(h, mod.el) * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
     const pm = BD.H4Gear.postureMul(h), hp0 = b.hp, r = orig(src, b, Object.assign({}, p, pm === 1 ? { dmg } : { dmg, posture: (p.posture != null ? p.posture : dmg * 0.25) * pm })); // 破城：架勢預設同 world.damageBoss
     const dealt = hp0 - b.hp;
     if (dealt <= 0) return r;
@@ -82,20 +82,22 @@
     if (hs.D && hs.D.onHit) hs.D.onHit(h, p, P, orig); // 武器命中後（弓：誘導箭標記、殘留觸發箭、引爆、量表）
     if (b.state === 'dead' || w.winner) return r;
     const ail = p.ail || mod.ail, sv = p.ail ? p.sv : mod.sv; // 命中參數帶的異常（弓的瓶）優先於武器本身
-    if (ail && w.rng() < H4.AILMENT_RATE) { const s = st.ail[ail]; s.acc += sv; if (s.acc >= s.at) ailment(w, st, h, b, ail, orig); }
+    for (const [k, v] of (ail ? [[ail, sv]] : []).concat(BD.H4Gear.coats(h).map((k) => [k, 6]))) { // 弓的瓶追加：每支箭另擲一次該異常
+      if (w.rng() < H4.AILMENT_RATE) { const s = st.ail[k]; s.acc += v * BD.H4Gear.svMul(h, k); if (s.acc >= s.at) ailment(w, st, h, b, k, orig); }
+    }
     // 傷口：打出來 / 集中弱點攻擊打破（打到哪都會破最近的傷口——集中模式代表瞄準）
-    if (!P.wound && w.time >= P.scarUntil && (P.woundAcc += dealt) >= H4.WOUND.at * b.maxHp) {
+    if (!P.wound && w.time >= P.scarUntil && (P.woundAcc += dealt * BD.H4Gear.mul(h, 'wound')) >= H4.WOUND.at * b.maxHp) {
       P.wound = w.time; P.woundAcc = 0; const at = partPos(b, P);
       w.fx.text(at.x, at.y - 16, `${P.name}部傷口`, '#ff7a7a', 18);
     }
     if (p.focus) { const W = P.wound ? P : st.parts.find((x) => x.wound); if (W) pop(w, st, h, b, W, orig); }
-    if (P.brkHp && !P.broken && (P.brkAcc += dealt) >= P.brkHp) {
+    if (P.brkHp && !P.broken && (P.brkAcc += dealt * BD.H4Gear.mul(h, 'brk')) >= P.brkHp) {
       P.broken = true; h.stats.h4.breaks++; const at = partPos(b, P);
       w.fx.text(at.x, at.y - 24, `${P.name}部位破壞！`, '#ffe27a', 26); w.log(h, `破壞了 ${b.name} 的${P.name}部`, true);
       flinch(w, st, b, H4.FLINCH.dur + 0.5);
     }
     if ((st.flinchAcc += dealt) >= st.flinchAt) { st.flinchAcc = 0; st.flinchAt *= H4.FLINCH.grow; flinch(w, st, b, H4.FLINCH.dur); }
-    if (spec.dtype === 'blunt' && P.id === 'head' && (st.stunAcc += dealt) >= st.stunAt) {
+    if (spec.dtype === 'blunt' && P.id === 'head' && (st.stunAcc += dealt * BD.H4Gear.mul(h, 'ko')) >= st.stunAt) {
       st.stunAcc = 0; st.stunAt *= H4.STUN.grow; if (cc(w, b, 'stun', H4.STUN.dur, '暈眩！', '#ffe27a')) w.log(h, '把 ' + b.name + ' 打暈了！', true);
     }
     return r;
@@ -108,7 +110,7 @@
     if (st.asleep && b.state !== 'stun') st.asleep = false;
     if (st.poisonT > 0) {
       st.poisonT -= dt; st.poisonAcc += dt;
-      if (st.poisonAcc >= 1) { st.poisonAcc -= 1; orig(st.poisonBy, b, { dmg: H4.AILMENTS.poison.dps * b.maxHp, dot: true, posture: 0, unblockable: true, ignoreIframe: true }); }
+      if (st.poisonAcc >= 1) { st.poisonAcc -= 1; orig(st.poisonBy, b, { dmg: H4.AILMENTS.poison.dps * b.maxHp * (st.poisonBy && st.poisonBy.h4 ? BD.H4Gear.mul(st.poisonBy, 'poison') : 1), dot: true, posture: 0, unblockable: true, ignoreIframe: true }); }
     }
     // 倒地：架勢崩潰改成長時間倒地，之後架勢上限提高
     if (b.stats.breaks > st.breaks) {

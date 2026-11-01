@@ -75,7 +75,7 @@
     h.def = def; h.skills = def.skills.map(BD.prepSkill); h.traits = def.traits.map(BD.trait); h.controller.p = def.ai;
     h.dmgMul = h.hunt.baseDmg; BD.huntWeapon(h);
     hs.spec = hs.specs[hs.wi]; hs.mod = hs.mods[hs.wi]; hs.sharp = hs.sharps[hs.wi]; hs.wT = w.time; BD.H4Weapons.equip(h);
-    h.stats.h4.switches++; h.brain.used.add(def.weapon); h.setState('recover', 1); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
+    h.stats.h4.switches++; h.brain.used.add(def.weapon); h.setState('recover', BD.H4Gear.cut(h, 'swap', 0.6)); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
   }
   const use = (w, h, dur, text) => { h.setState('recover', dur); w.fx.text(h.x, h.y - h.r - 24, text, '#e8f4ff', 16); };
   // 每 0.25 秒判斷一次（只在手上沒事時）：粉塵 → 閃光 → 回復藥 → 磨刀 → 換武器 → 集中弱點攻擊
@@ -94,13 +94,13 @@
     const t = b._target;
     if (I.flash > 0 && t && t !== h && t.state !== 'dead' && t.hp < t.maxHp * 0.35 && b.state !== 'stun' && b.state !== 'knockdown' && b.state !== 'transition' && w.rng() < 0.3 + 0.6 * p.care) {
       I.flash--; h.stats.h4.flashes++; use(w, h, 0.4, '閃光彈！');
-      const dur = H4.ITEMS.flashDur * Math.pow(H4.ITEMS.flashFade, st.flashes++);
+      const dur = H4.ITEMS.flashDur * Math.pow(H4.ITEMS.flashFade, st.flashes++) * BD.H4Gear.mul(h, 'fdur');
       b.setState('stun', dur); w.fx.text(b.x, b.y - b.r - 34, '目眩！', '#ffffff', 24); w.fx.ring(h.x, h.y, 10, 160, 0.3, '#ffffff', 8);
       w.log(h, `丟閃光彈掩護 ${t.name}`, true); return;
     }
     if (h.hp < h.maxHp * H4.POTION_AT && !chased && BD.Hunt.drink(h, 'hp')) { if (h.def.weapon === 'sns') h.stateDur = 0.25; return; } // 片手劍拔刀喝藥：硬直短
     if (hs.spec.sharp && hs.sharp < hs.spec.sharp * H4.SHARP.whetAt && rest) {
-      hs.sharp = hs.spec.sharp; h.stats.h4.whets++; use(w, h, H4.SHARP.whetTime, '磨刀'); return;
+      hs.sharp = hs.spec.sharp; h.stats.h4.whets++; use(w, h, H4.SHARP.whetTime * BD.H4Gear.cut(h, 'whet', 0.75), '磨刀'); return;
     }
     if (hs.defs[1]) { // 主武器 → 副武器：被追且血少（越不愛冒險越早換）；副 → 主：血回來了、或 Boss 倒地 / 暈眩
       const low = h.hp < h.maxHp * (0.35 + 0.25 * (1 - p.risk)), open = b.state === 'knockdown' || b.state === 'stun';
@@ -113,10 +113,10 @@
     if (w.intro > 0) return;
     const k = Math.exp(-dt / H4.AGGRO.decay);
     for (const h of st.hunters) {
-      st.aggro.set(h, st.aggro.get(h) * k + h.stats.dealt - st.dealt.get(h)); st.dealt.set(h, h.stats.dealt);
+      st.aggro.set(h, st.aggro.get(h) * k + (h.stats.dealt - st.dealt.get(h)) * BD.H4Gear.cut(h, 'aggro', 0.6)); st.dealt.set(h, h.stats.dealt); // 威嚇：仇恨累積變慢
       if (!w.winner && h.state !== 'dead') { BD.H4Weapons.step(h, dt); act(w, st, h); h.h4.sharps[h.h4.wi] = h.h4.sharp; } // 先讓武器接連段，道具 / 集中攻擊不插進連段空檔
     }
-    BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt); BD.H4Gear.tick(w, st);
+    BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt); BD.H4Gear.tick(w, st, dt);
     if (st.solo) return; // 獵魂代理：勝負與結算照獵魂規則
     if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); BD.H4Gear.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
     if (!w.winner && w.time >= H4.TIME_LIMIT) fail(w, st, '時間到');

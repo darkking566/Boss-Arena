@@ -276,8 +276,38 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   w.winner = rin; st.parts[0].broken = true; GR.end(w, st);
   const m = g.mats.ronin; assert.ok(m && m.p === 1 && rin.h4.gear.got.s >= 2, '勝利掉落素材（含部位素材）');
   const clean = GR.sanitize({ mats: { ronin: { s: -5, p: 1e9 }, nobody: { s: 3 } }, w: { 'katana:ronin': 9, 'katana:nobody': 1, 'x:ronin': 1 }, a: { 'head:ronin': 2, 'arm:ronin': 1 }, rec: { 'katana:ronin': [5, 9], 'gs:zeus': [1, 1] } });
-  assert.strictEqual(JSON.stringify(clean), JSON.stringify({ mats: { ronin: { s: 0, p: 999, g: 0 } }, w: { 'katana:ronin': 3 }, a: { 'head:ronin': 2 }, rec: { 'katana:ronin': [5, 1] }, eq: null }), '裝備防呆');
+  assert.strictEqual(JSON.stringify(clean), JSON.stringify({ mats: { ronin: { s: 0, p: 999, g: 0 } }, w: { 'katana:ronin': 3 }, a: { 'head:ronin': 2 }, rec: { 'katana:ronin': [5, 1] }, deco: {}, eq: null }), '裝備防呆');
   assert.ok(H.sanitize(JSON.parse(JSON.stringify(save))).hunters.rin.gear.w['katana:watcher'] === 2, '學習存檔帶著裝備');
+}
+
+// 裝飾珠：原作 361 顆、AI 鑲嵌（孔位 / 種類 / 上限 / 沒用的不鑲）、效果、掉落稀有度、存檔防呆
+{
+  const GR = BD.H4Gear, D = H4.DECOS, all = Object.values(D);
+  assert.strictEqual(all.length, 361, '珠子總數');
+  assert.ok(all.every((d) => d.slot >= 1 && d.slot <= 3 && d.skills.every(([k, l]) => H4.SKILLS[k] && H4.SKILLS[k].kind === d.kind && l >= 1)), '珠子資料完整');
+  const save = BD.H4Brain.newSave(), g = GR.gearOf(save, 'rin'); // 凜：太刀，預設雷屬性
+  g.w['katana:thor'] = 3; g.a['head:thor'] = 2; // 雷神太刀 III（孔 3/2/1）、頭 II（孔 2/1）
+  Object.assign(g.deco, { '攻擊珠Ⅲ【3】': 1, '攻擊珠Ⅱ【2】': 5, '雷光珠【1】': 1, '火炎珠【1】': 3, '射法珠【1】': 2, '加護珠【1】': 1, '狩人珠【1】': 4, '痛擊珠【3】': 1, '挑戰珠【3】': 1 });
+  const hd = Object.assign({}, H4.HUNTERS[0], { weapons: ['katana', 'bow'] }), eq = GR.choose(g, hd, 'ronin'), E = GR.build(g, eq);
+  assert.strictEqual(eq.deco.length, 4, '武器 3 孔 + 頭 1 孔（3 孔防具珠塞不進 2 孔）：' + eq.deco);
+  assert.strictEqual(E.L1.atk, 5, '攻擊夾在上限 5');
+  assert.ok(E.L1.thunderA === 1 && !E.L1.fireA && !E.L1.ammo, '只鑲對這把武器有用的：' + eq.deco);
+  assert.ok(E.L1.divine === 1 && !E.L1.life, '防具孔鑲加護，不鑲採集用的');
+  assert.ok(!E.L0.atk && E.L0.divine === 1, '換副武器時武器珠不生效');
+  const w = new BD.World(BD.Hunt4.team(), BD.bossById.ronin, { seed: 5, pace: 'heavy', hunt4: true, intro: 0.5, h4save: save }), st = w.hunt4, rin = st.hunters[0];
+  assert.ok(rin.h4.gear.L1.atk === 5, '開場套用珠子');
+  const P = st.parts[1]; const m0 = GR.atkMul(w, st, rin, P, 0.5); rin.h4.wi = 1; const m1 = GR.atkMul(w, st, rin, P, 0.5); rin.h4.wi = 0;
+  assert.ok(m0 > m1 * 1.15, '主武器帶攻擊珠時傷害較高');
+  assert.ok(GR.elMul(rin, 'thunder') > 1 && GR.elMul(rin, 'fire') === 1, '雷光珠只加雷');
+  assert.ok(Math.abs(GR.takenMul(w, rin) - 0.97) < 1e-9, '精靈加護 1 級');
+  // 掉落：弱 Boss 不掉 3 孔，強 Boss 會掉；整體機率在設定範圍
+  const roll = (stars) => { let x = 7; const rng = () => ((x = (x * 16807) % 2147483647) / 2147483647); const out = []; for (let i = 0; i < 4000; i++) out.push(GR.rollDeco(rng, stars, 0)); return out; };
+  const weak = roll(1.5), strong = roll(5), hit = weak.filter(Boolean);
+  assert.ok(hit.length > 4000 * 0.25 && hit.length < 4000 * 0.35, '掉落率約 30%：' + hit.length);
+  assert.ok(hit.every((k) => D[k].slot < 3), '1.5 星 Boss 不掉 3 孔');
+  assert.ok(strong.filter((k) => k && D[k].tier === 4).length > 50, '5 星 Boss 會掉組合珠');
+  assert.strictEqual(JSON.stringify(GR.sanitize({ deco: { '攻擊珠【1】': 2.4, '假珠【1】': 3, '匠珠【1】': 0, '超心珠【1】': 500 } }).deco), JSON.stringify({ '攻擊珠【1】': 2, '超心珠【1】': 99 }), '珠子防呆');
+  run(w, 20); // 帶滿珠子跑一段不出錯
 }
 
 // 整場：分出勝負、Boss 換過目標、同種子結果相同

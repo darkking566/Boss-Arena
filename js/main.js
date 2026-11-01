@@ -92,9 +92,9 @@
     const H4 = BD.HUNT4, GR = BD.H4Gear, g = GR.gearOf(state.h4save, h.id), eq = GR.choose(g, h4Armed(h), bossId), E = GR.build(g, eq);
     const wpn = eq.w ? `${GR.itemName(eq.w, g.w[eq.w])}（${H4.WTRAITS[E.wt].name}）` : '初始武器';
     const arm = ['head', 'body', 'legs'].map((s) => (eq[s] ? GR.itemName(eq[s], g.a[eq[s]]) : '—')).join(' / ');
-    const sk = Object.keys(E.sk).map((k) => H4.SKILLS[k].name + E.sk[k]).join('、') || '無';
+    const sk = GR.skillText(E.L1) || '無', gems = Object.values(g.deco).reduce((a, n) => a + n, 0);
     const mats = Object.values(g.mats).reduce((a, m) => a + m.s + m.p + m.g, 0);
-    return `裝備：${wpn}｜防具 ${arm}｜技能 ${sk}` + (E.set ? `｜套裝【${H4.SETS[E.set].name}】` : '') + `｜素材 ${mats} 個、已做 ${Object.keys(g.w).length + Object.keys(g.a).length} 件`;
+    return `裝備：${wpn}｜防具 ${arm}｜技能 ${sk}` + (E.set ? `｜套裝【${H4.SETS[E.set].name}】` : '') + `｜珠子 ${eq.deco.length ? eq.deco.join('、') : '—'}（持有 ${gems} 顆）` + `｜素材 ${mats} 個、已做 ${Object.keys(g.w).length + Object.keys(g.a).length} 件`;
   }
   // 主武器選擇（存在 localStorage）：預設各自的招牌武器
   const H4MAIN = 'bd.hunt4.main';
@@ -366,8 +366,8 @@
       ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`],
       ['反應 / 翻滾成功', (h) => h.brain.res.react.concat(h.brain.res.dodge).reduce((s, v, i) => s + (i % 2 ? `/${v}` : (i ? '　' : '') + v), '')],
       ['熟練度', (h) => `${Math.round(BD.H4Brain.mastery(state.h4save, h.def.hunter, h.def.weapon) * 100)}%`],
-      ['套裝 / 技能', (h) => { const E = h.h4.gear; return (E.set ? BD.HUNT4.SETS[E.set].name : '—') + '<br>' + (Object.keys(E.sk).map((k) => BD.HUNT4.SKILLS[k].name + E.sk[k]).join('、') || '—'); }],
-      ['獲得素材', (h) => { const x = h.h4.gear.got; return x ? `鱗 ${x.s}・部位 ${x.p}` + (x.g ? '・寶玉！' : '') : '—'; }],
+      ['套裝 / 技能', (h) => { const E = h.h4.gear; return (E.set ? BD.HUNT4.SETS[E.set].name : '—') + '<br>' + (BD.H4Gear.skillText(E.L1) || '—'); }],
+      ['獲得素材', (h) => { const x = h.h4.gear.got; return x ? `鱗 ${x.s}・部位 ${x.p}` + (x.g ? '・寶玉！' : '') + (h.h4.gear.gem ? '<br>💎 ' + h.h4.gear.gem : '') : '—'; }],
       ['製作 / 強化', (h) => h.h4.gear.made.join('<br>') || '—']];
     $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +
       rows.map(([n, f]) => `<tr><td>${n}</td>${st.hunters.map((h) => `<td>${f(h)}</td>`).join('')}</tr>`).join('');
