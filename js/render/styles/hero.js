@@ -101,16 +101,25 @@
   };
   R.defineBossStyle('hero', {
     body(ctx, o, t, { def, r }) {
-      const s = swing(o);
+      const s = swing(o), M = R.heroMotion, m = M && M.pose(o); // m：有動作表的招式姿勢（hero-motion.js）；沒有就用舊的 sw 擺法
+      if (m) { const k = 1 + 0.15 * m.air; ctx.translate(m.lean * r, 0); ctx.scale(k * (1 - 0.08 * m.sq), k * (1 + 0.08 * m.sq)); M.trail(ctx, o, r, def.weapon); }
       // 武器：握在身體右側（區域 y 軸正向），出招時以 s 擺動
       const sw = o.state === 'skill' && o.inst.skill.sw; // 太刀連斬各式的揮刀動作
       ctx.save(); ctx.translate(r * 0.2, r * 0.55);
-      if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
-      else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
+      if (m) {
+        ctx.translate(m.reach * r, 0); ctx.rotate(m.a);
+        if (m.glow > 0.02) { // 蓄力光：沿武器一道發光的線
+          ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.shadowColor = '#ffb050'; ctx.shadowBlur = 8 + 18 * m.glow; ctx.strokeStyle = `rgba(255,190,110,${Math.min(0.8, m.glow)})`; ctx.lineWidth = 6 + 6 * m.glow; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo((M.LEN[def.weapon] || 2) * r, 0); ctx.stroke(); ctx.restore();
+        }
+      } else if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
+      else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25));
+      (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); const hand = ctx.getTransform ? ctx.getTransform() : null; ctx.restore();
       const drv = o.h4 && o.h4.drv, cbSword = def.weapon === 'chargeblade' && drv && drv.mode === 'sword';
       if (def.weapon === 'sns' || def.weapon === 'lance' || def.weapon === 'gunlance' || cbSword) { // 盾：左手；防禦時舉到正前方，完美防禦窗內發亮（槍系 / 充能斧的盾較大）
         const g = o.state === 'skill' && o.inst.skill.guard, pf = g && o.inst.t <= o.inst.skill.guard.perfect, big = def.weapon === 'sns' ? 1 : 1.35;
-        ctx.save(); ctx.translate(g ? r * 0.75 : r * 0.25, g ? 0 : -r * 0.75); ctx.rotate(g ? 0 : -0.4);
+        const gv = g ? 1 : m ? Math.min(1, m.shield) : 0, push = m ? Math.max(0, m.shield - 1) * r * 0.6 : 0; // 盾擊：姿勢的 shield 把盾推到前方
+        ctx.save(); ctx.translate(r * (0.25 + 0.5 * gv) + push, -r * 0.75 * (1 - gv)); ctx.rotate(-0.4 * (1 - gv));
         if (pf) { ctx.shadowColor = '#9fe8ff'; ctx.shadowBlur = 16; } else if (cbSword && o.world && o.world.time < drv.shieldUntil) { ctx.shadowColor = '#ffd34a'; ctx.shadowBlur = 12; } // 盾強化
         ctx.fillStyle = '#4a6a8a'; ctx.strokeStyle = '#d8e4f0'; ctx.lineWidth = 2.5;
         ctx.beginPath(); ctx.ellipse(0, 0, r * 0.28 * big, r * 0.62 * big, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.restore();
@@ -128,6 +137,7 @@
       // 兜帽（頭）
       ctx.fillStyle = '#d7e6f2'; ctx.beginPath(); ctx.arc(r * 0.15, 0, r * 0.52, 0, U.TAU); ctx.fill();
       ctx.fillStyle = def.color; ctx.beginPath(); ctx.arc(-r * 0.05, 0, r * 0.52, Math.PI * 0.6, Math.PI * 1.4); ctx.fill();
+      if (M && hand) M.hands(ctx, hand, def, o, r); // 手畫在披肩上面，才看得出怎麼握武器
     },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

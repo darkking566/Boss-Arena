@@ -542,7 +542,7 @@ if (BD.FX && typeof BD.spawnFx === 'function') {
   else {
     const list = (html) => [...html.matchAll(/<script\b[^>]*\bsrc\s*=\s*"([^"]+)"/g)].map((m) => m[1]);
     const want = list(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).filter((f) => f !== 'js/input.js' && f !== 'js/main.js' && f !== 'js/training-ui.js' && f !== 'js/touch.js' && f !== 'js/hunt-ui.js');
-    const have = list(fs.readFileSync(gal, 'utf8')).filter((f) => f !== 'js/fx-gallery.js');
+    const have = list(fs.readFileSync(gal, 'utf8')).filter((f) => f !== 'js/fx-gallery.js' && f !== 'js/motion-gallery.js'); // 圖鑑頁自己的程式（特效 / 武器動作預覽）
     if (want.join('\n') !== have.join('\n')) {
       const miss = want.filter((f) => !have.includes(f)), extra = have.filter((f) => !want.includes(f));
       err('fx-gallery.html', `腳本清單與 index.html 不一致（缺少：${miss.join(', ') || '無'}；多出：${extra.join(', ') || '無'}；或順序不同）`);
