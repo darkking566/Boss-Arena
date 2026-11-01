@@ -39,8 +39,10 @@
     st.flinches++;
   }
 
-  function pop(w, st, h, b, P, orig) { // 集中弱點攻擊打破傷口
+  function pop(w, st, h, b, P, orig, coop) { // 集中弱點攻擊打破傷口
     const W = H4.WOUND, at = partPos(b, P);
+    if (coop) BD.Hunt4.finishCoop(w, st, coop, 'success');
+    else if (P.coop) BD.Hunt4.finishCoop(w, st, P.coop, 'cancelled');
     P.wound = 0; P.scarUntil = w.time + W.scar; h.stats.h4.pops++;
     orig(h, b, { dmg: W.popDmg, posture: W.popPosture, unblockable: true, noPerfect: true, ignoreIframe: true });
     w.fx.text(at.x, at.y - 20, '傷口破壞！', '#ff4a5a', 26); w.fx.ring(at.x, at.y, 8, 90, 0.45, '#ff3344', 6);
@@ -94,9 +96,15 @@
     // 傷口：打出來 / 集中弱點攻擊打破（打到哪都會破最近的傷口——集中模式代表瞄準）
     if (!P.wound && w.time >= P.scarUntil && (P.woundAcc += dealt * BD.H4Gear.mul(h, 'wound')) >= H4.WOUND.at * b.maxHp) {
       P.wound = w.time; P.woundAcc = 0; const at = partPos(b, P);
+      if (!st.solo) { P.woundBy = h.def.hunter; h.stats.h4.coop.created++; }
       w.fx.text(at.x, at.y - 16, `${P.name}部傷口`, '#ff7a7a', 18);
     }
-    if (p.focus) { const W = P.wound ? P : st.parts.find((x) => x.wound); if (W) pop(w, st, h, b, W, orig); }
+    if (p.focus) {
+      const c = p.h4coop;
+      const W = c ? !c.result && c.hunter === h.def.hunter && st.parts.find((x) => x.id === c.part && x.wound === c.wound && x.wound && w.time - x.wound <= H4.WOUND.life) :
+        P.wound && !P.coop ? P : st.parts.find((x) => x.wound && !x.coop);
+      if (W) pop(w, st, h, b, W, orig, c);
+    }
     if (P.brkHp && !P.broken && (P.brkAcc += dealt * BD.H4Gear.mul(h, 'brk')) >= P.brkHp) {
       P.broken = true; h.stats.h4.breaks++; const at = partPos(b, P);
       w.fx.text(at.x, at.y - 24, `${P.name}部位破壞！`, '#ffe27a', 26); w.log(h, `破壞了 ${b.name} 的${P.name}部`, true);

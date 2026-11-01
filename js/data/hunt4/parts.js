@@ -50,6 +50,7 @@
     { at: 0.25, name: '綠', color: '#5fd47a', mul: 1.05 }, { at: 0.1, name: '黃', color: '#ffe14a', mul: 1 }, { at: 0, name: '橙', color: '#ff8a3a', mul: 0.8 }],
   bounceFrom: 3, bounceHz: 0.45, hardCost: 2, whetAt: 0.3, whetTime: 1.6 };
   H4.ITEMS = { flashAt: 0.25, flashDur: 2.6, flashFade: 0.6, dustHeal: 0.3, dustR: 500 };
+  H4.SUPPORT = { dustGap: 1.2, flashGap: 1, flashR: 900, minFlash: 0.45, observe: 2 };
 
   // 各武器的狩獵屬性：dtype 傷害類型、sharp 銳利度上限（命中次數；遠程為 0）、focus 集中弱點攻擊（打破傷口）
   H4.WEAPON_SPECS = {

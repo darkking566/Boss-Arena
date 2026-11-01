@@ -280,6 +280,8 @@
     if (name !== 'result' && BD.sfx) BD.sfx.stop(); // 離開 / 重開戰鬥時停掉殘留音效
     $('#select').classList.toggle('hidden', name !== 'select');
     $('#result').classList.toggle('hidden', name !== 'result');
+    $('#result').classList.toggle('hunt4-result', name === 'result' && state.resultKind === 'hunt4');
+    $('#resGrowth').hidden = name !== 'result' || state.resultKind !== 'hunt4';
     if (name !== 'game' && BD.TrainingUI) BD.TrainingUI.hide();
     if (BD.HuntUI) { if (name === 'hunt') BD.HuntUI.open(msg); else BD.HuntUI.hide(); }
     if (name === 'select' || name === 'hunt') state.world = null;
@@ -355,11 +357,50 @@
     return w;
   }
   state.startHunt4 = startHunt4;
+  function showHunt4Review(st) {
+    const root = $('#resGrowth'); root.replaceChildren();
+    const add = (parent, tag, text, cls) => { const el = document.createElement(tag); el.textContent = text; if (cls) el.className = cls; parent.appendChild(el); return el; };
+    const pct = (n) => (n * 100).toFixed(1) + '%';
+    add(root, 'h2', '本場成長回顧').id = 'resGrowthTitle';
+    add(root, 'p', '記錄這一場的經驗與表現；單場結果不代表已經穩定掌握招式。', 'h4-review-note');
+    if (!st.review) { add(root, 'p', '本場回顧資料不足，仍可查看下方戰鬥統計。'); return; }
+    const grid = add(root, 'div', '', 'h4-review-grid');
+    for (const r of st.review) {
+      const hd = BD.HUNT4.HUNTERS.find((h) => h.id === r.id), card = add(grid, 'article', '', 'h4-review-card');
+      card.style.borderColor = hd.color;
+      add(card, 'h3', hd.name + '・' + hd.title);
+      if (r.before && r.after) {
+        for (const id of Object.keys(r.after.weapons)) {
+          const a = r.before.weapons[id], b = r.after.weapons[id], wp = BD.HUNT4.WEAPON_NAMES[id];
+          add(card, 'p', a ? `${wp}熟練度：${pct(a.mastery)} → ${pct(b.mastery)}（本場經驗 +${b.xp - a.xp}）` : `${wp}：缺少開戰前紀錄`);
+        }
+        const a = r.before.dex, b = r.after.dex;
+        add(card, 'p', `本 Boss 圖鑑：達記錄門檻 ${a.known}/${a.all} → ${b.known}/${b.all} 招；累計交手 ${a.fights} → ${b.fights} 場`);
+      } else add(card, 'p', '缺少前後紀錄，無法比較本場成長。');
+      for (const [label, v] of [['反應', r.react], ['翻滾', r.dodge]]) {
+        add(card, 'p', !v || !v[1] ? `${label}：本場尚無已結算的嘗試紀錄` : `${label}：成功 ${v[0]} / 嘗試 ${v[1]} 次` + (v[1] < 10 ? '（樣本較少，先作參考）' : ''));
+      }
+      if (r.coop) {
+        const c = r.coop;
+        add(card, 'p', `造傷 ${c.created} 次・隊友接應成功 ${c.assists} 次`);
+        add(card, 'p', c.started ? `傷口合作：成功 ${c.success} / 出手 ${c.started} 次；未命中 ${c.missed}、中止 ${c.cancelled}` : '傷口合作：本場尚未出手接應');
+      }
+      if (r.support) {
+        const s = r.support;
+        add(card, 'p', `粉塵實際回復 ${Math.round(s.healing)} HP（隊友 ${Math.round(s.allyHealing)} HP），有效受益 ${s.recipients} 人次（含自己）`);
+        add(card, 'p', `閃光打斷 ${s.interrupts} 次；掩護後觀察 2 秒未力竭 ${s.coverSafe}、期間力竭 ${s.coverFaint}、戰鬥提早結束 ${s.coverEnded}`);
+      }
+    }
+    add(root, 'p', '反應／翻滾沿用學習判定：嘗試後的觀察期間內，累計受傷超過最大生命的 2% 算失敗。這不是逐招完全閃避率。圖鑑同一招累計 3 次反應／翻滾觀察即達記錄門檻，不等於學會該招。熟練度僅列本場使用的武器；小幅增加可能因顯示到小數一位而看不出差異。', 'h4-review-note');
+    add(root, 'p', '造傷者按打出傷口的最後一擊記名。合作只計隊友接應指定傷口的集中攻擊；傷口消失、危險時收手或招式被打斷會中止，出手後沒打破指定傷口則記未命中。', 'h4-review-note');
+    add(root, 'p', '粉塵只計真正補回的生命，滿血或已力竭者不計受益人次。閃光記錄實際打斷與其後 2 秒的觀察結果，不代表保證救命；已飛出的投射物與地面危險仍會存在。', 'h4-review-note');
+  }
   function showHunt4Result(w) {
     state.resultShown = true; state.resultKind = 'hunt4'; h4Store(); // 這場學到的已寫進 state.h4save（戰鬥中直接累積）
     const st = w.hunt4, boss = st.boss, win = w.winner && w.winner.team === 0, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
     $('#resTitle').innerHTML = win ? `<span style="color:${boss.def.color}">${boss.name}</span> 討伐成功！` : '狩獵失敗…';
     $('#resSub').textContent = `狩獵時間 ${mm} 分 ${ss} 秒 · 力竭 ${st.faints} / ${BD.HUNT4.CARTS} · 怯 ${st.flinches} 次 · 倒地 ${st.topples} 次` + (win ? '' : ` · ${boss.name} 剩餘生命 ${Math.round(boss.hp / boss.maxHp * 100)}%`);
+    showHunt4Review(st);
     const rows = [['造成傷害', (h) => Math.round(h.stats.dealt)], ['承受傷害', (h) => Math.round(h.stats.taken)], ['力竭', (h) => st.faintsBy.get(h)],
       ['彈刀 / 見切', (h) => `${h.stats.deflects || 0} / ${h.stats.counters}`], ['相殺 / 力量對抗 / 完美防禦', (h) => `${h.stats.h4.offsets} / ${h.stats.h4.clashes} / ${h.stats.h4.pguards}`], ['翻滾 / 完美閃避', (h) => `${h.stats.dodges} / ${h.stats.perfect}`],
       ['傷口破壞 / 部位破壞', (h) => `${h.stats.h4.pops} / ${h.stats.h4.breaks}`], ['異常觸發', (h) => h.stats.h4.procs], ['換武器', (h) => h.stats.h4.switches],

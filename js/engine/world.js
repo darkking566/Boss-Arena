@@ -66,7 +66,8 @@
       this.fx.realUpdate(realDt);
       if (this.hitstop > 0) { this.hitstop -= realDt; return; }
       if (this.slowmo > 0) this.slowmo -= realDt;
-      this.acc += realDt * this.speed * (this.slowmo > 0 ? 0.35 : 1);
+      const slow = this.slowmo > 0 && (!this.hunt4 || this.winner); // 狩獵模式多人一直觸發會拖節奏：戰鬥中不放慢，只留勝負那一下
+      this.acc += realDt * this.speed * (slow ? 0.35 : 1);
       let n = 0;
       while (this.acc >= STEP && n < 16) { this.step(STEP); this.acc -= STEP; n++; }
       if (n >= 16) this.acc = 0;

@@ -69,6 +69,17 @@ button.primary:hover { filter: brightness(1.12); }
 table.stats { margin: 0 auto 12px; border-collapse: collapse; font-size: 16px; }
 table.stats th, table.stats td { padding: 5px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 table.stats td:first-child { color: #aaa; text-align: left; }
+.stats-scroll { max-width: 100%; overflow-x: auto; }
+.hunt4-result .res-wrap { min-width: 0; width: min(1120px, 96vw); }
+.h4-review { margin: 18px 0 24px; text-align: left; }
+.h4-review[hidden] { display: none; }
+.h4-review h2 { margin: 0 0 6px; font-size: 22px; color: #ffd27a; }
+.h4-review-note { color: #b5b0bd; font-size: 13px; line-height: 1.6; }
+.h4-review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.h4-review-card { border: 1px solid; border-left-width: 4px; border-radius: 8px; padding: 12px 16px; background: rgba(255,255,255,0.04); overflow-wrap: anywhere; }
+.h4-review-card h3 { margin: 0 0 8px; font-size: 18px; }
+.h4-review-card p { margin: 6px 0; font-size: 14px; line-height: 1.65; color: #e0dce5; }
+@media (max-width: 650px) { .h4-review-grid { grid-template-columns: 1fr; } }
 
 /* ── 模式切換（對戰 / 訓練場）── */
 .modes { display: flex; gap: 10px; justify-content: center; margin: 0 0 14px; }

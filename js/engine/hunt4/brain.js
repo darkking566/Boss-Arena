@@ -45,6 +45,13 @@
     return { fights: d.fights || 0, wins: d.wins || 0, known: Math.min(known, all), all, chased: d.chased || 0, soft };
   }
 
+  // 回顧只保存本場前後的讀值，不存歷史、不讀取戰鬥亂數，也不寫入學習存檔。
+  function learning(save, hid, weapons, bid) {
+    const M = save.hunters[hid], d = dexInfo(save, hid, bid), wp = {};
+    for (const id of weapons) wp[id] = { xp: (M && M.xp[id]) || 0, mastery: mastery(save, hid, id) };
+    return { weapons: wp, dex: { known: d.known, all: d.all, fights: d.fights } };
+  }
+
   // 匯入時的防呆：只留認得的欄位，數字夾在範圍內，表的鍵數有上限
   function sanitize(o) {
     const out = newSave();
@@ -73,6 +80,7 @@
     for (const h of st.hunters) {
       const M = mem(save, h.def.hunter), dex = sub(M.dex, bid), p = h.def.persona, rng = st.brng;
       const B = h.brain = { trials: [], holdUntil: 0, chasedT: 0, last: '', used: new Set([h.def.weapon]), res: { react: [0, 0], dodge: [0, 0] } }; // res：本場 [成功, 次數]
+      B.before = learning(save, h.def.hunter, h.h4.defs.filter(Boolean).map((d) => d.weapon), bid);
       const m = () => mastery(save, h.def.hunter, h.def.weapon), skId = () => (boss.state === 'skill' && boss.inst ? boss.inst.skill.id : null);
       const eps = () => 0.08 + 0.22 * (1 - m());
       const trial = (kind, a, extra) => B.trials.push(Object.assign({ kind, a, until: w.time + WIN[kind], taken: h.stats.taken, dealt: h.stats.dealt }, extra));
@@ -149,6 +157,13 @@
       d.fights = (d.fights || 0) + 1; if (win) d.wins = (d.wins || 0) + 1;
       d.chased = (d.chased || 0) + (h.brain.chasedT / Math.max(1, w.time) - (d.chased || 0)) / Math.min(d.fights, 20);
     }
+    st.review = st.hunters.map((h) => ({
+      id: h.def.hunter, before: h.brain.before,
+      after: learning(save, h.def.hunter, Array.from(h.brain.used), bid),
+      react: h.brain.res.react.slice(), dodge: h.brain.res.dodge.slice(),
+      coop: Object.assign({}, h.stats.h4.coop),
+      support: Object.assign({}, h.stats.h4.support),
+    }));
   }
 
   BD.H4Brain = { mem, newSave, sanitize, mastery, dexInfo, install, tick, end, partHit, V };
