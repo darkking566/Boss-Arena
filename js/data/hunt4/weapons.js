@@ -72,10 +72,12 @@
           hit(0.48, circle(135), { dmg: 58, posture: 16, kb: 80, fx: 'whirl' }), hit(0.72, cone(150, 80), { dmg: 105, posture: 40, kb: 260, fx: { id: 'slash', scale: 1.4 } })]),
     ] };
 
-  // 太刀：沿用獵魂的太刀（含彈刀 / 見切 / 氣刃），另外補上紅刃才能放的「氣刃兜割」
+  // 太刀：沿用獵魂的太刀（含彈刀 / 見切 / 氣刃），另外補上「氣刃兜割」（白刃起可放、消耗一階）與紅刃兜割後接的「練氣解放無雙斬」（霸體、再消耗一階）
   const helm = sk('k_helm', '氣刃兜割', '兜割', ['melee'], [0, 220], { cost: 0, sw: 'down', track: 8, recovery: 0.7 },
     [dash(0.15, 120, 0.15, { iframe: true })].concat(flurry(0.4, 5, 0.08, cone(150, 80), { dmg: 40, posture: 10, kb: 40 }, 'slash'),
       [hit(0.85, cone(170, 100), { dmg: 160, posture: 60, kb: 360, fx: { id: 'slash', scale: 1.7 } })]));
+  const musou = sk('k_musou', '練氣解放無雙斬', '無雙', ['melee', 'aoe'], [0, 200], { cost: 0, sw: 'spin', track: 6, recovery: 0.8, armor: 0.5 },
+    flurry(0.2, 6, 0.1, circle(170), { dmg: 35, posture: 10, kb: 40 }, 'whirl').concat([hit(0.95, cone(190, 120), { dmg: 220, posture: 70, kb: 420, fx: { id: 'slash', scale: 1.8 } })]));
 
   // ── 大錘：蓄力 I 上撈 → II 頭擊 → III 大爆擊（打頭累積暈眩）；蓄力迴轉移動接近；蓄力中被打 → 相殺上撈 ──
   const hammer = { id: 'hammer', name: '大錘', el: 'physical', ai: [40, 140], aiMod: { gapMul: 1.1, midWait: 0.2 }, bonus: {}, traits: [],
@@ -245,7 +247,7 @@
 
   H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive, bow, lightxbow, heavyxbow }; // 太刀用獵魂的武器物件
   Object.assign(H4.WEAPON_SPECS, {
-    katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm } }),
+    katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm, k_musou: musou } }),
     gs: { dtype: 'cut', sharp: 90,
       focus: sk('h4_focus_gs', '破傷・崩斬', '破傷', ['melee'], [0, 190], { cd: 6, sw: 'down', track: 8, recovery: 0.6 },
         [hit(0.5, cone(190, 50), { dmg: 170, posture: 45, kb: 200, focus: true, fx: { id: 'slash', scale: 1.8 } })]) },

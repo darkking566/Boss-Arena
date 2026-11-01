@@ -92,6 +92,7 @@
     k_mikiri: { t: 'rush', at: 0.45, holdA: -1.4, then: { t: 'hit', side: 1 } },
     w_iai: { t: 'charge', at: 0.5, lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', side: -1, w: 1.4 } }, // 刀收在腰側，放出時反手一閃
     k_helm: Object.assign({ t: 'rush', air: 1, then: { t: 'hit', kind: 'chop', h: 0.8 } }, red, { airAll: 1 }),
+    k_musou: Object.assign({ t: 'spin', turns: 3 }, red),
     h4_focus_katana: { t: 'charge', lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     // 大劍
     gs_c1: { t: 'charge', lv: 1, then: { t: 'hit', kind: 'chop' } },

@@ -183,7 +183,7 @@
   }
 
   // ── 太刀（魔物獵人式）：氣刃槽 + 練氣等級 + 連段 ──
-  // 左鍵連斬 a1→a2→a3 命中累積氣刃；右鍵消耗氣刃 s1→s2→s3→大回旋（大回旋命中提升練氣等級）；見切斬成功回氣並升級。
+  // 左鍵連斬 a1→a2→a3 命中累積氣刃；右鍵消耗氣刃 s1→s2→s3→大回旋（大回旋命中提升練氣等級）；見切斬消耗氣刃，成功回氣，反擊命中後右鍵直接接大回旋（升刃仍靠大回旋命中）。
   const KT = { lv: ['—', '白', '黃', '紅'], mul: [1, 1.05, 1.1, 1.2], chainWin: 0.75, lvTime: 25, idleDecay: 4 };
   const A_CHAIN = ['k_a1', 'k_a2', 'k_a3', 'k_a4', 'k_a5'], S_CHAIN = ['k_s1', 'k_s2', 'k_s3', 'k_spin'];
   function setLevel(b, n) {
@@ -191,18 +191,20 @@
     if (n > kt.level) { b.world.fx.text(b.x, b.y - b.r - 36, '練氣：' + KT.lv[n], ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 22); b.world.fx.sparkle(b.x, b.y, ['', '#ffffff', '#ffe27a', '#ff5a4a'][n], 12, 160, -Math.PI / 2, 1); }
     kt.level = n; kt.lvAt = b.world.time; b.dmgMul = b.hunt.baseDmg * KT.mul[n];
   }
-  BD.katanaLevel = setLevel; // 狩獵模式的氣刃兜割會消耗練氣等級
+  BD.katanaLevel = setLevel; BD.katanaMul = KT.mul; // 狩獵模式的氣刃兜割會消耗練氣等級、依起手等級加傷
   const LOGIC = {
     katana: {
       init(b) {
         b.spirit = 0; b.maxSpirit = 100; b.kv = {};
         for (const id in b.def.variants) b.kv[id] = BD.prepSkill(b.def.variants[id]);
         for (const s of b.skills) b.kv[s.id] = s;
-        b.hunt.kt = { level: 0, lvAt: 0, gainAt: 0, taken: 0, counters: 0 };
+        b.hunt.kt = { level: 0, lvAt: 0, gainAt: 0, taken: 0, counters: 0, mikiri: false };
       },
       pick(b, idx) {
         if (idx > 1) return b.skills[idx];
-        const last = b.world.time - b.lastSkillEnd < KT.chainWin ? b.lastSkillId : null, chain = idx === 0 ? A_CHAIN : S_CHAIN, j = chain.indexOf(last);
+        const last = b.world.time - b.lastSkillEnd < KT.chainWin ? b.lastSkillId : null;
+        if (idx === 1 && last === 'riposte' && b.hunt.kt.mikiri) return b.kv.k_spin; // 見切反擊命中 → 直接派生大回旋
+        const chain = idx === 0 ? A_CHAIN : S_CHAIN, j = chain.indexOf(last);
         return b.kv[chain[j >= 0 && j < chain.length - 1 ? j + 1 : 0]];
       },
       tick(b, dt) {
@@ -211,7 +213,8 @@
         if (d > 0 && !(sk && sk.grp === 's')) { b.spirit = Math.min(b.maxSpirit, b.spirit + Math.min(14, d * 0.15)); kt.gainAt = t; } // 氣刃斬本身不回氣
         if (t - kt.gainAt > KT.idleDecay) b.spirit = Math.max(0, b.spirit - 2 * dt);
         if (sk && sk.id === 'k_spin' && b.inst.landed && !b.inst.lvDone) { b.inst.lvDone = true; setLevel(b, kt.level + 1); }
-        if (b.stats.counters > kt.counters) { kt.counters = b.stats.counters; b.spirit = Math.min(b.maxSpirit, b.spirit + 30); kt.gainAt = t; setLevel(b, kt.level + 1); }
+        if (b.stats.counters > kt.counters) { kt.counters = b.stats.counters; b.spirit = Math.min(b.maxSpirit, b.spirit + 30); kt.gainAt = t; kt.mikiri = false; }
+        if (sk && sk.id === 'riposte' && b.inst.landed) kt.mikiri = true;
         if (kt.level > 0 && t - kt.lvAt > KT.lvTime) setLevel(b, kt.level - 1);
       },
     },

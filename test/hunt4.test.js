@@ -160,6 +160,22 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   gd.shells = 0; gl.cancelSkill(); gl.state = 'idle'; gl.startSkill(gl.h4.kv.gl_reload, { force: true }); run(w, 0.1); assert.strictEqual(gd.shells, 5, '裝填');
 }
 
+// 太刀：兜割命中消耗一階、威力隨起手等級；紅刃兜割自動接練氣解放無雙斬（霸體、再消耗一階）；Boss 倒地時白刃也會放兜割
+{
+  const w = new BD.World(BD.Hunt4.team({ rin: 'katana', mari: 'gs', yuzu: 'db', selena: 'sns' }), BD.bossById.ronin, { seed: 8, pace: 'heavy', hunt4: true, intro: 0.5 });
+  const st = w.hunt4, b = st.boss, k = st.hunters[0], kt = k.hunt.kt, ids = [];
+  run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {};
+  const pin = () => { b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); for (const h of st.hunters.slice(1)) { h.x = 1000; h.y = 1000; } };
+  k.cancelSkill(); k.state = 'idle'; k.x = 3000 - 90; k.y = 1800; k.face = 0; pin(); BD.katanaLevel(k, 3);
+  assert.ok(k.startSkill(k.h4.kv.k_helm, { force: true }), '兜割起手');
+  for (let i = 0; i < 60 * 4; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); pin(); if (k.inst && ids[ids.length - 1] !== k.inst.skill.id) ids.push(k.inst.skill.id); if (k.inst && k.inst.skill.id === 'k_helm' && k.inst.paid) assert.ok(Math.abs(k.dmgMul / k.hunt.baseDmg - BD.katanaMul[3] * 1.5) < 1e-9, '紅刃兜割威力以起手等級計'); }
+  assert.strictEqual(ids.slice(0, 2).join(), 'k_helm,k_musou', '紅刃兜割接無雙斬：' + ids);
+  assert.strictEqual(kt.level, 1, '兜割 + 無雙斬各消耗一階（紅 → 白）');
+  assert.ok(Math.abs(k.dmgMul - k.hunt.baseDmg * BD.katanaMul[1]) < 1e-9, '招式結束後傷害倍率回到當前練氣');
+  k.cancelSkill(); k.state = 'idle'; k.stateT = 1; pin(); k.x = 3000 - 90;
+  assert.strictEqual((k.h4.D.choose(k, 50) || {}).id, 'k_helm', 'Boss 倒地時白刃也放兜割');
+}
+
 // P7 第三批武器：斬擊斧變形 / 斧槽 / 屬性解放、充能斧裝瓶 / 超解瓶爆 / 盾強化、操蟲棍精華 / 急襲突刺消耗
 {
   const w = new BD.World(BD.Hunt4.team({ rin: 'switchaxe', mari: 'chargeblade', yuzu: 'glaive', selena: 'sns' }), BD.bossById.ronin, { seed: 8, pace: 'heavy', hunt4: true, intro: 0.5 });

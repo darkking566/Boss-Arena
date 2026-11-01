@@ -125,11 +125,14 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   check(h.spirit < 100 - 44, '氣刃斬消耗氣刃（' + h.spirit.toFixed(1) + '）'); eq(h.hunt.kt.level, 1, '大回旋命中後練氣升級');
   check(Math.abs(h.dmgMul - h.hunt.baseDmg * 1.05) < 1e-9, '練氣提高傷害倍率');
   h.spirit = 0; check(!h.startSkill(h.pick(1)), '氣刃不足不能施放氣刃斬');
-  // 見切：架式中被打中 → 反擊並回氣、再升一級
+  // 見切：消耗氣刃；架式中被打中 → 反擊並回氣（不直接升刃），反擊命中後右鍵直接派生大回旋，大回旋命中才升刃
   h.hp = h.maxHp; run(40); h.sta = h.maxSta; h.setState('idle', 0); h.cancelSkill();
-  const mk = h.skills.find((x) => x.id === 'k_mikiri'); check(h.startSkill(mk), '見切起手'); run(10);
-  const lv0 = h.hunt.kt.level, hp0 = h.hp; w.damageBoss(d, h, { dmg: 80 }); run(30);
-  check(h.hp === hp0 && h.stats.counters === 1 && h.spirit >= 30 && h.hunt.kt.level === lv0 + 1, '見切成功：無傷、回氣、練氣 +1');
+  const mk = h.skills.find((x) => x.id === 'k_mikiri'); h.spirit = 0; check(!h.startSkill(mk), '沒有氣刃不能見切');
+  h.spirit = 20; check(h.startSkill(mk), '見切起手'); run(10);
+  const lv0 = h.hunt.kt.level, hp0 = h.hp; d.x = h.x + 120; d.y = h.y; w.damageBoss(d, h, { dmg: 80 });
+  for (let i = 0; i < 200 && h.state !== 'idle'; i++) run(1);
+  check(h.hp === hp0 && h.stats.counters === 1 && h.spirit >= 30 && h.hunt.kt.level === lv0, '見切成功：無傷、回氣、練氣不變');
+  eq(h.pick(1).id, 'k_spin', '見切反擊命中 → 右鍵直接接大回旋'); d.x = h.x + 120; d.y = h.y; swing(1); eq(h.hunt.kt.level, lv0 + 1, '見切後大回旋命中才升刃');
   h.hunt.kt.lvAt = w.time - 100; run(2); eq(h.hunt.kt.level, lv0, '練氣等級久未命中會下降');
   // 彈刀：揮刀前 0.2 秒內被直接攻擊 → 免傷並反震；投射物改向打回；超出時機照常受傷
   h.cancelSkill(); h.setState('idle', 0); run(60); h.hp = h.maxHp; d.hp = d.maxHp; d.posture = 0; h.hunt.kt.gainAt = w.time;

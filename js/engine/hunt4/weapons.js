@@ -14,6 +14,7 @@
     for (const th of h.controller.scanThreats()) if (!th.glow) m = Math.min(m, th.left);
     return m;
   }
+  const DOWN = new Set(['stun', 'knockdown']), HELM_MUL = [1, 1, 1.25, 1.5]; // 太刀：Boss 倒地才捨得用低階兜割；兜割威力隨練氣等級
   const keepGoing = (h, base) => rng(h)() < (open(h) ? 0.95 : base); // 連段要不要接：Boss 有破綻幾乎必接
   BD.defineStatus('h4atk', { name: '攻擊強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgDealtMul: 1.1 } }); // 狩獵笛旋律
   BD.defineStatus('h4def', { name: '防禦強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.9 } });
@@ -50,25 +51,31 @@
   const guardTick = (h) => { if (h.h4.drv.counter && h.inst && h.inst.skill.guard) h.comboCancel(); };
 
   const DRIVERS = {
-    // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；紅刃時找破綻放氣刃兜割（降回白刃）
+    // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；見切反擊命中接大回旋；紅刃見破綻（或 Boss 倒地時白 / 黃刃）放兜割，紅刃兜割再接無雙斬
     katana: {
       choose(h, d) {
         const kt = h.hunt.kt;
-        if (kt.level === 3 && open(h)) { const s = pick(h, d, 'k_helm'); if (s) return s; }
+        if (kt.level >= (DOWN.has(h.enemy.state) ? 1 : 3) && open(h)) { const s = pick(h, d, 'k_helm'); if (s) return s; }
         if (h.spirit >= 40 && (kt.level < 3 || h.spirit >= h.maxSpirit * 0.9)) return pick(h, d, 'k_s1');
         return rng(h)() < 0.7 ? pick(h, d, 'k_a1') : null;
       },
       next(h, d) {
         const id = h.lastSkillId, A = ['k_a1', 'k_a2', 'k_a3', 'k_a4', 'k_a5'], S = ['k_s1', 'k_s2', 'k_s3', 'k_spin'];
         const p = h.def.persona, i = A.indexOf(id), j = S.indexOf(id);
+        if (id === 'riposte' && h.hunt.kt.mikiri) return pick(h, d, 'k_spin');
+        if (id === 'k_helm' && h.h4.drv.musou) { h.h4.drv.musou = false; return pick(h, d, 'k_musou'); }
         if (i >= 0 && i < A.length - 1 && keepGoing(h, 0.5 + 0.3 * p.risk)) return h.spirit >= 60 && rng(h)() < 0.4 ? pick(h, d, 'k_s1') : pick(h, d, A[i + 1]);
         if (j >= 0 && j < S.length - 1) return pick(h, d, S[j + 1]);
         return null;
       },
       react: (h) => h.pick(0), // 彈刀
       tick(h) {
-        const i = h.inst;
-        if (i && i.skill.id === 'k_helm' && !i.h4done && i.landed) { i.h4done = true; BD.katanaLevel(h, 1); }
+        const i = h.inst, kt = h.hunt.kt, id = i && i.skill.id, M = BD.katanaMul;
+        if (id === 'k_helm' || id === 'k_musou') {
+          if (!i.h4done) { i.h4done = true; i.lv = kt.level; if (id === 'k_helm') h.h4.drv.musou = false; } // 起手時的練氣等級決定威力
+          if (i.landed && !i.paid) { i.paid = true; BD.katanaLevel(h, i.lv - 1); if (id === 'k_helm' && i.lv === 3) h.h4.drv.musou = true; } // 命中才消耗一階
+          h.dmgMul = h.hunt.baseDmg * M[i.lv] * (id === 'k_helm' ? HELM_MUL[i.lv] : 1); kt.boost = true;
+        } else if (kt.boost) { kt.boost = false; h.dmgMul = h.hunt.baseDmg * M[kt.level]; }
       },
       gauge: (h) => ({ v: h.spirit / h.maxSpirit, color: ['#c8a0ff', '#ffffff', '#ffe27a', '#ff5a4a'][h.hunt.kt.level] }),
     },
