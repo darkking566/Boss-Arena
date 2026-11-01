@@ -31,9 +31,10 @@
   // 傷口：部位累積傷害達最大生命 at 比例就開傷口，life 秒後自然閉合；集中弱點攻擊打破 → 額外傷害 + 必定怯、該部位 scar 秒內不再開
   H4.WOUND = { at: 0.035, life: 60, scar: 40, hz: 0.1, popDmg: 160, popPosture: 40 };
   // 怯：累積傷害達最大生命 at 比例 → 硬直 dur 秒，每次門檻 ×grow；暈眩：打擊打頭累積；倒地：架勢崩潰改為倒地 dur 秒、之後架勢上限 ×grow
-  H4.FLINCH = { at: 0.06, dur: 0.7, grow: 1.3 };
-  H4.STUN = { at: 0.05, dur: 4, grow: 1.5 };
-  H4.TOPPLE = { dur: 3.5, grow: 1.5 };
+  H4.FLINCH = { at: 0.12, dur: 0.7, grow: 1.5 };
+  H4.STUN = { at: 0.12, dur: 4, grow: 2 };
+  H4.TOPPLE = { dur: 3.5, grow: 2 };
+  H4.HEAVY_KB = 300; // 擊退：只有打擊類且 kb ≥ 此值的重擊（大錘蓄力 III）能推動 Boss，其餘命中 kb 歸零
   H4.FATIGUE = { every: 150, dur: 25 }; // 每 every 秒進入 dur 秒疲勞（變慢、傷害降低）
   // 異常：每次命中 rate 機率累積 sv，滿 at 觸發，之後門檻 +grow
   H4.AILMENTS = {

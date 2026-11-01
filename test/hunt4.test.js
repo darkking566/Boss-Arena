@@ -149,7 +149,8 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   // 長槍：一般防禦（不完美）擋下也接反擊突刺
   lance.cancelSkill(); lance.state = 'idle'; lance.sta = lance.maxSta; lance.startSkill(lance.h4.kv.lance_guard, { force: true }); run(w, 0.4);
   let hp = lance.hp; w.damageBoss(b, lance, { dmg: 120 }); assert.ok(hp - lance.hp > 0 && hp - lance.hp <= 120 * 0.18 * 1.1, '長槍防禦減傷 ' + (hp - lance.hp));
-  run(w, 1); assert.ok(lance.lastSkillId === 'lance_counter' || (lance.inst && lance.inst.skill.id === 'lance_counter'), '擋下後反擊突刺');
+  let countered = false; for (let i = 0; i < 60; i++) { run(w, 1 / 60); countered = countered || !!(lance.inst && lance.inst.skill.id === 'lance_counter'); } // Boss 不被擊退時反擊後會再接連段，記錄過程而非終點
+  assert.ok(countered, '擋下後反擊突刺');
   // 銃槍：砲擊耗彈、固定傷害（不吃肉質）；裝填補滿
   const gd = gl.h4.drv; gd.shells = 5;
   gl.cancelSkill(); gl.state = 'idle'; gl.x = b.x - 80 - grow(b); gl.y = b.y; gl.face = 0; b.setState('stun', 5); gl.startSkill(gl.h4.kv.gl_shell, { force: true });
