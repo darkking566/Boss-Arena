@@ -59,6 +59,10 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   // 單一重擊不會打倒 Boss；架勢崩潰才倒地
   b.state = 'idle'; w.damageBoss(mari, b, { dmg: 900, posture: 0, kb: 900 }); run(w, 0.05);
   assert.ok(b.state !== 'knockdown', '單一重擊不倒地');
+  // 控制後先出一招：剛從麻痺恢復、還沒出招 → 新的倒地先記下，出完一招才補上
+  b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(mari, b, { dmg: 10, posture: 10 }); run(w, 0.05);
+  assert.ok(b.state !== 'knockdown' && st.pend && st.pend.state === 'knockdown', '控制恢復後未出招 → 倒地先記下');
+  st.owe = st.wasCC = false; st.pend = null; b.maxPosture /= BD.HUNT4.TOPPLE.grow;
   b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(mari, b, { dmg: 10, posture: 10 }); run(w, 0.05);
   assert.ok(b.state === 'knockdown' && st.topples === 1, '架勢崩潰 → 倒地');
 }
@@ -102,9 +106,10 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   const tk = mari.h4.kv.gs_tackle;
   mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.4; let hp = mari.hp; w.damageBoss(b, mari, { dmg: 100 });
   assert.ok(hp - mari.hp > 0 && hp - mari.hp < 70, '鐵壁衝撞減傷 ' + (hp - mari.hp));
+  st.owe = st.wasCC = false; // 測試直接從暈眩切回待機；實戰中相殺發生在 Boss 出手後，鎖定已解除
   b.setState('idle', 0); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1; hp = mari.hp;
   assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(mari.hp === hp && b.state === 'stagger' && mari.stats.h4.offsets === 1, '相殺：免傷、Boss 硬直');
-  b.setState('idle', 0); b.startSkill(b.skills[0], { force: true }); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1;
+  b.setState('idle', 0); st.owe = st.wasCC = false; b.startSkill(b.skills[0], { force: true }); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1;
   w.damageBoss(b, mari, { dmg: 200 }); assert.ok(mari.stats.h4.clashes === 1, '大招式相殺 → 力量對抗');
   run(w, 1.5); assert.ok(b.state === 'knockdown' || mari.hp < hp, '力量對抗有結果');
 }

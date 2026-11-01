@@ -16,6 +16,13 @@
     st.breaks = b.stats.breaks; st.topples = 0; st.flinches = 0;
     st.ail = {}; for (const k in H4.AILMENTS) st.ail[k] = { acc: 0, at: H4.AILMENTS[k].at, procs: 0 };
     st.poisonT = 0; st.poisonAcc = 0; st.poisonBy = null; st.asleep = false; st.fatigueAt = H4.FATIGUE.every;
+    st.owe = false; st.wasCC = false; st.bypass = false;
+    if (st.solo) return;
+    const set0 = b.setState.bind(b); // 控制後先出一招：所有切到控制狀態的路徑（閃光、相殺、架勢崩潰…）都經過這裡
+    b.setState = (s, dur) => {
+      if (CTRL.has(s) && !st.bypass && locked(st, b)) hold(st, s, dur, () => (s === 'knockdown' ? BD.applyStatus(b, s, { dur }, w) : b.setState(s, dur)));
+      else set0(s, dur);
+    };
   }
 
   const partAt = (st, b, src) => { const deg = Math.abs(U.angDiff(b.face, U.angTo(b, src))) * 180 / Math.PI; return st.parts.find((P) => deg <= P.front) || st.parts[st.parts.length - 1]; };
@@ -25,18 +32,23 @@
     return Object.assign({ i: i < 0 ? B.length - 1 : i }, B[i < 0 ? B.length - 1 : i]);
   }
   const busy = (b) => b.state === 'transition' || b.state === 'dead';
-  function cc(w, b, state, dur, text, color) { // Boss 硬直類：直接切狀態（打斷出招）
+  const CTRL = new Set(['stun', 'stagger', 'knockdown']);
+  // 控制鎖定：被控中、或剛恢復還沒打出下一招（過了前搖）前，新的控制都先記下（獵魂代理不鎖）
+  const locked = (st, b) => !st.solo && (st.owe || st.wasCC || CTRL.has(b.state));
+  function hold(st, state, dur, fire) { if (!st.pend || dur >= st.pend.dur) st.pend = { state, dur, fire }; } // 只留一筆，時間長的優先
+  function cc(w, b, state, dur, text, color, on) { // Boss 硬直類：直接切狀態（打斷出招）；鎖定中先記下
     if (busy(b)) return false;
-    b.setState(state, dur); w.fx.text(b.x, b.y - b.r - 34, text, color, 24); return true;
+    const st = w.hunt4;
+    if (locked(st, b)) { hold(st, state, dur, () => cc(w, b, state, dur, text, color, on)); return false; }
+    b.setState(state, dur); w.fx.text(b.x, b.y - b.r - 34, text, color, 24); if (on) on(); return true;
   }
-  function armored(w, st, b, state, dur, text, color) { // 霸體：出招中只記下（暈眩優先於怯），收招後 tick 補上
-    if (b.state !== 'skill') return cc(w, b, state, dur, text, color);
-    if (!st.pend || state === 'stun') st.pend = { state, dur, text, color };
+  function armored(w, st, b, state, dur, text, color, on) { // 霸體：出招中只記下（時間長的優先），收招後 tick 補上
+    if (b.state !== 'skill') return cc(w, b, state, dur, text, color, on);
+    hold(st, state, dur, () => cc(w, b, state, dur, text, color, on));
     return false;
   }
   function flinch(w, st, b, dur) {
-    if (b.state === 'knockdown' || b.state === 'stun' || !armored(w, st, b, 'stagger', dur, '怯！', '#ffd0a0')) return;
-    st.flinches++;
+    if (b.state !== 'knockdown' && b.state !== 'stun') armored(w, st, b, 'stagger', dur, '怯！', '#ffd0a0', () => st.flinches++);
   }
 
   function pop(w, st, h, b, P, orig, coop) { // 集中弱點攻擊打破傷口
@@ -58,7 +70,7 @@
     w.log(h, `${A.name}！`, true);
     if (id === 'poison') { st.poisonT = A.dur; st.poisonBy = h; w.fx.text(b.x, b.y - b.r - 34, '中毒！', A.color, 24); }
     else if (id === 'paralysis') cc(w, b, 'stun', A.dur, '麻痺！', A.color);
-    else if (id === 'sleep') { if (cc(w, b, 'stun', A.dur, '睡眠…', A.color)) st.asleep = true; }
+    else if (id === 'sleep') cc(w, b, 'stun', A.dur, '睡眠…', A.color, () => { st.asleep = true; });
     else if (id === 'blast') {
       orig(h, b, { dmg: A.dmg + A.hp * b.maxHp, posture: 25, unblockable: true, noPerfect: true, ignoreIframe: true });
       w.fx.text(b.x, b.y - b.r - 34, '爆破！', A.color, 26); w.fx.ring(b.x, b.y, 10, b.r + 70, 0.4, A.color, 7);
@@ -112,7 +124,7 @@
     }
     if ((st.flinchAcc += dealt) >= st.flinchAt) { st.flinchAcc = 0; st.flinchAt *= H4.FLINCH.grow; flinch(w, st, b, H4.FLINCH.dur); }
     if (spec.dtype === 'blunt' && P.id === 'head' && (st.stunAcc += dealt * BD.H4Gear.mul(h, 'ko')) >= st.stunAt) {
-      st.stunAcc = 0; st.stunAt *= H4.STUN.grow; if (armored(w, st, b, 'stun', H4.STUN.dur, '暈眩！', '#ffe27a')) w.log(h, '把 ' + b.name + ' 打暈了！', true);
+      st.stunAcc = 0; st.stunAt *= H4.STUN.grow; armored(w, st, b, 'stun', H4.STUN.dur, '暈眩！', '#ffe27a', () => w.log(h, '把 ' + b.name + ' 打暈了！', true));
     }
     return r;
   }
@@ -122,10 +134,11 @@
     if (b.state === 'dead' || w.winner) return;
     for (const P of st.parts) if (P.wound && w.time - P.wound > H4.WOUND.life) P.wound = 0;
     if (st.asleep && b.state !== 'stun') st.asleep = false;
-    if (st.pend && b.state !== 'skill') { // 收招：補上出招中記下的怯 / 暈眩；已倒地 / 暈眩就作廢
-      const q = st.pend; st.pend = null;
-      if (b.state !== 'knockdown' && b.state !== 'stun' && cc(w, b, q.state, q.dur, q.text, q.color)) { if (q.state === 'stagger') st.flinches++; else w.log(b, '收招後暈眩了！', true); }
-    }
+    const inCC = CTRL.has(b.state);
+    if (st.wasCC && !inCC) st.owe = true; // 剛從控制恢復：欠一招
+    st.wasCC = inCC;
+    if (st.owe && b.state === 'skill' && b.skillPhase() !== 'windup') st.owe = false; // 過了前搖＝這招已出手
+    if (st.pend && b.state !== 'skill' && !locked(st, b)) { const q = st.pend; st.pend = null; q.fire(); } // 收招 / 出完那一招：補上記下的控制
     if (st.poisonT > 0) {
       st.poisonT -= dt; st.poisonAcc += dt;
       if (st.poisonAcc >= 1) { st.poisonAcc -= 1; orig(st.poisonBy, b, { dmg: H4.AILMENTS.poison.dps * b.maxHp * (st.poisonBy && st.poisonBy.h4 ? BD.H4Gear.mul(st.poisonBy, 'poison') : 1), dot: true, posture: 0, unblockable: true, ignoreIframe: true }); }
@@ -133,7 +146,12 @@
     // 倒地：架勢崩潰改成長時間倒地，之後架勢上限提高
     if (b.stats.breaks > st.breaks) {
       st.breaks = b.stats.breaks;
-      if (!busy(b)) { BD.applyStatus(b, 'knockdown', { dur: H4.TOPPLE.dur }, w); st.topples++; b.maxPosture *= H4.TOPPLE.grow; w.log(b, '倒地！全員輸出！', true); }
+      const fall = () => { BD.applyStatus(b, 'knockdown', { dur: H4.TOPPLE.dur }, w); st.topples++; w.log(b, '倒地！全員輸出！', true); };
+      if (!busy(b)) {
+        b.maxPosture *= H4.TOPPLE.grow;
+        if (b.state === 'stagger' || !locked(st, b)) { st.bypass = true; fall(); st.bypass = false; } // 架勢崩潰的硬直直接轉倒地（同一次事件）
+        else hold(st, 'knockdown', H4.TOPPLE.dur, fall);
+      }
     }
     if (w.time >= st.fatigueAt) {
       st.fatigueAt += H4.FATIGUE.every + H4.FATIGUE.dur;
@@ -141,5 +159,5 @@
     }
   }
 
-  BD.H4Combat = { init, hit, tick, partPos, sharpBand };
+  BD.H4Combat = { init, hit, tick, partPos, sharpBand, locked };
 })(typeof window !== 'undefined' ? window : globalThis);

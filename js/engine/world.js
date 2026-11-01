@@ -66,7 +66,7 @@
       this.fx.realUpdate(realDt);
       if (this.hitstop > 0) { this.hitstop -= realDt; return; }
       if (this.slowmo > 0) this.slowmo -= realDt;
-      const slow = this.slowmo > 0 && (!this.hunt4 || this.winner); // 狩獵模式多人一直觸發會拖節奏：戰鬥中不放慢，只留勝負那一下
+      const slow = this.slowmo > 0 && (!this.hunt4 || this.hunt4.solo || this.winner); // 狩獵模式多人一直觸發會拖節奏：戰鬥中不放慢，只留勝負那一下
       this.acc += realDt * this.speed * (slow ? 0.35 : 1);
       let n = 0;
       while (this.acc >= STEP && n < 16) { this.step(STEP); this.acc -= STEP; n++; }
@@ -238,12 +238,13 @@
       if (fs && fs.phase === 2 && fs.def.phase2.frostbite && !BD.hasStatus(b, 'frozen')) BD.applyStatus(b, 'frostbite', { stacks: p.dot ? 3 : fs.def.phase2.frostbite, source: fs }, this);
       const big = pc ? dmg >= 120 : dmg >= 100;
       b.hurtFlash = big ? 0.16 : 0.12; b.hurtK = big ? 8 : dmg >= 40 ? 6 : 4; // 重擊整個身形閃白更久更亮
-      if (pc) {
+      const H = this.hunt4, stop = !H || H.solo || (src && (src === H.boss || src.owner === H.boss)); // 狩獵模式：四人連打停頓太多，只有 Boss 打人才停頓
+      if (pc && stop) {
         // 沉重：命中凍結
         if (!p.dot && dmg >= pc.hitstop.minDmg) this.freezeF = Math.max(this.freezeF, U.clamp(Math.round(dmg * pc.hitstop.perDmg), pc.hitstop.minF, pc.hitstop.maxF));
       }
       // 頓挫分級（只暫停實際播放，不改變模擬）：輕 → 重 → 毀滅性，一眼分出這下有多重
-      if (!p.dot) this.hitstop = Math.max(this.hitstop, dmg >= 150 ? 0.11 : dmg >= 100 ? 0.08 : dmg >= 40 ? 0.05 : dmg >= 25 ? 0.03 : 0);
+      if (!p.dot && stop) this.hitstop = Math.max(this.hitstop, dmg >= 150 ? 0.11 : dmg >= 100 ? 0.08 : dmg >= 40 ? 0.05 : dmg >= 25 ? 0.03 : 0);
       if (!p.dot || dmg >= 20) {
         const atkSrc = src && (src.isBoss ? src : src.owner) || null;
         BD.spawnFx(this, 'impact', b.x, b.y, { src: atkSrc, victim: b, dmg, big, heavyHit: !!pc });
@@ -279,7 +280,8 @@
         if (!downed) BD.applyStatus(b, 'stagger', { dur: 1.5 }, this); // 倒地時不再疊加硬直
         this.fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
         BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b });
-        this.hitstop = Math.max(this.hitstop, 0.1); this.slowmo = Math.max(this.slowmo, 0.4);
+        if (!this.hunt4 || this.hunt4.solo || b !== this.hunt4.boss) this.hitstop = Math.max(this.hitstop, 0.1);
+        this.slowmo = Math.max(this.slowmo, 0.4);
         this.log(b, '架勢崩潰，陷入硬直！', true);
       }
     }

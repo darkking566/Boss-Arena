@@ -177,7 +177,7 @@
       (i.v.actions.some((a) => a.at + (a.dur || 0) >= i.t && (a.dmg > 0 || a.dps > 0 || a.hit && a.hit.dmg > 0)) ||
        i.dash && i.dash.hit || i.circle && i.circle.hit);
     if (I.flash <= 0 || w.time < team.flashUntil || team.cover || !t || t === h || t.state === 'dead' || t.hp <= 0 ||
-        t.hp >= t.maxHp * H4.ITEMS.flashAt || !attacking || dur < S.minFlash || U.dist(h, b) - b.r > S.flashR || supportUnsafe(h, 0.55)) return false;
+        t.hp >= t.maxHp * H4.ITEMS.flashAt || !attacking || BD.H4Combat.locked(st, b) || dur < S.minFlash || U.dist(h, b) - b.r > S.flashR || supportUnsafe(h, 0.55)) return false;
     if (w.rng() >= 0.3 + 0.6 * p.care) return false;
     I.flash--; h.stats.h4.flashes++; st.flashes++;
     team.flashUntil = w.time + dur + S.flashGap;
