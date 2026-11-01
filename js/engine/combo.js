@@ -83,7 +83,7 @@
       return b.stats;
     }
 
-    dist() { return U.dist(this.b, this.e) - this.e.r * 0.6; }
+    dist() { return (U.dist(this.b, this.e) - this.e.r * 0.6) / (this.b.sizeMul || 1); }
     costMul() { const m = this.feat.costMul; return m == null ? 1 : m; } // 後續段落的體力折扣
     // 體力是否足夠接下一段（staGate = 至少要留下自身體力上限的比例；連段預留的普攻不扣）
     staOk(sk) {

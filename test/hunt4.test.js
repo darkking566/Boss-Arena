@@ -4,6 +4,7 @@ const assert = require('assert');
 const { load } = require('./lib/load');
 const { BD } = load({ noFx: true });
 const H4 = BD.HUNT4;
+const grow = (b) => b.r - b.def.radius; // Boss 放大（BOSS_SIZE）多出的半徑：獵人站位跟著往外移
 const make = (id, seed) => new BD.World(BD.Hunt4.team(), BD.bossById[id], { seed, pace: 'heavy', hunt4: true, intro: 0.5 });
 const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); } };
 
@@ -81,7 +82,7 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
     for (const id in h.h4.kv) {
       const s = h.h4.kv[id];
       if (s.guard || !s.actions.some((a) => a.do === 'hit' || a.do === 'proj') || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手；鬼人化 / 裝填沒有攻擊
-      b.x = 3000; b.y = 1800; b.state = 'idle'; b.statuses = b.statuses.filter((x) => x.id === 'kdGuard'); h.x = b.x - 60 - 0.8 * Math.max(0, ...s.actions.map((a) => (a.do === 'dash' ? a.dist : 0))); h.y = b.y; // 突進招站遠一點 h.face = 0; h.state = 'idle'; h.spirit = 100; h.sta = h.maxSta;
+      b.x = 3000; b.y = 1800; b.state = 'idle'; b.statuses = b.statuses.filter((x) => x.id === 'kdGuard'); h.x = b.x - 60 - grow(b) - 0.8 * Math.max(0, ...s.actions.map((a) => (a.do === 'dash' ? a.dist : 0))); h.y = b.y; // 突進招站遠一點 h.face = 0; h.state = 'idle'; h.spirit = 100; h.sta = h.maxSta;
       const hp = b.hp; assert.ok(h.startSkill(s, { force: true }), `${h.name} ${id} 無法施放`);
       for (let k = 0; k < ((s.v1.dur || 1) + 0.1) * 60; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); b.x = 3000; b.y = 1800; } // 釘住 Boss（不被碰撞推開）
       assert.ok(b.hp < hp || w.winner, `${h.name} ${id} 沒打到 Boss`);
@@ -94,7 +95,7 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   const w = make('ronin', 6), st = w.hunt4, b = st.boss, mari = st.hunters[1];
   run(w, 1);
   const seen = [];
-  b.x = 3000; b.y = 1800; mari.x = b.x - 90; mari.y = b.y; b.setState('stun', 6); mari.state = 'idle';
+  b.x = 3000; b.y = 1800; mari.x = b.x - 90 - grow(b); mari.y = b.y; b.setState('stun', 6); mari.state = 'idle';
   mari.startSkill(mari.h4.D.choose(mari, 60));
   for (let i = 0; i < 60 * 5; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); if (mari.inst && seen[seen.length - 1] !== mari.inst.skill.id) seen.push(mari.inst.skill.id); b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); }
   assert.strictEqual(seen.slice(0, 3).join(), 'gs_c1,gs_c2,gs_true', '大劍蓄力連段：' + seen);
@@ -114,7 +115,7 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   yuzu.startSkill(yuzu.h4.kv.db_demon, { force: true }); run(w, 0.3);
   assert.ok(s().demon, '鬼人化');
   const sta = yuzu.sta; run(w, 1); assert.ok(yuzu.sta < sta, '鬼人化耗體力');
-  s().gauge = 99; b.x = 3000; b.y = 1800; yuzu.x = b.x - 60; yuzu.y = b.y; yuzu.face = 0; yuzu.state = 'idle'; yuzu.startSkill(yuzu.h4.kv.db_d1, { force: true }); run(w, 0.5);
+  s().gauge = 99; b.x = 3000; b.y = 1800; yuzu.x = b.x - 60 - grow(b); yuzu.y = b.y; b.setState('stun', 3); yuzu.face = 0; yuzu.state = 'idle'; yuzu.startSkill(yuzu.h4.kv.db_d1, { force: true }); run(w, 0.5);
   assert.ok(s().gauge >= 100, '命中累積鬼人槽');
   yuzu.sta = 1; run(w, 0.1); assert.ok(!s().demon && s().arch, '體力見底 → 鬼人強化');
 }
@@ -136,12 +137,12 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   assert.strictEqual(ham.h4.defs[1].weapon, 'katana', '換主武器後，招牌武器變副武器');
   run(w, 1);
   const pin = () => { b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); };
-  const seen = []; b.x = 3000; b.y = 1800; ham.x = b.x - 90; ham.y = b.y; b.setState('stun', 6); ham.state = 'idle'; ham.sta = ham.maxSta;
+  const seen = []; b.x = 3000; b.y = 1800; ham.x = b.x - 90 - grow(b); ham.y = b.y; b.setState('stun', 6); ham.state = 'idle'; ham.sta = ham.maxSta;
   ham.startSkill(ham.h4.D.choose(ham, 60));
   for (let i = 0; i < 60 * 5; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); if (ham.inst && seen[seen.length - 1] !== ham.inst.skill.id) seen.push(ham.inst.skill.id); pin(); }
   assert.strictEqual(seen.slice(0, 3).join(), 'ham_c1,ham_c2,ham_c3', '大錘蓄力連段：' + seen);
   // 狩獵笛：兩個紅音 → 攻擊強化給範圍內隊友
-  const hd = horn.h4.drv; hd.notes = ['A', 'A']; horn.x = lance.x = b.x - 100; horn.y = b.y; lance.y = b.y + 60; horn.state = 'idle';
+  const hd = horn.h4.drv; hd.notes = ['A', 'A']; horn.x = lance.x = b.x - 100 - grow(b); horn.y = b.y; lance.y = b.y + 60; horn.state = 'idle';
   horn.startSkill(horn.h4.kv.horn_play, { force: true }); run(w, 0.1);
   assert.ok(BD.hasStatus(horn, 'h4atk') && BD.hasStatus(lance, 'h4atk') && hd.notes.length === 0, '演奏攻擊強化');
   hd.notes = []; horn.state = 'idle'; horn.cancelSkill(); horn.startSkill(horn.h4.kv.horn_back, { force: true }); run(w, 0.05); assert.strictEqual(hd.notes.join(), 'C', '綠音記一個音符');
@@ -151,7 +152,7 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   run(w, 1); assert.ok(lance.lastSkillId === 'lance_counter' || (lance.inst && lance.inst.skill.id === 'lance_counter'), '擋下後反擊突刺');
   // 銃槍：砲擊耗彈、固定傷害（不吃肉質）；裝填補滿
   const gd = gl.h4.drv; gd.shells = 5;
-  gl.cancelSkill(); gl.state = 'idle'; gl.x = b.x - 80; gl.y = b.y; gl.face = 0; b.setState('stun', 5); gl.startSkill(gl.h4.kv.gl_shell, { force: true });
+  gl.cancelSkill(); gl.state = 'idle'; gl.x = b.x - 80 - grow(b); gl.y = b.y; gl.face = 0; b.setState('stun', 5); gl.startSkill(gl.h4.kv.gl_shell, { force: true });
   hp = b.hp; for (let i = 0; i < 40; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); pin(); }
   assert.ok(gd.shells === 4 && b.hp < hp, '砲擊耗彈並造成傷害');
   const P = st.parts[0], hz0 = P.hz.cut; P.hz.cut = 0.1; hp = b.hp; BD.H4Combat.hit(w, st, gl, gl, b, { dmg: 62, fixed: true }, st.orig); const d1 = hp - b.hp;

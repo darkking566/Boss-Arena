@@ -25,6 +25,7 @@
   BD.HUNT4 = {
     HUNTERS,
     BOSS_HP_MUL: 9.5, POSTURE_MUL: 4, // Boss 生命 / 架勢放大：P3 四把近戰、AI 未學習時約 61% 勝率（46 場模擬，見 docs/hunt4.md §9）
+    BOSS_SIZE: 3, // Boss 體型與招式範圍倍率（4 人特效擠在一起時仍看得到 Boss）
     CARTS: 3, REVIVE: 8, TIME_LIMIT: 900, // 共用力竭次數、力竭後幾秒歸隊、時限（遊戲秒）
     AGGRO: { interval: 3, decay: 10, near: 260, stick: 1.3, random: 0.15 }, // 仇恨：重新評估間隔、衰減時間常數、近身加成、維持目標加成、隨機換人機率
     POTION_AT: 0.4, // 生命低於此比例且不是 Boss 目標時喝藥

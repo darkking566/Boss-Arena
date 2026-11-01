@@ -410,7 +410,7 @@
       }
       // 對撞：看準近身攻擊，搶在落下前揮出快速近戰，讓兩招撞在一起（需要 clash 特性）
       if (p.clash && th.kind === 'tele' && th.melee && th.left > 0.15 && th.left < 1.1 && b.def.clash) {
-        const d = U.dist(b, this.e) - this.e.r * 0.6, fits = (s) => BD.skillClash(s) && (s.tags || []).includes('fast') && s.range && d <= s.range[1] && b.skillReady(s), av = b.available(), sk = av.find((s) => (s.tags || []).includes('basic') && fits(s)) || av.find(fits); // 普攻優先：永遠可用
+        const d = (U.dist(b, this.e) - this.e.r * 0.6) / (b.sizeMul || 1), fits = (s) => BD.skillClash(s) && (s.tags || []).includes('fast') && s.range && d <= s.range[1] && b.skillReady(s), av = b.available(), sk = av.find((s) => (s.tags || []).includes('basic') && fits(s)) || av.find(fits); // 普攻優先：永遠可用
         if (sk && rng() < Math.min(0.95, p.clash * (1 + 1.5 * BD.clashFury(b, this.e)))) { this.plan = { type: 'clash', t: Math.max(0, th.left - 0.25), th, sk }; return; } // 殘血越想拚刀
       }
       // 換影閃避（劫）：近戰預警落下前與影子互換位置——影子必須在這個預警範圍外
@@ -490,7 +490,7 @@
         this.decide(th);
       }
       if (this.evade && w.time > this.evade.until) this.evade = null;
-      const d = U.dist(b, e) - e.r * 0.6;
+      const d = (U.dist(b, e) - e.r * 0.6) / (b.sizeMul || 1); // sizeMul：放大的 Boss 招式範圍也放大，距離換回原尺度比對 range / prefRange
       // 移動模式
       const [mn, mx] = p.prefRange;
       if (this.mode === 'approach' && d < mx) this.modeT = 0;
@@ -671,7 +671,7 @@ if (F && F.combo && rng() < F.combo.rate) { const c = this.chooseCombo(d, win, s
     }
     steer(dt) {
       const b = this.b, e = this.e, w = this.w, p = this.p, A = BD.ARENA;
-      const d = U.dist(b, e), toE = U.angTo(b, e), ux = Math.cos(toE), uy = Math.sin(toE);
+      const d = U.dist(b, e) / (b.sizeMul || 1), toE = U.angTo(b, e), ux = Math.cos(toE), uy = Math.sin(toE);
       const tx = -uy * this.strafeDir, ty = ux * this.strafeDir;
       const [mn, mx] = p.prefRange;
       let vx = 0, vy = 0, spd = p.walk;

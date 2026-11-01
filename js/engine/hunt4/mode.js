@@ -126,6 +126,7 @@
       BD.H4Weapons.equip(h);
     }
     boss.maxHp = boss.hp = boss.hpTrail = Math.round(boss.maxHp * H4.BOSS_HP_MUL); boss.maxPosture *= H4.POSTURE_MUL;
+    boss.r *= H4.BOSS_SIZE; boss.sizeMul = H4.BOSS_SIZE;
     w.enrageAt = Infinity; // 以時限取代狂暴
     BD.applyStatus(boss, 'kdGuard', { dur: Infinity }, w); // Boss 不會被單一重擊打倒，只有架勢累積崩潰才倒地（combat.js 的倒地）
     const st = w.hunt4 = { boss, hunters, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };

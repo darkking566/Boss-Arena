@@ -22,9 +22,9 @@
   }
   function resolveShape(w, b, inst, a) {
     let x, y, ang;
-    const anchor = a.anchor || 'self';
+    const anchor = a.anchor || 'self', k = b.sizeMul || 1; // sizeMul：狩獵模式放大 Boss 時招式範圍跟著放大
     if (anchor === 'self') {
-      ang = b.face + (a.angOff || 0); const off = a.off || 0;
+      ang = b.face + (a.angOff || 0); const off = (a.off || 0) * k;
       x = b.x + Math.cos(ang) * off; y = b.y + Math.sin(ang) * off;
     } else if (anchor === 'target') {
       const t = b.aimTarget(), lead = a.lead || 0;
@@ -37,7 +37,7 @@
       const p = pickSafe(w, b, a); x = p.x; y = p.y; ang = 0;
     }
     if (a.setMark) inst.marks[a.setMark] = { x, y, ang };
-    return { kind: a.shape, x, y, ang, r: a.r, r0: a.r0, arc: a.arc, len: a.len, w: a.w };
+    return { kind: a.shape, x, y, ang, r: a.r && a.r * k, r0: a.r0 && a.r0 * k, arc: a.arc, len: a.len && a.len * k, w: a.w && a.w * k };
   }
   function shapeCenter(s) {
     if (s.kind === 'rect') return { x: s.x + Math.cos(s.ang) * s.len / 2, y: s.y + Math.sin(s.ang) * s.len / 2 };
