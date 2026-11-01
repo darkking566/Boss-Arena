@@ -14,6 +14,7 @@
     for (const sk of def.skills.concat(Object.values(def.variants))) { // buildHero 已複製招式，可直接改
       if (!sk.cost && !sk.res && (sk.tags || []).includes('melee') && !BS.skip.includes(sk.id)) sk.cost = Math.max(BS.min, Math.round((sk.recovery || 0) * BS.perRec));
     }
+    def.stamina.regen *= H4.STA_REGEN_MUL;
     return Object.assign(def, {
       id: 'h4_' + h.id, hunter: h.id, persona: p, name: h.name, title: h.title, desc: h.desc, color: h.color, color2: h.color2, glow: h.glow,
       traits: def.traits.concat('hunt4', 'h4arms'), ai: aiOf(def, p, wp),
