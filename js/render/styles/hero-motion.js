@@ -5,7 +5,7 @@
 (function (G) {
   const BD = G.BD, U = BD.U, R = BD.Render, TAU = Math.PI * 2;
   const LEAD = 0.07, FOLLOW = 0.05; // 命中前多久開始揮、命中後甩出多久
-  const REST = { a: -0.25, reach: 0, lean: 0, sq: 0, air: 0, glow: 0, shake: 0, shield: 0 };
+  const REST = { a: -0.25, reach: 0, lean: 0, sq: 0, air: 0, glow: 0, shake: 0, shield: 0, pull: 0, arrows: 0, aim: 0, brace: 0 }; // pull 拉弦、arrows 搭箭數、aim 瞄準線、brace 架設
   const FIELDS = Object.keys(REST);
   const P = (o) => Object.assign({}, REST, o);
   const EASE = { in: (u) => u * u, out: (u) => 1 - (1 - u) * (1 - u), io: (u) => u * u * (3 - 2 * u), lin: (u) => u };
@@ -67,9 +67,20 @@
       keys.push([Math.max(0.12, D - 0.12), q, 'io']);
       return keys;
     },
+    // 拉弓：起手把弦拉到 pull 深度（搭 arrows 支箭），命中時間放手、回彈後座；aim＝同時畫瞄準線（龍之一矢）
+    draw(H, D, p) {
+      const t0 = H[0], k = p.kick || 0.4, full = P({ a: 0, pull: p.pull || 1, arrows: p.arrows || 1, lean: -0.08 * (p.pull || 1) - (p.lean || 0), aim: p.aim ? 1 : 0 });
+      return [[0, P({ a: 0 }), 'io'], [Math.min(0.08, t0 * 0.3), P({ a: 0, pull: 0.15, arrows: p.arrows || 1, aim: p.aim ? 0.2 : 0 }), 'out'], [Math.max(0.02, t0 - 0.03), full, 'out'],
+        [t0, P({ a: 0, glow: 0.5 }), 'in'], [t0 + 0.08, P({ a: 0, reach: -0.15 * k, lean: -0.12 * k - (p.lean || 0) }), 'out']];
+    },
+    // 瞄準：舉槍對準，瞄準線越來越亮，命中前接放出的模板（狙擊彈）
+    aim(H, D, p) {
+      const t0 = Math.max(0.05, H[0] - LEAD), rel = T[p.then.t](H, D, p.then).filter((k) => k[0] >= t0);
+      return [[0, P({}), 'io'], [Math.min(0.12, t0 * 0.3), P({ a: 0, aim: 0.25, lean: -0.05 }), 'out'], [t0, P({ a: 0, aim: 1, lean: -0.06 }), 'lin']].concat(rel.slice(1));
+    },
     guard(H, D) { return [[0, P({}), 'io'], [0.06, P({ a: -0.7, reach: -0.15, lean: -0.05 }), 'out'], [D - 0.1, P({ a: -0.7, reach: -0.15, lean: -0.05 }), 'lin']]; },
   };
-  const air = (keys, amt) => keys.map((k, i) => (i && i < keys.length - 1 ? [k[0], Object.assign({}, k[1], { air: amt }), k[2]] : k)); // 騰空：中間各格放大
+  const over = (keys, o) => keys.map((k, i) => (i && i < keys.length - 1 ? [k[0], Object.assign({}, k[1], o), k[2]] : k)); // 整招疊加（騰空放大、架設壓低）：中間各格
 
   // ── 招式 → 模板（M1 太刀 / 大劍 / 片手劍、M2 其餘近戰；遠程見設計文件 §4）──
   const red = { trail: '#ff8a7a' };
@@ -150,6 +161,19 @@
     ig_air: { t: 'spin', airAll: 1 }, ig_kinsect: { t: 'item', pose: { a: -0.3, reach: 0.35 } },
     ig_dive: { t: 'rush', air: 1, airAll: 1, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     h4_focus_glaive: { t: 'spin', airAll: 0.5 },
+    // 弓：拉弦越來越深、搭箭越來越多；龍之一矢後仰瞄準
+    bow_s1: { t: 'draw', pull: 0.45, arrows: 1 }, bow_s2: { t: 'draw', pull: 0.7, arrows: 2 }, bow_s3: { t: 'draw', pull: 1, arrows: 3 },
+    bow_volley: { t: 'draw', pull: 1, arrows: 5, kick: 0.6 },
+    bow_dragon: { t: 'draw', pull: 1.3, arrows: 1, aim: true, lean: 0.15, kick: 2 },
+    bow_coat: { t: 'item', pose: { a: 1.1, reach: -0.3 } }, // 弓垂到身側換瓶
+    // 輕弩：小後座、速射連三下
+    lbg_n: { t: 'hit', kind: 'shot', kick: 0.5 }, lbg_p: { t: 'hit', kind: 'shot', kick: 0.8 }, lbg_rapid: { t: 'hit', kind: 'shot', kick: 0.5 },
+    lbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.25 } },
+    // 重弩：大後座；狙擊先畫瞄準線；架設壓低身體、展開腳架
+    hbg_n: { t: 'hit', kind: 'shot', kick: 1.3 },
+    hbg_snipe: { t: 'aim', then: { t: 'hit', kind: 'shot', kick: 2.2 } },
+    hbg_siege: { t: 'hit', kind: 'shot', kick: 0.35, hold: { brace: 1, sq: 0.5 } },
+    hbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.3 } },
   };
 
   // 每招的關鍵影格只算一次（依招式版本 v 快取）
@@ -161,7 +185,8 @@
     let H = v.actions.filter((a) => a.do === 'hit' || a.do === 'proj').map((a) => a.at);
     if (m.at != null || !H.length) H = [D * (m.at != null ? m.at : 0.45)]; // 沒有攻擊動作的招（見切、居合）：用比例時間當出手點
     k = T[m.t](H, D, m);
-    if (m.airAll) k = air(k, m.airAll);
+    if (m.airAll) k = over(k, { air: m.airAll });
+    if (m.hold) k = over(k, m.hold);
     k.H0 = H[0]; // 變形武器：第一擊前畫舊形態
     const last = k[k.length - 1];
     if (last[0] < D - 1e-6) k.push([D, P({ a: REST.a + TAU * Math.round((last[1].a - REST.a) / TAU) }), 'io']); // 收招回待機（轉過整圈的接同角度，不倒轉）
@@ -218,6 +243,8 @@
     const dot = (x, y) => { ctx.beginPath(); ctx.arc(x, y, r * 0.17, 0, U.TAU); ctx.fill(); ctx.stroke(); };
     if (w === 'db') for (const s of [-1, 1]) dot(r * 0.3, s * r * 0.75);
     else for (const x of xs) dot(x * r, 0);
+    const p = w === 'bow' && pose(o);
+    if (p && p.pull > 0.05) dot(r * (0.65 - p.pull * 0.85), 0); // 拉弦的手
     ctx.restore();
   }
   R.heroMotion = { pose, trail, hands, MOTIONS, keysOf, LEN };

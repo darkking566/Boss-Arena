@@ -14,10 +14,12 @@
     ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len, 0); ctx.stroke();
   };
   const WEAPON = {
-    bow(ctx, r) {
+    bow(ctx, r, t, o, m) { // m：出招姿勢（拉弦深度 pull、搭箭數 arrows）
       ctx.strokeStyle = '#a8794a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(r * 0.2, 0, r * 1.1, -1.15, 1.15); ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1; ctx.beginPath();
-      ctx.moveTo(r * 0.2 + Math.cos(1.15) * r * 1.1, Math.sin(1.15) * r * 1.1); ctx.lineTo(r * 0.2 + Math.cos(-1.15) * r * 1.1, Math.sin(-1.15) * r * 1.1); ctx.stroke();
+      const ex = r * 0.2 + Math.cos(1.15) * r * 1.1, ey = Math.sin(1.15) * r * 1.1, mx = ex - (m ? m.pull : 0) * r * 0.85, n = m && m.pull > 0.05 ? Math.round(m.arrows) : 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(mx, 0); ctx.lineTo(ex, -ey); ctx.stroke();
+      ctx.strokeStyle = '#e8dcc0'; ctx.lineWidth = 1.5;
+      for (let k = 0; k < n; k++) { const a = (k - (n - 1) / 2) * 0.12; ctx.beginPath(); ctx.moveTo(mx, 0); ctx.lineTo(mx + Math.cos(a) * r * 1.5, Math.sin(a) * r * 1.5); ctx.stroke(); } // 搭在弦上的箭
     },
     greatsword(ctx, r) { blade(ctx, r * 2.6, 6, '#dfe6ee'); ctx.fillStyle = '#6b4a2a'; ctx.fillRect(-2, -5, 5, 10); },
     daggers(ctx, r) { for (const s of [-1, 1]) { ctx.save(); ctx.translate(r * 0.3, s * r * 0.75); blade(ctx, r * 1.05, 3, '#e8ecf2'); ctx.restore(); } },
@@ -94,7 +96,8 @@
       ctx.strokeStyle = '#a8794a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(r * 0.5, -r * 0.8); ctx.lineTo(r * 0.5, r * 0.8); ctx.stroke();
       blade(ctx, r * 1.3, 3, '#555c68');
     },
-    heavyxbow(ctx, r) {
+    heavyxbow(ctx, r, t, o, m) {
+      if (m && m.brace > 0.3) { ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(r * 1.5, -r * 0.7 * m.brace); ctx.lineTo(r * 1.1, 0); ctx.lineTo(r * 1.5, r * 0.7 * m.brace); ctx.stroke(); } // 架設：腳架展開
       ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(r * 0.6, -r * 1.1); ctx.lineTo(r * 0.6, r * 1.1); ctx.stroke();
       blade(ctx, r * 1.6, 6, '#444b57');
     },
@@ -115,7 +118,9 @@
         }
       } else if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
       else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25));
-      (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); const hand = ctx.getTransform ? ctx.getTransform() : null; ctx.restore();
+      (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o, m);
+      if (m && m.aim > 0.02) { ctx.strokeStyle = `rgba(255,80,60,${0.25 + 0.5 * m.aim})`; ctx.lineWidth = 1 + 1.5 * m.aim; ctx.beginPath(); ctx.moveTo((M.LEN[def.weapon] || 2) * r, 0); ctx.lineTo(r * 14, 0); ctx.stroke(); } // 瞄準線：觀戰的人看得出要開槍了
+      const hand = ctx.getTransform ? ctx.getTransform() : null; ctx.restore();
       const drv = o.h4 && o.h4.drv, cbSword = def.weapon === 'chargeblade' && drv && drv.mode === 'sword';
       if (def.weapon === 'sns' || def.weapon === 'lance' || def.weapon === 'gunlance' || cbSword) { // 盾：左手；防禦時舉到正前方，完美防禦窗內發亮（槍系 / 充能斧的盾較大）
         const g = o.state === 'skill' && o.inst.skill.guard, pf = g && o.inst.t <= o.inst.skill.guard.perfect, big = def.weapon === 'sns' ? 1 : 1.35;
