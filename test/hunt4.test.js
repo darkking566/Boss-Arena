@@ -147,6 +147,31 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   assert.ok(H.dexInfo(save, 'rin', 'ronin').all > 0 && H.dexInfo(save, 'rin', 'nobody').fights === 0);
 }
 
+// P5 裝備：配裝換算、武器特性 / 防具技能 / 套裝效果、不死之身、掉落與製作、存檔防呆
+{
+  const H = BD.H4Brain, GR = BD.H4Gear, save = H.newSave(), g = GR.gearOf(save, 'rin');
+  g.w['katana:watcher'] = 2; for (const s of ['head', 'body', 'legs']) g.a[s + ':gundyr'] = 1;
+  const yz = GR.gearOf(save, 'yuzu'); yz.w['db:thor'] = 1; yz.a['head:thor'] = 1; yz.a['body:thor'] = 1; yz.a['legs:thor'] = 1;
+  const w = new BD.World(BD.Hunt4.team(), BD.bossById.ronin, { seed: 3, pace: 'heavy', hunt4: true, intro: 0.5, h4save: save }), st = w.hunt4, b = st.boss, [rin, , yuzu] = st.hunters;
+  const E = rin.h4.gear;
+  assert.ok(E.wt === 'exploit' && rin.h4.mod.el === 'dragon' && E.sk.guard === 3 && E.set === 'undying', '配裝換算 ' + JSON.stringify(E.eq));
+  assert.ok(rin.h4.spec.sharp > BD.HUNT4.WEAPON_SPECS.katana.sharp, '武器等級提高銳利度上限');
+  assert.ok(Math.abs(GR.takenMul(w, rin) - 0.82) < 1e-9, '耐震 3 級');
+  run(w, 1);
+  const P = st.parts[1]; b.state = 'idle'; const m0 = GR.atkMul(w, st, rin, P, 0.5); b.setState('stun', 3); const m1 = GR.atkMul(w, st, rin, P, 0.5);
+  assert.ok(Math.abs(m1 / m0 - 1.2) < 1e-9, '狩影：Boss 暈眩時 +20%');
+  rin.hp = 5; w.damageBoss(b, rin, { dmg: 9999, unblockable: true, ignoreIframe: true });
+  assert.ok(rin.state !== 'dead' && rin.hp === 1, '不死之身'); rin.hp = 5; w.damageBoss(b, rin, { dmg: 9999, unblockable: true, ignoreIframe: true }); assert.strictEqual(rin.state, 'dead', '不死之身每場一次');
+  st.parts[0].wound = st.parts[2].wound = w.time; let hp = b.hp; GR.onPop(w, st, yuzu, st.parts[0], st.orig);
+  assert.ok(st.parts[2].wound === 0 && b.hp < hp, '連鎖雷');
+  assert.strictEqual(yuzu.h4.gear.set, 'storm'); hp = b.hp; for (let i = 0; i < 15; i++) GR.onHit(w, st, yuzu, 1, st.orig); assert.ok(b.hp < hp, '雷神之怒落雷');
+  w.winner = rin; st.parts[0].broken = true; GR.end(w, st);
+  const m = g.mats.ronin; assert.ok(m && m.p === 1 && rin.h4.gear.got.s >= 2, '勝利掉落素材（含部位素材）');
+  const clean = GR.sanitize({ mats: { ronin: { s: -5, p: 1e9 }, nobody: { s: 3 } }, w: { 'katana:ronin': 9, 'katana:nobody': 1, 'x:ronin': 1 }, a: { 'head:ronin': 2, 'arm:ronin': 1 }, rec: { 'katana:ronin': [5, 9], 'gs:zeus': [1, 1] } });
+  assert.strictEqual(JSON.stringify(clean), JSON.stringify({ mats: { ronin: { s: 0, p: 999, g: 0 } }, w: { 'katana:ronin': 3 }, a: { 'head:ronin': 2 }, rec: { 'katana:ronin': [5, 1] }, eq: null }), '裝備防呆');
+  assert.ok(H.sanitize(JSON.parse(JSON.stringify(save))).hunters.rin.gear.w['katana:watcher'] === 2, '學習存檔帶著裝備');
+}
+
 // 整場：分出勝負、Boss 換過目標、同種子結果相同
 let wins = 0;
 const ids = ['magmus', 'ronin', 'thor', 'deviljho', 'margit', 'zeus'];

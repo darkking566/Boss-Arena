@@ -50,6 +50,7 @@
   BD.defineTrait('hunt4', {
     onLethal(w, b) {
       const st = w.hunt4; if (!st) return false;
+      if (BD.H4Gear.undying(w, b)) return true; // 套裝「不死之身」
       st.faints++; st.faintsBy.set(b, st.faintsBy.get(b) + 1);
       b.cancelSkill(); b.hp = 0; b.state = 'dead'; b.stateT = 0; b.alive = false; b.statuses = [];
       w.fx.text(b.x, b.y - b.r - 30, '力竭', '#ff7070', 26); w.log(b, `力竭！（${st.faints}/${H4.CARTS}）`, true);
@@ -64,7 +65,7 @@
     const hs = h.h4, def = hs.defs[hs.wi ^= 1];
     h.def = def; h.skills = def.skills.map(BD.prepSkill); h.traits = def.traits.map(BD.trait); h.controller.p = def.ai;
     h.dmgMul = h.hunt.baseDmg; BD.huntWeapon(h);
-    hs.spec = H4.WEAPON_SPECS[def.weapon]; hs.sharp = hs.sharps[hs.wi]; hs.wT = w.time; BD.H4Weapons.equip(h);
+    hs.spec = hs.specs[hs.wi]; hs.mod = hs.mods[hs.wi]; hs.sharp = hs.sharps[hs.wi]; hs.wT = w.time; BD.H4Weapons.equip(h);
     h.stats.h4.switches++; h.brain.used.add(def.weapon); h.setState('recover', 1); w.fx.text(h.x, h.y - h.r - 24, '換武器：' + H4.WEAPON_NAMES[def.weapon], h.def.color, 16);
   }
   const use = (w, h, dur, text) => { h.setState('recover', dur); w.fx.text(h.x, h.y - h.r - 24, text, '#e8f4ff', 16); };
@@ -106,8 +107,8 @@
       st.aggro.set(h, st.aggro.get(h) * k + h.stats.dealt - st.dealt.get(h)); st.dealt.set(h, h.stats.dealt);
       if (!w.winner && h.state !== 'dead') { act(w, st, h); BD.H4Weapons.step(h, dt); h.h4.sharps[h.h4.wi] = h.h4.sharp; }
     }
-    BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt);
-    if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
+    BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt); BD.H4Gear.tick(w, st);
+    if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); BD.H4Gear.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
     if (!w.winner && w.time >= H4.TIME_LIMIT) fail(w, st, '時間到');
   }
 
@@ -117,7 +118,7 @@
       BD.huntUnit(h, true);
       const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = hd.weapons.slice(1).find((id) => (H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id]) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
       const spec = H4.WEAPON_SPECS[h.def.weapon];
-      h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, mod: hd.mod || {}, sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
+      h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, specs: [spec, sub && H4.WEAPON_SPECS[sub]], mod: hd.mod || {}, mods: [hd.mod || {}, hd.mod || {}], sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
         items: Object.assign({}, hd.items), nextAct: 0 };
       h.stats.h4 = { pops: 0, breaks: 0, procs: 0, whets: 0, flashes: 0, dusts: 0, switches: 0, offsets: 0, pguards: 0, clashes: 0 };
       BD.H4Weapons.equip(h);
@@ -126,7 +127,7 @@
     w.enrageAt = Infinity; // 以時限取代狂暴
     BD.applyStatus(boss, 'kdGuard', { dur: Infinity }, w); // Boss 不會被單一重擊打倒，只有架勢累積崩潰才倒地（combat.js 的倒地）
     const st = w.hunt4 = { boss, hunters, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };
-    BD.H4Combat.init(w, st); BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); // 沒給存檔 = 全新的獵人
+    BD.H4Combat.init(w, st); BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); BD.H4Gear.install(w, st); // 沒給存檔 = 全新的獵人（沒有裝備）
     const retarget = w.retarget.bind(w), step = w.step.bind(w), orig = st.orig = w.damageBoss.bind(w);
     w.retarget = (b) => (b === boss ? aggroTarget(w, st) : retarget(b));
     w.damageBoss = (src, b, p) => { // 獵人（或其投射物）打 Boss → 走狩獵戰鬥管線

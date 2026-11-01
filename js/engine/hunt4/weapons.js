@@ -151,6 +151,7 @@
   }
   BD.defineTrait('h4arms', {
     interceptDamage(w, b, src, p) {
+      if (!p.dot && p.dmg) p.dmg *= BD.H4Gear.takenMul(w, b); // 防具：耐震、守護靈光
       const i = b.inst, boss = src && (src.isBoss ? src : null);
       if (!i || !src || p.dot) return null;
       const s = i.skill;

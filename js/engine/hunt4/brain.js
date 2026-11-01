@@ -59,6 +59,7 @@
       out.hunters[hd.id] = { xp, strat: table(h.strat, (wp) => table(wp, arms)),
         dex: table(h.dex, (d) => ({ fights: Math.round(num(d.fights, 0, 1e7)), wins: Math.round(num(d.wins, 0, 1e7)), chased: num(d.chased, 0, 1),
           soft: arms(d.soft), sk: table(d.sk, (s) => ({ lead: arms(s.lead), dir: arms(s.dir) })) })) };
+      if (h.gear) out.hunters[hd.id].gear = BD.H4Gear.sanitize(h.gear);
     }
     return out;
   }
@@ -92,10 +93,10 @@
         const id = skId(); if (!id) return 0.1 + rng.range(-JIT[0], JIT[0]);
         const s = sub(sub(dex, 'sk'), id), lead = sub(s, 'lead'), k = choose(lead, { e: 0, m: 0.05, l: 0 }, eps(), rng);
         const fam = Math.min(1, Object.values(lead).reduce((a, x) => a + x[0], 0) / 10), j = JIT[0] - (JIT[0] - JIT[1]) * (0.6 * m() + 0.4 * fam);
-        pend.set(th.key, arm(lead, k));
+        pend.set(th.key, [arm(lead, k), boss.inst.skill.name]); // 名稱先記下：反應時 Boss 可能已收招（投射物還在飛）
         return LEAD[k] + rng.range(-j, j);
       };
-      h.onReact = (th) => { const a = pend.get(th.key); if (a) { trial('react', a); B.last = '反應：' + boss.inst.skill.name; } };
+      h.onReact = (th) => { const a = pend.get(th.key); if (a) { trial('react', a[0]); B.last = '反應：' + a[1]; } };
       // 圖鑑：Boss 出招時的翻滾方向
       const dodge0 = h.tryDodge.bind(h);
       h.tryDodge = (ang) => {
@@ -139,5 +140,5 @@
     }
   }
 
-  BD.H4Brain = { newSave, sanitize, mastery, dexInfo, install, tick, end, partHit, V };
+  BD.H4Brain = { mem, newSave, sanitize, mastery, dexInfo, install, tick, end, partHit, V };
 })(typeof window !== 'undefined' ? window : globalThis);

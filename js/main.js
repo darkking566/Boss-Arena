@@ -84,7 +84,16 @@
     const H = BD.H4Brain, sv = state.h4save, x = H.dexInfo(sv, h.id, bossId);
     const ms = h.weapons.filter((wp) => BD.HUNT4.WEAPON_SPECS[wp]).map((wp) => `${BD.HUNT4.WEAPON_NAMES[wp]} ${Math.round(H.mastery(sv, h.id, wp) * 100)}%`).join('、');
     return `<div class="d"><b style="color:${h.color}">${h.title}・${h.name}</b>：${h.desc}<br>熟練：${ms}｜圖鑑：招式 ${x.known}/${x.all}` +
-      (x.soft ? `・最軟 ${PART_NAME[x.soft]}` : '') + (x.fights ? `・被追 ${Math.round(x.chased * 100)}%・戰績 ${x.wins}/${x.fights}` : '・尚未交手') + '</div>';
+      (x.soft ? `・最軟 ${PART_NAME[x.soft]}` : '') + (x.fights ? `・被追 ${Math.round(x.chased * 100)}%・戰績 ${x.wins}/${x.fights}` : '・尚未交手') + '<br>' + h4Gear(h, bossId) + '</div>';
+  }
+  // 這場會帶的裝備（AI 依目標 Boss 挑）：武器與特性、防具技能、套裝、素材總數
+  function h4Gear(h, bossId) {
+    const H4 = BD.HUNT4, GR = BD.H4Gear, g = GR.gearOf(state.h4save, h.id), eq = GR.choose(g, h, bossId), E = GR.build(g, eq);
+    const wpn = eq.w ? `${GR.itemName(eq.w, g.w[eq.w])}（${H4.WTRAITS[E.wt].name}）` : '初始武器';
+    const arm = ['head', 'body', 'legs'].map((s) => (eq[s] ? GR.itemName(eq[s], g.a[eq[s]]) : '—')).join(' / ');
+    const sk = Object.keys(E.sk).map((k) => H4.SKILLS[k].name + E.sk[k]).join('、') || '無';
+    const mats = Object.values(g.mats).reduce((a, m) => a + m.s + m.p + m.g, 0);
+    return `裝備：${wpn}｜防具 ${arm}｜技能 ${sk}` + (E.set ? `｜套裝【${H4.SETS[E.set].name}】` : '') + `｜素材 ${mats} 個、已做 ${Object.keys(g.w).length + Object.keys(g.a).length} 件`;
   }
   const H4KEY = 'bd.hunt4.save';
   state.h4save = (() => { try { return BD.H4Brain.sanitize(JSON.parse(localStorage.getItem(H4KEY))); } catch (e) { return BD.H4Brain.newSave(); } })();
@@ -342,7 +351,10 @@
       ['傷口破壞 / 部位破壞', (h) => `${h.stats.h4.pops} / ${h.stats.h4.breaks}`], ['異常觸發', (h) => h.stats.h4.procs], ['換武器', (h) => h.stats.h4.switches],
       ['回復藥 / 磨刀', (h) => `${h.hunt.used} / ${h.stats.h4.whets}`], ['閃光彈 / 生命粉塵', (h) => `${h.stats.h4.flashes} / ${h.stats.h4.dusts}`],
       ['反應 / 翻滾成功', (h) => h.brain.res.react.concat(h.brain.res.dodge).reduce((s, v, i) => s + (i % 2 ? `/${v}` : (i ? '　' : '') + v), '')],
-      ['熟練度', (h) => `${Math.round(BD.H4Brain.mastery(state.h4save, h.def.hunter, h.def.weapon) * 100)}%`]];
+      ['熟練度', (h) => `${Math.round(BD.H4Brain.mastery(state.h4save, h.def.hunter, h.def.weapon) * 100)}%`],
+      ['套裝 / 技能', (h) => { const E = h.h4.gear; return (E.set ? BD.HUNT4.SETS[E.set].name : '—') + '<br>' + (Object.keys(E.sk).map((k) => BD.HUNT4.SKILLS[k].name + E.sk[k]).join('、') || '—'); }],
+      ['獲得素材', (h) => { const x = h.h4.gear.got; return x ? `鱗 ${x.s}・部位 ${x.p}` + (x.g ? '・寶玉！' : '') : '—'; }],
+      ['製作 / 強化', (h) => h.h4.gear.made.join('<br>') || '—']];
     $('#resStats').innerHTML = `<tr><th></th>${st.hunters.map((h) => `<th style="color:${h.def.color}">${h.name}</th>`).join('')}</tr>` +
       rows.map(([n, f]) => `<tr><td>${n}</td>${st.hunters.map((h) => `<td>${f(h)}</td>`).join('')}</tr>`).join('');
     $('#btnRematch').textContent = '🔁 再狩獵一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回選單';

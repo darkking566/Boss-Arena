@@ -41,6 +41,7 @@
     w.fx.text(at.x, at.y - 20, '傷口破壞！', '#ff4a5a', 26); w.fx.ring(at.x, at.y, 8, 90, 0.45, '#ff3344', 6);
     w.log(h, `打破了${P.name}部的傷口`);
     flinch(w, st, b, H4.FLINCH.dur + 0.3);
+    BD.H4Gear.onPop(w, st, h, P, orig);
   }
 
   function ailment(w, st, h, b, id, orig) {
@@ -62,19 +63,20 @@
     const P = partAt(st, b, src), hs = h.h4, spec = hs.spec, mod = hs.mod, S = H4.SHARP;
     const hz = P.hz[spec.dtype] + (P.wound ? H4.WOUND.hz : 0) + (P.broken ? 0.05 : 0);
     let mul = hz / 0.5, bounce = false;
-    BD.H4Brain.partHit(h, P.id, mul);
+    BD.H4Brain.partHit(h, P.id, mul); mul *= BD.H4Gear.atkMul(w, st, h, P, hz);
     if (spec.sharp && src === h) { const band = sharpBand(hs); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz; if (bounce) mul *= 0.6; }
     if (st.asleep && p.dmg >= 20) mul *= H4.AILMENTS.sleep.wakeMul;
     let dmg = p.dmg * mul;
     if (mod.el) dmg += mod.elv * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
-    const hp0 = b.hp, r = orig(src, b, Object.assign({}, p, { dmg }));
+    const pm = BD.H4Gear.postureMul(h), hp0 = b.hp, r = orig(src, b, Object.assign({}, p, pm === 1 ? { dmg } : { dmg, posture: (p.posture != null ? p.posture : dmg * 0.25) * pm })); // 破城：架勢預設同 world.damageBoss
     const dealt = hp0 - b.hp;
     if (dealt <= 0) return r;
     if (st.asleep) { st.asleep = false; if (b.state === 'stun') b.setState('idle', 0); w.fx.text(b.x, b.y - b.r - 34, '驚醒！', '#8fb8ff', 22); }
     if (spec.sharp && src === h) {
-      hs.sharp = Math.max(0, hs.sharp - (hz < S.bounceHz ? S.hardCost : 1));
+      hs.sharp = Math.max(0, hs.sharp - (hz < S.bounceHz ? S.hardCost : 1) * BD.H4Gear.sharpCost(h));
       if (bounce && h.state === 'skill') { h.setState('recover', 0.35); w.fx.text(h.x, h.y - h.r - 24, '被彈開', '#cccccc', 16); }
     }
+    BD.H4Gear.onHit(w, st, h, dealt, orig);
     if (b.state === 'dead' || w.winner) return r;
     if (mod.ail && w.rng() < H4.AILMENT_RATE) { const s = st.ail[mod.ail]; s.acc += mod.sv; if (s.acc >= s.at) ailment(w, st, h, b, mod.ail, orig); }
     // 傷口：打出來 / 集中弱點攻擊打破（打到哪都會破最近的傷口——集中模式代表瞄準）
