@@ -12,7 +12,7 @@
     let want = 520;
     if (a && a.undodgeable && a.dur && t.speed) want = U.clamp(t.speed() * Math.max(0.6, a.dur - 0.6) * 0.95 + (a.r || 0) * 0.6, 240, 520);
     for (let i = 0; i < 40; i++) {
-      const x = w.rng.range(150, A().w - 150), y = w.rng.range(150, A().h - 150);
+      const x = w.rng.range(Math.max(150, t.x - 3000), Math.min(A().w - 150, t.x + 3000)), y = w.rng.range(Math.max(150, t.y - 1800), Math.min(A().h - 150, t.y + 1800)); // 大地圖：只在目標周圍（舊地圖大小）取點
       if (A().pillars.some((p) => Math.hypot(p.x - x, p.y - y) < p.r + 70)) continue;
       const d = Math.hypot(t.x - x, t.y - y);
       const score = -Math.abs(d - want) + w.rng() * 60;
@@ -64,7 +64,7 @@
     let pts;
     if (P && (P.id === 'domain' || P.id === 'absolutezero')) {
       pts = [];
-      for (let i = 0; i < 40; i++) pts.push(w.rng.range(0, A().w), w.rng.range(0, A().h));
+      for (let i = 0; i < 40; i++) pts.push(w.rng.range(Math.max(0, s.x - 3000), Math.min(A().w, s.x + 3000)), w.rng.range(Math.max(0, s.y - 1800), Math.min(A().h, s.y + 1800)));
     }
     const o = Object.assign({ src: b, angle: s.ang, arc: s.arc, radius: s.r, r0: s.r0, len: s.len, width: s.w, shape: s.kind }, opts);
     if (pts) o.pts = pts;

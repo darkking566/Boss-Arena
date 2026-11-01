@@ -56,9 +56,11 @@
     spawn(w, b, m) {
       knight(w, b, m, true);
       m.team = 2; m.neutral = true;
-      const A2 = A(), side = w.rng.int(0, 3);
-      const x = side === 0 ? 40 : side === 1 ? A2.w - 40 : w.rng.range(100, A2.w - 100);
-      const y = side === 2 ? 40 : side === 3 ? A2.h - 40 : w.rng.range(100, A2.h - 100);
+      // 從戰場周圍（舊地圖大小 6000×3600 的框，夾在地圖內）的邊上出現
+      const A2 = A(), side = w.rng.int(0, 3), e = b.enemy || b;
+      const L = U.clamp((b.x + e.x) / 2 - 3000, 0, A2.w - 6000), T = U.clamp((b.y + e.y) / 2 - 1800, 0, A2.h - 3600);
+      const x = side === 0 ? L + 40 : side === 1 ? L + 6000 - 40 : w.rng.range(L + 100, L + 6000 - 100);
+      const y = side === 2 ? T + 40 : side === 3 ? T + 3600 - 40 : w.rng.range(T + 100, T + 3600 - 100);
       w.stats.rogues++;
       w.banner('紅眼監視者出現！', '被深淵吞噬的同伴——敵我不分', '#ff3344', 1.6);
       w.log(null, '紅眼監視者出現了，敵我不分地攻擊所有人！', true);

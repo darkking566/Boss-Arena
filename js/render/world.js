@@ -34,10 +34,13 @@
   }
 
   // ─────────────────────── 競技場 ───────────────────────
-  // 地面：直接畫進指定 context（會以繪製倍率畫入靜態層，DPR 2 也清晰）；rnd 固定種子、順序固定
-  function drawFloor(g) {
+  // 地面：只畫世界座標區域 [x0,x1)×[y0,y1)（大地圖分塊快取用）。雜點以 1000px 為一格、每格固定種子，
+  // 與哪一塊來畫無關，相鄰分塊接縫一致；區域外（含 150px 邊距）的雜點照樣抽亂數但不畫
+  const PATCH = 1000, PM = 150;
+  function drawFloor(g, rx0, ry0, rx1, ry1) {
     const A = BD.ARENA;
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const near = (x, y) => x > rx0 - PM && x < rx1 + PM && y > ry0 - PM && y < ry1 + PM;
     // 生態區底色：橫向漸層，交界處各留 120px 的柔和過渡
     const GROUND = { snow: ['#e6eef6', '#b4c7da'], forest: ['#52703c', '#2f4a28'], desert: ['#c9ab70', '#b08f58'], wheat: ['#9a7a2e', '#7a5c1e'], lake: ['#d99a78', '#b98aa0'], swamp: ['#3d4a30', '#2a3626'], white: ['#ffffff'], dark: ['#000000'] };
     const lg = g.createLinearGradient(0, 0, A.w, 0);
@@ -45,45 +48,44 @@
       const c = GROUND[b.id][0], pad = 120;
       lg.addColorStop(i ? (b.x0 + pad) / A.w : 0, c); lg.addColorStop(i < A.biomes.length - 1 ? (b.x1 - pad) / A.w : 1, c);
     });
-    g.fillStyle = lg; g.fillRect(0, 0, A.w, A.h);
+    g.fillStyle = lg; g.fillRect(rx0, ry0, rx1 - rx0, ry1 - ry0);
     if (A.biomes[0].id === 'lake') { // 夕陽下平靜的水面：上緣映著落日的金橙、往下漸漸沉入暮藍，不放任何雜物
       const sg = g.createLinearGradient(0, 0, 0, A.h);
       [[0, '#f0c27a'], [0.22, '#eb9f6c'], [0.5, '#b98aa0'], [0.78, '#5f84b0'], [1, '#33618f']].forEach(([p, c]) => sg.addColorStop(p, c));
-      g.fillStyle = sg; g.fillRect(0, 0, A.w, A.h);
+      g.fillStyle = sg; g.fillRect(rx0, ry0, rx1 - rx0, ry1 - ry0);
     }
     g.lineWidth = 1.5; g.lineCap = 'round';
-    for (const b of A.biomes) {
+    for (let py = Math.max(0, Math.floor((ry0 - PM) / PATCH)); py * PATCH < Math.min(A.h, ry1 + PM); py++) for (let px = Math.max(0, Math.floor((rx0 - PM) / PATCH)); px * PATCH < Math.min(A.w, rx1 + PM); px++) {
+      const b = BD.biomeAt(px * PATCH + PATCH / 2);
       if (b.id === 'lake' || GROUND[b.id].length < 2) continue; // 湖面與純白 / 純黑：只有底色
-      const x0 = b.x0 + 70, x1 = b.x1 - 70, area = (x1 - x0) * A.h / 1.23e6, X = () => x0 + rnd() * (x1 - x0), dark = GROUND[b.id][1];
+      seed = 7 + (py * 977 + px) * 7919;
+      const x0 = Math.max(px * PATCH, 70), x1 = Math.min((px + 1) * PATCH, A.w - 70), y0 = py * PATCH, y1 = Math.min((py + 1) * PATCH, A.h);
+      if (x1 <= x0) continue;
+      const area = (x1 - x0) * (y1 - y0) / 1.23e6, X = () => x0 + rnd() * (x1 - x0), Y = () => y0 + rnd() * (y1 - y0), dark = GROUND[b.id][1];
       for (let i = 0, n = Math.round(260 * area); i < n; i++) {
-        g.fillStyle = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : 'rgba(150,190,90,0.5)';
-        g.globalAlpha = 0.14; g.beginPath(); g.ellipse(X(), rnd() * A.h, 30 + rnd() * 70, 20 + rnd() * 45, rnd() * 3, 0, U.TAU); g.fill();
+        const fs = rnd() < 0.5 ? dark : b.id === 'desert' ? 'rgba(235,215,160,0.5)' : b.id === 'snow' ? 'rgba(255,255,255,0.8)' : b.id === 'wheat' ? 'rgba(210,170,80,0.5)' : 'rgba(150,190,90,0.5)';
+        const x = X(), y = Y(), ex = 30 + rnd() * 70, ey = 20 + rnd() * 45, ea = rnd() * 3;
+        if (!near(x, y)) continue;
+        g.fillStyle = fs; g.globalAlpha = 0.14; g.beginPath(); g.ellipse(x, y, ex, ey, ea, 0, U.TAU); g.fill();
       }
       g.globalAlpha = 1;
       for (let i = 0, n = Math.round((b.id === 'desert' || b.id === 'snow' ? 300 : b.id === 'wheat' ? 2400 : 900) * area); i < n; i++) {
-        const x = X(), y = rnd() * A.h;
-        if (b.id === 'desert') { // 沙丘風紋：緩弧
-          g.strokeStyle = rnd() < 0.5 ? 'rgba(120,90,50,0.22)' : 'rgba(255,240,200,0.3)';
-          g.beginPath(); g.arc(x, y, 30 + rnd() * 60, 3.4, 5.4); g.stroke();
-        } else if (b.id === 'snow') { // 雪丘：藍色陰影弧 + 白色高光弧，偶有冰晶閃點
-          g.strokeStyle = rnd() < 0.6 ? 'rgba(120,150,190,0.3)' : 'rgba(255,255,255,0.7)'; g.lineWidth = 2;
-          g.beginPath(); g.arc(x, y, 25 + rnd() * 55, 3.4, 5.2); g.stroke(); g.lineWidth = 1.5;
-          if (rnd() < 0.15) { g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillRect(x, y, 2, 2); }
-        } else if (b.id === 'wheat') { // 麥茬：被割後的短稈（麥叢被摧毀後露出的地面）
-          g.strokeStyle = rnd() < 0.5 ? 'rgba(214,176,84,0.7)' : 'rgba(110,80,30,0.6)';
-          const h = 5 + rnd() * 7, an = -1.2 - rnd() * 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * h, y + Math.sin(an) * h); g.stroke();
-        } else { // 草叢 / 沼澤雜草
-          g.strokeStyle = rnd() < 0.5 ? (b.id === 'swamp' ? 'rgba(120,150,70,0.35)' : 'rgba(160,205,100,0.35)') : 'rgba(25,55,20,0.45)';
-          const h = 4 + rnd() * 7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
-        }
+        const x = X(), y = Y(), r = [rnd(), rnd(), rnd(), rnd()]; // 每筆固定抽 4 個亂數，可跳過不畫而不影響後續
+        if (!near(x, y)) continue;
+        let k = 0; const rnd2 = () => r[k++];
+        drawFloorMark(g, b.id, x, y, rnd2);
       }
       if (b.id === 'swamp') for (let i = 0, n = Math.round(60 * area); i < n; i++) { // 泥濘斑
-        g.fillStyle = 'rgba(40,30,18,0.28)'; g.beginPath(); g.ellipse(X(), rnd() * A.h, 20 + rnd() * 50, 12 + rnd() * 26, rnd() * 3, 0, U.TAU); g.fill();
+        const x = X(), y = Y(), ex = 20 + rnd() * 50, ey = 12 + rnd() * 26, ea = rnd() * 3;
+        if (!near(x, y)) continue;
+        g.fillStyle = 'rgba(40,30,18,0.28)'; g.beginPath(); g.ellipse(x, y, ex, ey, ea, 0, U.TAU); g.fill();
       }
     }
     g.lineCap = 'butt';
-    // 沼澤：泥岸 → 水面 → 睡蓮葉
-    for (const p of A.ponds) {
+    // 沼澤：泥岸 → 水面 → 睡蓮葉（每個池子各自固定種子）
+    A.ponds.forEach((p, pi) => {
+      if (p.x + p.rx + 40 < rx0 || p.x - p.rx - 40 > rx1 || p.y + p.ry + 40 < ry0 || p.y - p.ry - 40 > ry1) return;
+      seed = 11 + pi * 104729;
       g.fillStyle = '#3a3220'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 16, p.ry + 12, 0, 0, U.TAU); g.fill();
       g.fillStyle = 'rgba(25,45,20,0.55)'; g.beginPath(); g.ellipse(p.x, p.y, p.rx + 7, p.ry + 5, 0, 0, U.TAU); g.fill();
       g.strokeStyle = 'rgba(110,140,60,0.8)'; g.lineWidth = 2; g.beginPath();
@@ -96,59 +98,64 @@
         const a = rnd() * U.TAU, d = 0.35 + rnd() * 0.5, lx = p.x + Math.cos(a) * p.rx * d, ly = p.y + Math.sin(a) * p.ry * d;
         g.fillStyle = 'rgba(80,130,60,0.9)'; g.beginPath(); g.ellipse(lx, ly, 9 + rnd() * 5, 6 + rnd() * 3, rnd() * 3, 0, U.TAU); g.fill();
       }
-    }
+    });
     if (GROUND[A.biomes[0].id].length < 2) return; // 純白 / 純黑不加暗角
     // 暗角
     const v =g.createRadialGradient(A.w / 2, A.h / 2, A.h * 0.4, A.w / 2, A.h / 2, A.w * 0.62);
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)');
-    g.fillStyle = v; g.fillRect(0, 0, A.w, A.h);
+    g.fillStyle = v; g.fillRect(rx0, ry0, rx1 - rx0, ry1 - ry0);
   }
-  // 快取關閉時沿用的 1x 地板畫布（避免每幀重畫石磚）
-  let floorCache = null;
-  function floor() {
-    if (floorCache && floorCache.map === BD.ARENA.map) return floorCache;
-    const A = BD.ARENA;
-    const c = typeof document !== 'undefined' ? document.createElement('canvas') : null;
-    if (!c) return null;
-    c.width = A.w; c.height = A.h;
-    drawFloor(c.getContext('2d'));
-    c.map = A.map; floorCache = c; return c;
-  }
-  // 靜態層：牆、地面、兩圈邊框一起畫進離屏畫布（涵蓋 -34..A.w+34 / -34..A.h+34）
-  // 繪製倍率變更或 R.invalidateCaches() 時重建
-  let arenaLayer = null;
-  function drawArenaStatic(g) {
-    const A = BD.ARENA;
-    g.fillStyle = '#0a110a'; g.fillRect(-34, -34, A.w + 68, A.h + 68);
-    g.fillStyle = '#1b2a17'; g.fillRect(-26, -26, A.w + 52, A.h + 52);
-    drawFloor(g);
-    g.strokeStyle = '#5a4a30'; g.lineWidth = 4; g.strokeRect(-2, -2, A.w + 4, A.h + 4);
-    g.strokeStyle = 'rgba(255,200,120,0.15)'; g.lineWidth = 1; g.strokeRect(-14, -14, A.w + 28, A.h + 28);
-  }
-  function getArenaLayer(scale) {
-    if (arenaLayer && arenaLayer.scale === scale && arenaLayer.map === BD.ARENA.map) return arenaLayer;
-    const A = BD.ARENA, c = document.createElement('canvas');
-    c.width = Math.ceil((A.w + 68) * scale) + 2; c.height = Math.ceil((A.h + 68) * scale) + 2;
-    const g = c.getContext('2d');
-    g.setTransform(scale, 0, 0, scale, 34 * scale + 1, 34 * scale + 1);
-    drawArenaStatic(g);
-    arenaLayer = { canvas: c, scale, map: BD.ARENA.map };
-    return arenaLayer;
-  }
-  if (R.onInvalidate) R.onInvalidate(() => { arenaLayer = null; });
-  function drawArena(ctx, w, t) {
-    const A = BD.ARENA;
-    if (R.cache.enabled) {
-      const s = Math.min(1.1, R.renderScale(ctx), Math.sqrt(14e6 / ((A.w + 68) * (A.h + 68)))), L = getArenaLayer(s); // 大地圖：靜態層上限約 14M 像素，避免離屏畫布過大
-      R.drawSprite(ctx, { canvas: L.canvas, scale: s }, -34 - 1 / s, -34 - 1 / s);
-    } else {
-      // 快取關閉：照舊即時繪製（地面用 1x 快取畫布）
-      ctx.fillStyle = '#0a110a'; ctx.fillRect(-34, -34, A.w + 68, A.h + 68);
-      ctx.fillStyle = '#1b2a17'; ctx.fillRect(-26, -26, A.w + 52, A.h + 52);
-      const f = floor(); if (f) ctx.drawImage(f, 0, 0); else { ctx.fillStyle = '#25202a'; ctx.fillRect(0, 0, A.w, A.h); }
-      ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 4; ctx.strokeRect(-2, -2, A.w + 4, A.h + 4);
-      ctx.strokeStyle = 'rgba(255,200,120,0.15)'; ctx.lineWidth = 1; ctx.strokeRect(-14, -14, A.w + 28, A.h + 28);
+  // 單筆地面紋路（風紋 / 雪丘 / 麥茬 / 草叢）；rnd 每筆最多用 4 個
+  function drawFloorMark(g, id, x, y, rnd) {
+    if (id === 'desert') { // 沙丘風紋：緩弧
+      g.strokeStyle = rnd() < 0.5 ? 'rgba(120,90,50,0.22)' : 'rgba(255,240,200,0.3)';
+      g.beginPath(); g.arc(x, y, 30 + rnd() * 60, 3.4, 5.4); g.stroke();
+    } else if (id === 'snow') { // 雪丘：藍色陰影弧 + 白色高光弧，偶有冰晶閃點
+      g.strokeStyle = rnd() < 0.6 ? 'rgba(120,150,190,0.3)' : 'rgba(255,255,255,0.7)'; g.lineWidth = 2;
+      g.beginPath(); g.arc(x, y, 25 + rnd() * 55, 3.4, 5.2); g.stroke(); g.lineWidth = 1.5;
+      if (rnd() < 0.15) { g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillRect(x, y, 2, 2); }
+    } else if (id === 'wheat') { // 麥茬：被割後的短稈（麥叢被摧毀後露出的地面）
+      g.strokeStyle = rnd() < 0.5 ? 'rgba(214,176,84,0.7)' : 'rgba(110,80,30,0.6)';
+      const h = 5 + rnd() * 7, an = -1.2 - rnd() * 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * h, y + Math.sin(an) * h); g.stroke();
+    } else { // 草叢 / 沼澤雜草
+      g.strokeStyle = rnd() < 0.5 ? (id === 'swamp' ? 'rgba(120,150,70,0.35)' : 'rgba(160,205,100,0.35)') : 'rgba(25,55,20,0.45)';
+      const h = 4 + rnd() * 7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 4, y - h); g.stroke();
     }
+  }
+  // 地面分塊快取：每塊 1024×1024 世界單位，以繪製倍率畫入離屏畫布（四周多 1 裝置像素的真實內容蓋住接縫），
+  // 只建 / 畫鏡頭看得到的塊；最多留 TILE_MAX 塊（LRU）。換地圖、繪製倍率變更或 R.invalidateCaches() 時失效
+  const TILE = 1024, TILE_MAX = 24, tiles = new Map();
+  function getTile(scale, tx, ty) {
+    const key = BD.ARENA.map + '|' + scale + '|' + tx + ',' + ty;
+    let e = tiles.get(key);
+    if (e) { tiles.delete(key); tiles.set(key, e); return e; }
+    const c = document.createElement('canvas'), x0 = tx * TILE, y0 = ty * TILE;
+    c.width = c.height = Math.ceil(TILE * scale) + 2;
+    const g = c.getContext('2d');
+    g.setTransform(scale, 0, 0, scale, 1 - x0 * scale, 1 - y0 * scale);
+    const pad = 2 / scale, A = BD.ARENA;
+    drawFloor(g, x0 - pad, y0 - pad, Math.min(A.w, x0 + TILE + pad), Math.min(A.h, y0 + TILE + pad));
+    e = { canvas: c, scale }; tiles.set(key, e);
+    if (tiles.size > TILE_MAX) tiles.delete(tiles.keys().next().value);
+    return e;
+  }
+  if (R.onInvalidate) R.onInvalidate(() => tiles.clear());
+  // 目前畫布在世界座標中看得到的範圍（由 ctx 變換反推，鏡頭縮放 / 震動都算進去）
+  function viewRect(ctx) {
+    const m = ctx.getTransform().inverse(), W = ctx.canvas.width, H = ctx.canvas.height;
+    const xs = [m.e, m.a * W + m.e, m.c * H + m.e, m.a * W + m.c * H + m.e], ys = [m.f, m.b * W + m.f, m.d * H + m.f, m.b * W + m.d * H + m.f];
+    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  }
+  function drawArena(ctx, w, t) {
+    const A = BD.ARENA, v = viewRect(ctx);
+    ctx.fillStyle = '#0a110a'; ctx.fillRect(-34, -34, A.w + 68, A.h + 68);
+    ctx.fillStyle = '#1b2a17'; ctx.fillRect(-26, -26, A.w + 52, A.h + 52);
+    const s = R.cache.enabled ? Math.min(1.1, R.renderScale(ctx)) : 1; // 快取關閉：固定 1x 分塊
+    const tx0 = Math.max(0, Math.floor(v.x0 / TILE)), tx1 = Math.min(Math.ceil(A.w / TILE) - 1, Math.floor(v.x1 / TILE));
+    const ty0 = Math.max(0, Math.floor(v.y0 / TILE)), ty1 = Math.min(Math.ceil(A.h / TILE) - 1, Math.floor(v.y1 / TILE));
+    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) R.drawSprite(ctx, getTile(s, tx, ty), tx * TILE - 1 / s, ty * TILE - 1 / s);
+    ctx.strokeStyle = '#5a4a30'; ctx.lineWidth = 4; ctx.strokeRect(-2, -2, A.w + 4, A.h + 4);
+    ctx.strokeStyle = 'rgba(255,200,120,0.15)'; ctx.lineWidth = 1; ctx.strokeRect(-14, -14, A.w + 28, A.h + 28);
     drawWater(ctx, t);
     // 地面痕跡（圓形污痕 / 程序化裂地）
     drawDecals(ctx, w);
@@ -407,7 +414,9 @@
     });
   }
   function drawPillars(ctx) {
+    const v = viewRect(ctx);
     for (const p of BD.ARENA.pillars) {
+      if (p.x < v.x0 - 150 || p.x > v.x1 + 150 || p.y < v.y0 - 150 || p.y > v.y1 + 150) continue; // 大地圖：只畫看得到的樹
       ctx.save(); ctx.translate(p.x, p.y);
       drawTreeSprite(ctx, p.r, p.v);
       ctx.restore();
@@ -448,7 +457,7 @@
     if (BD.ARENA.biomes[0].id === 'lake') { // 湖面：世界座標固定的閃爍漣漪，只畫鏡頭附近的
       const c = R.cam, A = BD.ARENA;
       ctx.save(); ctx.lineWidth = 1.5;
-      for (let i = 0; i < 280; i++) {
+      for (let i = 0, n = Math.round(280 * A.w * A.h / 2.16e7); i < n; i++) { // 密度與舊 6000×3600 相同
         const gx = (i * 977) % A.w, gy = (i * 613 + 41) % A.h;
         if (gx < c.x - 60 || gx > c.x + R.VW / c.z + 60 || gy < c.y - 40 || gy > c.y + R.VH / c.z + 40) continue;
         const k = (t * (0.1 + (i % 5) * 0.03) + i * 0.137) % 1;

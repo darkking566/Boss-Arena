@@ -51,15 +51,15 @@
     desc: '全場冰封的預兆：畫面漸暗泛藍，安全圈亮起燈塔般的冷光並不斷有光環向圈心收束，場上飄起雪光、地面陸續裂出霜紋，施放者周身一圈圈寒氣外擴。位置為安全圈圓心，life 為預警時長。',
     params: { life: 2.6, radius: 115 },
     spawn(fx, x, y, o) {
-      const E = o.E, life = o.life || 2.6, r = o.radius || 115, src = o.src || null, A = BD.ARENA;
+      const E = o.E, life = o.life || 2.6, r = o.radius || 115, src = o.src || null;
       fx.veil(life, 0.42, '#041a33');
       fx.glow(x, y, r * 1.4, E.glow, life, 0.55, 0);
       for (let t = 0; t < life; t += 0.2) fx.after(t, () => {
         fx.ring(x, y, r * 3.2, r, 0.55, E.glow, 3);
-        for (let i = 0; i < 6; i++) fx.sparkle(BD.vrng() * A.w, BD.vrng() * A.h, '#ffffff', 1, 40, -Math.PI / 2, 1);
+        for (let i = 0; i < 6; i++) fx.sparkle(x + (BD.vrng() - 0.5) * 6000, y + (BD.vrng() - 0.5) * 3600, '#ffffff', 1, 40, -Math.PI / 2, 1);
         fx.motes(x, y, E, 2, r, 60);
       });
-      for (let t = 0.3; t < life; t += 0.5) fx.after(t, () => fx.crack(BD.vrng() * A.w, BD.vrng() * A.h, 70 + BD.vrng() * 60, E.decal, 6, E.crack, 3));
+      for (let t = 0.3; t < life; t += 0.5) fx.after(t, () => fx.crack(x + (BD.vrng() - 0.5) * 6000, y + (BD.vrng() - 0.5) * 3600, 70 + BD.vrng() * 60, E.decal, 6, E.crack, 3));
       if (src) for (let t = 0; t < life - 0.4; t += 0.7) fx.after(t, () => { fx.ring(src.x, src.y, src.r, src.r * 4.5, 0.7, E.glow, 4); fx.motes(src.x, src.y, E, 4, src.r * 2, 90); });
       fx.after(life - 0.15, () => fx.flash(E.glow, 0.2));
     },
@@ -92,7 +92,7 @@
           if (i % 4 === 0) fx.crack(px, py, 60 + BD.vrng() * 50, E.decal, 9, E.crack, 3);
         });
       }
-      for (let t = 0.3; t < 1.8; t += 0.15) fx.after(t, () => { for (let j = 0; j < 8; j++) fx.sparkle(BD.vrng() * BD.ARENA.w, BD.vrng() * BD.ARENA.h, '#ffffff', 1, 50, Math.PI / 2, 1); });
+      for (let t = 0.3; t < 1.8; t += 0.15) fx.after(t, () => { for (let j = 0; j < 8; j++) fx.sparkle(x + (BD.vrng() - 0.5) * 6000, y + (BD.vrng() - 0.5) * 3600, '#ffffff', 1, 50, Math.PI / 2, 1); });
     },
   });
 

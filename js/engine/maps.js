@@ -1,8 +1,8 @@
 'use strict';
-// 地圖：每個地形是一張獨立的 6000×3600 地圖（單一生態區）。BD.setMap(id) 就地改寫 BD.ARENA（world.js 等模組持有的是同一個物件），
+// 地圖：每個地形是一張獨立的 18000×10800 大地圖（單一生態區）。BD.setMap(id) 就地改寫 BD.ARENA（world.js 等模組持有的是同一個物件），
 // 每個 World 建構時依 opts.map 呼叫一次。樹位以固定種子散佈（與 w.rng 無關），避開雙方出生點。不碰 DOM。
 (function (G) {
-  const BD = G.BD, A = BD.ARENA, W = 6000, H = 3600;
+  const BD = G.BD, A = BD.ARENA, W = 18000, H = 10800, K = 9; // K：面積相對舊 6000×3600 的倍數，樹量照比例放大
   // colors：選圖卡片的底色漸層；desc：選圖畫面的說明
   BD.MAPS = [
     { id: 'desert', name: '沙漠', icon: '🏜', biome: 'desert', colors: ['#d8bd80', '#b08f58'], desc: '開闊沙地，無遮蔽。招式與奔跑揚起大片沙塵（持續數秒），行走留下淺腳印。' },
@@ -24,7 +24,7 @@
   function scatterTrees(n) {
     const out = [], spawn = [[W / 2 - 350, H / 2], [W / 2 + 350, H / 2]];
     let s = 20240601; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-    for (let tries = 0; tries < 6000 && out.length < n; tries++) {
+    for (let tries = 0; tries < n * 45 && out.length < n; tries++) {
       const x = 70 + rnd() * (W - 140), y = 70 + rnd() * (H - 140);
       if (out.every((t) => Math.hypot(t[0] - x, t[1] - y) > 130) && spawn.every((p) => Math.hypot(p[0] - x, p[1] - y) > 230)) out.push([Math.round(x), Math.round(y)]);
     }
@@ -34,10 +34,10 @@
     const m = BD.mapById[id] || BD.mapById[BD.DEFAULT_MAP];
     A.map = m.id; A.w = W; A.h = H;
     A.biomes = [{ id: m.biome, x0: 0, x1: W }];
-    // 水池以 3000×1800 為一格設計，鋪滿 2×2 格（密度與大小不變）
+    // 水池以 3000×1800 為一格設計，鋪滿 6×6 格（密度與大小不變）
     A.ponds = [];
-    for (const ox of [0, 3000]) for (const oy of [0, 1800]) for (const p of m.ponds || []) A.ponds.push(Object.assign({}, p, { x: p.x + ox, y: p.y + oy }));
-    A.trees = scatterTrees(m.trees || 0);
+    for (let ox = 0; ox < W; ox += 3000) for (let oy = 0; oy < H; oy += 1800) for (const p of m.ponds || []) A.ponds.push(Object.assign({}, p, { x: p.x + ox, y: p.y + oy }));
+    A.trees = scatterTrees((m.trees || 0) * K);
     if (BD.WHEAT) BD.WHEAT.update();
     BD.resetArena();
     return m;
