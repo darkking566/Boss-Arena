@@ -211,7 +211,39 @@
         [dash(0.1, 140, 0.2, { iframe: true }), hit(0.35, rect(200, 70), { dmg: 240, posture: 60, kb: 340, fx: { id: 'thrust', scale: 1.6 } })]),
     ] };
 
-  H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive }; // katana / bow / lightxbow 用獵魂的武器物件
+  // ── 遠程：招式不耗體力，由驅動管彈藥 / 塗料瓶 ──
+  const shot = (at, p) => Object.assign({ do: 'proj', at, n: 1, life: 1.2 }, p);
+  const rs = (id, name, short, o, actions) => sk(id, name, short, ['ranged'], [0, 850], Object.assign({ cost: 0 }, o), actions);
+  const arrow = (dmg, n, extra) => Object.assign({ n, spread: n > 1 ? 0.07 : 0, speed: 1100, r: 7, dmg, posture: dmg * 0.25, kb: 40, kind: 'arrow' }, extra);
+  // ── 弓：蓄力射擊 I → II → III → 剛射（越射蓄力段數越高、箭數越多）；強擊瓶塗料提高傷害（有限支數，用完找空檔換瓶）；Boss 有破綻放龍之一矢 ──
+  const bow = { id: 'bow', name: '弓', el: 'physical', ai: [380, 700], bonus: {}, traits: [],
+    skills: [rs('bow_s1', '蓄力射擊 I', '射擊I', { track: 9, recovery: 0.2 }, [shot(0.22, arrow(42, 1))])],
+    variants: [
+      rs('bow_s2', '蓄力射擊 II', '射擊II', { track: 9, recovery: 0.22 }, [shot(0.28, arrow(36, 2))]),
+      rs('bow_s3', '蓄力射擊 III', '射擊III', { track: 9, recovery: 0.25 }, [shot(0.34, arrow(34, 3, { pierce: true }))]),
+      rs('bow_volley', '剛射', '剛射', { track: 8, recovery: 0.35 }, [shot(0.3, arrow(30, 5, { spread: 0.1 }))]),
+      rs('bow_dragon', '龍之一矢', '龍矢', { track: 5, recovery: 0.6 }, [shot(1.0, { speed: 1700, r: 13, dmg: 260, posture: 90, kb: 260, pierce: true, kind: 'bolt' })]),
+      rs('bow_coat', '換塗料瓶', '換瓶', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.6 }, []),
+    ] };
+  // ── 輕弩：通常彈 / 貫通彈 / 速射彈三種彈各自計數，打空了找空檔裝填；Boss 有破綻用速射 ──
+  const bullet = (dmg, extra) => Object.assign({ speed: 1300, r: 7, dmg, posture: dmg * 0.25, kb: 50, kind: 'bolt' }, extra);
+  const lightxbow = { id: 'lightxbow', name: '輕弩', el: 'physical', ai: [320, 620], bonus: {}, traits: [],
+    skills: [rs('lbg_n', '通常彈', '通常', { track: 10, recovery: 0.2 }, [shot(0.16, bullet(50))])],
+    variants: [
+      rs('lbg_p', '貫通彈', '貫通', { track: 9, recovery: 0.3 }, [shot(0.24, bullet(80, { speed: 1600, pierce: true }))]),
+      rs('lbg_rapid', '速射', '速射', { track: 10, recovery: 0.3 }, [0.14, 0.24, 0.34].map((t) => shot(t, bullet(34)))),
+      rs('lbg_reload', '裝填', '裝填', { tags: ['buff'], range: [0, 900], track: 0, recovery: 0.7 }, []),
+    ] };
+  // ── 重弩：重彈一發一發慢慢打；架設＝站定連射（受擊減傷不倒、會被包夾）；Boss 有破綻用狙擊彈；彈匣打空要裝填 ──
+  const heavyxbow = { id: 'heavyxbow', name: '重弩', el: 'physical', ai: [420, 760], bonus: {}, traits: [],
+    skills: [rs('hbg_n', '重弩彈', '重彈', { track: 8, recovery: 0.4 }, [shot(0.4, bullet(150, { speed: 1500, r: 9, kb: 120 }))])],
+    variants: [
+      rs('hbg_snipe', '狙擊彈', '狙擊', { track: 5, recovery: 0.7 }, [shot(1.1, bullet(340, { speed: 1900, r: 12, posture: 110, kb: 300, pierce: true }))]),
+      rs('hbg_siege', '架設連射', '架設', { track: 8, recovery: 0.5, armor: 0.4 }, [0, 1, 2, 3, 4, 5, 6, 7].map((k) => shot(0.35 + k * 0.16, bullet(56)))),
+      rs('hbg_reload', '裝填', '裝填', { tags: ['buff'], range: [0, 900], track: 0, recovery: 1.0 }, []),
+    ] };
+
+  H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive, bow, lightxbow, heavyxbow }; // 太刀用獵魂的武器物件
   Object.assign(H4.WEAPON_SPECS, {
     katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm } }),
     gs: { dtype: 'cut', sharp: 90,
@@ -247,6 +279,11 @@
       focus: sk('h4_focus_glaive', '蟲穿・旋斬', '蟲穿', ['melee'], [0, 180], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
         [dash(0.05, 90, 0.15, { iframe: true }), hit(0.3, circle(160), { dmg: 110, posture: 35, kb: 180, focus: true, fx: 'whirl' })]) },
   });
+  Object.assign(H4.WEAPON_SPECS, { heavyxbow: { dtype: 'shot', sharp: 0 } }); // 遠程沒有集中弱點攻擊（投射物不開 / 不打破傷口）
+  // 弓：強擊瓶支數 / 傷害倍率、龍之一矢冷卻；輕弩：各彈種彈數；重弩：彈匣、狙擊 / 架設冷卻
+  H4.BOW = { coats: 12, coatDmg: 1.25, dragonCd: 30 };
+  H4.LBG = { mag: { n: 8, p: 4, rapid: 3 } };
+  H4.HBG = { mag: 6, snipeCd: 25, siegeCd: 14 };
   // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽
   H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.2, ampDrain: 2.5, lowAt: 20, morphAt: 55 };
   // 充能斧：劍命中加能量、每 20 能量裝 1 瓶、最多 5 瓶、超解每瓶瓶爆傷害、盾強化秒數 / 防禦承受 / 斧傷害倍率

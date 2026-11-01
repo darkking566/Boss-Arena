@@ -340,6 +340,74 @@
       },
       gauge: (h) => { const n = H4.KINSECT.order.filter((c) => BD.hasStatus(h, 'h4' + c)).length; return { v: n / 3, color: n === 3 ? '#ffe27a' : '#a0d0a0' }; },
     },
+    // 弓：蓄力射擊 I → II → III → 剛射；強擊瓶用完找空檔換瓶；Boss 有破綻且冷卻好了放龍之一矢
+    bow: {
+      init: () => ({ coat: H4.BOW.coats, dragonAt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv;
+        if (!s.coat && threatIn(h) > 1) return kv(h, 'bow_coat');
+        if (open(h) && h.world.time >= s.dragonAt) { const x = pick(h, d, 'bow_dragon'); if (x) return x; }
+        return pick(h, d, 'bow_s1');
+      },
+      next(h, d) {
+        if (threatIn(h) < 0.35 || !keepGoing(h, 0.6 + 0.3 * h.def.persona.risk)) return null;
+        return pick(h, d, { bow_s1: 'bow_s2', bow_s2: 'bow_s3', bow_s3: 'bow_volley', bow_coat: 'bow_s1' }[h.lastSkillId] || '');
+      },
+      tick(h) {
+        const s = h.h4.drv, B = H4.BOW, w = h.world, id = startOnce(h);
+        if (id === 'bow_coat') { s.coat = B.coats; w.fx.text(h.x, h.y - h.r - 24, '強擊瓶', '#ff8a6a', 16); }
+        else if (id === 'bow_dragon') s.dragonAt = w.time + B.dragonCd;
+        else if (id && s.coat) s.coat--;
+        h.dmgMul = h.hunt.baseDmg * (s.coat ? B.coatDmg : 1); // shortcut: 塗料效果看「現在還有沒有瓶」，最後一瓶射出後還在飛的箭不加成
+      },
+      gauge: (h) => ({ v: h.h4.drv.coat / H4.BOW.coats, color: '#ff8a6a' }),
+    },
+    // 輕弩：三種彈各自計數；有破綻用速射、偶爾貫通彈、平常通常彈；打空了裝填（全部補滿）
+    lightxbow: {
+      init: () => Object.assign({}, H4.LBG.mag),
+      choose(h, d) {
+        const s = h.h4.drv;
+        if (!s.n && (threatIn(h) > 0.8 || !s.p && !s.rapid)) return kv(h, 'lbg_reload');
+        if (open(h) && s.rapid) { const x = pick(h, d, 'lbg_rapid'); if (x) return x; }
+        if (s.p && (open(h) || rng(h)() < 0.3)) { const x = pick(h, d, 'lbg_p'); if (x) return x; }
+        return s.n ? pick(h, d, 'lbg_n') : pick(h, d, s.p ? 'lbg_p' : 'lbg_rapid');
+      },
+      next(h, d) {
+        const s = h.h4.drv;
+        if (threatIn(h) < 0.35 || !keepGoing(h, 0.55 + 0.3 * h.def.persona.risk)) return null;
+        return s.n ? pick(h, d, 'lbg_n') : null;
+      },
+      tick(h) {
+        const s = h.h4.drv, id = startOnce(h);
+        if (id === 'lbg_reload') { Object.assign(s, H4.LBG.mag); h.world.fx.text(h.x, h.y - h.r - 24, '裝填', '#cfe0ff', 16); }
+        else if (id) { const k = { lbg_n: 'n', lbg_p: 'p', lbg_rapid: 'rapid' }[id]; if (k) s[k] = Math.max(0, s[k] - 1); }
+      },
+      gauge: (h) => ({ v: h.h4.drv.n / H4.LBG.mag.n, color: '#8ad0ff' }),
+    },
+    // 重弩：彈匣打空就裝填；有破綻放狙擊彈；安全時架設連射（減傷、不倒）
+    heavyxbow: {
+      init: () => ({ mag: H4.HBG.mag, snipeAt: 0, siegeAt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv, w = h.world;
+        if (!s.mag) return kv(h, 'hbg_reload');
+        if (open(h) && w.time >= s.snipeAt) { const x = pick(h, d, 'hbg_snipe'); if (x) return x; }
+        if (w.time >= s.siegeAt && threatIn(h) > 1.5) { const x = pick(h, d, 'hbg_siege'); if (x) return x; }
+        return pick(h, d, 'hbg_n');
+      },
+      next(h, d) {
+        const s = h.h4.drv;
+        if (!s.mag || threatIn(h) < 0.4 || !keepGoing(h, 0.5 + 0.3 * h.def.persona.risk)) return null;
+        return pick(h, d, 'hbg_n');
+      },
+      tick(h) {
+        const s = h.h4.drv, Hb = H4.HBG, w = h.world, id = startOnce(h);
+        if (id === 'hbg_reload') { s.mag = Hb.mag; w.fx.text(h.x, h.y - h.r - 24, '裝填', '#cfe0ff', 16); }
+        else if (id === 'hbg_n') s.mag = Math.max(0, s.mag - 1);
+        else if (id === 'hbg_snipe') s.snipeAt = w.time + Hb.snipeCd;
+        else if (id === 'hbg_siege') s.siegeAt = w.time + Hb.siegeCd; // 架設與狙擊用專用彈，不吃彈匣
+      },
+      gauge: (h) => ({ v: h.h4.drv.mag / H4.HBG.mag, color: '#c0a060' }),
+    },
   };
 
   // 武器上手：建招式表、掛驅動（choose 包住 AI 的 chooseSkill；react 給 agentize）

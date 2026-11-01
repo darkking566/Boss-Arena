@@ -68,19 +68,19 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   assert.ok(rin.h4.defs[1] && rin.h4.defs[1].weapon === 'bow', '凜帶著弓');
   rin.hp = rin.maxHp * 0.3; rin.h4.items.flash = 0; rin.hunt.hpPotions = 0; b._target = rin; st.switchT = 1e9; rin.state = 'idle';
   run(w, 0.3);
-  assert.ok(rin.def.weapon === 'bow' && rin.skills.some((s) => s.id === 'w_shot'), '換成弓');
+  assert.ok(rin.def.weapon === 'bow' && rin.skills.some((s) => s.id === 'bow_s1'), '換成弓');
   run(w, 7); b.state = 'idle'; b.posture = b.maxPosture; w.damageBoss(st.hunters[1], b, { dmg: 10, posture: 10 }); run(w, 3);
   assert.ok(rin.def.weapon === 'katana' && rin.maxSpirit > 0, '倒地時換回太刀');
 }
 
 // P3 武器：每一招（含連段變體、集中弱點攻擊、額外招）都能施放並打到身旁的 Boss
-for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }, { rin: 'switchaxe', mari: 'chargeblade', yuzu: 'glaive', selena: 'sns' }]) {
+for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }, { rin: 'switchaxe', mari: 'chargeblade', yuzu: 'glaive', selena: 'sns' }, { rin: 'bow', mari: 'heavyxbow', yuzu: 'lightxbow', selena: 'sns' }]) {
   const w = new BD.World(BD.Hunt4.team(mains), BD.bossById.ronin, { seed: 5, pace: 'heavy', hunt4: true, intro: 0.5 }), st = w.hunt4, b = st.boss;
   run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {}; // 全員不自己行動，只放指定的招
   for (const h of st.hunters) {
     for (const id in h.h4.kv) {
       const s = h.h4.kv[id];
-      if (s.guard || !s.actions.some((a) => a.do === 'hit') || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手；鬼人化 / 裝填沒有攻擊
+      if (s.guard || !s.actions.some((a) => a.do === 'hit' || a.do === 'proj') || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手；鬼人化 / 裝填沒有攻擊
       b.x = 3000; b.y = 1800; b.state = 'idle'; b.statuses = b.statuses.filter((x) => x.id === 'kdGuard'); h.x = b.x - 60 - 0.8 * Math.max(0, ...s.actions.map((a) => (a.do === 'dash' ? a.dist : 0))); h.y = b.y; // 突進招站遠一點 h.face = 0; h.state = 'idle'; h.spirit = 100; h.sta = h.maxSta;
       const hp = b.hp; assert.ok(h.startSkill(s, { force: true }), `${h.name} ${id} 無法施放`);
       for (let k = 0; k < ((s.v1.dur || 1) + 0.1) * 60; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); b.x = 3000; b.y = 1800; } // 釘住 Boss（不被碰撞推開）
@@ -184,6 +184,27 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   for (let k = 0; k < 3; k++) go(ig, 'ig_kinsect', 0.05);
   assert.ok(['red', 'white', 'orange'].every((c) => BD.hasStatus(ig, 'h4' + c)), '獵蟲依序取得三色精華');
   go(ig, 'ig_dive', 0.05); assert.ok(!['red', 'white', 'orange'].some((c) => BD.hasStatus(ig, 'h4' + c)), '急襲突刺消耗精華');
+}
+
+// P8 第四批遠程：弓強擊瓶耗瓶 / 換瓶與傷害倍率、輕弩各彈種計數與裝填、重弩彈匣 / 狙擊冷卻
+{
+  const w = new BD.World(BD.Hunt4.team({ rin: 'bow', mari: 'heavyxbow', yuzu: 'lightxbow', selena: 'sns' }), BD.bossById.ronin, { seed: 9, pace: 'heavy', hunt4: true, intro: 0.5 });
+  const st = w.hunt4, [bw, hb, lb] = st.hunters, R = BD.HUNT4;
+  run(w, 1); st.boss.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {};
+  const go = (h, id) => { h.cancelSkill(); h.state = 'idle'; assert.ok(h.startSkill(h.h4.kv[id], { force: true }), id); run(w, 0.05); };
+  const bd = bw.h4.drv; bd.coat = 2;
+  go(bw, 'bow_s1'); assert.ok(bd.coat === 1 && Math.abs(bw.dmgMul / bw.hunt.baseDmg - R.BOW.coatDmg) < 1e-9, '弓：射擊耗強擊瓶、有瓶時加傷');
+  go(bw, 'bow_s2'); assert.ok(bd.coat === 0 && bw.dmgMul === bw.hunt.baseDmg, '瓶用完不加傷');
+  go(bw, 'bow_coat'); assert.strictEqual(bd.coat, R.BOW.coats, '換瓶補滿');
+  const ld = lb.h4.drv;
+  go(lb, 'lbg_n'); go(lb, 'lbg_p'); go(lb, 'lbg_rapid');
+  assert.ok(ld.n === R.LBG.mag.n - 1 && ld.p === R.LBG.mag.p - 1 && ld.rapid === R.LBG.mag.rapid - 1, '輕弩：各彈種分開計數');
+  go(lb, 'lbg_reload'); assert.ok(ld.n === R.LBG.mag.n && ld.p === R.LBG.mag.p, '輕弩裝填');
+  ld.n = 0; ld.p = 0; ld.rapid = 0; assert.strictEqual(lb.h4.D.choose(lb, 300).id, 'lbg_reload', '打空就裝填');
+  const hd = hb.h4.drv;
+  go(hb, 'hbg_n'); assert.strictEqual(hd.mag, R.HBG.mag - 1, '重弩耗彈');
+  go(hb, 'hbg_snipe'); assert.ok(hd.snipeAt > w.time && hd.mag === R.HBG.mag - 1, '狙擊彈進冷卻、不吃彈匣');
+  hd.mag = 0; assert.strictEqual(hb.h4.D.choose(hb, 400).id, 'hbg_reload', '彈匣空了裝填');
 }
 
 // P4 獵人大腦：存檔防呆、學習會寫進存檔、同存檔 + 同種子結果相同、熟練度隨場數上升
