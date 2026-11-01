@@ -15,7 +15,9 @@
       ai: Object.assign({}, def.ai, { aggression: 0.35 + 0.5 * p.risk, patience: p.patience, retreat: 0.1 + 0.4 * (1 - p.risk), punish: 0.5 + 0.4 * p.show, nervous: 0.3 * (1 - p.risk) }, wp.aiMod),
     });
   }
-  const team = () => H4.HUNTERS.map((h) => buildHunter(h, 'heavy'));
+  // mains：{ 獵人 id: 主武器 }（選單可換）；武器清單 = 主武器 + 原本的其他武器（第一把已實作的當副武器）
+  const ARMS = (h, main) => [main].concat(h.weapons.filter((x) => x !== main));
+  const team = (mains) => H4.HUNTERS.map((h) => { const m = (mains && H4.WEAPON_SPECS[mains[h.id]] && mains[h.id]) || h.weapons[0]; return Object.assign(buildHunter(h, 'heavy', m), { h4weapons: ARMS(h, m) }); });
 
   // Boss 每 interval 秒依「仇恨 + 近身加成」挑目標，維持原目標有加成，偶爾隨機換人
   function aggroTarget(w, st) {
@@ -105,7 +107,7 @@
     const k = Math.exp(-dt / H4.AGGRO.decay);
     for (const h of st.hunters) {
       st.aggro.set(h, st.aggro.get(h) * k + h.stats.dealt - st.dealt.get(h)); st.dealt.set(h, h.stats.dealt);
-      if (!w.winner && h.state !== 'dead') { act(w, st, h); BD.H4Weapons.step(h, dt); h.h4.sharps[h.h4.wi] = h.h4.sharp; }
+      if (!w.winner && h.state !== 'dead') { BD.H4Weapons.step(h, dt); act(w, st, h); h.h4.sharps[h.h4.wi] = h.h4.sharp; } // 先讓武器接連段，道具 / 集中攻擊不插進連段空檔
     }
     BD.H4Combat.tick(w, st, dt, st.orig); BD.H4Brain.tick(w, st, dt); BD.H4Gear.tick(w, st);
     if (w.winner && !st.done) { st.done = true; BD.H4Brain.end(w, st); BD.H4Gear.end(w, st); if (w.winner.team === 0) w.banner('狩獵成功！', st.boss.name + ' 被討伐', '#ffe27a', 3); }
@@ -116,7 +118,7 @@
     const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
     for (const h of hunters) {
       BD.huntUnit(h, true);
-      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = hd.weapons.slice(1).find((id) => (H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id]) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
+      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), sub = (h.def.h4weapons || hd.weapons).slice(1).find((id) => (H4.WEAPON_DEFS[id] || BD.HUNT.WEAPON_BY_ID[id]) && H4.WEAPON_SPECS[id]); // 副武器要已實作才帶
       const spec = H4.WEAPON_SPECS[h.def.weapon];
       h.h4 = { defs: [h.def, sub ? buildHunter(hd, h.def.paceId, sub) : null], wi: 0, wT: -9, spec, specs: [spec, sub && H4.WEAPON_SPECS[sub]], mod: hd.mod || {}, mods: [hd.mod || {}, hd.mod || {}], sharp: spec.sharp, sharps: [spec.sharp, sub ? H4.WEAPON_SPECS[sub].sharp : 0],
         items: Object.assign({}, hd.items), nextAct: 0 };
@@ -136,5 +138,5 @@
     };
     w.step = (dt) => { step(dt); tick(w, st, dt); };
   };
-  BD.Hunt4 = { buildHunter, team };
+  BD.Hunt4 = { buildHunter, team, ARMS };
 })(typeof window !== 'undefined' ? window : globalThis);

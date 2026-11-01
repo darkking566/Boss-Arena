@@ -43,6 +43,26 @@
       ctx.shadowBlur = 0;
     },
     sns(ctx, r) { blade(ctx, r * 1.5, 4, '#e8ecf2'); ctx.fillStyle = '#c0a050'; ctx.fillRect(-1, -6, 3, 12); },
+    // 第二批：大錘（蓄力段數發光）、狩獵笛（音符數 → 笛身顏色）、長槍、銃槍（槍管；龍擊砲可用時槍口發橘光）
+    hammer(ctx, r, t, o) {
+      const lv = (o && o.h4 && o.h4.drv.lvl) || 0;
+      blade(ctx, r * 1.9, 4, '#8a6a46');
+      if (lv) { ctx.shadowColor = ['', '#ffd08a', '#ffa040', '#ff5a2a'][lv]; ctx.shadowBlur = 8 + lv * 5; }
+      ctx.fillStyle = '#6f7884'; ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 2;
+      ctx.fillRect(r * 1.6, -r * 0.55, r * 0.75, r * 1.1); ctx.strokeRect(r * 1.6, -r * 0.55, r * 0.75, r * 1.1); ctx.shadowBlur = 0;
+    },
+    horn(ctx, r, t, o) {
+      const d = o && o.h4 && o.h4.drv, n = d && d.notes ? d.notes.length : 0;
+      blade(ctx, r * 1.7, 4, '#8a6a46');
+      ctx.fillStyle = ['#b89a5a', '#d8a85a', '#e8c06a', '#fff0a0'][n]; ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(r * 1.4, -r * 0.25); ctx.lineTo(r * 2.4, -r * 0.7); ctx.lineTo(r * 2.4, r * 0.7); ctx.lineTo(r * 1.4, r * 0.25); ctx.closePath(); ctx.fill(); ctx.stroke();
+    },
+    lance(ctx, r) { blade(ctx, r * 2.8, 4, '#d8dee6'); ctx.fillStyle = '#e8ecf2'; ctx.beginPath(); ctx.moveTo(r * 2.8, 0); ctx.lineTo(r * 2.4, -r * 0.22); ctx.lineTo(r * 2.4, r * 0.22); ctx.closePath(); ctx.fill(); },
+    gunlance(ctx, r, t, o) {
+      const d = o && o.h4 && o.h4.drv;
+      blade(ctx, r * 2.4, 7, '#5a626e'); ctx.fillStyle = '#d8dee6'; ctx.beginPath(); ctx.moveTo(r * 2.75, 0); ctx.lineTo(r * 2.35, -r * 0.25); ctx.lineTo(r * 2.35, r * 0.25); ctx.closePath(); ctx.fill();
+      if (d && o.world && o.world.time >= d.wfAt) { ctx.fillStyle = `rgba(255,140,60,${0.5 + 0.4 * Math.sin(t * 8)})`; ctx.beginPath(); ctx.arc(r * 2.4, 0, r * 0.18, 0, U.TAU); ctx.fill(); }
+    },
     staff(ctx, r, t) {
       blade(ctx, r * 2.2, 3, '#7a5a3a');
       ctx.fillStyle = `rgba(170,140,255,${0.6 + 0.4 * Math.sin(t * 6)})`; ctx.beginPath(); ctx.arc(r * 2.3, 0, r * 0.38, 0, U.TAU); ctx.fill();
@@ -64,12 +84,12 @@
       ctx.save(); ctx.translate(r * 0.2, r * 0.55);
       if (sw === 'thrust') ctx.translate((s + 1) * r * 0.6, -(s + 1) * r * 0.25);
       else ctx.rotate(sw === 'spin' ? (s + 1) * Math.PI : sw === 'down' ? -1.5 + (s + 1) * 1.1 : sw === 'ccw' ? -s * 0.9 - 0.3 : s * 0.9 + (o.state === 'skill' ? 0 : -0.25)); (WEAPON[def.weapon] || WEAPON.katana)(ctx, r, t, o); ctx.restore();
-      if (def.weapon === 'sns') { // 盾：左手；防禦時舉到正前方，完美防禦窗內發亮
-        const g = o.state === 'skill' && o.inst.skill.guard, pf = g && o.inst.t <= o.inst.skill.guard.perfect;
+      if (def.weapon === 'sns' || def.weapon === 'lance' || def.weapon === 'gunlance') { // 盾：左手；防禦時舉到正前方，完美防禦窗內發亮（槍系的盾較大）
+        const g = o.state === 'skill' && o.inst.skill.guard, pf = g && o.inst.t <= o.inst.skill.guard.perfect, big = def.weapon === 'sns' ? 1 : 1.35;
         ctx.save(); ctx.translate(g ? r * 0.75 : r * 0.25, g ? 0 : -r * 0.75); ctx.rotate(g ? 0 : -0.4);
         if (pf) { ctx.shadowColor = '#9fe8ff'; ctx.shadowBlur = 16; }
         ctx.fillStyle = '#4a6a8a'; ctx.strokeStyle = '#d8e4f0'; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.28, r * 0.62, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.restore();
+        ctx.beginPath(); ctx.ellipse(0, 0, r * 0.28 * big, r * 0.62 * big, 0, 0, U.TAU); ctx.fill(); ctx.stroke(); ctx.restore();
       }
       if (o.state === 'skill' && o.inst.skill.grp === 'a' && o.inst.t < 0.2) { // 彈刀判定中：刀前一道白弧
         ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r * 1.7, -0.9, 0.9); ctx.stroke();

@@ -15,6 +15,32 @@
     return m;
   }
   const keepGoing = (h, base) => rng(h)() < (open(h) ? 0.95 : base); // 連段要不要接：Boss 有破綻幾乎必接
+  BD.defineStatus('h4atk', { name: '攻擊強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgDealtMul: 1.1 } }); // 狩獵笛旋律
+  BD.defineStatus('h4def', { name: '防禦強化', tags: ['buff'], stacking: 'refresh', modifiers: { dmgTakenMul: 0.85 } });
+  // 狩獵笛：最近 3 個音符 → 旋律（同色兩個以上；紅藍綠各一 = 全音）；目標旋律依隊伍狀況決定
+  const NOTE = { horn_l: 'A', horn_dash: 'A', horn_r: 'B', horn_back: 'C' }, NOTE_SK = { A: 'horn_l', B: 'horn_r', C: 'horn_back' }, MEL_NOTE = { atk: 'A', def: 'B', heal: 'C' };
+  const MEL_NAME = { atk: '攻擊強化', def: '防禦強化', heal: '回復', all: '全音・回復與體力' };
+  function melody(ns) {
+    const c = (x) => ns.filter((n) => n === x).length;
+    return c('A') >= 2 ? 'atk' : c('B') >= 2 ? 'def' : c('C') >= 2 ? 'heal' : ns.length === 3 ? 'all' : null;
+  }
+  const allies = (h) => h.world.hunt4.hunters.filter((x) => x.state !== 'dead' && U.dist(x, h) < H4.HORN.range);
+  function hornTarget(h) {
+    const al = allies(h);
+    if (al.some((x) => x.hp < x.maxHp * (0.4 + 0.3 * h.def.persona.care))) return 'heal';
+    const need = (id) => al.filter((x) => BD.statusRemaining(x, id) < 8).length >= Math.ceil(al.length / 2);
+    return need('h4atk') ? 'atk' : need('h4def') ? 'def' : 'atk';
+  }
+  function perform(h, mel) {
+    const w = h.world, Hn = H4.HORN;
+    for (const x of allies(h)) {
+      if (mel === 'atk' || mel === 'def') BD.applyStatus(x, mel === 'atk' ? 'h4atk' : 'h4def', { dur: Hn.dur }, w);
+      else { x.hp = Math.min(x.maxHp, x.hp + x.maxHp * (mel === 'heal' ? Hn.heal : Hn.allHeal)); if (mel === 'all') x.sta = x.maxSta; }
+    }
+    w.fx.text(h.x, h.y - h.r - 30, '♪ ' + MEL_NAME[mel], '#c8f0ff', 20); w.fx.ring(h.x, h.y, 20, Hn.range, 0.6, '#c8f0ff', 4); w.log(h, '演奏：' + MEL_NAME[mel]);
+  }
+  // 槍系：防禦 → 完美防禦（或長槍的一般防禦）立刻收盾接反擊；攻擊將至時舉盾
+  const guardTick = (h) => { if (h.h4.drv.counter && h.inst && h.inst.skill.guard) h.comboCancel(); };
 
   const DRIVERS = {
     // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；紅刃時找破綻放氣刃兜割（降回白刃）
@@ -111,6 +137,102 @@
       tick(h) { if (h.h4.drv.counter && h.inst && h.inst.skill.guard) h.comboCancel(); }, // 完美防禦：立刻收盾，由 next 接反擊
       gauge: () => null,
     },
+    // 大錘：蓄力 I → II → III（打頭疊暈眩）；遠了用蓄力迴轉接近；蓄力中攻擊將至 → 相殺上撈（成功直接接 II）
+    hammer: {
+      init: () => ({ lvl: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv;
+        if (d > 180) { const sp = pick(h, d, 'ham_spin'); if (sp) return sp; }
+        if (open(h) || rng(h)() < 0.4 + 0.3 * h.def.persona.patience * (h.controller.punishWindow() > 0.4 ? 1 : 0)) { s.lvl = 1; return pick(h, d, 'ham_c1'); }
+        return rng(h)() < 0.6 ? pick(h, d, 'ham_side') : null;
+      },
+      next(h, d) {
+        const s = h.h4.drv, id = h.lastSkillId, p = h.def.persona;
+        if (id === 'ham_offset') { s.lvl = 2; return pick(h, d, 'ham_c2'); }
+        if ((id === 'ham_side' || id === 'ham_spin') && rng(h)() < 0.5) { s.lvl = 1; return pick(h, d, 'ham_c1'); }
+        if (!s.lvl || id === 'ham_c3') { s.lvl = 0; return null; }
+        const nxt = s.lvl === 1 ? 'ham_c2' : 'ham_c3', sk = kv(h, nxt);
+        if (threatIn(h) < sk.v1.windup + 0.15) return pick(h, d, 'ham_offset');
+        if (!keepGoing(h, 0.4 + 0.5 * p.risk)) { s.lvl = 0; return null; }
+        s.lvl++; return pick(h, d, nxt);
+      },
+      react: (h) => (h.h4.drv.lvl && U.dist(h, h.enemy) < 220 ? kv(h, 'ham_offset') : null),
+      tick(h) { if (h.h4.drv.lvl && h.state !== 'skill' && h.world.time - h.lastSkillEnd > 1) h.h4.drv.lvl = 0; },
+      gauge: (h) => ({ v: h.h4.drv.lvl / 3, color: ['#888', '#ffd08a', '#ffa040', '#ff5a2a'][h.h4.drv.lvl] }),
+    },
+    // 狩獵笛：照隊伍需要（有人低血 → 回復；增益快沒了 → 攻擊 / 防禦）挑音符；旋律成形且沒有威脅就演奏；Boss 有破綻放響玉
+    horn: {
+      init: () => ({ notes: [], echoAt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv, tgt = hornTarget(h), mel = melody(s.notes), safe = threatIn(h) > 0.8;
+        if (mel && safe && (mel === tgt || s.notes.length === 3 && rng(h)() < 0.3)) { const pl = pick(h, null, 'horn_play'); if (pl) return pl; }
+        if (open(h) && h.world.time >= s.echoAt) { const e = pick(h, d, 'horn_echo'); if (e) return e; }
+        if (d > 160) return pick(h, d, 'horn_dash');
+        return pick(h, d, NOTE_SK[MEL_NOTE[tgt]], 'horn_l');
+      },
+      next(h, d) {
+        const s = h.h4.drv, id = h.lastSkillId;
+        if (!NOTE[id] || threatIn(h) < 0.4 || !keepGoing(h, 0.5 + 0.3 * h.def.persona.risk)) return null;
+        const tgt = hornTarget(h);
+        return melody(s.notes) === tgt ? pick(h, null, 'horn_play') : pick(h, d, NOTE_SK[MEL_NOTE[tgt]]);
+      },
+      tick(h) {
+        const s = h.h4.drv, i = h.inst;
+        if (!i || i.h4done) return;
+        const id = i.skill.id;
+        if (NOTE[id]) { i.h4done = true; s.notes.push(NOTE[id]); if (s.notes.length > 3) s.notes.shift(); }
+        else if (id === 'horn_play') { i.h4done = true; const mel = melody(s.notes); if (mel) perform(h, mel); s.notes = []; }
+        else if (id === 'horn_echo') { i.h4done = true; s.echoAt = h.world.time + H4.HORN.echoCd; }
+      },
+      gauge: (h) => { const s = h.h4.drv, m = melody(s.notes); return { v: s.notes.length / 3, color: m ? { atk: '#ff6a5a', def: '#5a9aff', heal: '#6adf8a', all: '#ffffff' }[m] : '#888' }; },
+    },
+    // 長槍：遠了突進；三段突刺；攻擊將至就舉盾，擋下（不必完美）就反擊突刺
+    lance: {
+      init: () => ({ counter: false }),
+      choose: (h, d) => (d > 220 ? pick(h, d, 'lance_charge') : pick(h, d, 'lance_p1')),
+      next(h, d) {
+        const s = h.h4.drv, id = h.lastSkillId;
+        if (s.counter) { s.counter = false; return pick(h, null, 'lance_counter'); }
+        if (threatIn(h) < 0.35) return pick(h, null, 'lance_guard');
+        const chain = { lance_p1: 'lance_p2', lance_p2: 'lance_p3', lance_charge: 'lance_p1', lance_counter: 'lance_p2' };
+        return chain[id] && keepGoing(h, 0.6 + 0.3 * h.def.persona.risk) ? pick(h, d, chain[id]) : null;
+      },
+      react: (h) => kv(h, 'lance_guard'),
+      tick: guardTick,
+      gauge: () => null,
+    },
+    // 銃槍：突刺 → 砲擊 → 上撈 → 砲擊 → 叩擊 →（滿彈）全彈發射；沒彈就找空檔裝填；Boss 倒地 / 暈眩時放龍擊砲（長冷卻）
+    gunlance: {
+      init: (h) => ({ counter: false, shells: h.h4.spec.shells, wfAt: 0 }),
+      choose(h, d) {
+        const s = h.h4.drv, w = h.world;
+        if (s.shells === 0 && threatIn(h) > 1) return kv(h, 'gl_reload');
+        if (w.time >= s.wfAt && (h.enemy.state === 'knockdown' || h.enemy.state === 'stun')) { const f = pick(h, d, 'gl_wf'); if (f) return f; }
+        if (s.shells === h.h4.spec.shells && open(h)) { const b = pick(h, d, 'gl_slam'); if (b) return b; }
+        if (d > 160) return pick(h, d, 'gl_lunge');
+        return pick(h, d, 'gl_p1');
+      },
+      next(h, d) {
+        const s = h.h4.drv, id = h.lastSkillId, full = s.shells === h.h4.spec.shells;
+        if (s.counter) { s.counter = false; return pick(h, d, s.shells ? 'gl_shell' : 'gl_p2'); }
+        if (threatIn(h) < 0.35) return pick(h, null, 'gl_guard');
+        if (!keepGoing(h, 0.55 + 0.3 * h.def.persona.risk)) return null;
+        const chain = { gl_lunge: 'gl_shell', gl_p1: 'gl_shell', gl_shell: 'gl_p2', gl_p2: 'gl_slam', gl_slam: full ? 'gl_burst' : 'gl_shell' }[id];
+        return chain && (chain === 'gl_shell' ? s.shells > 0 : true) ? pick(h, d, chain) : chain === 'gl_shell' ? pick(h, d, 'gl_slam') : null;
+      },
+      react: (h) => kv(h, 'gl_guard'),
+      tick(h) {
+        guardTick(h);
+        const s = h.h4.drv, i = h.inst;
+        if (!i || i.h4done) return;
+        const id = i.skill.id;
+        if (id === 'gl_shell') { i.h4done = true; s.shells = Math.max(0, s.shells - 1); }
+        else if (id === 'gl_burst') { i.h4done = true; s.shells = 0; }
+        else if (id === 'gl_reload') { i.h4done = true; s.shells = h.h4.spec.shells; h.world.fx.text(h.x, h.y - h.r - 24, '裝填', '#e8f4ff', 16); }
+        else if (id === 'gl_wf') { i.h4done = true; s.wfAt = h.world.time + h.h4.spec.wfCd; }
+      },
+      gauge: (h) => { const s = h.h4.drv; return { v: s.shells / h.h4.spec.shells, color: h.world.time >= s.wfAt ? '#ff8a3a' : '#c0c8d0' }; },
+    },
   };
 
   // 武器上手：建招式表、掛驅動（choose 包住 AI 的 chooseSkill；react 給 agentize）
@@ -168,7 +290,8 @@
           return 'deflected';
         }
         const G2 = H4.GUARD; b.sta = Math.max(0, b.sta - p.dmg * G2.staPerDmg);
-        p.dmg *= b.sta > 0 ? G2.chip : 0.6; p.kb = (p.kb || 0) * G2.kbMul; p.posture = (p.posture || 0) * 0.5; // 體力被削光＝防禦被破
+        if (s.guard.block && b.sta > 0) b.h4.drv.counter = true; // 長槍：擋下就反擊
+        p.dmg *= b.sta > 0 ? (s.guard.chip != null ? s.guard.chip : G2.chip) : 0.6; p.kb = (p.kb || 0) * G2.kbMul; p.posture = (p.posture || 0) * 0.5; // 體力被削光＝防禦被破
         return null;
       }
       if (s.armor) { p.dmg *= 1 - s.armor; p.kb = 0; p.posture = (p.posture || 0) * 0.3; BD.applyStatus(b, 'kdGuard', { dur: 0.3 }, w); }

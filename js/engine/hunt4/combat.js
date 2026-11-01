@@ -62,12 +62,13 @@
   function hit(w, st, h, src, b, p, orig) {
     const P = partAt(st, b, src), hs = h.h4, spec = hs.spec, mod = hs.mod, S = H4.SHARP;
     const hz = P.hz[spec.dtype] + (P.wound ? H4.WOUND.hz : 0) + (P.broken ? 0.05 : 0);
-    let mul = hz / 0.5, bounce = false;
-    BD.H4Brain.partHit(h, P.id, mul); mul *= BD.H4Gear.atkMul(w, st, h, P, hz);
-    if (spec.sharp && src === h) { const band = sharpBand(hs); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz; if (bounce) mul *= 0.6; }
+    let mul = p.fixed ? 1 : hz / 0.5, bounce = false; // fixed：砲擊等固定傷害，不吃肉質 / 銳利度 / 屬性
+    if (!p.fixed) BD.H4Brain.partHit(h, P.id, mul);
+    mul *= BD.H4Gear.atkMul(w, st, h, P, hz);
+    if (spec.sharp && src === h && !p.fixed) { const band = sharpBand(hs); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz; if (bounce) mul *= 0.6; }
     if (st.asleep && p.dmg >= 20) mul *= H4.AILMENTS.sleep.wakeMul;
     let dmg = p.dmg * mul;
-    if (mod.el) dmg += mod.elv * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
+    if (mod.el && !p.fixed) dmg += mod.elv * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
     const pm = BD.H4Gear.postureMul(h), hp0 = b.hp, r = orig(src, b, Object.assign({}, p, pm === 1 ? { dmg } : { dmg, posture: (p.posture != null ? p.posture : dmg * 0.25) * pm })); // 破城：架勢預設同 world.damageBoss
     const dealt = hp0 - b.hp;
     if (dealt <= 0) return r;

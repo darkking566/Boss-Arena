@@ -80,21 +80,27 @@
   }
   // 狩獵：獵人的熟練度與對這位 Boss 的圖鑑（招式摸熟幾招、最軟部位、被追比例、戰績）
   const PART_NAME = { head: '頭', legs: '腳', body: '身', tail: '尾' };
-  function h4Line(h, bossId) {
+  function h4Line(h0, bossId) {
+    const h = h4Armed(h0);
     const H = BD.H4Brain, sv = state.h4save, x = H.dexInfo(sv, h.id, bossId);
-    const ms = h.weapons.filter((wp) => BD.HUNT4.WEAPON_SPECS[wp]).map((wp) => `${BD.HUNT4.WEAPON_NAMES[wp]} ${Math.round(H.mastery(sv, h.id, wp) * 100)}%`).join('、');
+    const ms = h.weapons.filter((wp) => BD.HUNT4.WEAPON_SPECS[wp]).slice(0, 2).map((wp) => `${BD.HUNT4.WEAPON_NAMES[wp]} ${Math.round(H.mastery(sv, h.id, wp) * 100)}%`).join('、');
     return `<div class="d"><b style="color:${h.color}">${h.title}・${h.name}</b>：${h.desc}<br>熟練：${ms}｜圖鑑：招式 ${x.known}/${x.all}` +
       (x.soft ? `・最軟 ${PART_NAME[x.soft]}` : '') + (x.fights ? `・被追 ${Math.round(x.chased * 100)}%・戰績 ${x.wins}/${x.fights}` : '・尚未交手') + '<br>' + h4Gear(h, bossId) + '</div>';
   }
   // 這場會帶的裝備（AI 依目標 Boss 挑）：武器與特性、防具技能、套裝、素材總數
   function h4Gear(h, bossId) {
-    const H4 = BD.HUNT4, GR = BD.H4Gear, g = GR.gearOf(state.h4save, h.id), eq = GR.choose(g, h, bossId), E = GR.build(g, eq);
+    const H4 = BD.HUNT4, GR = BD.H4Gear, g = GR.gearOf(state.h4save, h.id), eq = GR.choose(g, h4Armed(h), bossId), E = GR.build(g, eq);
     const wpn = eq.w ? `${GR.itemName(eq.w, g.w[eq.w])}（${H4.WTRAITS[E.wt].name}）` : '初始武器';
     const arm = ['head', 'body', 'legs'].map((s) => (eq[s] ? GR.itemName(eq[s], g.a[eq[s]]) : '—')).join(' / ');
     const sk = Object.keys(E.sk).map((k) => H4.SKILLS[k].name + E.sk[k]).join('、') || '無';
     const mats = Object.values(g.mats).reduce((a, m) => a + m.s + m.p + m.g, 0);
     return `裝備：${wpn}｜防具 ${arm}｜技能 ${sk}` + (E.set ? `｜套裝【${H4.SETS[E.set].name}】` : '') + `｜素材 ${mats} 個、已做 ${Object.keys(g.w).length + Object.keys(g.a).length} 件`;
   }
+  // 主武器選擇（存在 localStorage）：預設各自的招牌武器
+  const H4MAIN = 'bd.hunt4.main';
+  state.h4main = (() => { const o = {}; let v = null; try { v = JSON.parse(localStorage.getItem(H4MAIN)); } catch (e) { /* 壞掉就用預設 */ }
+    for (const h of BD.HUNT4.HUNTERS) o[h.id] = v && BD.HUNT4.WEAPON_SPECS[v[h.id]] ? v[h.id] : h.weapons[0]; return o; })();
+  const h4Armed = (h) => Object.assign({}, h, { weapons: BD.Hunt4.ARMS(h, state.h4main[h.id]) });
   const H4KEY = 'bd.hunt4.save';
   state.h4save = (() => { try { return BD.H4Brain.sanitize(JSON.parse(localStorage.getItem(H4KEY))); } catch (e) { return BD.H4Brain.newSave(); } })();
   function h4Store() { try { localStorage.setItem(H4KEY, JSON.stringify(state.h4save)); } catch (e) { /* file:// 下可能不可用：本次開啟期間仍記得 */ } }
@@ -211,7 +217,14 @@
   $('#modeTrain').addEventListener('click', () => setMode('train'));
   $('#modeTeam').addEventListener('click', () => setMode('team'));
   $('#modeHunt4').addEventListener('click', () => setMode('hunt4'));
-  $('#roster4').innerHTML = BD.HUNT4.HUNTERS.map((h) => `<div class="h4" style="border-color:${h.color}"><div class="nm" style="color:${h.color}">${h.title}・${h.name}</div>
+  const wpOpts = (h) => Object.keys(BD.HUNT4.WEAPON_SPECS).map((id) => `<option value="${id}"${state.h4main[h.id] === id ? ' selected' : ''}>${BD.HUNT4.WEAPON_NAMES[id]}${h.weapons[0] === id ? '（招牌）' : ''}</option>`).join('');
+  $('#roster4').addEventListener('change', (e) => {
+    const id = e.target.dataset && e.target.dataset.h4main;
+    if (!id) return;
+    state.h4main[id] = e.target.value; try { localStorage.setItem(H4MAIN, JSON.stringify(state.h4main)); } catch (err) { /* file:// 下可能不可用 */ }
+    showDetail(1, state.pick[1]);
+  });
+  $('#roster4').innerHTML = BD.HUNT4.HUNTERS.map((h) => `<div class="h4" style="border-color:${h.color}"><div class="nm" style="color:${h.color}">${h.title}・${h.name} <select data-h4main="${h.id}" title="這場的主武器">${wpOpts(h)}</select></div>
     <div class="tt">${h.desc}</div><div class="tt">武器：${h.weapons.map((id) => BD.HUNT4.WEAPON_NAMES[id]).join(' / ')}　「${h.line}」</div></div>`).join('');
 
   // ── 戰鬥節奏（選角畫面）──
@@ -333,7 +346,7 @@
 
   // 狩獵模式（4v1）：四位 AI 獵人討伐一位 Boss
   function startHunt4(bossId, mapId) {
-    const w = new BD.World(BD.Hunt4.team(), BD.bossById[bossId], { input, pace: 'heavy', map: mapId || state.map, hunt4: true, h4save: state.h4save });
+    const w = new BD.World(BD.Hunt4.team(state.h4main), BD.bossById[bossId], { input, pace: 'heavy', map: mapId || state.map, hunt4: true, h4save: state.h4save });
     w.speed = 1;
     state.world = w; state.resultShown = false; state.hunt4 = { boss: bossId, map: mapId || state.map };
     view.player = null; view.focus = null;

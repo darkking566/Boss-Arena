@@ -191,4 +191,5 @@ body.touch .tp { display: none; }
 .roster4 { flex-direction: column; gap: 8px; }
 .roster4 .h4 { padding: 8px 12px; background: rgba(255,255,255,0.05); border-left: 4px solid; border-radius: 6px; text-align: left; }
 .roster4 .h4 .nm { font-size: 19px; font-weight: bold; }
+.roster4 .h4 select { float: right; font-size: 14px; background: #1a1620; color: #eee; border: 1px solid #555; border-radius: 4px; padding: 2px 4px; }
 .roster4 .h4 .tt { font-size: 13px; color: #aaa; }

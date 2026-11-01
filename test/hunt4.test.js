@@ -74,13 +74,13 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
 }
 
 // P3 武器：每一招（含連段變體、集中弱點攻擊、額外招）都能施放並打到身旁的 Boss
-{
-  const w = make('ronin', 5), st = w.hunt4, b = st.boss;
+for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }]) {
+  const w = new BD.World(BD.Hunt4.team(mains), BD.bossById.ronin, { seed: 5, pace: 'heavy', hunt4: true, intro: 0.5 }), st = w.hunt4, b = st.boss;
   run(w, 1); b.controller.update = () => {}; for (const h of st.hunters) h.controller.update = () => {}; // 全員不自己行動，只放指定的招
   for (const h of st.hunters) {
     for (const id in h.h4.kv) {
       const s = h.h4.kv[id];
-      if (s.guard || id === 'db_demon' || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手
+      if (s.guard || !s.actions.some((a) => a.do === 'hit') || (s.tags || []).includes('counter')) continue; // 防禦 / 架式要等對方出手；鬼人化 / 裝填沒有攻擊
       b.x = 3000; b.y = 1800; b.state = 'idle'; b.statuses = b.statuses.filter((x) => x.id === 'kdGuard'); h.x = b.x - 60 - 0.8 * Math.max(0, ...s.actions.map((a) => (a.do === 'dash' ? a.dist : 0))); h.y = b.y; // 突進招站遠一點 h.face = 0; h.state = 'idle'; h.spirit = 100; h.sta = h.maxSta;
       const hp = b.hp; assert.ok(h.startSkill(s, { force: true }), `${h.name} ${id} 無法施放`);
       for (let k = 0; k < ((s.v1.dur || 1) + 0.1) * 60; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); b.x = 3000; b.y = 1800; } // 釘住 Boss（不被碰撞推開）
@@ -126,6 +126,38 @@ const run = (w, sec) => { for (let i = 0; i < sec * 60 && !w.over; i++) { w.hits
   run(w, 1); assert.ok(sel.lastSkillId === 'sns_counter' || (sel.inst && sel.inst.skill.id === 'sns_counter'), '完美防禦後反擊');
   sel.cancelSkill(); sel.state = 'idle'; sel.startSkill(sel.h4.kv.sns_guard, { force: true }); run(w, 0.4); hp = sel.hp; sel.sta = sel.maxSta;
   w.damageBoss(b, sel, { dmg: 120 }); assert.ok(hp - sel.hp > 0 && hp - sel.hp < 60, '一般防禦減傷 ' + (hp - sel.hp));
+}
+
+// P6 第二批武器：大錘蓄力連段、狩獵笛旋律增益、長槍擋下就反擊、銃槍砲擊耗彈 / 裝填 / 固定傷害、主武器選擇
+{
+  const w = new BD.World(BD.Hunt4.team({ rin: 'hammer', mari: 'horn', yuzu: 'lance', selena: 'gunlance' }), BD.bossById.ronin, { seed: 8, pace: 'heavy', hunt4: true, intro: 0.5 });
+  const st = w.hunt4, b = st.boss, [ham, horn, lance, gl] = st.hunters;
+  assert.strictEqual(st.hunters.map((h) => h.def.weapon).join(), 'hammer,horn,lance,gunlance');
+  assert.strictEqual(ham.h4.defs[1].weapon, 'katana', '換主武器後，招牌武器變副武器');
+  run(w, 1);
+  const pin = () => { b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); };
+  const seen = []; b.x = 3000; b.y = 1800; ham.x = b.x - 90; ham.y = b.y; b.setState('stun', 6); ham.state = 'idle'; ham.sta = ham.maxSta;
+  ham.startSkill(ham.h4.D.choose(ham, 60));
+  for (let i = 0; i < 60 * 5; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); if (ham.inst && seen[seen.length - 1] !== ham.inst.skill.id) seen.push(ham.inst.skill.id); pin(); }
+  assert.strictEqual(seen.slice(0, 3).join(), 'ham_c1,ham_c2,ham_c3', '大錘蓄力連段：' + seen);
+  // 狩獵笛：兩個紅音 → 攻擊強化給範圍內隊友
+  const hd = horn.h4.drv; hd.notes = ['A', 'A']; horn.x = lance.x = b.x - 100; horn.y = b.y; lance.y = b.y + 60; horn.state = 'idle';
+  horn.startSkill(horn.h4.kv.horn_play, { force: true }); run(w, 0.1);
+  assert.ok(BD.hasStatus(horn, 'h4atk') && BD.hasStatus(lance, 'h4atk') && hd.notes.length === 0, '演奏攻擊強化');
+  hd.notes = []; horn.state = 'idle'; horn.cancelSkill(); horn.startSkill(horn.h4.kv.horn_back, { force: true }); run(w, 0.05); assert.strictEqual(hd.notes.join(), 'C', '綠音記一個音符');
+  // 長槍：一般防禦（不完美）擋下也接反擊突刺
+  lance.cancelSkill(); lance.state = 'idle'; lance.sta = lance.maxSta; lance.startSkill(lance.h4.kv.lance_guard, { force: true }); run(w, 0.4);
+  let hp = lance.hp; w.damageBoss(b, lance, { dmg: 120 }); assert.ok(hp - lance.hp > 0 && hp - lance.hp <= 120 * 0.12 + 1, '長槍防禦減傷 ' + (hp - lance.hp));
+  run(w, 1); assert.ok(lance.lastSkillId === 'lance_counter' || (lance.inst && lance.inst.skill.id === 'lance_counter'), '擋下後反擊突刺');
+  // 銃槍：砲擊耗彈、固定傷害（不吃肉質）；裝填補滿
+  const gd = gl.h4.drv; gd.shells = 5;
+  gl.cancelSkill(); gl.state = 'idle'; gl.x = b.x - 80; gl.y = b.y; gl.face = 0; b.setState('stun', 5); gl.startSkill(gl.h4.kv.gl_shell, { force: true });
+  hp = b.hp; for (let i = 0; i < 40; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); pin(); }
+  assert.ok(gd.shells === 4 && b.hp < hp, '砲擊耗彈並造成傷害');
+  const P = st.parts[0], hz0 = P.hz.cut; P.hz.cut = 0.1; hp = b.hp; BD.H4Combat.hit(w, st, gl, gl, b, { dmg: 62, fixed: true }, st.orig); const d1 = hp - b.hp;
+  P.hz.cut = 0.9; hp = b.hp; BD.H4Combat.hit(w, st, gl, gl, b, { dmg: 62, fixed: true }, st.orig); P.hz.cut = hz0;
+  assert.ok(d1 > 0 && Math.abs((hp - b.hp) / d1 - 1) < 0.2, `固定傷害不吃肉質 ${d1} ${hp - b.hp}`); // 世界傷害本身有 ±8% 亂數；沒有 fixed 時肉質 0.1 對 0.9 會差 9 倍
+  gd.shells = 0; gl.cancelSkill(); gl.state = 'idle'; gl.startSkill(gl.h4.kv.gl_reload, { force: true }); run(w, 0.1); assert.strictEqual(gd.shells, 5, '裝填');
 }
 
 // P4 獵人大腦：存檔防呆、學習會寫進存檔、同存檔 + 同種子結果相同、熟練度隨場數上升

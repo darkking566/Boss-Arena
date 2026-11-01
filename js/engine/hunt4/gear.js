@@ -12,6 +12,7 @@
   const elemFit = (T, bid) => (T.el ? (((H4.BOSS_PARTS[bid] || {}).weak || {})[T.el] || 1) - 1 : T.ail ? 0.2 : 0.15);
   const keyBoss = (k) => k.slice(k.indexOf(':') + 1);
   const ROMAN = ['', 'I', 'II', 'III'];
+  const armed = (h) => { const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter); return { id: hd.id, persona: hd.persona, weapons: h.h4.defs[0].h4weapons || hd.weapons }; }; // 這場實際帶的主武器
   const itemName = (k, r) => { const [t, bid] = k.split(':'); return `${BD.bossById[bid].name}${H4.SLOTS[t] ? '・' + H4.SLOTS[t] : H4.WEAPON_NAMES[t]} ${ROMAN[r]}`; };
 
   // AI 配裝：武器挑（等級 + 個性偏好特性 + 打這隻 Boss 的屬性相性 + 戰績）；防具每格挑最好的，三件同 Boss 的套裝更划算就整套
@@ -56,7 +57,7 @@
   function install(w, st) {
     const bid = st.boss.def.id;
     for (const h of st.hunters) {
-      const hs = h.h4, hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), g = gearOf(st.save, hd.id), eq = g.eq = choose(g, hd, bid), E = build(g, eq);
+      const hs = h.h4, hd = armed(h), g = gearOf(st.save, hd.id), eq = g.eq = choose(g, hd, bid), E = build(g, eq);
       hs.gear = Object.assign(E, { eq, hits: 0, combo: 0, lastHit: -9, ogUntil: 0, bonus: false, ev: 0, perf: 0, undying: false, got: null, made: [] });
       if (E.mod) hs.mods[0] = hs.mod = E.mod;
       if (hs.specs[0].sharp && E.sharp !== 1) { hs.specs[0] = hs.spec = Object.assign({}, hs.spec, { sharp: Math.round(hs.spec.sharp * E.sharp) }); hs.sharp = hs.sharps[0] = hs.spec.sharp; }
@@ -137,7 +138,7 @@
     const save = st.save, b = st.boss, bid = b.def.id, win = w.winner && w.winner.team === 0, rng = st.brng, D = H4.DROP;
     const breaks = st.parts.filter((P) => P.broken).length;
     for (const h of st.hunters) {
-      const hd = H4.HUNTERS.find((x) => x.id === h.def.hunter), g = gearOf(save, hd.id), E = h.h4.gear, p = hd.persona;
+      const hd = armed(h), g = gearOf(save, hd.id), E = h.h4.gear, p = hd.persona;
       const score = (win ? 1 : 0) - 0.2 * st.faintsBy.get(h);
       for (const k of [E.eq.w, E.eq.head, E.eq.body, E.eq.legs]) if (k) { const r = g.rec[k] || (g.rec[k] = [0, 0]); r[0] = Math.min(200, r[0] + 1); r[1] += (score - r[1]) / r[0]; }
       if (!win) continue;

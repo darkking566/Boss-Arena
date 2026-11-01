@@ -25,6 +25,8 @@
   R.defineStatusIcon('iframe', { glyph: '閃', color: '#d8fff0' });
   R.defineStatusIcon('invuln', { glyph: '無', color: '#ffe680' });
   R.defineStatusIcon('h4fatigue', { glyph: '疲', color: '#cfc8a8' }); // 狩獵模式：Boss 疲勞
+  R.defineStatusIcon('h4atk', { glyph: '攻', color: '#ff6a5a' }); // 狩獵笛旋律
+  R.defineStatusIcon('h4def', { glyph: '防', color: '#5a9aff' });
   R.defineStatusIcon('h4slow', { glyph: '緩', color: '#c8b4ff' }); // 狩獵模式：套裝「時之隙」
   R.defineStatusIcon('transition', { glyph: '轉', color: '#ff9a3c' });
   R.defineStatusIcon('hidden', { glyph: '隱', color: '#9a8cff' });
