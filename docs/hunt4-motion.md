@@ -87,12 +87,16 @@
 ### 大劍（慢、重、蓄力清楚）
 | 招 | 模板 | 看點 |
 |---|---|---|
-| 蓄力斬 gs_c1 | charge 1 → chop | 劍扛在肩上抖 |
-| 強蓄力斬 gs_c2 | charge 2 → slash | 劍往身後拉得更深、發光 |
-| 真蓄力斬 gs_true | charge 3 → chop ×2 | 第一下小劈、第二下大劈，落地下沉最深 |
-| 橫掃 gs_wide | slash | 很寬的半圓殘影 |
-| 鐵壁衝撞 gs_tackle | rush | 劍身平擋在身前往前撞 |
-| 破傷・崩斬 | chop | — |
+| 蓄力斬 / 強蓄力斬 gs_a1~3 / gs_b1~3 | charge 1~3 → chop / slash | 等級越高劍扛得越深、抖動與發光越強 |
+| 真蓄力斬 gs_t1~3 | charge 1~3 → chop ×2 | 第一下小劈、第二下大劈，落地下沉最深 |
+| 連消帶打上撈斬 gs_off1~3 | charge → up | 劍拖在身後蓄力，反手由下往上撈，白色殘影 |
+| 追擊十字斬 gs_cross1~3 | rush → slash ×2 | 衝上去左右各一斬，黃色殘影 |
+| 橫掃 / 強橫掃 / 橫打擊 gs_wide / gs_swide / gs_side | slash | 強橫掃半圓最寬；橫打擊短而快 |
+| 上撈斬 gs_up | up | 從身後低處撈起 |
+| 鐵壁衝撞 gs_tackle / 飛身躍入橫掃 gs_leap | rush | 劍身平擋在身前往前撞；飛身稍微騰空接大橫掃 |
+| 防禦 gs_guard / 腳踢 gs_kick / 力量對決 gs_pclash | guard / hit / charge | 劍橫擋在前；腳踢是短突刺姿勢；對決先沉再劈 |
+| 跳躍蓄力斬 gs_jump / 落下突刺 gs_drop / 拔刀蓄力斬 gs_draw | rush（騰空）→ chop / thrust | 跳斬整招騰空；落刺由上往下插；拔刀衝上去直劈 |
+| 集中貫通斬 h4_focus_gs | chop | — |
 
 ### 雙刀（快、細、密）
 | 招 | 模板 | 看點 |

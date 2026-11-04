@@ -95,11 +95,13 @@
     k_musou: Object.assign({ t: 'spin', turns: 3 }, red),
     h4_focus_katana: { t: 'charge', lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     // 大劍
-    gs_c1: { t: 'charge', lv: 1, then: { t: 'hit', kind: 'chop' } },
-    gs_c2: { t: 'charge', lv: 2, holdA: -2.6, then: { t: 'hit', side: 1, w: 1.5 } },
-    gs_true: { t: 'charge', lv: 3, then: { t: 'hit', kind: 'chop', h: 1.1 } },
-    gs_wide: { t: 'hit', side: 1, w: 1.7 },
-    gs_tackle: { t: 'rush', holdA: -1.3, then: { t: 'hit', kind: 'thrust', len: 0.35, ang: -1.3 } }, // 劍身平擋在身前撞
+    // 蓄力 I~III 越高抖動 / 發光越強；真蓄力兩段劈；連消帶打＝反手上撈；十字斬＝衝上去兩段斬；衝撞/防禦＝劍身平擋在身前
+    gs_wide: { t: 'hit', side: 1, w: 1.7 }, gs_swide: { t: 'hit', side: 1, w: 1.9 }, gs_side: { t: 'hit', side: -1, w: 1 }, gs_up: { t: 'hit', kind: 'up' },
+    gs_tackle: { t: 'rush', holdA: -1.3, then: { t: 'hit', kind: 'thrust', len: 0.35, ang: -1.3 } },
+    gs_leap: { t: 'rush', holdA: -0.6, air: 0.5, then: { t: 'hit', side: 1, w: 1.8 } }, gs_kick: { t: 'hit', kind: 'thrust', len: 0.25, ang: 0.4 },
+    gs_guard: { t: 'guard' }, gs_pclash: { t: 'charge', lv: 2, holdA: -1.4, then: { t: 'hit', kind: 'chop', h: 1.1 } },
+    gs_jump: { t: 'rush', air: 1, airAll: 1, holdA: -2.2, then: { t: 'hit', kind: 'chop', h: 1.1 } }, gs_drop: { t: 'rush', air: 1, airAll: 0.7, holdA: -1.6, then: { t: 'hit', kind: 'thrust', len: 0.7, ang: 1.1 } },
+    gs_draw: { t: 'rush', holdA: -2.2, then: { t: 'hit', kind: 'chop' } },
     h4_focus_gs: { t: 'hit', kind: 'chop', h: 1.1 },
     // 片手劍
     sns_a1: { t: 'hit', kind: 'chop', h: 0.8 }, sns_a2: { t: 'hit', side: 1 }, sns_a3: { t: 'spin' },
@@ -197,6 +199,12 @@
     hbg_siege: { t: 'hit', kind: 'shot', kick: 0.35, hold: { brace: 1, sq: 0.5 } },
     hbg_reload: { t: 'item', pose: { a: 0.9, reach: -0.3 } },
   };
+  for (const l of [1, 2, 3]) Object.assign(MOTIONS, {
+    ['gs_a' + l]: { t: 'charge', lv: l, then: { t: 'hit', kind: 'chop' } }, ['gs_b' + l]: { t: 'charge', lv: l, holdA: -2.6, then: { t: 'hit', side: 1, w: 1.5 } },
+    ['gs_t' + l]: { t: 'charge', lv: l, then: { t: 'hit', kinds: ['chop', 'chop'], h: 1.1 } },
+    ['gs_off' + l]: { t: 'charge', lv: l, holdA: 2.2, then: { t: 'hit', kind: 'up', trail: '#e8f4ff' } },
+    ['gs_cross' + l]: { t: 'rush', trail: '#fff1a8', then: { t: 'hit', kinds: ['slash', 'slash'], side: 1, w: 1.5 } },
+  });
   for (const [am, k] of [['n', 0.5], ['p', 0.8], ['s', 0.9]]) Object.assign(MOTIONS, {
     ['lbg_shot_' + am]: { t: 'hit', kind: 'shot', kick: k }, ['lbg_chase_' + am]: { t: 'hit', kind: 'shot', kick: k, hold: { sq: 0.3 } },
     ['lbg_rapid_' + am]: { t: 'hit', kind: 'shot', kick: k * 0.6 }, ['lbg_rchase_' + am]: { t: 'hit', kind: 'shot', kick: k * 0.8, hold: { sq: 0.4 } },

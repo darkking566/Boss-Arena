@@ -94,24 +94,56 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
     }
   }
 }
-// 大劍：Boss 有破綻 → 蓄力 → 強蓄力 → 真蓄力；鐵壁衝撞減傷、相殺、力量對抗
+// 大劍（荒野式）：蓄力等級依破綻長度、三段連招、精準衝撞 / 連消帶打 / 精準防禦 → 力量對決、真蓄力【強擊】、集中貫通斬 → 真蓄力、連招表
 {
-  const w = make('ronin', 6), st = w.hunt4, b = st.boss, mari = st.hunters[1];
-  run(w, 1);
+  const w = make('ronin', 6), st = w.hunt4, b = st.boss, mari = st.hunters[1], s = () => mari.h4.drv, D = mari.h4.D;
+  run(w, 1); mari.brain = null; // 不探索：照連招表第一套（基本三段蓄力）
+  const place = () => { b.x = 3000; b.y = 1800; b.face = 0; mari.x = b.x - 90 - grow(b); mari.y = b.y; mari.face = 0; };
+  const fresh = () => { place(); b.setState('idle', 0); mari.cancelSkill(); mari.state = 'idle'; mari.statuses = []; mari.hp = mari.maxHp; mari.sta = mari.maxSta; s().combo = null; s().off = false; s().counter = false; st.owe = st.wasCC = false; };
+  // 蓄力等級：破綻長 → III；破綻短 → I（打得中的最高等級）
+  fresh(); b.setState('stun', 6); assert.strictEqual(D.choose(mari, 60).id, 'gs_a3', '破綻長 → 蓄力 III');
+  fresh(); b.setState('stun', 0.5); assert.strictEqual(D.choose(mari, 60).id, 'gs_a1', '破綻短 → 蓄力 I');
+  // 連段：蓄力 → 強蓄力 → 真蓄力
+  fresh(); b.setState('stun', 6); mari.startSkill(D.choose(mari, 60));
   const seen = [];
-  b.x = 3000; b.y = 1800; mari.x = b.x - 90 - grow(b); mari.y = b.y; b.setState('stun', 6); mari.state = 'idle';
-  mari.startSkill(mari.h4.D.choose(mari, 60));
   for (let i = 0; i < 60 * 5; i++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); if (mari.inst && seen[seen.length - 1] !== mari.inst.skill.id) seen.push(mari.inst.skill.id); b.x = 3000; b.y = 1800; if (b.state !== 'stun') b.setState('stun', 5); }
-  assert.strictEqual(seen.slice(0, 3).join(), 'gs_c1,gs_c2,gs_true', '大劍蓄力連段：' + seen);
+  assert.ok(/^gs_a\d$/.test(seen[0]) && /^gs_b\d$/.test(seen[1]) && /^gs_t\d$/.test(seen[2]), '大劍蓄力連段：' + seen);
+  // 鐵壁衝撞：減傷；相殺 → 精準衝撞（保留蓄力），大招式也不觸發力量對抗
   const tk = mari.h4.kv.gs_tackle;
-  mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.4; let hp = mari.hp; w.damageBoss(b, mari, { dmg: 100 });
+  fresh(); mari.startSkill(tk, { force: true }); mari.inst.t = 0.4; let hp = mari.hp; w.damageBoss(b, mari, { dmg: 100 });
   assert.ok(hp - mari.hp > 0 && hp - mari.hp < 70, '鐵壁衝撞減傷 ' + (hp - mari.hp));
-  st.owe = st.wasCC = false; // 測試直接從暈眩切回待機；實戰中相殺發生在 Boss 出手後，鎖定已解除
-  b.setState('idle', 0); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1; hp = mari.hp;
-  assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(mari.hp === hp && b.state === 'stagger' && mari.stats.h4.offsets === 1, '相殺：免傷、Boss 硬直');
-  b.setState('idle', 0); st.owe = st.wasCC = false; b.startSkill(b.skills[0], { force: true }); mari.cancelSkill(); mari.state = 'idle'; mari.startSkill(tk, { force: true }); mari.inst.t = 0.1;
-  w.damageBoss(b, mari, { dmg: 200 }); assert.ok(mari.stats.h4.clashes === 1, '大招式相殺 → 力量對抗');
-  run(w, 1.5); assert.ok(b.state === 'knockdown' || mari.hp < hp, '力量對抗有結果');
+  fresh(); mari.startSkill(tk, { force: true }); mari.inst.t = 0.1; hp = mari.hp;
+  assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(mari.hp === hp && b.state === 'stagger' && mari.stats.h4.offsets === 1 && s().pt, '相殺：免傷、Boss 硬直、精準衝撞');
+  fresh(); b.startSkill(b.skills[0], { force: true }); mari.startSkill(tk, { force: true }); mari.inst.t = 0.1; const cl = mari.stats.h4.clashes;
+  w.damageBoss(b, mari, { dmg: 200 }); assert.ok(mari.stats.h4.clashes === cl, '衝撞相殺大招式不觸發力量對抗');
+  // 精準衝撞後的蓄力：起手已蓄一半
+  fresh(); b.setState('stun', 6); s().pt = true; s().ptT = w.time; mari.startSkill(mari.h4.kv.gs_b3, { force: true }); run(w, 0.05);
+  assert.ok(!s().pt && mari.inst.t >= H4.GS.at.b[2] * 0.5, '精準衝撞 → 下一次蓄力提早出手');
+  // 連消帶打上撈斬：相殺成功 → Boss 失衡 → 接追擊十字斬
+  fresh(); mari.startSkill(mari.h4.kv.gs_off2, { force: true }); mari.inst.t = 0.1;
+  assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(s().off && b.state === 'stagger' && b.stateDur > 0.9, '連消帶打：相殺、Boss 失衡');
+  mari.comboCancel(); const nx = D.next(mari, 80); assert.ok(nx && nx.id === 'gs_cross2', '相殺成功 → 追擊十字斬：' + (nx && nx.id));
+  // 精準防禦：累積到門檻 → 力量對決（Boss 失衡、接真蓄力）；沒到門檻 → 接蓄力等
+  fresh(); mari.startSkill(mari.h4.kv.gs_guard, { force: true }); mari.inst.t = 0.1; s().pg = 0; hp = mari.hp;
+  assert.strictEqual(w.damageBoss(b, mari, { dmg: 60 }), 'deflected'); assert.ok(mari.hp === hp && s().counter && s().pg === 1 && mari.stats.h4.pguards >= 1, '精準防禦：免傷、累積');
+  mari.comboCancel(); s().pg = s().clashNeed; const pc = D.next(mari, 80); assert.ok(pc && pc.id === 'gs_pclash', '累積夠 → 力量對決');
+  mari.state = 'idle'; mari.startSkill(pc, { force: true }); run(w, 0.05);
+  assert.ok(b.state === 'stagger' && mari.stats.h4.clashes === 1 && s().clashNeed === H4.GS.clash.need + 1, '力量對決：Boss 失衡、門檻上升');
+  mari.comboCancel(); const ct = D.next(mari, 80); assert.ok(ct && /^gs_t\d$/.test(ct.id), '力量對決 → 真蓄力：' + (ct && ct.id));
+  fresh(); mari.startSkill(mari.h4.kv.gs_guard, { force: true }); mari.inst.t = 0.5; const sh = mari.h4.sharp; w.damageBoss(b, mari, { dmg: 60 });
+  assert.ok(mari.h4.sharp < sh, '一般防禦磨耗斬味');
+  // 真蓄力【強擊】：第一擊命中，第二擊 ×strong
+  fresh(); b.setState('stun', 30); mari.startSkill(mari.h4.kv.gs_t3, { force: true });
+  const hit2 = (pre) => { b.hp = b.maxHp; mari.inst.strong = false; if (pre) w.damageBoss(mari, b, { dmg: 10, ev: 'gs1', posture: 0 }); const h0 = b.hp; w.damageBoss(mari, b, { dmg: 100, ev: 'gs2', posture: 0 }); return h0 - b.hp; };
+  const plain = hit2(false), strong = hit2(true), ratio = strong / plain;
+  assert.ok(Math.abs(ratio - H4.GS.strong) < 0.08, '真蓄力【強擊】：第二擊 ×' + ratio.toFixed(2));
+  // 集中貫通斬破傷口 → 接真蓄力
+  fresh(); mari.lastSkillId = 'h4_focus_gs'; mari.stats.h4.pops = s().pops + 1; const pp = D.next(mari, 80); assert.ok(pp && /^gs_t\d$/.test(pp.id), '破傷口 → 真蓄力：' + (pp && pp.id));
+  fresh(); mari.lastSkillId = 'h4_focus_gs'; s().pops = mari.stats.h4.pops; assert.strictEqual(D.next(mari, 80), null, '沒破傷口 → 不接');
+  // 連招表：步驟都認得、id 不重複；每個招式 id 都存在
+  const TOK = /^([abt][123]?|off[123]|wide|swide|side|leap|tackle|up|cross|guard|kick|draw|jump|drop|focus)$/, ids = new Set();
+  for (const c of [...H4.GS_COMBOS, ...Object.values(H4.GS_AFTER).flat()]) { assert.ok(!ids.has(c.id), '連招 id 重複 ' + c.id); ids.add(c.id); assert.ok(c.seq.every((t) => TOK.test(t)), '連招步驟不認得：' + c.id); }
+  assert.ok(H4.GS_COMBOS.length >= 20, '大劍連招表夠多');
 }
 // 雙刀（荒野式）：鬼人化耗體力、命中累積鬼人槽、槽滿取得鬼人強化（與鬼人化並存）、亂舞 / 鬼人連斬耗槽並切換鬼人化、精準迴避 → 鬼人身躱 → 迴避後連招、集中亂舞後的兩種終結
 {

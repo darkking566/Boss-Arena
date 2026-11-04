@@ -14,23 +14,73 @@
   const dash = (at, dist, dur, extra) => Object.assign({ do: 'dash', at, dist, dur }, extra);
   const sk = (id, name, short, tags, range, o, actions) => Object.assign({ id, name, short, tags, range, cd: 0.05, cost: 0, track: 7 }, o, { actions });
 
-  // ── 大劍：蓄力 I → 強蓄力 → 真蓄力，中間可用鐵壁衝撞（受擊減傷、相殺）保住蓄力段數 ──
+  // ── 大劍（荒野式）：蓄力斬 / 強蓄力斬 / 真・蓄力斬各有蓄力 I~III（越高出手越慢、威力越高；AI 依 Boss 破綻長度挑打得中的等級）、真蓄力【強擊】（第一擊命中 → 第二擊加成）、
+  //    鐵壁衝撞（精準衝撞保留蓄力）→ 飛身躍入橫掃斬 / 橫打擊、強橫掃斬、連消帶打上撈斬 I~III（相殺成功 → 追擊十字斬 I~III）、防禦 / 精準防禦 → 腳踢 / 力量對決、
+  //    跳躍蓄力斬 → 落下突刺、拔刀蓄力斬、集中貫通斬（破傷口 → 真蓄力）。連招表 H4.GS_COMBOS 由獵人大腦依情境學；招式 id：gs_<a 蓄力|b 強蓄|t 真蓄|off 相殺|cross 十字><1~3> ──
+  const GSP = {
+    at: { a: [0.4, 0.6, 0.84], b: [0.52, 0.76, 1.0], t: [0.85, 1.12, 1.4], off: [0.3, 0.46, 0.62] }, // 各等級出手時間（秒）
+    rec: { a: [0.45, 0.52, 0.6], b: [0.5, 0.58, 0.68], t: [0.7, 0.85, 1.0], off: [0.4, 0.5, 0.65], cross: [0.45, 0.5, 0.56] },
+    cost: { a: [10, 12, 14], b: [12, 14, 16], t: [14, 17, 20], off: [8, 10, 12] },
+    dmg: { a: [180, 230, 300], b: [240, 310, 400], t: [[12, 180], [16, 265], [20, 380]], off: [190, 250, 330], cross: [[90, 300], [110, 390], [130, 480]] },
+    post: { a: [30, 42, 58], b: [45, 62, 85], t: [[6, 50], [8, 70], [10, 100]], off: [40, 55, 72], cross: [[20, 70], [24, 85], [28, 105]] },
+    strong: 1.3, over: 0.75, overP: 0.14, // 真蓄力【強擊】倍率（第一擊命中才有）、過度蓄力倍率、AI 蓄過頭的機率（× (1 − 耐心)；只有蓄力 III 會）
+    offDur: 0.8, offPost: 25, offResist: 0.35, // 連消帶打：Boss 失衡秒數（+ 0.25 × 等級）、架勢（× 等級）、近 12 秒每成功一次的遞減（失衡 ÷ (1 + 此值 × 次數)）
+    clash: { need: 2, max: 5, stag: 1.6 }, // 力量對決：累積幾次精準防禦（Boss 重擊算 2）才發動、門檻上限、Boss 失衡秒數
+    keep: 0.3, // 精準衝撞後的下一次蓄力：起手已蓄好一半（出手提早 50%）、AI 敢蓄更高（視窗 +0.3 秒）
+  };
+  H4.GS = GSP;
+  const GSN = ['', 'I', 'II', 'III'], GSL = [1, 2, 3];
+  const gsChg = (k, name, o, hitOf) => GSL.map((l) => sk(`gs_${k}${l}`, `${name} ${GSN[l]}`, `${name.slice(0, 2)}${GSN[l]}`, ['melee'], [0, 175 + 5 * (l - 1)],
+    Object.assign({ cost: GSP.cost[k][l - 1], track: 7, recovery: GSP.rec[k][l - 1] }, o), hitOf(l - 1)));
+  const gsA = gsChg('a', '蓄力斬', { sw: 'down' }, (i) => [hit(GSP.at.a[i], cone(175, 70), { dmg: GSP.dmg.a[i], posture: GSP.post.a[i], kb: 200 + 60 * i, fx: { id: 'slash', scale: 1.3 + 0.2 * i } })]);
   const greatsword = { id: 'gs', name: '大劍', el: 'physical', ai: [70, 170], aiMod: { gapMul: 1.1, midWait: 0.2 }, bonus: {}, traits: [], // aiMod：覆寫 AI 節奏（大劍招少，出手間隔要短一點）
     skills: [
-      sk('gs_c1', '蓄力斬', '蓄力', ['melee'], [0, 175], { cost: 14, sw: 'down', track: 7, recovery: 0.55 },
-        [hit(0.62, cone(175, 70), { dmg: 280, posture: 45, kb: 260, fx: { id: 'slash', scale: 1.5 } })]),
-      sk('gs_wide', '橫掃', '橫掃', ['melee', 'fast'], [0, 170], { cost: 12, sw: 'cw', track: 6, recovery: 0.5 },
+      gsA[1],
+      sk('gs_wide', '橫掃斬', '橫掃', ['melee', 'fast'], [0, 170], { cost: 12, sw: 'cw', track: 6, recovery: 0.5 },
         [hit(0.34, cone(175, 140), { dmg: 150, posture: 28, kb: 240, fx: { id: 'slash', scale: 1.4 } })]),
     ],
-    variants: [
-      sk('gs_c2', '強蓄力斬', '強蓄', ['melee'], [0, 180], { cost: 14, sw: 'cw', track: 7, recovery: 0.6 },
-        [hit(0.82, cone(180, 120), { dmg: 400, posture: 65, kb: 320, fx: { id: 'slash', scale: 1.7 } })]),
-      sk('gs_true', '真蓄力斬', '真蓄', ['melee'], [0, 190], { cost: 18, sw: 'down', track: 6, recovery: 0.9 },
-        [hit(1.25, cone(150, 60), { dmg: 300, posture: 40, kb: 120, fx: { id: 'slash', scale: 1.6 } }),
-          hit(1.45, cone(195, 80), { dmg: 620, posture: 110, kb: 420, fx: { id: 'slash', scale: 2.2 } })]),
-      sk('gs_tackle', '鐵壁衝撞', '衝撞', ['melee', 'defensive'], [0, 140], { cost: 16, sw: 'thrust', track: 9, recovery: 0.3, armor: 0.5, offset: [0.02, 0.3] },
-        [dash(0.08, 70, 0.12), hit(0.2, circle(90), { dmg: 40, posture: 30, kb: 200, dtype: 'blunt' })]),
-    ] };
+    variants: [].concat(
+      [gsA[0], gsA[2]],
+      gsChg('b', '強蓄力斬', { sw: 'cw' }, (i) => [hit(GSP.at.b[i], cone(180, 120), { dmg: GSP.dmg.b[i], posture: GSP.post.b[i], kb: 260 + 60 * i, fx: { id: 'slash', scale: 1.5 + 0.2 * i } })]),
+      // 真・蓄力斬：小的第一擊（ev gs1：命中就讓第二擊吃【強擊】）+ 主要的第二擊（ev gs2）
+      gsChg('t', '真蓄力斬', { sw: 'down', track: 6 }, (i) => [
+        hit(GSP.at.t[i], cone(150, 60), { dmg: GSP.dmg.t[i][0], posture: GSP.post.t[i][0], kb: 120, ev: 'gs1', fx: { id: 'slash', scale: 1.2 } }),
+        hit(GSP.at.t[i] + 0.2, cone(195, 80), { dmg: GSP.dmg.t[i][1], posture: GSP.post.t[i][1], kb: 420, ev: 'gs2', fx: { id: 'slash', scale: 1.8 + 0.2 * i } })]),
+      [
+        // 衝撞：霸體減傷 50%、開頭 0.3 秒相殺；精準衝撞（相殺成功）保留蓄力。noClash＝相殺不觸發力量對抗（大劍的力量對決來自精準防禦）
+        sk('gs_tackle', '鐵壁衝撞', '衝撞', ['melee', 'defensive'], [0, 140], { cost: 16, sw: 'thrust', track: 9, recovery: 0.3, armor: 0.5, offset: [0.02, 0.3], noClash: true },
+          [dash(0.08, 70, 0.12), hit(0.2, circle(90), { dmg: 40, posture: 30, kb: 200, dtype: 'blunt' })]),
+        sk('gs_swide', '強橫掃斬', '強橫', ['melee'], [0, 190], { cost: 14, sw: 'cw', track: 6, recovery: 0.6 },
+          [hit(0.6, cone(200, 150), { dmg: 330, posture: 70, kb: 300, fx: { id: 'slash', scale: 1.9 } })]),
+        sk('gs_leap', '飛身躍入橫掃斬', '飛身', ['melee', 'gap'], [40, 260], { cost: 14, sw: 'cw', track: 8, recovery: 0.5 },
+          [dash(0.06, 150, 0.2), hit(0.3, cone(190, 150), { dmg: 240, posture: 55, kb: 260, fx: { id: 'slash', scale: 1.6 } })]),
+        sk('gs_side', '橫打擊', '橫打', ['melee', 'fast'], [0, 150], { cost: 6, sw: 'ccw', track: 7, recovery: 0.3 },
+          [hit(0.22, cone(150, 110), { dmg: 70, posture: 38, kb: 120, dtype: 'blunt', fx: 'slash' })]),
+        sk('gs_up', '上撈斬', '上撈', ['melee', 'fast'], [0, 165], { cost: 8, sw: 'ccw', track: 8, recovery: 0.4 },
+          [hit(0.3, cone(165, 90), { dmg: 120, posture: 40, kb: 200, fx: 'slash' })]),
+        // 防禦：前 0.2 秒精準防禦（累積到門檻 → 力量對決）；一般防禦磨耗斬味（dull）
+        sk('gs_guard', '防禦', '防禦', ['defensive'], [0, 400], { cost: 0, track: 12, recovery: 0.8, guard: { perfect: 0.2, chip: 0.3, dull: 4 } }, []),
+        sk('gs_kick', '腳踢', '腳踢', ['melee', 'fast'], [0, 125], { cost: 6, sw: 'thrust', track: 9, recovery: 0.35 },
+          [hit(0.18, cone(125, 70), { dmg: 60, posture: 40, kb: 160, dtype: 'blunt' })]),
+        sk('gs_pclash', '力量對決', '對決', ['melee'], [0, 250], { cost: 0, sw: 'down', track: 12, recovery: 0.55, armor: 0.8, noClash: true },
+          [hit(0.3, cone(190, 100), { dmg: 200, posture: 110, kb: 420, fx: { id: 'slash', scale: 1.9 } })]),
+        // 進場 / 空中
+        sk('gs_jump', '跳躍蓄力斬', '跳斬', ['melee', 'gap'], [130, 340], { cd: 8, cost: 12, sw: 'down', track: 9, recovery: 0.5 },
+          [dash(0.08, 220, 0.3), hit(0.5, cone(170, 80), { dmg: 160, posture: 45, kb: 260, fx: { id: 'slash', scale: 1.6 } })]),
+        sk('gs_drop', '落下突刺', '落刺', ['melee'], [0, 200], { cost: 10, sw: 'thrust', track: 8, recovery: 0.5 },
+          [dash(0.05, 60, 0.1), hit(0.3, rect(190, 70), { dmg: 130, posture: 40, kb: 200, fx: { id: 'thrust', scale: 1.5 } })]),
+        sk('gs_draw', '拔刀蓄力斬', '拔刀', ['melee', 'gap'], [100, 300], { cd: 4, cost: 14, sw: 'down', track: 8, recovery: 0.55 },
+          [dash(0.04, 150, 0.2), hit(0.55, cone(175, 70), { dmg: 290, posture: 50, kb: 240, fx: { id: 'slash', scale: 1.5 } })]),
+      ],
+      // 連消帶打上撈斬 I~III：出手前 + 揮出的一小段時間內承受近戰攻擊＝相殺（Boss 失衡）→ 追擊十字斬 I~III（兩段、向前位移）
+      GSL.map((l) => sk('gs_off' + l, `連消帶打上撈斬 ${GSN[l]}`, `相殺${GSN[l]}`, ['melee', 'defensive'], [0, 165],
+        { cost: GSP.cost.off[l - 1], sw: 'ccw', track: 9, recovery: GSP.rec.off[l - 1], offset: [0.04, GSP.at.off[l - 1] + 0.1], noClash: true },
+        [hit(GSP.at.off[l - 1], cone(170, 90), { dmg: GSP.dmg.off[l - 1], posture: GSP.post.off[l - 1], kb: 220 + 40 * l, fx: { id: 'slash', scale: 1.3 + 0.2 * (l - 1) } })])),
+      GSL.map((l) => sk('gs_cross' + l, `追擊十字斬 ${GSN[l]}`, `十字${GSN[l]}`, ['melee', 'gap'], [0, 330], { cost: 0, sw: 'cw', track: 9, recovery: GSP.rec.cross[l - 1] },
+        [dash(0.04, 160, 0.12),
+          hit(0.2, cone(185, 120), { dmg: GSP.dmg.cross[l - 1][0], posture: GSP.post.cross[l - 1][0], kb: 120, fx: 'slash' }),
+          hit(0.42, cone(190, 120), { dmg: GSP.dmg.cross[l - 1][1], posture: GSP.post.cross[l - 1][1], kb: 360, fx: { id: 'slash', scale: 1.7 + 0.2 * (l - 1) } })]))
+    ) };
 
   // ── 片手劍：連斬 → 迴旋斬、盾擊（打擊，可打暈）、防禦（前 0.2 秒為完美防禦 → 自動反擊）、完美突進、跳躍斬 ──
   const sns = { id: 'sns', name: '片手劍', el: 'physical', ai: [40, 125], bonus: {}, traits: [],
@@ -272,8 +322,9 @@
   Object.assign(H4.WEAPON_SPECS, {
     katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm, k_musou: musou } }),
     gs: { dtype: 'cut', sharp: 90,
-      focus: sk('h4_focus_gs', '破傷・崩斬', '破傷', ['melee'], [0, 190], { cd: 6, sw: 'down', track: 8, recovery: 0.6 },
-        [hit(0.5, cone(190, 50), { dmg: 170, posture: 45, kb: 200, focus: true, fx: { id: 'slash', scale: 1.8 } })]) },
+      focus: sk('h4_focus_gs', '集中貫通斬', '貫通', ['melee'], [0, 190], { cd: 6, sw: 'down', track: 8, recovery: 0.6 }, // 命中傷口 → 持續斬擊 → 收尾；破傷口後驅動接真蓄力
+        [hit(0.45, cone(190, 50), { dmg: 110, posture: 30, kb: 200, focus: true, fx: { id: 'slash', scale: 1.6 } })]
+          .concat(flurry(0.58, 4, 0.08, cone(190, 50), { dmg: 26, posture: 6, kb: 30 }, 'slash'), [hit(1.0, cone(190, 60), { dmg: 100, posture: 30, kb: 200, fx: { id: 'slash', scale: 1.7 } })])) },
     sns: { dtype: 'cut', sharp: 160,
       focus: sk('h4_focus_sns', '盾穿・突刺', '盾穿', ['melee'], [0, 170], { cd: 6, sw: 'thrust', track: 9, recovery: 0.4 },
         [dash(0.08, 80, 0.1), hit(0.22, rect(170, 60), { dmg: 60, posture: 30, kb: 160, focus: true, fx: 'thrust' })]) },
@@ -379,6 +430,42 @@
     { id: 'sreload', name: '墊步裝填', mode: 'r', when: ['idle', 'move', 'open', 'atk'], need: { magLow: true }, prior: 0.6, seq: ['rapid', 'burst', 'burst'] },
     { id: 'exit', name: '提早收手', mode: 'r', when: ['idle', 'move', 'atk'], need: { lowEn: true }, prior: 0.75, risk: -0.4, seq: ['off', 'shot', 'chase'] },
   ];
+  // 大劍連招表：AI 依情境（Boss 狀態 when、需求 need）挑一套，獵人大腦記住每個情境下哪套回報高。
+  // 步驟：a / b / t 蓄力斬 / 強蓄力斬 / 真蓄力斬（等級依 Boss 破綻剩餘時間自動挑）、a1 b1 t1 固定蓄力 I（快速出手）、wide 橫掃斬、swide 強橫掃斬（接在強蓄力 / 十字斬 / 跳躍 / 集中貫通後）、
+  //       tackle 鐵壁衝撞、leap 飛身躍入橫掃斬、side 橫打擊（接在衝撞 / 飛身後）、up 上撈斬、cross 追擊十字斬（相殺成功後，只在 GS_AFTER 用）、guard 防禦、kick 腳踢（接在防禦後）、
+  //       jump 跳躍蓄力斬、drop 落下突刺（接在跳躍後）、draw 拔刀蓄力斬、focus 集中貫通斬（要有傷口）。做不到的步驟跳過（最多連跳 3 個），走完或卡住就結束。
+  //       off1~3 連消帶打上撈斬 I~III、guard / focus 成功的後續（十字斬、力量對決、破傷口真蓄力）由 H4.GS_AFTER 接，沒成功就結束。
+  // need：near 近身（< 260）、far 遠（≥ 200）、wound Boss 身上有傷口、sta 體力下限、lowSta 體力少、threat 一秒內有攻擊朝自己來、long 破綻還有 2.5 秒以上；prior 先驗回報、risk 越愛冒險越想用
+  H4.GS_COMBOS = [
+    { id: 'basic', name: '基本三段蓄力', when: ['idle', 'open', 'down'], prior: 0.6, seq: ['a', 'b', 't'] },
+    { id: 'downFull', name: '倒地全力', when: ['down'], need: { long: true }, prior: 0.75, risk: 0.3, seq: ['a', 'b', 't', 'wide', 'a', 'b', 't'] },
+    { id: 'ender', name: '直取真蓄力', when: ['open', 'down'], prior: 0.45, risk: 0.4, seq: ['t'] },
+    { id: 'quickTrue', name: '衝撞跳階快速真蓄', when: ['open', 'down'], need: { sta: 45 }, prior: 0.5, risk: 0.4, seq: ['tackle', 'b', 'tackle', 't'] },
+    { id: 'swideRoute', name: '強橫掃路線', when: ['idle', 'open', 'down'], prior: 0.55, risk: 0.2, seq: ['a', 'b', 'swide', 't'] },
+    { id: 'sweepChain', name: '橫掃接蓄力', when: ['idle', 'move', 'open'], prior: 0.5, seq: ['wide', 'a', 'b'] },
+    { id: 'tackleRoute', name: '衝撞飛身路線', when: ['idle', 'move', 'open'], need: { sta: 40 }, prior: 0.45, risk: 0.3, seq: ['tackle', 'leap', 'side', 'b'] },
+    { id: 'leapBurst', name: '倒地衝撞飛身', when: ['down'], need: { sta: 50 }, prior: 0.5, risk: 0.3, seq: ['tackle', 'leap', 'side', 'b', 't'] },
+    { id: 'openMid', name: '破綻中夾衝撞', when: ['open'], need: { sta: 40 }, prior: 0.45, seq: ['a', 'tackle', 'b'] },
+    { id: 'upRoute', name: '上撈接蓄力', when: ['idle', 'move', 'open'], prior: 0.4, seq: ['up', 'a', 'b'] },
+    { id: 'poke', name: '試探', when: ['idle', 'move'], prior: 0.35, risk: -0.3, seq: ['a1', 'wide'] },
+    { id: 'save', name: '節省體力', when: ['idle', 'move', 'open'], need: { lowSta: true }, prior: 0.7, risk: -0.4, seq: ['a1'] },
+    { id: 'offQuick', name: '相殺迎擊 I', when: ['atk'], need: { near: true, threat: true }, prior: 0.55, risk: -0.2, seq: ['off1'] },
+    { id: 'offMid', name: '相殺迎擊 II', when: ['atk'], need: { near: true, threat: true }, prior: 0.6, risk: 0.1, seq: ['off2'] },
+    { id: 'offHeavy', name: '相殺迎擊 III', when: ['atk'], need: { near: true, threat: true, sta: 40 }, prior: 0.5, risk: 0.4, seq: ['off3'] },
+    { id: 'guardCounter', name: '防禦反擊', when: ['atk'], need: { near: true, threat: true }, prior: 0.5, risk: -0.3, seq: ['guard'] },
+    { id: 'guardKick', name: '腳踢連段', when: ['atk', 'idle'], need: { near: true, threat: true }, prior: 0.3, seq: ['guard', 'kick', 'tackle', 'b'] },
+    { id: 'woundBurst', name: '傷口爆發', when: ['idle', 'open', 'down'], need: { wound: true }, prior: 0.8, seq: ['focus'] },
+    { id: 'jumpEntry', name: '跳躍進場', when: ['idle', 'move'], need: { far: true }, prior: 0.5, risk: 0.2, seq: ['jump', 'swide', 'b', 't'] },
+    { id: 'jumpDrop', name: '跳躍落刺', when: ['idle', 'move', 'open'], need: { far: true }, prior: 0.4, seq: ['jump', 'drop', 'b'] },
+    { id: 'drawEntry', name: '拔刀蓄力進場', when: ['idle', 'move'], need: { far: true }, prior: 0.55, seq: ['draw', 'b', 't'] },
+  ];
+  // 大劍的反應後接招（相殺成功 / 精準防禦 / 力量對決 / 破傷口），獵人大腦在 pg / off / pop 情境下學哪套好
+  H4.GS_AFTER = {
+    off: [{ id: 'xFull', name: '十字接真蓄', prior: 0.6, seq: ['cross', 'b', 't'] }, { id: 'xSwide', name: '十字接強橫掃', prior: 0.5, seq: ['cross', 'swide'] }, { id: 'xSafe', name: '十字接強蓄', prior: 0.55, seq: ['cross', 'b'] }],
+    pg: [{ id: 'pgChg', name: '防禦後蓄力', prior: 0.55, seq: ['a', 'b'] }, { id: 'pgUp', name: '防禦後上撈', prior: 0.4, seq: ['up', 'a'] }, { id: 'pgWide', name: '防禦後橫掃', prior: 0.45, seq: ['wide', 'a'] }, { id: 'pgOff', name: '防禦後相殺', prior: 0.35, seq: ['off2'] }],
+    pop: [{ id: 'pTrue', name: '破傷後真蓄', prior: 0.7, seq: ['t'] }, { id: 'pLeap', name: '破傷後飛身', prior: 0.5, seq: ['leap', 'side', 'b'] }, { id: 'pSwide', name: '破傷後強橫掃', prior: 0.5, seq: ['swide', 't'] }],
+    clash: [{ id: 'cTrue', name: '對決後真蓄', prior: 0.8, seq: ['t'] }],
+  };
   H4.HBG = { mag: 6, snipeCd: 25, siegeCd: 14 };
   // 斬擊斧：劍形態每招耗槽、斧攻擊回槽、劍命中累積解放槽、解放後劍傷害倍率與每秒掉槽
   H4.SWITCH = { swordCost: 12, axeGain: 15, wildGain: 30, ampPerHit: 10, ampDmg: 1.25, ampDrain: 2.5, lowAt: 20, morphAt: 55 };
@@ -388,7 +475,7 @@
   H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
   H4.HORN = { range: 600, dur: 45, heal: 0.05, allHeal: 0.03, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
   // 普攻耗體力：原本 cost 0 的近戰招改耗 收招秒數 × perRec（至少 min）；skip＝獎勵 / 資源型招式維持免費（反擊、砲擊吃彈、龍擊砲吃冷卻）
-  H4.BASIC_STA = { perRec: 25, min: 4, skip: ['sns_counter', 'lance_counter', 'gl_shell', 'gl_wf'] };
+  H4.BASIC_STA = { perRec: 25, min: 4, skip: ['sns_counter', 'lance_counter', 'gl_shell', 'gl_wf', 'gs_pclash', 'gs_cross1', 'gs_cross2', 'gs_cross3'] };
   H4.STA_REGEN_MUL = 0.6; // 獵人體力回復倍率（獵魂基礎每秒 34 → 約 20）
   H4.GUARD = { chip: 0.25, staPerDmg: 0.35, kbMul: 0.3 }; // 一般防禦：承受傷害比例、每點傷害耗體力、擊退倍率
   H4.CLASH = { dmg: 120, lock: 1.2, win: 0.55, topple: 2.5 }; // 力量對抗：Boss 單擊傷害門檻、對峙時間、基礎勝率、勝利時 Boss 倒地秒數

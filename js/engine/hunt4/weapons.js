@@ -70,7 +70,8 @@
   function comboNext(h, d, tok) { // 連招下一步（tok：步驟 → 招式 id）；做不到的步驟跳過（最多連跳 3 個），走完或卡住就結束
     const s = h.h4.drv, c = s.combo;
     for (let skip = 0; s.ci < c.seq.length && skip < 3; skip++) {
-      const id = tok(h, c.seq[s.ci++]), sk = id && kv(h, id);
+      const id = tok(h, c.seq[s.ci++]), sk = id && (typeof id === 'string' ? kv(h, id) : id); // 步驟可回傳招式物件（集中貫通斬不在 kv 裡）
+      if (id === false) break; // 檢查點沒過：結束連招
       if (ready(h, sk, sk && sk.tags.includes('defensive') ? null : d)) return sk;
     }
     s.combo = null; return null;
@@ -188,6 +189,63 @@
     if (d.n <= 0 || w.time >= d.until) s.wyv = null;
   }
 
+  // ── 大劍：蓄力等級、連招步驟、反應後接招 ──
+  const GS_CHG = /^gs_([abt])([123])$/, GS_STAGE = { a: 1, b: 2, t: 3 };
+  const GS_PREV = { swide: /^(gs_b\d|gs_cross\d|gs_jump|gs_drop|h4_focus_gs)$/, leap: /^(gs_tackle|h4_focus_gs)$/, side: /^(gs_tackle|gs_leap)$/, kick: /^gs_guard$/, drop: /^gs_jump$/ }; // 這些步驟只能接在特定招式後面
+  function gsWindow(h) { // 這一手能用的時間：Boss 破綻剩幾秒（出招中 / 待機保守估），再受攻擊將至的限制
+    const b = h.enemy, w = OPEN.has(b.state) ? Math.max(0.3, (b.stateDur || 1) - b.stateT) : b.state === 'skill' ? 0.8 : 1.1;
+    return Math.min(w, threatIn(h) - 0.1);
+  }
+  function gsLv(h, k) { // 打得中的最高蓄力等級（確實命中的低等級勝過揮空的高等級）；愛冒險的敢賭、精準衝撞後敢蓄更高
+    const s = h.h4.drv, G = H4.GS, win = gsWindow(h) + 0.25 * (h.def.persona.risk - 0.5) + (s.pt ? G.keep : 0);
+    let lv = 1;
+    for (let l = 2; l <= 3; l++) if (G.at[k][l - 1] + 0.1 <= win) lv = l;
+    return lv;
+  }
+  function gsTok(h, tok) { // 連招步驟 → 招式 id（或招式物件）；做不到的步驟回 null（跳過）
+    const s = h.h4.drv, last = h.lastSkillId || '';
+    let m = /^([abt])([123])?$/.exec(tok);
+    if (m) return `gs_${m[1]}${m[2] || gsLv(h, m[1])}`;
+    if ((m = /^off([123])$/.exec(tok))) return 'gs_' + tok;
+    if (tok === 'cross') return s.offLv && h.world.time - s.offT < 3 ? 'gs_cross' + s.offLv : null;
+    if (tok === 'focus') return h.world.hunt4.parts.some((P) => P.wound) ? h.h4.focus : null;
+    if (GS_PREV[tok] && !GS_PREV[tok].test(last)) return null;
+    return 'gs_' + tok;
+  }
+  function gsOk(h, c, d, sit, wound) {
+    const n = c.need || {};
+    return c.when.includes(sit) && (n.far ? d >= 120 : d < 200) && (!n.near || d < 260) && (!n.wound || wound) && h.sta >= (n.sta || 0) && (!n.lowSta || h.sta < 40)
+      && (!n.threat || threatIn(h) < 1) && (!n.long || gsWindow(h) > 2.5);
+  }
+  function gsStep(h, d) { // 連招下一步；蓄不完會被打斷 → 先衝撞硬吃（最多兩次），不然收手
+    const s = h.h4.drv, sk = comboNext(h, d, gsTok);
+    if (sk && GS_CHG.test(sk.id) && threatIn(h) < sk.v1.windup + 0.2) {
+      s.ci = Math.max(0, s.ci - 1);
+      const tk = s.tk < 2 ? pick(h, null, 'gs_tackle') : null;
+      if (tk) { s.tk++; return tk; }
+      s.combo = null; return null;
+    }
+    return sk;
+  }
+  function gsAfter(h, kind, d) { // 反應後接招（相殺 / 精準防禦 / 力量對決 / 破傷口）：獵人大腦依情境學哪套好
+    const s = h.h4.drv, list = H4.GS_AFTER[kind], id = h.brain ? h.brain.pick('combo', 'after|' + kind, list.map((c) => ({ id: c.id, name: c.name, prior: c.prior }))) : list[0].id;
+    s.combo = list.find((c) => c.id === id); s.ci = 0; s.tk = 0;
+    return gsStep(h, d);
+  }
+  function gsStart(h, s, id, i) { // 招式開始：記蓄力段數、精準衝撞後起手已蓄一半、蓄過頭、力量對決讓 Boss 失衡
+    const G = H4.GS, w = h.world, m = GS_CHG.exec(id), say = (t, c) => w.fx.text(h.x, h.y - h.r - 24, t, c, 16);
+    if (m) {
+      const k = m[1], l = +m[2];
+      s.stage = GS_STAGE[k]; s.lv = l;
+      if (s.pt) { s.pt = false; i.t = Math.max(i.t, G.at[k][l - 1] * 0.5); say('保留蓄力', '#ffe27a'); }
+      if (l === 3 && w.rng() < G.overP * (1 - h.def.persona.patience)) { i.over = true; s.stat.over++; say('蓄過頭…', '#bbbbbb'); }
+    } else if (id === 'gs_pclash') {
+      const b = h.enemy; s.stat.clash++; h.stats.h4.clashes++;
+      if (b.state !== 'transition' && b.state !== 'dead') b.setState('stagger', G.clash.stag);
+      w.fx.text((h.x + b.x) / 2, (h.y + b.y) / 2 - 40, '力量對決！', '#ffe27a', 26); w.log(h, '與 ' + b.name + ' 力量對決！', true);
+    } else if (id === 'h4_focus_gs') s.pops = h.stats.h4.pops;
+  }
+
   const DRIVERS = {
     // 太刀：連斬 → 累積氣刃 → 氣刃斬到大回旋升練氣；見切反擊命中接大回旋；紅刃見破綻（或 Boss 倒地時白 / 黃刃）放兜割，紅刃兜割再接無雙斬
     katana: {
@@ -217,26 +275,74 @@
       },
       gauge: (h) => ({ v: h.spirit / h.maxSpirit, color: ['#c8a0ff', '#ffffff', '#ffe27a', '#ff5a4a'][h.hunt.kt.level] }),
     },
-    // 大劍：蓄力 I → 強蓄力 → 真蓄力；連段中看到攻擊來就鐵壁衝撞（減傷 + 相殺）保住段數
+    // 大劍（荒野式）：照連招表 H4.GS_COMBOS 出招（獵人大腦依情境學哪套好）；蓄力等級依 Boss 破綻剩幾秒挑「打得中的最高等級」；
+    //   精準衝撞（相殺）保留蓄力、連消帶打成功 → 追擊十字斬、精準防禦累積 → 力量對決、集中貫通斬破傷口 → 真蓄力，這些「反應後接招」由 H4.GS_AFTER 的表挑
     gs: {
-      init: (h) => ({ lvl: 0 }),
+      init: () => ({ stage: 0, lv: 0, combo: null, ci: 0, tk: 0, off: false, offLv: 1, offT: -9, offH: [], pt: false, ptT: 0, counter: false, pg: 0, clashNeed: H4.GS.clash.need, pops: 0, dec: {},
+        stat: { pt: 0, off: 0, over: 0, strong: 0, clash: 0 } }),
       choose(h, d) {
-        const s = h.h4.drv;
-        if (open(h) || rng(h)() < 0.25 + 0.3 * h.def.persona.patience * (h.controller.punishWindow() > 0.5 ? 1 : 0)) { s.lvl = 1; return pick(h, d, 'gs_c1'); }
-        return rng(h)() < 0.5 ? pick(h, d, 'gs_wide') : null;
+        const sit = bowSit(h), rk = h.def.persona.risk - 0.5, wound = h.world.hunt4.parts.some((P) => P.wound), list = H4.GS_COMBOS.filter((c) => gsOk(h, c, d, sit, wound));
+        if (!list.length) return null;
+        const opts = list.map((c) => ({ id: c.id, name: c.name, prior: c.prior + (c.risk || 0) * rk })), key = `${sit}|${d < 260 ? 'near' : 'mid'}${wound ? '|w' : ''}`;
+        const id = h.brain ? h.brain.pick('combo', key, opts) : opts[0].id, s = h.h4.drv;
+        s.combo = list.find((c) => c.id === id); s.ci = 0; s.tk = 0;
+        return gsStep(h, d);
       },
       next(h, d) {
-        const s = h.h4.drv, id = h.lastSkillId, p = h.def.persona;
-        if (id === 'gs_wide' && rng(h)() < 0.35) { s.lvl = 1; return pick(h, d, 'gs_c1'); }
-        if (!s.lvl || id === 'gs_true') { s.lvl = 0; return null; }
-        const nxt = s.lvl === 1 ? 'gs_c2' : 'gs_true', sk = kv(h, nxt);
-        if (threatIn(h) < sk.v1.windup + 0.2) return pick(h, d, 'gs_tackle'); // 會被打斷 → 先衝撞硬吃
-        if (!keepGoing(h, 0.3 + 0.5 * p.risk)) { s.lvl = 0; return null; }
-        s.lvl++; return pick(h, d, nxt);
+        const s = h.h4.drv, id = h.lastSkillId || '', G = H4.GS;
+        if (s.counter) { // 精準防禦：累積夠了 → 力量對決，否則接蓄力 / 上撈 / 橫掃 / 相殺
+          s.counter = false;
+          if (s.pg >= s.clashNeed) { s.pg = 0; s.clashNeed = Math.min(G.clash.max, s.clashNeed + 1); const c = pick(h, null, 'gs_pclash'); if (c) return c; }
+          return gsAfter(h, 'pg', d);
+        }
+        if (id === 'gs_pclash') return gsAfter(h, 'clash', d);
+        if (s.off && id.startsWith('gs_off')) { s.off = false; return gsAfter(h, 'off', d); }
+        if (id === 'h4_focus_gs') { s.combo = null; return h.stats.h4.pops > s.pops ? gsAfter(h, 'pop', d) : null; }
+        if (!s.combo || !keepGoing(h, 0.85 + 0.1 * h.def.persona.risk)) { s.combo = null; return null; }
+        return gsStep(h, d);
       },
-      react: (h) => (h.h4.drv.lvl ? kv(h, 'gs_tackle') : null),
-      tick(h) { if (h.h4.drv.lvl && h.state !== 'skill' && h.world.time - h.lastSkillEnd > 1) h.h4.drv.lvl = 0; }, // 連段斷了就歸零
-      gauge: (h) => ({ v: h.h4.drv.lvl / 3, color: ['#888', '#ffd08a', '#ffa040', '#ff5a2a'][h.h4.drv.lvl] }),
+      react(h, th) { // 攻擊將至：連段中衝撞保住段數；近戰預警 → 依個性相殺 / 精準防禦 / 交給翻滾（每個威脅只決定一次）
+        const s = h.h4.drv, p = h.def.persona, w = h.world;
+        if (s.stage && w.time - h.lastSkillEnd < 1.2) return kv(h, 'gs_tackle');
+        if (!th || th.kind !== 'tele' || !th.melee || th.undo) return null;
+        if (s.dec[th.key] == null) {
+          if (Object.keys(s.dec).length > 24) s.dec = {};
+          const r = rng(h)();
+          s.dec[th.key] = r < 0.3 + 0.3 * p.risk ? 'gs_off' + (rng(h)() < 0.5 ? 2 : 1) : r < 0.6 + 0.25 * p.patience ? 'gs_guard' : '';
+        }
+        return s.dec[th.key] ? kv(h, s.dec[th.key]) : null;
+      },
+      onOffset(h, sk, boss) { // 相殺成功：衝撞＝精準衝撞（保留蓄力）；連消帶打＝Boss 失衡（近期成功越多越短）→ 結束後接追擊十字斬
+        const s = h.h4.drv, w = h.world, G = H4.GS, say = (t, c) => w.fx.text(h.x, h.y - h.r - 30, t, c, 22);
+        if (sk.id === 'gs_tackle') { s.pt = true; s.ptT = w.time; s.stat.pt++; say('精準衝撞！', '#ffe27a'); return; }
+        const L = +sk.id.slice(-1);
+        if (!(L >= 1)) return;
+        s.offH = s.offH.filter((t) => w.time - t < 12); const n = s.offH.length; s.offH.push(w.time);
+        s.off = true; s.offLv = L; s.offT = w.time; s.stat.off++;
+        if (boss.state !== 'transition' && boss.state !== 'dead') { boss.setState('stagger', (G.offDur + 0.25 * L) / (1 + G.offResist * n)); boss.posture += G.offPost * L; w.checkPostureBreak(boss); }
+        say('連消帶打！', '#fff1a8');
+      },
+      onGuard(h, p) { h.h4.drv.pg += p.dmg >= H4.CLASH.dmg ? 2 : 1; }, // 精準防禦累積：Boss 重擊算兩次
+      tick(h) {
+        const s = h.h4.drv, w = h.world, i = h.inst, id = startOnce(h);
+        if (id) gsStart(h, s, id, i);
+        if (s.counter && i && i.skill.guard) h.comboCancel(); // 精準防禦：立刻收盾，由 next 接招
+        if (s.stage && h.state !== 'skill' && w.time - h.lastSkillEnd > 1) s.stage = 0; // 連段斷了就歸零
+        if (s.combo && h.state !== 'skill' && w.time - h.lastSkillEnd > 1.5) s.combo = null;
+        if (s.pt && w.time - s.ptT > 3) s.pt = false;
+      },
+      hitMul(h, p) { // 過度蓄力打折；真蓄力【強擊】：第一擊命中，第二擊加成
+        const i = h.inst, G = H4.GS;
+        if (!i || p.proj) return 1;
+        return (i.over ? G.over : 1) * (p.ev === 'gs2' && i.strong ? G.strong : 1);
+      },
+      onHit(h, p) {
+        const i = h.inst, s = h.h4.drv;
+        if (!i) return;
+        if (p.ev === 'gs1') i.strong = true;
+        else if (p.ev === 'gs2' && i.strong && !i.shown) { i.shown = true; s.stat.strong++; h.world.fx.text(h.enemy.x, h.enemy.y - h.enemy.r - 56, '強擊！', '#ff9a5a', 20); }
+      },
+      gauge: (h) => ({ v: h.h4.drv.stage / 3, color: ['#888', '#ffd08a', '#ffa040', '#ff5a2a'][h.h4.drv.stage] }),
     },
     // 片手劍：連斬 → 迴旋斬、對頭盾擊、破綻時完美突進、遠了跳躍斬；攻擊來時舉盾（完美防禦 → 反擊）
     sns: {
@@ -636,7 +742,7 @@
     hs.D = D || null; hs.drv = D && D.init ? D.init(h) : {};
     if (!c._choose0) c._choose0 = c.chooseSkill.bind(c);
     c.chooseSkill = (d, win) => { const r = hs.D && hs.D.choose(h, d, win), s = r === false ? null : r || c._choose0(d, win); return s && h.brain ? h.brain.gate(s, d) : s; }; // 驅動回 false＝這次不出招也不用備援；獵人大腦決定出手或等待
-    if (D && D.react) h.react = () => D.react(h); else delete h.react;
+    if (D && D.react) h.react = (th) => D.react(h, th); else delete h.react;
     h.onProj = D && D.onProj ? (p, a) => D.onProj(h, p, a) : null;
   }
   // 招式剛結束 → 問驅動要不要接下一招（每次結束只問一次）
@@ -671,16 +777,19 @@
       if (s.evade && !p.undodgeable && i.t <= s.evade.win) { b.h4.D.onEvade(b, s.evade.perfect != null && i.t <= s.evade.perfect); return 'dodged'; } // 弓：墊步 / 飛燕射擊
       if (s.offset && boss && !p.unblockable && i.t >= s.offset[0] && i.t <= s.offset[1]) {
         b.stats.h4.offsets++; w.hitstop = Math.max(w.hitstop, 0.09); BD.spawnFx(w, 'parry', b.x, b.y, { src: b });
-        if (p.dmg >= H4.CLASH.dmg && boss.state === 'skill') clash(w, b, boss);
+        if (p.dmg >= H4.CLASH.dmg && boss.state === 'skill' && !s.noClash) clash(w, b, boss);
         else { w.fx.text(b.x, b.y - b.r - 30, '相殺！', '#ffffff', 24); if (boss.state !== 'transition') boss.setState('stagger', 0.6); boss.posture += 40; w.checkPostureBreak(boss); }
+        if (b.h4.D && b.h4.D.onOffset) b.h4.D.onOffset(b, s, boss); // 武器接手：大劍的精準衝撞 / 連消帶打
         return 'deflected';
       }
       if (s.guard && !p.unblockable) {
         if (i.t <= s.guard.perfect) {
           b.stats.h4.pguards++; b.h4.drv.counter = true; w.hitstop = Math.max(w.hitstop, 0.07); BD.spawnFx(w, 'parry', b.x, b.y, { src: b });
           w.fx.text(b.x, b.y - b.r - 30, '完美防禦！', '#9fe8ff', 22); if (boss) { boss.posture += 30; w.checkPostureBreak(boss); }
+          if (b.h4.D && b.h4.D.onGuard) b.h4.D.onGuard(b, p, boss); // 大劍：累積力量對決
           return 'deflected';
         }
+        if (s.guard.dull && b.h4.spec.sharp) b.h4.sharp = Math.max(0, b.h4.sharp - s.guard.dull); // 用刀身擋會磨耗斬味
         const G2 = H4.GUARD; b.sta = Math.max(0, b.sta - p.dmg * G2.staPerDmg);
         if (s.guard.block && b.sta > 0) b.h4.drv.counter = true; // 長槍：擋下就反擊
         const chip = b.h4.drv.guardChip != null ? b.h4.drv.guardChip : s.guard.chip != null ? s.guard.chip : G2.chip; // 驅動可臨時覆寫（充能斧盾強化）
