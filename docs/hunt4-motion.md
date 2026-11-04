@@ -97,13 +97,18 @@
 ### 雙刀（快、細、密）
 | 招 | 模板 | 看點 |
 |---|---|---|
-| 二連斬 / 返刃二連 | multi slash | 兩把刀各揮一次（左右手交替） |
-| 車輪斬 db_a3 | spin | — |
+| 二段斬 / 二段斬返 db_n1 / db_n2 | multi slash | 兩把刀各揮一次（左右手交替） |
+| 車輪斬 / 迴轉斬 db_n3 / db_spin | spin | — |
+| 斬拂 db_lunge、跳躍二段斬 db_jump | rush → slash / chop | 斬拂前衝；跳躍斬騰空劈下 |
 | 鬼人化 db_demon | item | 雙刀在胸前交叉一下，之後刀身帶紅光（鬼人化期間） |
-| 鬼人連斬 / 六連斬 | multi slash | 很快的交錯殘影 |
-| 鬼人亂舞 db_flurry | spin 多圈 | 前段原地轉，後段往前推進 |
-| 鬼人突進連斬 db_dash | rush → multi | — |
-| 刃旋・穿傷 | rush → spin | — |
+| 鬼人逆手斬 / 二段斬 / 六段斬 db_d1~d3 | multi slash / spin | 很快的交錯紅色殘影 |
+| 鬼人突進連斬 db_dash、左右移動斬 db_side | rush → multi | 紅色殘影 |
+| 亂舞 I~III db_ra1~3 | spin 2 / 3 / 4 圈 | 紅色殘影，圈數隨階段增加 |
+| 鬼人連斬 I~II db_ar1~2 | spin 2 / 3 圈 | 金色殘影（鬼人強化） |
+| 鬼人迴避 db_dodge、強化迴避 db_dodge_b | item / rush → spin | 側身後仰；身躱時帶藍色殘影一邊閃一邊斬 |
+| 螺旋切割 db_screw、空中回轉亂舞・天 db_heaven | rush → spin | 藍色殘影；天為 4 圈 |
+| 迴天穿刺 db_drill | multi thrust | 藍色殘影 |
+| 集中亂舞【迴天】h4_focus_db | rush → spin | — |
 
 ### 片手劍（輕快，盾要看得見）
 | 招 | 模板 | 看點 |

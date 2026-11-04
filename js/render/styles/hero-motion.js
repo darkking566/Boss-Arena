@@ -109,10 +109,17 @@
     sns_rush: { t: 'rush', then: { t: 'spin', turns: 2 } },
     h4_focus_sns: { t: 'hit', kind: 'thrust', len: 0.8 },
     // 雙刀（鬼人系殘影紅）
-    db_a1: { t: 'hit', side: 1, w: 0.9 }, db_a2: { t: 'hit', side: -1, w: 0.9 }, db_a3: { t: 'spin' },
+    db_n1: { t: 'hit', side: 1, w: 0.9 }, db_n2: { t: 'hit', side: -1, w: 0.9 }, db_n3: { t: 'spin' }, db_spin: { t: 'spin' },
+    db_lunge: { t: 'rush', then: { t: 'hit', side: 1, w: 0.9 } }, db_up: { t: 'hit', kind: 'up' }, db_jump: { t: 'hit', kind: 'chop', airAll: 1 },
     db_demon: { t: 'item', pose: { a: -0.7, reach: 0.1, glow: 0.7 } }, // 雙刀在胸前交叉
-    db_d1: { t: 'hit', side: 1, w: 0.9, trail: '#ff6a5a' }, db_d2: { t: 'spin', turns: 2, trail: '#ff6a5a' }, db_flurry: { t: 'spin', turns: 3, trail: '#ff6a5a' },
-    db_dash: { t: 'rush', trail: '#ff6a5a', then: { t: 'hit', side: 1, w: 0.9 } },
+    db_d1: { t: 'hit', side: 1, w: 0.9, trail: '#ff6a5a' }, db_d2: { t: 'hit', side: -1, w: 0.9, trail: '#ff6a5a' }, db_d3: { t: 'spin', turns: 2, trail: '#ff6a5a' },
+    db_dash: { t: 'rush', trail: '#ff6a5a', then: { t: 'hit', side: 1, w: 0.9 } }, db_spin2: { t: 'spin', turns: 2, trail: '#ff6a5a' }, db_side: { t: 'hit', side: -1, w: 0.9, trail: '#ff6a5a' },
+    db_air: { t: 'rush', air: 1, airAll: 1, trail: '#ff6a5a', then: { t: 'spin', turns: 2, trail: '#ff6a5a' } }, db_airfin: { t: 'hit', kind: 'chop', h: 1.1, trail: '#ff6a5a' },
+    db_ra1: { t: 'spin', turns: 2, trail: '#ff6a5a' }, db_ra2: { t: 'spin', turns: 3, trail: '#ff6a5a' }, db_ra3: { t: 'spin', turns: 4, trail: '#ff6a5a' },
+    db_ar1: { t: 'spin', turns: 2, trail: '#ffd34a' }, db_ar2: { t: 'spin', turns: 3, trail: '#ffd34a' },
+    db_dodge: { t: 'item', pose: { a: 0.2, lean: -0.15, air: 0.04 } }, db_dodge_b: { t: 'rush', trail: '#6ab0ff', then: { t: 'spin', turns: 1, trail: '#6ab0ff' } },
+    db_screw: { t: 'rush', trail: '#6ab0ff', then: { t: 'spin', turns: 2, trail: '#6ab0ff' } },
+    db_heaven: { t: 'rush', air: 1, airAll: 1, trail: '#6ab0ff', then: { t: 'spin', turns: 4, trail: '#6ab0ff' } }, db_drill: { t: 'hit', kind: 'thrust', len: 0.7, trail: '#6ab0ff' },
     h4_focus_db: { t: 'rush', then: { t: 'spin' } },
     // 大錘：錘頭拖在身後蓄力
     ham_c1: { t: 'charge', lv: 1, holdA: 2.2, then: { t: 'hit', kind: 'up' } },

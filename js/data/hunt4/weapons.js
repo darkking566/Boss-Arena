@@ -32,24 +32,6 @@
         [dash(0.08, 70, 0.12), hit(0.2, circle(90), { dmg: 40, posture: 30, kb: 200, dtype: 'blunt' })]),
     ] };
 
-  // ── 雙刀：鬼人化（持續耗體力、招式換成鬼人系）→ 命中累積鬼人槽 → 解除時槽滿進入鬼人強化（亂舞可用、消耗槽）──
-  const demonHit = (n, t0, gap, dmg) => flurry(t0, n, gap, cone(130, 110), { dmg, posture: 6, kb: 50 }, 'slash');
-  const dualblades = { id: 'db', name: '雙刀', el: 'physical', ai: [40, 115], bonus: {}, traits: [],
-    skills: [
-      sk('db_a1', '二連斬', '二連', ['melee', 'fast'], [0, 120], { cost: 0, sw: 'cw', creep: 0.5, recovery: 0.2 }, demonHit(2, 0.12, 0.1, 30)),
-    ],
-    variants: [
-      sk('db_demon', '鬼人化', '鬼人', ['buff'], [0, 400], { cd: 1, cost: 0, track: 0, recovery: 0.25 }, []),
-      sk('db_a2', '返刃二連', '二連', ['melee', 'fast'], [0, 120], { cost: 0, sw: 'ccw', creep: 0.4, recovery: 0.22 }, demonHit(2, 0.1, 0.1, 32)),
-      sk('db_a3', '車輪斬', '車輪', ['melee'], [0, 135], { cost: 0, sw: 'spin', creep: 0.6, recovery: 0.32 }, demonHit(3, 0.12, 0.09, 30)),
-      sk('db_d1', '鬼人連斬', '鬼連', ['melee', 'fast'], [0, 125], { cost: 0, sw: 'cw', creep: 0.6, recovery: 0.18 }, demonHit(4, 0.08, 0.07, 26)),
-      sk('db_d2', '鬼人六連斬', '六連', ['melee'], [0, 130], { cost: 6, sw: 'spin', creep: 0.5, recovery: 0.24 }, demonHit(6, 0.1, 0.065, 25)),
-      sk('db_flurry', '鬼人亂舞', '亂舞', ['melee', 'aoe'], [0, 140], { cost: 22, sw: 'spin', track: 4, recovery: 0.45 },
-        demonHit(10, 0.12, 0.07, 24).concat([hit(0.9, circle(150), { dmg: 70, posture: 30, kb: 260, fx: { id: 'whirl', scale: 1.2 } })])),
-      sk('db_dash', '鬼人突進連斬', '突進', ['melee', 'gap'], [80, 300], { cost: 10, sw: 'thrust', track: 9, recovery: 0.25 },
-        [dash(0.08, 200, 0.16, { iframe: true })].concat(demonHit(3, 0.26, 0.07, 28))),
-    ] };
-
   // ── 片手劍：連斬 → 迴旋斬、盾擊（打擊，可打暈）、防禦（前 0.2 秒為完美防禦 → 自動反擊）、完美突進、跳躍斬 ──
   const sns = { id: 'sns', name: '片手劍', el: 'physical', ai: [40, 125], bonus: {}, traits: [],
     skills: [
@@ -286,15 +268,12 @@
       rs('hbg_reload', '裝填', '裝填', { tags: ['buff'], range: [0, 900], track: 0, recovery: 1.0 }, []),
     ] };
 
-  H4.WEAPON_DEFS = { gs: greatsword, db: dualblades, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive, bow, lightxbow, heavyxbow }; // 太刀用獵魂的武器物件
+  H4.WEAPON_DEFS = { gs: greatsword, sns, hammer, horn, lance, gunlance, switchaxe, chargeblade, glaive, bow, lightxbow, heavyxbow }; // 太刀用獵魂的武器物件
   Object.assign(H4.WEAPON_SPECS, {
     katana: Object.assign(H4.WEAPON_SPECS.katana, { extra: { k_helm: helm, k_musou: musou } }),
     gs: { dtype: 'cut', sharp: 90,
       focus: sk('h4_focus_gs', '破傷・崩斬', '破傷', ['melee'], [0, 190], { cd: 6, sw: 'down', track: 8, recovery: 0.6 },
         [hit(0.5, cone(190, 50), { dmg: 170, posture: 45, kb: 200, focus: true, fx: { id: 'slash', scale: 1.8 } })]) },
-    db: { dtype: 'cut', sharp: 200,
-      focus: sk('h4_focus_db', '刃旋・穿傷', '刃旋', ['melee'], [0, 160], { cd: 6, sw: 'spin', track: 9, recovery: 0.4 },
-        [dash(0.05, 90, 0.12)].concat(flurry(0.18, 4, 0.06, cone(140, 90), { dmg: 22, posture: 6, kb: 30 }, 'slash'), [hit(0.45, cone(150, 80), { dmg: 40, focus: true, posture: 20, kb: 120, fx: 'whirl' })])) },
     sns: { dtype: 'cut', sharp: 160,
       focus: sk('h4_focus_sns', '盾穿・突刺', '盾穿', ['melee'], [0, 170], { cd: 6, sw: 'thrust', track: 9, recovery: 0.4 },
         [dash(0.08, 80, 0.1), hit(0.22, rect(170, 60), { dmg: 60, posture: 30, kb: 160, focus: true, fx: 'thrust' })]) },
@@ -408,7 +387,6 @@
   // 操蟲棍：精華秒數；紅 = 傷害、白 = 移動、橙 = 減傷
   H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
   H4.HORN = { range: 600, dur: 45, heal: 0.05, allHeal: 0.03, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
-  H4.DEMON = { drain: 7, exitAt: 0.25, gaugePerHit: 2.2, archDrain: 2, flurryCost: 30, dmgMul: 1.15 }; // 雙刀：鬼人化每秒耗體力、體力低於此比例自動解除（留翻滾的體力）、每次命中加鬼人槽、鬼人強化每秒掉槽、亂舞耗槽、鬼人化傷害倍率
   // 普攻耗體力：原本 cost 0 的近戰招改耗 收招秒數 × perRec（至少 min）；skip＝獎勵 / 資源型招式維持免費（反擊、砲擊吃彈、龍擊砲吃冷卻）
   H4.BASIC_STA = { perRec: 25, min: 4, skip: ['sns_counter', 'lance_counter', 'gl_shell', 'gl_wf'] };
   H4.STA_REGEN_MUL = 0.6; // 獵人體力回復倍率（獵魂基礎每秒 34 → 約 20）

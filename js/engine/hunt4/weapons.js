@@ -238,36 +238,6 @@
       tick(h) { if (h.h4.drv.lvl && h.state !== 'skill' && h.world.time - h.lastSkillEnd > 1) h.h4.drv.lvl = 0; }, // 連段斷了就歸零
       gauge: (h) => ({ v: h.h4.drv.lvl / 3, color: ['#888', '#ffd08a', '#ffa040', '#ff5a2a'][h.h4.drv.lvl] }),
     },
-    // 雙刀：鬼人化耗體力、命中累積鬼人槽；體力見底解除，槽滿進入鬼人強化（亂舞耗槽）
-    db: {
-      init: (h) => ({ demon: false, arch: false, gauge: 0, dealt: 0 }),
-      choose(h, d) {
-        const s = h.h4.drv, p = h.def.persona;
-        if (!s.demon && h.sta > h.maxSta * (0.95 - 0.3 * p.risk)) return kv(h, 'db_demon');
-        if ((s.demon || s.arch && s.gauge >= H4.DEMON.flurryCost) && open(h) && h.sta > 30) { const f = pick(h, d, 'db_flurry'); if (f) return f; }
-        if (d > 140) return pick(h, d, 'db_dash');
-        return pick(h, d, s.demon ? 'db_d1' : 'db_a1');
-      },
-      next(h, d) {
-        const s = h.h4.drv, id = h.lastSkillId, p = h.def.persona;
-        if (threatIn(h) < 0.35 || !keepGoing(h, 0.5 + 0.4 * p.risk)) return null;
-        const chain = s.demon ? { db_d1: 'db_d2', db_d2: 'db_flurry', db_dash: 'db_d1', db_flurry: 'db_d1' } : { db_a1: 'db_a2', db_a2: 'db_a3', db_dash: 'db_a1' };
-        return chain[id] ? pick(h, d, chain[id], s.demon ? 'db_d1' : 'db_a1') : null;
-      },
-      tick(h, dt) {
-        const s = h.h4.drv, D = H4.DEMON, i = h.inst;
-        if (i && i.skill.id === 'db_demon' && !i.h4done) { i.h4done = true; s.demon = !s.demon; if (s.demon) h.world.fx.text(h.x, h.y - h.r - 24, '鬼人化！', '#ff4a4a', 18); }
-        if (i && i.skill.id === 'db_flurry' && !i.h4done && !s.demon) { i.h4done = true; s.gauge -= D.flurryCost; }
-        const got = h.stats.dealt - s.dealt; s.dealt = h.stats.dealt;
-        if (s.demon) {
-          h.sta -= D.drain * dt; h.staDelay = Math.max(h.staDelay, 0.2);
-          if (got > 0) s.gauge = Math.min(100, s.gauge + D.gaugePerHit);
-          if (h.sta <= h.maxSta * D.exitAt) { s.demon = false; if (s.gauge >= 100) { s.arch = true; h.world.fx.text(h.x, h.y - h.r - 24, '鬼人強化', '#ffd34a', 18); } }
-        } else if (s.arch && (s.gauge -= D.archDrain * dt) <= 0) { s.arch = false; s.gauge = 0; }
-        h.dmgMul = h.hunt.baseDmg * (s.demon ? D.dmgMul : 1); h.def.dodgeCost = s.demon || s.arch ? 10 : 20; // 鬼人迴避：翻滾更省體力
-      },
-      gauge: (h) => { const s = h.h4.drv; return { v: s.gauge / 100, color: s.demon ? '#ff4a4a' : s.arch ? '#ffd34a' : '#a06060' }; },
-    },
     // 片手劍：連斬 → 迴旋斬、對頭盾擊、破綻時完美突進、遠了跳躍斬；攻擊來時舉盾（完美防禦 → 反擊）
     sns: {
       init: (h) => ({ counter: false }),

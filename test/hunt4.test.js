@@ -113,16 +113,40 @@ for (const mains of [null, { rin: 'hammer', mari: 'horn', yuzu: 'lance', selena:
   w.damageBoss(b, mari, { dmg: 200 }); assert.ok(mari.stats.h4.clashes === 1, '大招式相殺 → 力量對抗');
   run(w, 1.5); assert.ok(b.state === 'knockdown' || mari.hp < hp, '力量對抗有結果');
 }
-// 雙刀：鬼人化耗體力、鬼人槽累積、體力見底解除時槽滿 → 鬼人強化
+// 雙刀（荒野式）：鬼人化耗體力、命中累積鬼人槽、槽滿取得鬼人強化（與鬼人化並存）、亂舞 / 鬼人連斬耗槽並切換鬼人化、精準迴避 → 鬼人身躱 → 迴避後連招、集中亂舞後的兩種終結
 {
-  const w = make('ronin', 7), st = w.hunt4, b = st.boss, yuzu = st.hunters[2], s = () => yuzu.h4.drv;
+  const w = make('ronin', 7), st = w.hunt4, b = st.boss, yuzu = st.hunters[2], s = () => yuzu.h4.drv, D = yuzu.h4.D, K = (id) => yuzu.h4.kv[id], DM = H4.DEMON;
+  const go = (id, sec) => { yuzu.cancelSkill(); yuzu.state = 'idle'; yuzu.sta = yuzu.maxSta; assert.ok(yuzu.startSkill(K(id), { force: true }), id); run(w, sec || 0.05); };
+  const near = () => { b.x = 3000; b.y = 1800; yuzu.x = b.x - 60 - grow(b); yuzu.y = b.y; yuzu.face = 0; };
   run(w, 1); yuzu.state = 'idle'; yuzu.sta = yuzu.maxSta;
-  yuzu.startSkill(yuzu.h4.kv.db_demon, { force: true }); run(w, 0.3);
-  assert.ok(s().demon, '鬼人化');
+  go('db_demon', 0.3); assert.ok(s().demon, '鬼人化');
   const sta = yuzu.sta; run(w, 1); assert.ok(yuzu.sta < sta, '鬼人化耗體力');
-  s().gauge = 99; b.x = 3000; b.y = 1800; yuzu.x = b.x - 60 - grow(b); yuzu.y = b.y; b.setState('stun', 3); yuzu.face = 0; yuzu.state = 'idle'; yuzu.startSkill(yuzu.h4.kv.db_d1, { force: true }); run(w, 0.5);
-  assert.ok(s().gauge >= 100, '命中累積鬼人槽');
-  yuzu.sta = 1; run(w, 0.1); assert.ok(!s().demon && s().arch, '體力見底 → 鬼人強化');
+  s().gauge = 99; near(); b.setState('stun', 3); go('db_d1', 0.5);
+  assert.ok(s().arch && s().demon, '槽滿 → 鬼人強化，與鬼人化並存');
+  s().gauge = 60; go('db_ra2'); assert.ok(s().gauge > 38 && s().gauge <= 40 && s().demon, '亂舞 II 耗鬼人槽 20');
+  s().gauge = 60; go('db_ar1'); assert.ok(!s().demon && s().arch && s().gauge <= 40, '鬼人連斬：解除鬼人化（R2 派生）、耗槽');
+  yuzu.h4.drv.prev = 'db_ar1'; go('db_ra2'); assert.ok(s().demon, '連斬後 R2 接亂舞：回到鬼人化');
+  s().gauge = 5; s().arch = false; s().demon = true; go('db_d1', 0.5); const g0 = s().gauge; go('db_ra1', 0.8); assert.ok(s().gauge <= g0 + 0.01, '亂舞不累積鬼人槽');
+  // 精準迴避 → 鬼人身躱
+  s().boost = 0; s().after = false; near(); b.setState('idle', 0); go('db_dodge'); yuzu.inst.t = 0.05; let hp = yuzu.hp;
+  assert.strictEqual(w.damageBoss(b, yuzu, { dmg: 50 }), 'dodged'); assert.ok(yuzu.hp === hp && s().boost === H4.DEMON.boost.dur && s().after, '精準迴避：免傷、鬼人身躱、準備迴避後連招');
+  go('db_dodge'); yuzu.inst.t = 0.2; s().boost = 0; assert.strictEqual(w.damageBoss(b, yuzu, { dmg: 50 }), 'dodged'); assert.ok(s().boost === 0, '開頭之後的迴避只是閃避、沒有身躱');
+  go('db_dodge'); s().boost = 10; yuzu.inst.t = 0.05; w.damageBoss(b, yuzu, { dmg: 50 }); assert.strictEqual(s().boost, 10 + DM.boost.ext, '再次精準迴避延長身躱');
+  s().boost = DM.boost.cap - 1; go('db_dodge'); yuzu.inst.t = 0.05; w.damageBoss(b, yuzu, { dmg: 50 }); assert.strictEqual(s().boost, DM.boost.cap, '身躱有上限');
+  s().demon = true; s().arch = true; s().gauge = 80; s().boost = 10; yuzu.sta = yuzu.maxSta; yuzu.state = 'idle'; run(w, 0.05);
+  assert.ok(Math.abs(yuzu.dmgMul / yuzu.hunt.baseDmg - DM.dmgMul * DM.boost.atk) < 1e-9, '鬼人化 × 身躱的物理倍率');
+  yuzu.lastSkillId = 'db_dodge'; s().after = true; s().combo = null; b.setState('stun', 3); near();
+  const nx = D.next(yuzu, 100); assert.ok(nx && s().combo && s().combo.after, '精準迴避後直接挑「迴避後」連招：' + (nx && nx.id));
+  s().boost = 0.05; run(w, 0.2); assert.strictEqual(s().boost, 0, '身躱時間到結束');
+  // 集中亂舞【迴天】：打破傷口回耐力、接空中回轉亂舞・天 / 迴天穿刺
+  yuzu.lastSkillId = 'h4_focus_db'; s().fp = yuzu.stats.h4.pops; assert.strictEqual(D.next(yuzu, 100), null, '沒打破傷口不接終結');
+  yuzu.stats.h4.pops++; const fz = D.next(yuzu, 100); assert.ok(fz && /^db_(heaven|drill)$/.test(fz.id), '打破傷口接終結：' + (fz && fz.id));
+  yuzu.sta = 10; yuzu.stats.h4.pops++; run(w, 0.05); assert.ok(yuzu.sta > 30, '打破傷口回耐力');
+  // 連招表
+  const TOK = new Set(['a1', 'a2', 'a3', 'o1', 'o2', 'o3', 'up', 'side', 'ra1', 'ra2', 'ra3', 'ar1', 'ar2', 'on', 'off', 'dodge', 'screw', 'jump', 'air', 'airfin']);
+  assert.ok(H4.DB_COMBOS.length >= 40 && new Set(H4.DB_COMBOS.map((c) => c.id)).size === H4.DB_COMBOS.length, '雙刀連招表 ≥ 40 套、id 不重複');
+  for (const c of H4.DB_COMBOS) assert.ok(c.seq.every((t) => TOK.has(t)) && c.when.length && c.prior > 0, '連招合法：' + c.id);
+  assert.ok(H4.DB_COMBOS.filter((c) => c.after).length >= 8, '迴避後連招 ≥ 8 套');
 }
 // 片手劍：完美防禦免傷並接反擊；一般防禦減傷
 {
