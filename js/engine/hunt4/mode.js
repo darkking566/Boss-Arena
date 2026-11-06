@@ -264,7 +264,7 @@
     const hunters = w.bosses.filter((b) => b.team === 0), boss = w.bosses.find((b) => b.team === 1);
     for (const h of hunters) BD.huntUnit(h, true);
     boss.maxHp = boss.hp = boss.hpTrail = Math.round(boss.maxHp * H4.BOSS_HP_MUL); boss.maxPosture *= H4.POSTURE_MUL;
-    boss.r *= H4.BOSS_SIZE; boss.sizeMul = H4.BOSS_SIZE;
+    boss.r *= H4.BOSS_SIZE; boss.sizeMul = (boss.sizeMul || 1) * H4.BOSS_SIZE;
     w.enrageAt = Infinity; // 以時限取代狂暴
     const st = arm(w, hunters, boss, false);
     BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); BD.H4Gear.install(w, st); // 沒給存檔 = 全新的獵人（沒有裝備）

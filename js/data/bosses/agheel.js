@@ -39,7 +39,7 @@
     desc: '盤踞寧姆格福亞基爾湖、龍燒廢墟上空的飛龍——古龍衰弱的後裔，前肢化為一對巨大翅膀，翼緣像燒焦的羽毛般層層剝落。灰黑的鱗甲、頭上兩支長角與鼻角、背脊一排尖棘，長尾末端如破旗。湖畔的流浪貴族朝天祈禱，盼牠的龍焰把自己燒成灰。牠會踏地、撕咬、甩尾、以翅膀拍擊，退到半空俯衝，或從天上噴下整片火海。被動「翼風驅逐」（改編）：每挨 4 下，振翼颳起帶火星的強風把近身者吹開。',
     color: '#5a524c', color2: '#211d1c', glow: '#ff8a2a', style: 'agheel',
     rank: 'boss', stars: 4,
-    radius: 96, maxHp: 2800, speed: 205, turn: 3.4, mass: 2.6, fxEl: 'fire', hurt: 'flesh',
+    radius: 96, sizeMul: 1.6, maxHp: 2800, speed: 205, turn: 3.4, mass: 2.6, fxEl: 'fire', hurt: 'flesh',
     traits: ['dragonwing'],
     stamina: { max: 160, regen: 32 }, posture: 240, dodgeCost: 26, dodgeSpeed: 460,
     ai: {

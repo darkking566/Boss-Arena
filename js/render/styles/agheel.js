@@ -154,9 +154,9 @@
   }
   R.defineBossStyle('agheel', {
     body(g, o, t, k) {
-      const h = elev(o.inst);
+      const h0 = elev(o.inst), h = h0 * k.r / 96; // 飛行高度跟著體型（sizeMul）等比放大
       g.save();
-      if (h) { g.translate(-Math.sin(o.face) * h, -Math.cos(o.face) * h); const s = 1 + h / 600; g.scale(s, s); }
+      if (h) { g.translate(-Math.sin(o.face) * h, -Math.cos(o.face) * h); const s = 1 + h0 / 600; g.scale(s, s); }
       dragon(g, o, t, k.r, k.st, h > 20); g.restore();
     },
     hidden(g, b, t) { // 升空（三拍俯衝 / 大招）：地上一團陰影跟著落點走，龍在空中振翼
@@ -168,7 +168,7 @@
       const x = b.x + (mark.x - b.x) * q, y = b.y + (mark.y - b.y) * q, hgt = p < 0.75 ? 60 + 150 * Math.sin(Math.min(1, p / 0.4) * Math.PI / 2) : 210 * (1 - (p - 0.75) / 0.25);
       g.save(); g.fillStyle = 'rgba(0,0,0,' + (0.18 + 0.25 * (1 - hgt / 210)) + ')';
       g.beginPath(); g.ellipse(x, y, b.r * (1.6 + hgt / 300), b.r * (1.1 + hgt / 400), 0, 0, TAU); g.fill(); g.restore();
-      g.save(); g.translate(x, y - hgt); g.rotate(U.angTo({ x, y }, mark) || b.face); const s = 1 + hgt / 900; g.scale(s, s);
+      g.save(); g.translate(x, y - hgt * b.r / 96); g.rotate(U.angTo({ x, y }, mark) || b.face); const s = 1 + hgt / 900; g.scale(s, s);
       dragon(g, b, t, b.r, 'skill', true); g.restore();
     },
   });

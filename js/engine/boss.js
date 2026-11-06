@@ -33,7 +33,8 @@
     constructor(world, def, team, x, y) {
       this.world = world; this.def = def; this.team = team; this.isBoss = true;
       this.x = x; this.y = y; this.vx = 0; this.vy = 0; this.kbx = 0; this.kby = 0;
-      this.r = def.radius; this.face = team === 0 ? 0 : Math.PI; this.wantFace = this.face;
+      this.r = def.radius * (def.sizeMul || 1); if (def.sizeMul) this.sizeMul = def.sizeMul; // sizeMul：巨型 Boss，碰撞與招式範圍一起放大
+      this.face = team === 0 ? 0 : Math.PI; this.wantFace = this.face;
       this.maxHp = def.maxHp; this.hp = def.maxHp; this.hpTrail = def.maxHp;
       this.phase = 1; this.maxSta = def.stamina.max; this.sta = this.maxSta; this.staDelay = 0;
       this.maxPosture = def.posture; this.posture = 0; this.postureDelay = 0;
