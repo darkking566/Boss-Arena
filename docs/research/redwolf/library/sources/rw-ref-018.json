@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-018",
+  "image_sha256": "1af11f198c047e636d70e318b91aa241737254fb93e9b9b1477eb792c9d5d96d",
+  "image_url": "https://www.gamepressure.com/elden-ring/gfx/word/1125502875.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-018.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:20.904052+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-018 紅狼・動作",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-018 紅狼・動作"
+    }
+  ],
+  "url": "https://www.gamepressure.com/elden-ring/red-wolf-of-radagon/z7f7a9",
+  "use": "reference-only"
+}

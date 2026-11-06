@@ -193,8 +193,9 @@ npm run validate     # 資料檢查：動作/召喚物/樣式/特性是否已註
 npm run sim          # 全配對無頭對戰（可加種子：node test/sim.js 1,2,3,4,5,6）
 python3 test/browser_test.py   # headless Chrome（file://）；CHROME_PATH 可指定瀏覽器，BD_SHOTS 可指定截圖目錄
 ```
-`npm run fingerprint` 會比對 `test/baseline-fingerprint.json`（重構前的逐幀行為指紋）；新增 Boss 後配對數改變，
-若要以新狀態為基準，執行 `node test/fingerprint.js > test/baseline-fingerprint.json` 重新產生。
+`npm run fingerprint` 會比對 `test/baseline-fingerprint.json`（歷史版本的逐幀行為指紋）。新增 Boss 時，舊 Boss 的配對仍嚴格比較，
+新增配對會實際模擬並另列數量，但不冒稱有歷史指紋。新 Boss 的時序、死亡清理、換目標與模式整合要另加專屬測試（例：`npm run test:redwolf`）。
+不要為了讓新增 Boss 通過而重新產生正式基準；只有另外取得明確授權、刻意接受既有行為變更時才更新基準。
 
 ## 7. 戰鬥節奏（沉重版）
 

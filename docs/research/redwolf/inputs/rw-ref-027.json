@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-027",
+  "kind": "image",
+  "title": "rw-ref-027 紅狼・咬劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.ggrecon.com/articles/elden-ring-red-wolf-boss-fight/",
+  "image_url": "https://www.ggrecon.com/media/hkbpaqs4/elden-ring-red-wolf-boss-fight-sword.jpg?format=webp",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-03.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-027.jpg",
+  "image_sha256": "76b2e77dca10f3ba88aef01361a64ec4fcca23640aa678688d6bbaeb011bd93e"
+}

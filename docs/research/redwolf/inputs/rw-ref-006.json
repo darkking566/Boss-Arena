@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-006",
+  "kind": "image",
+  "title": "rw-ref-006 紅狼・咬劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.eurogamer.pt/elden-ring-red-wolf-of-radagon-dicas-e-estrategias-para-derrotar-o-boss",
+  "image_url": "https://assetsio.gnwcdn.com/elden_ring_red_wolf__slash_D7PCedC.png?width=2048&height=2048&fit=bounds&quality=85&format=jpg&auto=webp",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-006.jpg",
+  "image_sha256": "43e6c49e1f0a9c4f6ab9ac15b1e256ad951eb2d46b7e0e1587971e21c112ab9a"
+}

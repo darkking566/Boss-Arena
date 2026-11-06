@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-023",
+  "image_sha256": "68db10792618db80a2760663022d832137b1d1c704c24fe7ffee3159ba296f0a",
+  "image_url": "https://cdn.mos.cms.futurecdn.net/fdMZtZVUZgQbJ7cvPTgtPH.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-023.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:21.785844+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-023 紅狼・輝劍",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-023 紅狼・輝劍"
+    }
+  ],
+  "url": "https://www.gamesradar.com/elden-ring-red-wolf-of-radagon-boss-fight/",
+  "use": "reference-only"
+}

@@ -37,6 +37,8 @@
   // 每位 Boss 的裝備主題：屬性（el）或異常（ail），都沒有 = 無屬性（攻擊額外 +6%）；武器特性、防具技能、套裝
   const T = (el, wt, sk, set) => ({ [el && H4.AILMENTS[el] ? 'ail' : 'el']: el, wt, sk, set });
   H4.BOSS_GEAR = {
+    agheel: T('fire', 'siege', 'guard', 'berserk'), // 原作龍焰（火）
+    redwolf: T(null, 'sharp', 'evade', 'timegap'), // 原作沒有本模式的五行屬性；裝備採機動 / 利刃主題
     magmus: T('fire', 'magma', 'guard', 'berserk'), witch: T('ice', 'sharp', 'evade', 'timegap'), ronin: T('paralysis', 'swallow', 'offguard', 'timegap'),
     brood: T('poison', 'leech', 'weakex', 'guardian'), watcher: T('dragon', 'exploit', 'combo', 'berserk'), lubu: T('blast', 'siege', 'challenger', 'berserk'),
     gundyr: T('paralysis', 'siege', 'guard', 'undying'), thor: T('thunder', 'chain', 'challenger', 'storm'), zed: T('dragon', 'exploit', 'combo', 'timegap'),

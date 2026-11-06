@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-033",
+  "kind": "image",
+  "title": "rw-ref-033 紅狼・動作",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.dexerto.com/elden-ring/how-to-beat-red-wolf-of-radagon-in-elden-ring-1771010/",
+  "image_url": "https://www.dexerto.com/cdn-image/wp-content/uploads/2023/12/07/elden-ring-red-wolf-of-radagon.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-03.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-033.jpg",
+  "image_sha256": "2bf04bb86694bf8a3a936f19aa024e42a643e22b0074e62ae442c6a53dfa6b5b"
+}

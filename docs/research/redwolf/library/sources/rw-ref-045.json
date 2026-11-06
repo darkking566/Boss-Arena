@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-045",
+  "image_sha256": "0bd71a480de82bc92c7c91abf1a5b03cfcd71b12ad492ffb3470460f8791774c",
+  "image_url": "https://livedoor.blogimg.jp/kaitekigamelife/imgs/4/3/43c3409c-s.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-04.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-045.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:24.849363+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-045 紅狼・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-045 紅狼・外觀"
+    }
+  ],
+  "url": "https://okirakugamelife.blog.jp/archives/14337179.html",
+  "use": "reference-only"
+}

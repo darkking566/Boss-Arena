@@ -194,6 +194,8 @@
       u.roared = false;
       u.lastDodgeStart = -9;
       u.alive = true;
+      if (u._glintblades) u._glintblades.length = 0;
+      BD.traitHook(u, 'onReset', this.w, u);
     }
 
     reset() {

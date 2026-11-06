@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-031",
+  "image_sha256": "49f7e9d3190e96e1c3d24d07378a73b810e3c986774c58ab1576785ce9b0356e",
+  "image_url": "https://www.famitsu.com/images/000/254/849/z_6231b78e81b9c.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-03.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-031.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:22.787757+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-031 紅狼・咬劍",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-031 紅狼・咬劍"
+    }
+  ],
+  "url": "https://www.famitsu.com/news/202203/16254849.html",
+  "use": "reference-only"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-001",
+  "kind": "image",
+  "title": "rw-ref-001 紅狼・外觀",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://eip.gg/elden-ring/guides/how-to-beat-the-red-wolf-of-radagon/",
+  "image_url": "https://eip.gg/wp-content/uploads/2022/03/Red-Wolf-Radagon-Boss-Elden-Ring-Featured-Image.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-001.jpg",
+  "image_sha256": "57550ca779b0f86dc6e44d17f26e82b4671fd546ecebd7129e9423873b516771"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-002",
+  "kind": "image",
+  "title": "rw-ref-002 紅狼・咬劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://eip.gg/elden-ring/guides/how-to-beat-the-red-wolf-of-radagon/",
+  "image_url": "https://eip.gg/wp-content/uploads/2022/03/Sword-Attack-Radagon-Wolf-Elden-Ring-1024x572.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-002.jpg",
+  "image_sha256": "6d4e960d6e1cfc1928bb86c30bd3c4da42bfb32e4390b34758d1fbec17df4cb6"
+}

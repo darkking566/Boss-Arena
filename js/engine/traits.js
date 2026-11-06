@@ -6,6 +6,7 @@
 //   tyrant：大海暴君（波賽頓）——每挨 4 下動怒（傷害與速度短暫提升）
 //   reflect：神虛視（亞當）——見切架式（counter 動作帶 reflect:true）看穿對手出招時，把整招複製成自己的反擊；二階段過載、將死時死立不倒
 //   phantomarms：黃金幻影（瑪爾基特）——每挨 3 下，自動朝攻擊者擲出一把黃金短刀
+//   dragonwing：翼風驅逐（飛龍亞基爾，改編）——每挨 4 下，振翼颳起帶火星的強風把近身者吹開
 //   grafted：接肢（葛瑞克）——每揮 3 下，背上接來的手臂追加一記爪掃；二階段換成左臂龍頭的火咬
 (function (G) {
   const BD = G.BD, K = BD.K;
@@ -283,6 +284,23 @@
       });
       return null; // 只計數，不攔截傷害
     },
+  });
+
+  // ── dragonwing：翼風驅逐（飛龍亞基爾，改編）——每挨 4 下（非持續傷害），0.25 秒後振翼颳起帶火星的強風：身邊一圈小傷害 + 擊退 + 短燃燒 ──
+  BD.defineTrait('dragonwing', {
+    interceptDamage(w, b, src, p) {
+      if (p.dot || !src || BD.getMod(b, 'invuln')) return null;
+      if ((b._wingbeat = (b._wingbeat || 0) + 1) < 4) return null;
+      b._wingbeat = 0;
+      w.later(0.25, () => {
+        if (b.state === 'dead' || b.state === 'transition' || BD.hasStatus(b, 'hidden')) return;
+        const r = b.r + 120;
+        BD.spawnFx(w, 'agheelgust', b.x, b.y, { src: b, radius: r });
+        w.applyArea(b, { kind: 'circle', x: b.x, y: b.y, r }, { dmg: 34, posture: 12, kb: 420, status: { id: 'burn', dur: 2 } });
+      });
+      return null; // 只計數，不攔截傷害
+    },
+    onReset(w, b) { b._wingbeat = 0; },
   });
 
   // ── grafted：接肢（葛瑞克）——每 3 個 hit 動作（多段噴火不算），0.2 秒後背上的手臂從左側追加一記爪掃；二階段換成龍頭火咬（燃燒）──

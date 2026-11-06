@@ -1,0 +1,26 @@
+{
+  "author": "DanielD / EIP Gaming",
+  "characters": 49,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2022-03-24; updated 2022-05-25",
+  "id": "eip-moves",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Read through web search/page tools on 2026-11-07; only a short exact verification excerpt retained.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:25.606977+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Short excerpt and original notes for reference; no full article retained.",
+  "text_sha256": "cdde4c4ecb94cb897a762f7e6f8123025284cf17ee462a092be6a2cfe6dde521",
+  "title": "EIP Gaming — How to Beat the Red Wolf of Radagon",
+  "units": [
+    {
+      "end": 49,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Sword Spin – The boss spawns a sword in its mouth"
+    }
+  ],
+  "url": "https://eip.gg/elden-ring/guides/how-to-beat-the-red-wolf-of-radagon/"
+}

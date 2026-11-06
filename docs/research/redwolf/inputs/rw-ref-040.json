@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-040",
+  "kind": "image",
+  "title": "rw-ref-040 紅狼・動作",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://sirusgaming.com/elden-ring-red-wolf-of-radagon-boss-fight-guide/",
+  "image_url": "https://sirusgaming.com/wp-content/uploads/2022/03/elden-ring-red-wolf_0001_Layer-2.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-04.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-040.jpg",
+  "image_sha256": "90d5763fa99eb593d5b93d319416339ba48f4a250582165b2c83029636b13c7a"
+}

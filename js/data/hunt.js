@@ -109,6 +109,8 @@
   };
   // 每位 Boss：short 套裝簡稱、arch 原型、passive 被動（靈魂解鎖後可裝備）、set2 / set4 套裝獎勵
   const BOSS_META = {
+    agheel: { short: '飛龍', arch: 'bulwark', passive: { name: '翼風驅逐', mods: { def: 0.06, hp: 60 } }, set2: { name: '焚灰之翼', mods: { hp: 120 } }, set4: { name: '龍心熾燃', mods: { dmg: 0.1, def: 0.06 } } },
+    redwolf: { short: '紅狼', arch: 'swift', passive: { name: '獵步留輝', mods: { spd: 0.04, cdr: 0.05 } }, set2: { name: '紅鬃金飾', mods: { sta: 15 } }, set4: { name: '輝劍獵場', mods: { cdr: 0.08, spd: 0.05 } } },
     magmus: { short: '熔岩', arch: 'bulwark', passive: { name: '熔岩之軀', mods: { def: 0.08, hp: 60 } }, set2: { name: '熔岩護佑', mods: { hp: 120 } }, set4: { name: '不滅熔核', mods: { def: 0.1, dmg: 0.08 } } },
     witch: { short: '霜月', arch: 'arcane', passive: { name: '霜月加護', mods: { mana: 30, manaRegen: 0.2 } }, set2: { name: '寒霜吐息', mods: { mana: 40 } }, set4: { name: '絕對零度', mods: { cdr: 0.12, manaRegen: 0.3 } } },
     ronin: { short: '影刃', arch: 'swift', passive: { name: '見切之心', mods: { spd: 0.05, cdr: 0.05 } }, set2: { name: '無聲步法', mods: { spd: 0.04 } }, set4: { name: '百鬼夜行', mods: { spd: 0.06, dmg: 0.1 } } },

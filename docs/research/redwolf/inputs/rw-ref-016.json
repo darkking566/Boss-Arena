@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-016",
+  "kind": "image",
+  "title": "rw-ref-016 紅狼・輝劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.gamepressure.com/elden-ring/red-wolf-of-radagon/z7f7a9",
+  "image_url": "https://www.gamepressure.com/elden-ring/gfx/word/1125502843.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-02.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-016.jpg",
+  "image_sha256": "4c7db29746f6f1dde5c199307e30542af8f95a290fc6e779080f7a53ac108d29"
+}

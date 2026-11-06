@@ -1,0 +1,26 @@
+{
+  "author": "Creative Uncut; gallery lists FromSoftware",
+  "characters": 30,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "web edition retrieved 2026-11-07",
+  "id": "creativeuncut-catalog",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Read through web search/page tools on 2026-11-07; only a short exact verification excerpt retained.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:26.289209+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Short excerpt and original notes for reference; no full article retained.",
+  "text_sha256": "2ecb1b895a6b794e88968f0f20227b43625984aa0cbea91f9b676c0ace92d575",
+  "title": "Creative Uncut — Lesser Red Wolf of Radagon Art",
+  "units": [
+    {
+      "end": 30,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Lesser Red Wolf of Radagon Art"
+    }
+  ],
+  "url": "https://www.creativeuncut.com/gallery-43/er-lesser-red-wolf-of-radagon.html"
+}

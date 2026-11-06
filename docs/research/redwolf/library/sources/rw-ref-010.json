@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-010",
+  "image_sha256": "59adb6237de273853395bee48910a21b9a829a51a9792f0236b8e48f977a5b5e",
+  "image_url": "https://assetsio.gnwcdn.com/er_00365.jpg?width=1200&height=630&fit=crop&enable=upscale&auto=webp",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-01.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-010.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:20.216273+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-010 紅狼・咬劍",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-010 紅狼・咬劍"
+    }
+  ],
+  "url": "https://www.eurogamer.pl/elden-ring-rudy-wilk-radagona",
+  "use": "reference-only"
+}

@@ -1,0 +1,26 @@
+{
+  "author": "Joel Franey / GamesRadar+",
+  "characters": 41,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "web edition retrieved 2026-11-07",
+  "id": "gamesradar-delay",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Read through web search/page tools on 2026-11-07; only a short exact verification excerpt retained.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:25.845869+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Short excerpt and original notes for reference; no full article retained.",
+  "text_sha256": "99b4d2c9c60875d9619c867480fc15f2800b7ea2ca7fa5605530b8a99a69be2b",
+  "title": "GamesRadar+ — Red Wolf of Radagon boss fight",
+  "units": [
+    {
+      "end": 41,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "the Wolf often uses this window to attack"
+    }
+  ],
+  "url": "https://www.gamesradar.com/elden-ring-red-wolf-of-radagon-boss-fight/"
+}

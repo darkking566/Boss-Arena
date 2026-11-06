@@ -1,0 +1,26 @@
+{
+  "author": "eXputer",
+  "characters": 64,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "web edition retrieved 2026-11-07",
+  "id": "exputer-phase",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Read through web search/page tools on 2026-11-07; only a short exact verification excerpt retained.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:26.083289+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Short excerpt and original notes for reference; no full article retained.",
+  "text_sha256": "1c899e95b65acd9519b2b6c60e3081750496c63be6a59e787b1c36ebfa3f2756",
+  "title": "eXputer — Red Wolf of Radagon",
+  "units": [
+    {
+      "end": 64,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "The encounter is best understood as one continuing combat phase."
+    }
+  ],
+  "url": "https://eldenring.exputer.com/characters/red-wolf-of-radagon"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-031",
+  "kind": "image",
+  "title": "rw-ref-031 紅狼・咬劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.famitsu.com/news/202203/16254849.html",
+  "image_url": "https://www.famitsu.com/images/000/254/849/z_6231b78e81b9c.jpg",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-03.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-031.jpg",
+  "image_sha256": "49f7e9d3190e96e1c3d24d07378a73b810e3c986774c58ab1576785ce9b0356e"
+}

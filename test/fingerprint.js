@@ -68,8 +68,15 @@ function runOne(job) {
 function emit(results) {
   const out = {};
   for (let i = 0; i < jobs.length; i++) out[`${jobs[i].a}-${jobs[i].b}-s${jobs[i].seed}`] = results[i];
-  if (CHECK) process.exit(compare(JSON.parse(fs.readFileSync(BASE, 'utf8')), out) ? 1 : 0);
-  if (CHECK_HEAVY) process.exit(compare(JSON.parse(fs.readFileSync(BASE_HEAVY, 'utf8')), out) ? 1 : 0);
+  if (CHECK || CHECK_HEAVY) {
+    const baseline = JSON.parse(fs.readFileSync(CHECK_HEAVY ? BASE_HEAVY : BASE, 'utf8'));
+    const oldIds = new Set(Object.keys(baseline).flatMap((k) => k.split('-').slice(0, 2)));
+    // 新 Boss 沒有歷史指紋；舊配對仍逐幀嚴格比較，刪除 / 改名舊 Boss 仍會失敗。不要重寫正式基準。
+    const historical = Object.fromEntries(Object.entries(out).filter(([k]) => k.split('-').slice(0, 2).every((id) => oldIds.has(id))));
+    const added = Object.keys(out).length - Object.keys(historical).length;
+    if (added) console.log(`NEW BOSS PAIRS: ${added} 場已模擬，無歷史基準；另由 Boss 專屬測試檢查新機制`);
+    process.exit(compare(baseline, historical) ? 1 : 0);
+  }
   if (WRITE_HEAVY) { fs.writeFileSync(BASE_HEAVY, JSON.stringify(out, null, 0)); console.log(`已寫入 ${path.relative(process.cwd(), BASE_HEAVY)}（${Object.keys(out).length} 場）`); process.exit(0); }
   process.stdout.write(JSON.stringify(out, null, 0));
 }

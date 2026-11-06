@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "id": "rw-ref-026",
+  "image_sha256": "39b2f2afe52a9c77061b3e22e3e3b51738ffd234eff48a213de6fbb93c9c9cce",
+  "image_url": "https://www.ggrecon.com/media/ayjlt5fq/elden-ring-red-wolf-boss-fight-header.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-03.jpg",
+  "kind": "image",
+  "local_file": "../images/rw-ref-026.jpg",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "realm": "reference",
+  "registered_at": "2026-11-06T19:33:22.165491+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "title": "rw-ref-026 紅狼・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "rw-ref-026 紅狼・外觀"
+    }
+  ],
+  "url": "https://www.ggrecon.com/articles/elden-ring-red-wolf-boss-fight/",
+  "use": "reference-only"
+}

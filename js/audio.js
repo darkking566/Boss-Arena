@@ -113,7 +113,7 @@
   const LONG = 0.35, GAP = { hitFlesh: 0.12, hitHeavy: 0.12, hitBeast: 0.15, shoot: 0.12, draw: 0.25, sheath: 1, mikiriClang: 0.5, mikiriRing: 0.5, horseNeigh: 0.8, horseGallop: 0.16, shieldBreak: 0.15, bladeScrape: 0.2, swordWhoosh: 0.1, maceAir: 0.1, tridentThrow: 0.2, tridentReturn: 0.2, anvilDestroy: 0.5, throwWhoosh: 0.08, heartbeat: 0.22, shadowTeleport: 0.12, fangSnap: 0.15, crit: 0.08, stepSand: 0.1, stepSnow: 0.1, stepGrass: 0.1, stepMud: 0.1, stepWater: 0.1, wood: 0.12, grass: 0.12, splash: 0.2, stun: 0.5, bell: 0.35, click: 0.05, explodeMid: LONG, explodeBig: LONG, slamHeavy: LONG, slamThud: LONG, roarMid: 1, roarBig: 1, death: 1, fire: LONG, ice: LONG, lightning: 0.08, dash: 0.25, teleport: 0.4, buff: 1, projHit: 0.1, ultCast: 1.5, poison: LONG, victory: 1, wolfHowl: 0.8, wolfGrowl: 0.25, wolfDisperse: 0.5, wolfPant: 0.3, beastBite: 0.12, ghostSwoop: 0.2, bowShoot: 0.08, windBurst: 0.15, windDeflect: 0.08, windWhirl: 0.15, windCharge: 0.18, windShoot: 0.06, windAir: 0.12, windPierce: 0.08, windSpin: 0.12, metalWhoosh: 0.06, windShield: 0.2, sakeDrink: 0.5, sakeSpit: 0.5, crystalResonate: 0.15, beaconBeam: 1.0, soulCharge: 0.6, sculkPulse: 0.2, sculkShriek: 0.6 };
   // 音檔常帶很長的尾巴（蓄力 7 秒、砸地 6.6 秒…），超過上限就淡出截斷；未列出者播完整檔
   const MAXLEN = { mikiriRing: 1.5, horseNeigh: 1.8, horseGallop: 0.6, shieldBreak: 0.8, bladeScrape: 0.8, swordWhoosh: 0.5, maceAir: 0.6, tridentThrow: 0.8, tridentReturn: 1.2, anvilDestroy: 1.2, throwWhoosh: 0.4, heartbeat: 0.6, shadowTeleport: 0.8, fangSnap: 0.8, ambDesert: 8, ambSnow: 8, ambLake: 6, ambForest: 8, ambWheat: 7, ambSwamp: 8, explodeMid: 1.5, explodeBig: 2.2, slamHeavy: 1.5, slamThud: 1, roarMid: 2, roarBig: 2.2, fire: 1.2, ice: 1.2, lightning: 1.5, shockwave: 1.2, teleport: 1.2, buff: 1.2, ultCast: 1.5, poison: 1.2, wolfHowl: 2.2, wolfGrowl: 1.2, wolfDisperse: 1.0, wolfPant: 0.6, beastBite: 0.5, ghostSwoop: 0.9, bowShoot: 0.5, windBurst: 0.8, windDeflect: 0.6, windWhirl: 1.2, windCharge: 0.7, windShoot: 0.4, windAir: 0.9, windPierce: 0.5, windSpin: 1.2, metalWhoosh: 0.7, windShield: 1.0, sakeDrink: 0.5, sakeSpit: 0.5, crystalResonate: 1.5, beaconBeam: 2.2, soulCharge: 1.8, sculkPulse: 1.0, sculkShriek: 1.5 };
-  const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath', 'graftbreath', 'stridingflame', 'grabflame'];
+  const ELEM = { fire: 'fire', ice: 'ice', lightning: 'lightning', poison: 'poison' }, ELEM_FX = ['projhit', 'trapburst', 'breath', 'flamethrow', 'dragonbreath', 'graftbreath', 'stridingflame', 'grabflame', 'agheelbreath', 'agheelflame', 'agheelrain'];
   const BUFF = ['summon', 'shadowrise', 'thunderwake', 'ironfist', 'adamas', 'divinesight', 'gfoc', 'gfocroar', 'mangekyo', 'susanoo', 'godofgods', 'sightstance', 'ogreback'], TELE = ['blink', 'boltblink', 'vanish', 'shadowswap', 'appear', 'livingshadow', 'edenblink'];
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
   const ROAR = ['roar', 'bloodroar', 'awaken', 'dragonrage'];
@@ -878,6 +878,7 @@
     once(o, group, vol) { if (!seen.has(o)) { seen.add(o); play(group, vol); } }, // 每個物件只響一次（如無法閃避的預警）
     stop() { for (const h of [...live]) { live.delete(h); clearInterval(h.t); h.a.pause(); } voices = 0; }, // 離開戰鬥時立刻停掉所有音效
     proj(kind, a, owner) { // 投射物離手（BD.spawnProj）：只有拋擲 / 射出類有聲音，其餘種類靜音以免太密集
+      if (kind === 'glintblade' || kind === 'glintcomet') { play('crystalResonate', 0.5); play('throwWhoosh', kind === 'glintcomet' ? 0.7 : 0.4); return; }
       if (a && a.ret) {
         play('maceAir', 0.9);        // 風魔手裏劍：巨型迴旋武器離手沉重破空
         play('tridentThrow', 0.85);
@@ -953,6 +954,17 @@
       }
     },
     fx(id, category, o) {
+      if (id === 'agheeldive') { play('slamHeavy', 1); play('explodeMid', 0.7); return; }
+      if (id === 'agheelwing' || id === 'agheelgust' || id === 'agheeltakeoff') { play('windBurst', 0.8); play('maceAir', 0.5); return; }
+      if (id === 'agheelroar' || id === 'agheelheart') { play('roarMid', 1); return; }
+      if (id.startsWith('redwolf')) {
+        if (id === 'redwolfcrown') { play('wolfHowl', 0.75); play('crystalResonate', 0.6); }
+        else if (id === 'redwolfglint') play('crystalResonate', 0.35);
+        else if (id === 'redwolfbound') { play('wolfGrowl', 0.35); play('dash', 0.4); }
+        else if (id === 'redwolfplunge') { play('slamHeavy', 0.75); play('swordWhoosh', 0.75); }
+        else { play('swordWhoosh', 0.75); play('wolfGrowl', 0.4); }
+        return;
+      }
       const wDef = o.src && (o.src.def || (o.src.owner && o.src.owner.def));
       const isWatcher = !!(wDef && wDef.id === 'watcher');
       const isThor = !!(wDef && wDef.id === 'thor');

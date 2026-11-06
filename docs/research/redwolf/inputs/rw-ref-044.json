@@ -1,0 +1,19 @@
+{
+  "id": "rw-ref-044",
+  "kind": "image",
+  "title": "rw-ref-044 紅狼・咬劍",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring base game screenshot / concept candidate",
+  "phase": null,
+  "provenance": "Original game pixels hosted by a third-party guide; visually inspected locally.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original screenshot owner; redistribution not granted",
+  "url": "https://www.computerbild.de/artikel/cb-eSports-Elden-Ring-Roten-Wolf-von-Radagon-besiegen-32112145.html",
+  "image_url": "https://i.computer-bild.de/imgs/1/4/2/5/9/9/9/7/Der-Rote-Wolf-von-Radagon-in-Elden-Ring-1250x835-63a0ff50895ca0df.jpg?impolicy=image_gallery_desktop",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex visual inspection 2026-11-07: contact-04.jpg",
+  "use": "reference-only",
+  "local_file": "../images/rw-ref-044.jpg",
+  "image_sha256": "acc1a8fceedd21d50a16178f7e3292f31c5df774dbcd22037adf189787f444c8"
+}

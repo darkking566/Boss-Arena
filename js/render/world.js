@@ -694,6 +694,7 @@
   }
   function drawBoss(ctx, b, t) {
     const style = R.bossStyle(b.def.style);
+    if (R.drawGlintblades) R.drawGlintblades(ctx, b, t);
     if (style.under) style.under(ctx, b, t); // 例如劫的影子：隱身時也要畫
     if (BD.hasStatus(b, 'hidden')) {
       if (style.hidden) style.hidden(ctx, b, t);
@@ -963,6 +964,7 @@
     for (const p of w.projectiles) {
       const a = Math.atan2(p.vy, p.vx);
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a);
+      if (R.drawWolfProjectile && R.drawWolfProjectile(ctx, p, t)) { ctx.restore(); continue; }
       if (p.kind === 'ice') {
         // 含陰影的整顆冰錐（陰影範圍已計入精靈框）
         R.blit(ctx, 'proj:ice:' + p.r, p.r * 4.9 + 24, p.r * 1.4 + 24, p.r * 4 + 12, p.r * 0.7 + 12, (g) => {
