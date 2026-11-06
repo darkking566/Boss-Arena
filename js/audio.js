@@ -964,6 +964,13 @@
       }
       if (id === 'agheelwing' || id === 'agheelgust' || id === 'agheeltakeoff') { play('windBurst', 0.8); play('maceAir', 0.5); return; }
       if (id === 'agheelroar' || id === 'agheelheart') { play('roarMid', 1); return; }
+      if (id === 'agheelbite') { play('beastBite', 0.9); play('fangSnap', 0.6); if (o.el === 'fire') play('fire', 0.6); return; }
+      if (id === 'agheelstomp') { play('slamThud', 0.9); play('stepSand', 0.6); return; }
+      if (id === 'agheeltail') { play('windSpin', 0.8); play('maceAir', 0.6); return; }
+      if (id === 'agheelgore') { play('hitBeast', 0.8); play('swordWhoosh', 0.5); return; }
+      if (id === 'agheelinhale') { play('windCharge', 0.5); return; }
+      if (id === 'agheelpyre' || id === 'agheelrock') { play('fire', 0.55); play('explodeMid', 0.35); return; }
+      if (id === 'agheelnova') { play('explodeBig', 0.9); play('fire', 0.7); return; }
       if (id.startsWith('redwolf')) {
         if (id === 'redwolfcrown') { play('wolfHowl', 0.75); play('crystalResonate', 0.6); }
         else if (id === 'redwolfglint') play('crystalResonate', 0.35);
