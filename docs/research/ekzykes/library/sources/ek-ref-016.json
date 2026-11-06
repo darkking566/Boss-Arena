@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-016",
+  "image_sha256": "aaf20cd6b5c018c8af76310c91ebf5500969a657c831b303aa57b1b04b397d2f",
+  "image_url": "https://www.gamepressure.com/elden-ring/gfx/word/1117384281.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-016.jpg",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:42.277376+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-016 艾格基斯・腐霧",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-016 艾格基斯・腐霧"
+    }
+  ],
+  "url": "https://www.gamepressure.com/elden-ring/decaying-ekzykes/z4fe3f",
+  "use": "reference-only"
+}

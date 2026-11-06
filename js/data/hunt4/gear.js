@@ -38,6 +38,7 @@
   const T = (el, wt, sk, set) => ({ [el && H4.AILMENTS[el] ? 'ail' : 'el']: el, wt, sk, set });
   H4.BOSS_GEAR = {
     agheel: T('fire', 'siege', 'guard', 'berserk'), // 原作龍焰（火）
+    ekzykes: T(null, 'siege', 'guard', 'guardian'), // 猩紅腐敗另有狀態規則，不誤標成本模式的綠毒屬性
     redwolf: T(null, 'sharp', 'evade', 'timegap'), // 原作沒有本模式的五行屬性；裝備採機動 / 利刃主題
     magmus: T('fire', 'magma', 'guard', 'berserk'), witch: T('ice', 'sharp', 'evade', 'timegap'), ronin: T('paralysis', 'swallow', 'offguard', 'timegap'),
     brood: T('poison', 'leech', 'weakex', 'guardian'), watcher: T('dragon', 'exploit', 'combo', 'berserk'), lubu: T('blast', 'siege', 'challenger', 'berserk'),

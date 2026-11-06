@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-019",
+  "image_sha256": "8316dd1e46b581897a89a63000d072bf0d9239e734f2de6a5d30c597a7339506",
+  "image_url": "https://playerassist.com/wp-content/uploads/2022/06/beat-decaying-ekzykes-in-Elden-Ring.png",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-03.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-019.png",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:43.903745+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-019 艾格基斯・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-019 艾格基斯・外觀"
+    }
+  ],
+  "url": "https://playerassist.com/how-to-beat-decaying-ekzykes-in-elden-ring/",
+  "use": "reference-only"
+}

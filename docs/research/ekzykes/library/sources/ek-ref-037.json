@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-037",
+  "image_sha256": "0dd3f6859142c406d7367658f6ef27e9cf53f0d4cd89880832f710b40453ff8a",
+  "image_url": "https://hobbyfanclub.com/web/board/2024/vofi5kz1biszla2dosq0112202416161106212.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-05.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-037.jpg",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:46.677430+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-037 艾格基斯・模型",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-037 艾格基斯・模型"
+    }
+  ],
+  "url": "https://hobbyfanclub.com/onesixth/Soichi-Harigiri/Elden-Ring-Decaying-Ekzykes-1033-110621",
+  "use": "reference-only"
+}

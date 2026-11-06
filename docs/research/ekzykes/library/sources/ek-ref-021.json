@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-021",
+  "image_sha256": "ab848c99e3d1571c47b8eed6a7e90a11846ae09d0027b4fe203f373dce00e672",
+  "image_url": "https://img.3dmgame.com/uploads/images/news/20240723/1721713849_752762.png",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-03.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-021.png",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:44.936904+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-021 艾格基斯・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-021 艾格基斯・外觀"
+    }
+  ],
+  "url": "https://www.3dmgame.com/gl/3944018.html",
+  "use": "reference-only"
+}

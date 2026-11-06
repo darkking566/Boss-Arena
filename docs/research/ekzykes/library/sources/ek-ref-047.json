@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-047",
+  "image_sha256": "cba313c9e36322c8ece7406ccc54e5b4964e29c601a6ec6a2591663bab6b2361",
+  "image_url": "https://cdn.supersoluce.com/file/docs/docid_60cc9d3a9a20455d6c000001/elemid_4ee9fac00a2fe93e0e000014/thumb_1647330752-1.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-06.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-047.jpg",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:48.074925+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-047 艾格基斯・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-047 艾格基斯・外觀"
+    }
+  ],
+  "url": "https://video-game-guide-walkthrough.supersoluce.com/solution/elden-ring-guide-walkthrough/er-bosses-guide/bosses-caelid/decaying-ekzykes/",
+  "use": "reference-only"
+}

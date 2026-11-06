@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-048",
+  "image_sha256": "425b68e3c790ae3d22f13fcbda97fb39032ca3d70f59e9730765dfd90f7beac6",
+  "image_url": "https://cdn.mos.cms.futurecdn.net/XgcRdTBbo7QoYBwDFm4ZAg.png",
+  "inspection": "viewed",
+  "inspection_ref": "Codex full-size view_image ek-ref-048.png, game item description legible",
+  "kind": "image",
+  "local_file": "../images/ek-ref-048.png",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:48.386125+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-048 艾格基斯・原作文字",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-048 艾格基斯・原作文字"
+    }
+  ],
+  "url": "https://www.windowscentral.com/elden-ring-best-spells",
+  "use": "reference-only"
+}

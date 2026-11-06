@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-017",
+  "image_sha256": "f9300ba5e5fbc20c213f3bbe189e02805557051fab5bd99d943a1aae60297175",
+  "image_url": "https://www.gamepressure.com/elden-ring/gfx/word/1117384296.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-017.jpg",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:42.806751+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-017 艾格基斯・動作",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-017 艾格基斯・動作"
+    }
+  ],
+  "url": "https://www.gamepressure.com/elden-ring/decaying-ekzykes/z4fe3f",
+  "use": "reference-only"
+}

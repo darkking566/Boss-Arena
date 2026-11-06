@@ -1,0 +1,19 @@
+{
+  "id": "ek-ref-001",
+  "kind": "image",
+  "title": "ek-ref-001 艾格基斯・外觀",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "url": "https://game8.jp/eldenring/442336",
+  "image_url": "https://img.game8.jp/6624100/4052107dfe855d549374511cb50e9cac.png/original",
+  "retrieved_at": "2026-11-07",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/ek-ref-001.png",
+  "image_sha256": "0301110b2e551b6f3c2840c169113357a7b263cca49117eff676243b11f27277"
+}

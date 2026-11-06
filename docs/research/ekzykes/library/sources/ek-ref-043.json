@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-043",
+  "image_sha256": "c3edbca153f868938a24cb0772b82740b7d09eb960d3bcfe7f674a7ad2027328",
+  "image_url": "https://i.ytimg.com/vi/mUZUO6rlWM8/hqdefault.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-05.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-043.jpg",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:47.592010+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-043 艾格基斯・影片封面",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-043 艾格基斯・影片封面"
+    }
+  ],
+  "url": "https://www.youtube.com/watch?v=mUZUO6rlWM8",
+  "use": "reference-only"
+}

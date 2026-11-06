@@ -1,0 +1,26 @@
+{
+  "author": "FromSoftware / UDON / Simon & Schuster",
+  "characters": 50,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2023-08-29 ISBN 9781772942705",
+  "id": "artbook-publisher",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Actual readable web page inspected 2026-11-07",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:49.473511+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original notes and short verification excerpt only",
+  "text_sha256": "dc958f69a23004eae050ed9c78516cddbf8a88f03ea35759d34a5721035ddaa5",
+  "title": "官方畫冊第二冊出版資料",
+  "units": [
+    {
+      "end": 50,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Volume II includes art of the foes great and small"
+    }
+  ],
+  "url": "https://www.simonandschuster.com/books/Elden-Ring-Official-Art-Book-Volume-II/FromSoftware/Elden-Ring-Official-Art-Book/9781772942705"
+}

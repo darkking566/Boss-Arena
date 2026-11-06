@@ -1,0 +1,26 @@
+{
+  "author": "Game8 攻略班",
+  "characters": 19,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2025-11-20",
+  "id": "game8-moves",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Actual readable web page inspected 2026-11-07",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:48.571754+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original notes and short verification excerpt only",
+  "text_sha256": "424f2efbaf57f584545941b1beb15cc65851b90d272f7cc791369b74c147fb1e",
+  "title": "Game8 JP：艾格基斯動作圖解",
+  "units": [
+    {
+      "end": 19,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "地上ガス溜め→そのまま右から左へブレス"
+    }
+  ],
+  "url": "https://game8.jp/eldenring/442336"
+}

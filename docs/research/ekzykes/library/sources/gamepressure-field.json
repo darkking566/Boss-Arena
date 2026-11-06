@@ -1,0 +1,26 @@
+{
+  "author": "Gamepressure",
+  "characters": 28,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2024-03-05",
+  "id": "gamepressure-field",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Actual readable web page inspected 2026-11-07",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:48.938797+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original notes and short verification excerpt only",
+  "text_sha256": "0bd92eb1c9b85b25adea7e448ae76362fcc1077b9ca2cae053f0106a50738b58",
+  "title": "Gamepressure：艾格基斯攻略",
+  "units": [
+    {
+      "end": 28,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Beware of its rotting breath"
+    }
+  ],
+  "url": "https://www.gamepressure.com/elden-ring/decaying-ekzykes/z4fe3f"
+}

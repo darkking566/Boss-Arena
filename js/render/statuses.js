@@ -38,6 +38,8 @@
   R.defineStatusIcon('root', { glyph: '縛', color: '#e0e0e0' });
   R.defineStatusIcon('stun', { glyph: '暈', color: '#ffe27a' });
   R.defineStatusIcon('frozen', { glyph: '凍', color: '#bfefff' });
+  R.defineStatusIcon('rotbuildup', { glyph: '蝕', color: '#d8b69a' });
+  R.defineStatusIcon('scarletrot', { glyph: '腐', color: '#ed795a' });
   R.defineStatusIcon('stagger', { glyph: '崩', color: '#ffcc33' });
   R.defineStatusIcon('overtime', { glyph: '狂', color: '#ff3355' });
   R.defineStatusIcon('burn', { glyph: '燒', color: '#ff8a2a' });
@@ -101,7 +103,7 @@
       const rem = BD.statusRemaining(b, st.id);
       if (isFinite(rem)) label += ` ${rem.toFixed(1)}s`;
       if (def.stacking === 'stack' && st.stacks > 1) {
-        label += def.id === 'bleed' || def.id === 'frostbite' ? ` ${Math.round(st.stacks)}/100` : ` ×${st.stacks}`;
+        label += def.id === 'bleed' || def.id === 'frostbite' || def.id === 'rotbuildup' ? ` ${Math.round(st.stacks)}/100` : ` ×${st.stacks}`;
       }
       if (def.id === 'shield') label += ` (${Math.ceil(st.value)})`;
       const gw = 12;

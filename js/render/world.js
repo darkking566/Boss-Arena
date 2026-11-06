@@ -252,7 +252,7 @@
     }
   }
   // 塵團 / 雪霧 / 麥屑：預烘焙的徑向漸層色票，隨時間擴張並淡出
-  const PUFF = { sand: [226, 203, 152], snow: [240, 247, 255], wheat: [240, 205, 110], water: [205, 238, 248], steam: [236, 238, 244], toxic: [150, 215, 90], blood: [165, 20, 32], ink: [24, 14, 44] };
+  const PUFF = { sand: [226, 203, 152], snow: [240, 247, 255], wheat: [240, 205, 110], water: [205, 238, 248], steam: [236, 238, 244], toxic: [150, 215, 90], scarletrot: [145, 62, 49], blood: [165, 20, 32], ink: [24, 14, 44] };
   function drawPuffs(ctx, fx) {
     for (const p of fx.puffs) {
       const age = 1 - p.life / p.max, r = U.lerp(p.r0, p.r1, Math.sqrt(age)), a = p.al * Math.min(1, age * 8) * Math.pow(1 - age, 1.3);
@@ -590,7 +590,7 @@
       const arming = z.t < z.delay, life = z.dur + z.delay - z.t, fade = U.clamp(life / 0.6, 0, 1) * U.clamp((z.t - z.delay + 0.3) / 0.3, 0.3, 1);
       ctx.save(); ctx.globalAlpha = fade;
       const col = { lava: ['255,110,30', '255,200,80'], blizzard: ['160,220,255', '240,250,255'], poison: ['120,200,60', '200,255,120'],
-        acid: ['170,230,40', '230,255,120'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
+        acid: ['170,230,40', '230,255,120'], scarletrot: ['158,65,47', '220,149,111'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
       if (arming) {
         ctx.setLineDash([8, 6]); ctx.strokeStyle = `rgba(${col[1]},0.8)`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (z.t / z.delay), 0, U.TAU); ctx.stroke();
@@ -608,6 +608,14 @@
       if (z.kind === 'blizzard') {
         ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
         for (let i = 0; i < 5; i++) { const a = t * 2 + i * 1.256; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (0.3 + i * 0.13), a, a + 1.2); ctx.stroke(); }
+      } else if (z.kind === 'scarletrot') {
+        // 腐霧保留可讀外框；薄霧與菌絲飄絮，不蓋住整場角色。
+        for (let i = 0; i < 9; i++) {
+          const a = i * 2.399 + z.seed, ph = (t * 0.25 + i * 0.13) % 1, d = z.r * (0.22 + 0.55 * ph);
+          const x = z.x + Math.cos(a) * d, y = z.y + Math.sin(a) * d - ph * 22;
+          ctx.fillStyle = `rgba(155,67,49,${0.12 * (1 - ph)})`; ctx.beginPath(); ctx.ellipse(x, y, z.r * 0.28, z.r * 0.15, a, 0, U.TAU); ctx.fill();
+          ctx.fillStyle = `rgba(235,223,195,${0.7 * (1 - ph)})`; ctx.fillRect(x, y - 9, 2, 2);
+        }
       } else if (z.kind === 'fire') {
         for (let i = 0; i < 4; i++) {
           const a = i * 1.57 + z.seed, rr = z.r * 0.45, fl = 0.6 + 0.4 * Math.sin(t * 14 + i * 2 + z.seed);

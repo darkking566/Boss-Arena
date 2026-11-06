@@ -1,0 +1,26 @@
+{
+  "author": "SCULPTORS / 針桐雙一",
+  "characters": 9,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2026-01-30",
+  "id": "sculptor-origin",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Actual readable web page inspected 2026-11-07",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:49.105853+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original notes and short verification excerpt only",
+  "text_sha256": "4fea498b1b05db5b22a77fc5149903043468494b6eb27031d568fce280cd4bc4",
+  "title": "SCULPTORS：針桐雙一作品資料",
+  "units": [
+    {
+      "end": 9,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "腐りゆくエグズキス"
+    }
+  ],
+  "url": "https://sculptors.jp/topics/2835"
+}

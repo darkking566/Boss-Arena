@@ -955,6 +955,13 @@
     },
     fx(id, category, o) {
       if (id === 'agheeldive') { play('slamHeavy', 1); play('explodeMid', 0.7); return; }
+      if (id.startsWith('ekzykes')) {
+        if (id === 'ekzykescrash') { play('slamHeavy', 0.85); play('poison', 0.35); }
+        else if (id === 'ekzykesheart' || id === 'ekzykesroar') play('roarMid', 0.8);
+        else if (id === 'ekzykeswing' || id === 'ekzykestakeoff') { play('windBurst', 0.7); play('maceAir', 0.35); }
+        else play('poison', 0.55);
+        return;
+      }
       if (id === 'agheelwing' || id === 'agheelgust' || id === 'agheeltakeoff') { play('windBurst', 0.8); play('maceAir', 0.5); return; }
       if (id === 'agheelroar' || id === 'agheelheart') { play('roarMid', 1); return; }
       if (id.startsWith('redwolf')) {

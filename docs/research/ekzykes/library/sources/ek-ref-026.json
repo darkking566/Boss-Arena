@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-026",
+  "image_sha256": "30d8c6006b481943ed94122ff81ccd617e5270569ecccd8ff1746af7ca128daf",
+  "image_url": "https://img.game8.jp/6624078/7e5fdcfa1bb0233de847717d9712d039.gif/show",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-03.jpg; four motion keyframes reviewed in ek-ref-026-motion.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-026.gif",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:45.437939+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-026 艾格基斯・動作",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-026 艾格基斯・動作"
+    }
+  ],
+  "url": "https://game8.jp/eldenring/442336",
+  "use": "reference-only"
+}

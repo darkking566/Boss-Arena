@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 game / separately labelled sculpture or video cover",
+  "id": "ek-ref-010",
+  "image_sha256": "44509ce53ae8e52d113bcc832ca7c5ed2882ec832a324830c31e8484727be7af",
+  "image_url": "https://lh3.googleusercontent.com/ocSbTNMvfwCev7kkWXDO7lT-_ST1PF3Cy0Rraeicpsh6FgEgBbT6X5208eOcD2dpCHXVghhWV1jzMNnluVjdDzZqZPoZ7QYt-mUsQbG1g3A=s0",
+  "inspection": "viewed",
+  "inspection_ref": "Codex actual visual review 2026-11-07: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/ek-ref-010.png",
+  "phase": null,
+  "provenance": "Original game pixels / third-party sculpture as labelled, actual visual review recorded",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:39.568137+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original rights retained; local research only; redistribution permission unknown.",
+  "title": "ek-ref-010 艾格基斯・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "ek-ref-010 艾格基斯・外觀"
+    }
+  ],
+  "url": "https://kamigame.jp/eldenring/page/211231076578803440.html",
+  "use": "reference-only"
+}

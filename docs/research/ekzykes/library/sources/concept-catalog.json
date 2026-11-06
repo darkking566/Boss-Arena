@@ -1,0 +1,26 @@
+{
+  "author": "Creative Uncut",
+  "characters": 28,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "retrieved 2026-11-07",
+  "id": "concept-catalog",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Actual readable web page inspected 2026-11-07",
+  "realm": "reference",
+  "registered_at": "2026-11-06T20:26:49.285579+00:00",
+  "retrieved_at": "2026-11-07",
+  "rights": "Original notes and short verification excerpt only",
+  "text_sha256": "4a9ebd3ba10b83aeec81f4cf981cf3209bdebd6efe0dcfc904e37d332d65b448",
+  "title": "Creative Uncut：艾格基斯概念圖專頁",
+  "units": [
+    {
+      "end": 28,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Decaying Ekzykes Concept Art"
+    }
+  ],
+  "url": "https://www.creativeuncut.com/gallery-43/er-decaying-ekzykes-concept.html"
+}
