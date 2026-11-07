@@ -128,6 +128,11 @@
           <div class="d">一／二階段每招與大招都可從底部面板直接施放；預設無冷卻／無限體力，可隨時重置。</div></div>` : '');
       return;
     }
+    if (state.mode === 'horde') { // 小兵潮：所選 Boss 單挑無限雜兵
+      $('#detail').innerHTML = detailHtml(BD.bossById[a], 0).replace('藍方：', '迎戰：') +
+        `<div><h3>小兵潮（生存模式）</h3><div class="d">四面八方湧來的低級雜兵，每 1.5 秒一波，數量隨時間越來越多、沒有上限；${Object.values(BD.GRUNTS).map((g) => g.name).join(' / ')} 會陸續登場。Boss 倒下即結束，成績是撐住的秒數與擊倒數。</div></div>`;
+      return;
+    }
     if (state.mode === 'hunt4') { // 狩獵：顯示目標 Boss（右側選的）與獵人隊
       $('#detail').innerHTML = detailHtml(BD.bossById[b], 1).replace('紅方：', '目標：') +
         `<div><h3>獵人隊（4 人，AI 操控）· 已累積 ${state.h4save.matches} 場</h3>${BD.HUNT4.HUNTERS.map((h) => h4Line(h, b)).join('')}
@@ -191,6 +196,7 @@
       return;
     }
     if (state.mode === 'hunt4') { startHunt4(state.pick[1], state.map); return; }
+    if (state.mode === 'horde') { startHorde(state.pick[0], { player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map }); return; }
     if (state.mode === 'team' && (!state.team[0].length || !state.team[1].length)) { alert('3v3：兩隊各至少要選 1 位 Boss'); return; }
     start(state.mode === 'team' ? state.team[0].slice() : state.pick[0], state.mode === 'team' ? state.team[1].slice() : state.pick[1], {
       player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map,
@@ -199,20 +205,23 @@
 
   // ── 模式切換（對戰 / 訓練場）──
   function setMode(mode) {
-    state.mode = mode === 'train' || mode === 'team' || mode === 'hunt4' ? mode : 'duel';
-    const train = state.mode === 'train', team = state.mode === 'team', h4 = state.mode === 'hunt4';
+    state.mode = mode === 'train' || mode === 'team' || mode === 'hunt4' || mode === 'horde' ? mode : 'duel';
+    const train = state.mode === 'train', team = state.mode === 'team', h4 = state.mode === 'hunt4', hd = state.mode === 'horde';
     $('#select').classList.toggle('training', train);
     $('#select').classList.toggle('hunt4', h4);
+    $('#select').classList.toggle('horde', hd);
+    $('#modeHorde').classList.toggle('on', hd);
     $('#modeHunt4').classList.toggle('on', h4);
     $('#modeDuel').classList.toggle('on', state.mode === 'duel');
     $('#modeTrain').classList.toggle('on', train);
     $('#modeTeam').classList.toggle('on', team);
-    $('#sideA h2').textContent = train ? '選擇 Boss' : team ? '藍方（選 3 位）' : h4 ? '獵人隊' : '藍方';
+    $('#sideA h2').textContent = train || hd ? '選擇 Boss' : team ? '藍方（選 3 位）' : h4 ? '獵人隊' : '藍方';
     $('#sideB h2').textContent = team ? '紅方（選 3 位）' : h4 ? '選擇目標 Boss' : '紅方';
     $('#sideA h2').className = 'blue';
-    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : h4 ? '🐉 出發狩獵' : '⚔ 開始對決';
+    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : h4 ? '🐉 出發狩獵' : hd ? '🪲 迎戰小兵潮' : '⚔ 開始對決';
     refreshSelect();
   }
+  $('#modeHorde').addEventListener('click', () => setMode('horde'));
   $('#modeDuel').addEventListener('click', () => setMode('duel'));
   $('#modeTrain').addEventListener('click', () => setMode('train'));
   $('#modeTeam').addEventListener('click', () => setMode('team'));
@@ -270,7 +279,7 @@
     sel.addEventListener('change', () => setPace(sel.value));
     setPace(BD.DEFAULT_PACE);
   })();
-  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent, state.hunt.arms) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : start(state.last.a, state.last.b, state.last.opts)));
+  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent, state.hunt.arms) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : state.resultKind === 'horde' ? startHorde(state.last.horde, state.last.opts) : start(state.last.a, state.last.b, state.last.opts)));
   $('#btnSwap').addEventListener('click', () => start(state.last.b, state.last.a, state.last.opts));
   $('#btnMenu').addEventListener('click', () => show(state.resultKind === 'hunt' ? 'hunt' : 'select'));
   $('#modeHunt').addEventListener('click', () => show('hunt'));
@@ -301,6 +310,19 @@
     return w;
   }
   state.start = start;
+
+  // 小兵潮（生存模式）：Boss 對無上限的雜兵潮；對手是 hidden 假人（js/engine/minions/horde.js）
+  function startHorde(a, opts) {
+    opts = Object.assign({ player: null, speed: 1, pace: BD.DEFAULT_PACE, map: state.map }, opts || {});
+    state.last = { horde: a, opts };
+    const w = new BD.World(BD.bossById[a], BD.bossById.dummy, { player: opts.player, input, seed: opts.seed, pace: opts.pace, map: opts.map, horde: true });
+    w.speed = opts.player != null ? 1 : opts.speed;
+    state.world = w; state.resultShown = false;
+    view.player = opts.player; view.focus = 0; // 鏡頭只跟 Boss（假人會飄到雜兵身上）
+    show('game');
+    return w;
+  }
+  state.startHorde = startHorde;
 
   // 訓練場世界：Boss 對訓練假人（不計勝負、不會結束）
   function startTraining(a, opts) {
@@ -418,6 +440,18 @@
     state.screen = 'result';
   }
 
+  function showHordeResult(w) {
+    state.resultShown = true; state.resultKind = 'horde';
+    const H = w.horde, b = H.hero, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
+    $('#btnRematch').textContent = '🔁 再戰一次'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 重新選角';
+    $('#resTitle').innerHTML = `<span style="color:${b.def.color}">${b.name}</span> 被雜兵潮淹沒`;
+    $('#resSub').textContent = `撐了 ${mm} 分 ${ss} 秒 · 擊倒 ${H.kills} 隻 · 場上最多 ${H.peak} 隻`;
+    $('#resStats').innerHTML = [['已湧出雜兵', H.spawned], ['造成傷害', Math.round(b.stats.dealt)], ['施放技能次數', b.stats.skills], ['翻滾 / 完美閃避', `${b.stats.dodges} / ${b.stats.perfect}`], ['被架勢崩潰', b.stats.breaks]]
+      .map(([n, v]) => `<tr><td>${n}</td><td>${v}</td></tr>`).join('');
+    show('result');
+    state.screen = 'result';
+  }
+
   function showResult(w) {
     state.resultShown = true; state.resultKind = 'duel';
     $('#btnRematch').textContent = '🔁 重賽（同組合）'; $('#btnSwap').style.display = ''; $('#btnMenu').textContent = '↩ 重新選角';
@@ -471,7 +505,7 @@
     }
     const w = state.world;
     if (!w || state.screen !== 'game') return;
-    if (k === 'Tab' && !w.training && !w.hunt) { // 聚焦模式：全體 → 每位存活 Boss → 全體
+    if (k === 'Tab' && !w.training && !w.hunt && !w.horde) { // 聚焦模式：全體 → 每位存活 Boss → 全體
       const order = [null, ...w.bosses.map((b, i) => (b.state !== 'dead' ? i : -1)).filter((i) => i >= 0)];
       view.focus = order[(order.indexOf(view.focus) + 1) % order.length];
       return;
@@ -521,7 +555,7 @@
           view.player = w.training.mode === 'player' ? 0 : null;
           if (BD.TrainingUI) BD.TrainingUI.update(w);
         }
-        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : w.hunt4 ? showHunt4Result : showResult)(w);
+        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : w.hunt4 ? showHunt4Result : w.horde ? showHordeResult : showResult)(w);
       } else {
         if (R.perf) R.perf.push(frameMs, 0);
         ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, R.W, R.H);

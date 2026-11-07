@@ -91,6 +91,8 @@ table.stats td:first-child { color: #aaa; text-align: left; }
 #select.training .train-only { display: flex; }
 #select.training #sideB, #select.training .vs, #select.training .duel-only { display: none; }
 #select.training .detail { grid-template-columns: 3fr 2fr; }
+#select.horde #sideB, #select.horde .vs, #select.horde .duel-only:not(.horde-ok) { display: none; }
+#select.horde .detail { grid-template-columns: 3fr 2fr; }
 /* ── 訓練場底部面板（設計尺寸 1500×136，以 transform 縮放到畫布）── */
 .tp { position: absolute; left: 0; top: 0; width: 1500px; height: 136px; transform-origin: 0 0; z-index: 5;
   background: rgba(10,8,14,0.84); border-top: 2px solid #c89a5a; padding: 8px 12px; box-sizing: border-box;

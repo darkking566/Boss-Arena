@@ -70,6 +70,19 @@
     if (m.kind === 'rogue') { ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#ff5566'; ctx.fillText('紅眼', m.x, m.y - m.r - 18); }
   }
   // ── 鏡爪：魔狼的水墨身軀拖得很長、而且要壓在沙塵之上，整隻由造型的 over 畫（js/render/styles/kindred.js）──
+  // ── 小兵潮雜兵（BD.GRUNTS，js/engine/minions/horde.js）：依 shape 畫小造型 ──
+  function grunt(ctx, m, t) {
+    const g = BD.GRUNTS[m.kind], r = m.r;
+    ctx.rotate(m.face || 0); ctx.fillStyle = g.color; ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    if (g.shape === 'tri') { ctx.moveTo(r * 1.2, 0); ctx.lineTo(-r, r * 0.9); ctx.lineTo(-r * 0.6, 0); ctx.lineTo(-r, -r * 0.9); ctx.closePath(); }
+    else if (g.shape === 'armor') ctx.rect(-r, -r, r * 2, r * 2);
+    else ctx.arc(0, 0, r * (g.shape === 'bomb' ? 1 + 0.12 * Math.sin(t * 18) : 1), 0, U.TAU);
+    ctx.fill(); ctx.stroke();
+    if (g.shape === 'bug') { ctx.beginPath(); for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { const a = s * (0.8 + i * 0.5) + Math.sin(t * 24 + i) * 0.2; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * r * 1.6, Math.sin(a) * r * 1.6); } ctx.stroke(); }
+    ctx.fillStyle = g.shape === 'bomb' ? '#fff' : '#ffeaa0'; ctx.beginPath(); ctx.arc(r * 0.45, -r * 0.3, 1.8, 0, U.TAU); ctx.arc(r * 0.45, r * 0.3, 1.8, 0, U.TAU); ctx.fill();
+  }
+  for (const k in BD.GRUNTS) R.defineMinionStyle(k, grunt);
   R.defineMinionStyle('wolf', () => {});
   R.defineMinionStyle('watcher', knight, { absolute: true });
   R.defineMinionStyle('rogue', knight, { absolute: true });

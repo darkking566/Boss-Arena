@@ -14,7 +14,7 @@
     <div class="sel-wrap">
       <h1>Boss<span>鬥技場</span></h1>
       <p class="sub">俯視角 Boss 對決 —— 選出兩位 Boss，觀看具有魂系 AI 的牠們一決勝負</p>
-      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button><button id="modeHunt4" class="mode">🐉 狩獵</button></div>
+      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button><button id="modeHunt4" class="mode">🐉 狩獵</button><button id="modeHorde" class="mode">🪲 小兵潮</button></div>
       <div class="cols">
         <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div><div class="roster4 hunt4-only" id="roster4"></div></div>
         <div class="vs">VS</div>
@@ -32,8 +32,8 @@
         <span class="pace-desc">訓練假人站著不動、不會反擊也不會倒下；可在場上切換 AI／手動施放／親自操控、強制二階段、重置。</span>
       </div>
       <div class="opts">
-        <label class="chk duel-only"><input type="checkbox" id="optPlayer"> 由我親自操控藍方 Boss（預設為 AI 對 AI 觀戰）</label>
-        <label class="duel-only">觀戰速度
+        <label class="chk duel-only horde-ok"><input type="checkbox" id="optPlayer"> 由我親自操控藍方 Boss（預設為 AI 對 AI 觀戰；小兵潮模式則是 AI 自己撐）</label>
+        <label class="duel-only horde-ok">觀戰速度
           <select id="optSpeed"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select>
         </label>
         <label class="chk"><input type="checkbox" id="optTele" checked> 顯示攻擊落點預警框</label>
@@ -167,6 +167,7 @@
 <script src="js/engine/minions/witch.js"></script>
 <script src="js/engine/minions/watcher.js"></script>
 <script src="js/engine/minions/kindred.js"></script>
+<script src="js/engine/minions/horde.js"></script>
 <script src="js/engine/boss.js"></script>
 <script src="js/engine/world.js"></script>
 <script src="js/engine/maps.js"></script>

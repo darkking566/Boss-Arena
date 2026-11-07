@@ -122,13 +122,13 @@
       drawTeamPanel(ctx, w, 0, t); drawTeamPanel(ctx, w, 1, t);
       const p = view.player != null && w.bosses[view.player]; // 玩家的技能列畫在競技場下緣
       if (p && p.state !== 'dead') drawSkills(ctx, p, R.W / 2 - 300, R.OY + R.VH - 30, 600, false);
-    } else for (const b of w.bosses) drawPanel(ctx, b, w, t);
+    } else for (const b of w.bosses) if (!(w.horde && b.isDummy)) drawPanel(ctx, b, w, t);
     if (w.hunt4 && R.drawHunt4Parts) R.drawHunt4Parts(ctx, w, t);
     if (w.training && R.drawTrainingCenter) { R.drawTrainingCenter(ctx, w, t); return; }
     // 中央
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = `bold 40px ${FONT}`; ctx.fillStyle = '#fff';
-    ctx.fillText(h4 ? '狩獵' : 'VS', R.W / 2, 62);
+    ctx.fillText(h4 ? '狩獵' : w.horde ? '生存' : 'VS', R.W / 2, 62);
     const tm = Math.max(0, w.time - 0), mm = Math.floor(tm / 60), ss = Math.floor(tm % 60);
     ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = '#ddd';
     ctx.fillText(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, R.W / 2, 98);
@@ -141,6 +141,7 @@
       ctx.fillText(`節奏：${pc.name}`, R.W / 2, 140);
     }
     if (h4) { const H4 = BD.HUNT4, left = H4.CARTS - w.hunt4.faints; ctx.font = `bold 15px ${FONT}`; ctx.fillStyle = left <= 1 ? '#ff6a6a' : '#ffd0a0'; ctx.fillText(`力竭 ${w.hunt4.faints} / ${H4.CARTS}`, R.W / 2, pc ? 160 : 144); }
+    if (w.horde) { const n = w.minions.reduce((c, m) => c + (m.alive && m.grunt ? 1 : 0), 0); ctx.font = `bold 15px ${FONT}`; ctx.fillStyle = '#ffd0a0'; ctx.fillText(`擊倒 ${w.horde.kills} · 場上 ${n}`, R.W / 2, pc ? 160 : 144); }
     if (w.enrageOn) { ctx.fillStyle = `rgba(255,60,90,${0.7 + 0.3 * Math.sin(t * 6)})`; ctx.font = `bold 15px ${FONT}`; ctx.fillText(`狂暴 ×${w.enrage.toFixed(2)}`, R.W / 2, pc ? 160 : 144); }
   }
   function drawBanners(ctx, w) {

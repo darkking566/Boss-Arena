@@ -59,6 +59,7 @@
       if (opts.hunt && BD.setupHunt) BD.setupHunt(this, opts);
       if (opts.hunt && opts.h4solo && BD.setupHunt4Solo) BD.setupHunt4Solo(this);
       if (opts.hunt4 && BD.setupHunt4) BD.setupHunt4(this, opts);
+      if (opts.horde && BD.setupHorde) BD.setupHorde(this);
     }
     tick(realDt) {
       if (this.paused) return;
@@ -83,6 +84,7 @@
       } else if (!this.over) {
         if (this.teamMode) for (const b of this.bosses) if (b.state !== 'dead') this.retarget(b);
         for (const b of this.bosses) if (b.controller && b.state !== 'dead' && b.enemy.state !== 'dead') b.controller.update(dt);
+        if (this.horde) this.horde.step(dt);
       }
       for (const b of this.bosses) {
         if (b.enemy.state === 'dead') { b.moveX = b.moveY = 0; }
