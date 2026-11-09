@@ -955,6 +955,16 @@
     },
     fx(id, category, o) {
       if (id === 'agheeldive') { play('slamHeavy', 1); play('explodeMid', 0.7); return; }
+      if (id.startsWith('fs') && BD.effects[id] && BD.effects[id].name.startsWith('墜星成獸')) {
+        if (id === 'fsroll' || id === 'fsslam' || id === 'fsstomp') { play('slamHeavy', 0.9); play('explodeMid', 0.4); }
+        else if (id === 'fsawaken' || id === 'fsrear') play('roarMid', 0.85);
+        else if (id === 'fspull' || id === 'fsorb' || id === 'fscoreflare') { play('windCharge', 0.6); play('crystalResonate', 0.5); }
+        else if (id === 'fsbolt' || id === 'fsray' || id === 'fsreverse') { play('lightning', 0.7); play('shockwave', 0.5); }
+        else if (id === 'fsmandible' || id === 'fstail') { play('maceAir', 0.7); play('fangSnap', 0.4); }
+        else if (id === 'fscharge' || id === 'fsjump' || id === 'fsgouge') { play('dash', 0.6); play('stepSand', 0.6); }
+        else play('slamThud', 0.6);
+        return;
+      }
       if (id.startsWith('ekzykes')) {
         if (id === 'ekzykescrash') { play('slamHeavy', 0.85); play('poison', 0.35); }
         else if (id === 'ekzykesheart' || id === 'ekzykesroar') play('roarMid', 0.8);

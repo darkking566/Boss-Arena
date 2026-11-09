@@ -1,3 +1,27 @@
+# 墜星成獸：本次交付與試玩
+
+更新：2026-11-09。使用者要求先大量考據並收集至少 30 張圖片（最好有概念圖），再新增墜星成獸，演出越華麗越好。
+
+- 考據：`docs/bosses/fallingstar.md`；圖鑑 `docs/research/fallingstar/gallery.html`，逐圖記錄在 `IMAGE-INDEX.md`。
+  - 59 張候選全看過，保留 46 張：2 張 Creative Uncut 官方概念圖、2 張招式流程圖、42 張遊戲畫面、封面與標示過的同人圖。
+  - 概念圖是 Chrome 正常開頁後截圖；直接圖片網址回 403，沒有繞過。
+- 角色：
+  - 11 招一階技能，半血解鎖重力反轉與重力光束。
+  - 被動「星核引力」，兩階段大招，22 種特效，新增重力元素。
+  - 支援獵魂、4v1 與團隊。
+- 強度：每節奏 156 場。輕快 39.1%、沉重 49.4%（沉重傷害 ×1.34；HP 4500）（`test/fallingstar-strength-final.log`）。
+- 自動檢查：
+  - 提交版本（不含平行進行中的 borealis / chakram）匯出後跑 `npm test`：validate、訓練場 5881、FALLINGSTAR、hooks 全過，輕快指紋 3174/3174 IDENTICAL。
+  - 含 borealis 的工作目錄：validate 會因 borealis 未註冊特效失敗，與本角色無關；其餘各步全過（`test/fallingstar-final-full.log`）。
+  - 沉重指紋 3174/3174 IDENTICAL（`test/fallingstar-final-heavy.log`）。
+- 瀏覽器：真實本機 Chrome、file://（`test/fallingstar-browser.log`）。
+  - 14 張技能畫面加選角、結算、390px、圖鑑，共 18 張在 `screenshots/fallingstar/`。
+  - 完整 AI 對艾格基斯 130.7 秒正常結算。
+  - 圖鑑 46 張全載入，22 特效 × 20 元素無例外，頁面 JS 例外 0。
+- 未驗證：使用者實際試玩手感、音效聽感、長時間效能。沒有 Git 提交。`driver-accepted = false`。
+- **下一道門：使用者試玩並確認外觀與招式方向。**
+
+
 # 艾格基斯：本次交付與試玩
 
 更新：2026-11-07。使用者要求先大量考據與至少 30 張圖片，再新增艾格基斯；已明確確認本機保存研究圖鑑、角色技能與華麗演出的寫入範圍。
