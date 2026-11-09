@@ -106,9 +106,9 @@
       // 原作：鞭打（Whip Strike）——向柳龍光學的鞭打，罵它是「女人小孩的護身技」，卻比原版更快更狠
       { id: 'whip_strike', name: '鞭打', short: '鞭打', tags: ['melee', 'fast'], range: [60, 330], cd: 6.2, cost: 22, track: 7, recovery: 0.6,
         actions: [{ do: 'tele', at: 0.05, dur: 0.4, shape: 'rect', len: 330, w: 60, follow: true },
-          ...flurry(0.45, 4, 0.14, { shape: 'rect', len: 330, w: 60 }, { dmg: 34, posture: 11, kb: 60 }, { id: 'whiplash', scale: 0.8 }, 0.92)],
+          ...flurry(0.45, 4, 0.14, { shape: 'rect', len: 330, w: 60 }, { dmg: 34, posture: 11, kb: 60, status: { id: 'bleed', stacks: 11 } }, { id: 'whiplash', scale: 0.8 }, 0.92)],
         actions2: [{ do: 'tele', at: 0.05, dur: 0.36, shape: 'rect', len: 350, w: 64, follow: true },
-          ...flurry(0.41, 6, 0.12, { shape: 'rect', len: 350, w: 64 }, { dmg: 32, posture: 11, kb: 60 }, { id: 'whiplash', scale: 0.9, ...BLOOD }, 0.92)] },
+          ...flurry(0.41, 6, 0.12, { shape: 'rect', len: 350, w: 64 }, { dmg: 32, posture: 11, kb: 60, status: { id: 'bleed', stacks: 11 } }, { id: 'whiplash', scale: 0.9, ...BLOOD }, 0.92)] },
       // 原作：滾踢（Roll Kick，對刃牙）——貼身旋身一踢
       { id: 'roll_kick', name: '迴旋踢', short: '迴旋', tags: ['gap', 'melee'], range: [80, 360], cd: 6.5, cost: 24, track: 7, recovery: 0.65,
         actions: [...dashStrike(0.4, 0.35, 190, 70, 0.12, { dmg: 60, posture: 20, kb: 160 }, {}),
@@ -164,7 +164,7 @@
       { id: 'beast_barrage', name: '猛獸連擊', short: '猛獸', phase: 2, tags: ['melee', 'fast'], range: [0, 290], cd: 8, cost: 28, track: 6, recovery: 0.85,
         actions: [{ do: 'tele', at: 0.1, dur: 0.55, shape: 'rect', len: 290, w: 130, follow: true },
           { do: 'hit', at: 0.65, shape: 'rect', len: 290, w: 130, dmg: 100, posture: 38, kb: 260, fx: { id: 'beastclaw', scale: 1.1, ...BLOOD } },
-          ...flurry(0.85, 13, 0.1, { shape: 'rect', len: 290, w: 130 }, { dmg: 15, posture: 5, kb: 40 }, { id: 'beastclaw', ...BLOOD }, 0.94),
+          ...flurry(0.85, 13, 0.1, { shape: 'rect', len: 290, w: 130 }, { dmg: 15, posture: 5, kb: 40, status: { id: 'bleed', stacks: 6 } }, { id: 'beastclaw', ...BLOOD }, 0.94),
           ...strike(2.25, 0.25, { shape: 'rect', len: 330, w: 150 }, { dmg: 88, posture: 32, kb: 540, fx: { id: 'beastclaw', scale: 1.4, ...BLOOD } })] },
       // 原作：鬼之貌（鬼背全開）的一擊——打在身上就是「惡魔的領域」，能讓任何戰鬥瞬間結束
       { id: 'demon_blow', name: '鬼貌一擊', short: '鬼貌', phase: 2, tags: ['gap', 'melee'], range: [60, 420], cd: 11, cost: 32, track: 5, recovery: 1.0,

@@ -68,8 +68,8 @@
     },
     skills: [
       { id: 'fangtian_sweep', name: '方天掃', short: '方天掃', tags: ['melee', 'aoe'], clash: 'heavy', range: [0, 185], cd: 3.2, cost: 24, track: 6, creep: 0.3, recovery: 0.55,
-        actions: strike(0.52, 0.36, { shape: 'cone', r: 185, arc: 150 * D }, { dmg: 105, posture: 35, kb: 440, fx: 'cleave' }),
-        actions2: [...strike(0.48, 0.32, { shape: 'cone', r: 205, arc: 160 * D }, { dmg: 115, posture: 40, kb: 480, fx: 'cleave' }),
+        actions: strike(0.52, 0.36, { shape: 'cone', r: 185, arc: 150 * D }, { dmg: 105, posture: 35, kb: 440, fx: 'cleave', status: { id: 'bleed', stacks: 30 } }),
+        actions2: [...strike(0.48, 0.32, { shape: 'cone', r: 205, arc: 160 * D }, { dmg: 115, posture: 40, kb: 480, fx: 'cleave', status: { id: 'bleed', stacks: 35 } }),
           ...strike(0.85, 0.28, { shape: 'circle', r: 150 }, { dmg: 65, posture: 20, kb: 350, fx: 'ring' })] },
       { id: 'randgriz_thrust', name: '蘭蒂格瑞絲・破盾突', short: '破盾突', tags: ['melee', 'fast'], clash: 'heavy', range: [50, 270], cd: 3.6, cost: 22, track: 8, creep: 0.2, recovery: 0.5, // 盾牌破壞者：重削架勢
         actions: strike(0.45, 0.3, { shape: 'rect', len: 270, w: 55 }, { dmg: 100, posture: 95, kb: 260, fx: 'thrust', status: { id: 'vulnerable', dur: 4 } }),
@@ -86,9 +86,9 @@
           ...strike(0.8, 0.18, { shape: 'cone', r: 210, arc: 120 * D }, { dmg: 110, posture: 40, kb: 320, fx: 'cleave', status: { id: 'bleed', stacks: 40, dur: 7 } })] },
       { id: 'rift_cut', name: '裂空試斬', short: '試斬', tags: ['melee', 'aoe'], range: [0, 320], cd: 6.0, cost: 28, track: 5, recovery: 0.7,
         actions: [{ do: 'tele', at: 0.2, dur: 0.55, shape: 'rect', len: 330, w: 90, follow: true },
-          { do: 'hit', at: 0.75, shape: 'rect', len: 330, w: 90, dmg: 150, posture: 50, kb: 460, fx: { id: 'skyrend', el: 'blood', scale: 0.8 } }],
+          { do: 'hit', at: 0.75, shape: 'rect', len: 330, w: 90, dmg: 150, posture: 50, kb: 460, fx: { id: 'skyrend', el: 'blood', scale: 0.8 }, status: { id: 'bleed', stacks: 75 } }],
         actions2: [{ do: 'tele', at: 0.15, dur: 0.5, shape: 'rect', len: 360, w: 100, follow: true },
-          { do: 'hit', at: 0.65, shape: 'rect', len: 360, w: 100, dmg: 170, posture: 60, kb: 520, fx: { id: 'skyrend', el: 'blood', scale: 0.95 } }] },
+          { do: 'hit', at: 0.65, shape: 'rect', len: 360, w: 100, dmg: 170, posture: 60, kb: 520, fx: { id: 'skyrend', el: 'blood', scale: 0.95 }, status: { id: 'bleed', stacks: 80 } }] },
       { id: 'dodge_whirl', name: '旋身讓步・戟舞', short: '戟舞', tags: ['melee', 'aoe'], range: [0, 160], cd: 3.8, cost: 20, track: 5, creep: 0.3, recovery: 0.5,
         actions: [{ do: 'invuln', at: 0, dur: 0.35 }, // 旋身讓過迴旋槌
           ...strike(0.42, 0.35, { shape: 'circle', r: 160 }, { dmg: 95, posture: 30, kb: 300, fx: 'whirl' })],

@@ -9,7 +9,7 @@
 (function (G) {
   const BD = G.BD, { D, strike } = BD.DataKit;
   const CANE = { el: 'physical' }; // 拐杖本身是木頭：物理塵土；幻影武器才是聖屬性（Boss 預設 fxEl）
-  const dagger = (at, o) => Object.assign({ do: 'proj', at, n: 1, speed: 820, r: 12, dmg: 62, posture: 14, kb: 120, life: 1.1, homing: 1.6, kind: 'holydagger', deflect: true, fx: 'daggerform' }, o);
+  const dagger = (at, o) => Object.assign({ do: 'proj', at, n: 1, speed: 820, r: 12, dmg: 62, posture: 14, kb: 120, life: 1.1, homing: 1.6, kind: 'holydagger', deflect: true, fx: 'daggerform', status: { id: 'bleed', stacks: 12 } }, o);
 
   // 躍起下刺：躍起消失 → 空中停頓鎖定落點 → 往下刺，落點炸開聖光十字
   function leapStab(at, r, dmg, up) {
@@ -122,16 +122,16 @@
           dagger(0.42), dagger(0.78), ...hammerLeap(2.0, 175, 190, 130)] },
       // 4. 幻影短刀斬：左手黃金短刀快速兩斬（原作 Quick Dagger Slashes）
       { id: 'dagger_slash', name: '幻影短刀斬', short: '短刀', tags: ['melee', 'fast'], range: [0, 200], cd: 3.2, cost: 16, track: 8, creep: 0.4, recovery: 0.4,
-        actions: [...strike(0.28, 0.22, { shape: 'cone', r: 190, arc: 120 * D, angOff: -0.3 }, { dmg: 70, posture: 20, kb: 220, fx: 'phantomslash' }),
-          ...strike(0.58, 0.22, { shape: 'cone', r: 190, arc: 110 * D, angOff: 0.2 }, { dmg: 76, posture: 22, kb: 260, fx: 'phantomslash' })],
-        actions2: [...strike(0.26, 0.2, { shape: 'cone', r: 200, arc: 120 * D, angOff: -0.3 }, { dmg: 70, posture: 20, kb: 220, fx: 'phantomslash' }),
-          ...strike(0.54, 0.2, { shape: 'cone', r: 200, arc: 110 * D, angOff: 0.2 }, { dmg: 76, posture: 22, kb: 260, fx: 'phantomslash' }),
-          ...strike(0.9, 0.26, { shape: 'rect', len: 230, w: 50 }, { dmg: 92, posture: 26, kb: 320, fx: 'phantomthrust' })] },
+        actions: [...strike(0.28, 0.22, { shape: 'cone', r: 190, arc: 120 * D, angOff: -0.3 }, { dmg: 70, posture: 20, kb: 220, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } }),
+          ...strike(0.58, 0.22, { shape: 'cone', r: 190, arc: 110 * D, angOff: 0.2 }, { dmg: 76, posture: 22, kb: 260, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } })],
+        actions2: [...strike(0.26, 0.2, { shape: 'cone', r: 200, arc: 120 * D, angOff: -0.3 }, { dmg: 70, posture: 20, kb: 220, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } }),
+          ...strike(0.54, 0.2, { shape: 'cone', r: 200, arc: 110 * D, angOff: 0.2 }, { dmg: 76, posture: 22, kb: 260, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } }),
+          ...strike(0.9, 0.26, { shape: 'rect', len: 230, w: 50 }, { dmg: 92, posture: 26, kb: 320, fx: 'phantomthrust', status: { id: 'bleed', stacks: 20 } })] },
       // 5. 後撤擲刀：揮刀、往後跳、在空中擲出短刀（原作 Dagger Retreat）
       { id: 'dagger_retreat', name: '後撤擲刀', short: '後撤', tags: ['melee', 'defensive'], range: [0, 220], cd: 6, cost: 18, track: 7, recovery: 0.45,
-        actions: [...strike(0.3, 0.24, { shape: 'cone', r: 200, arc: 140 * D }, { dmg: 74, posture: 20, kb: 320, fx: 'phantomslash' }),
+        actions: [...strike(0.3, 0.24, { shape: 'cone', r: 200, arc: 140 * D }, { dmg: 74, posture: 20, kb: 320, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } }),
           { do: 'dash', at: 0.42, dir: 'back', dist: 230, dur: 0.26, fx: 'omenbackstep' }, dagger(0.64, { homing: 1.2 })],
-        actions2: [...strike(0.28, 0.22, { shape: 'cone', r: 210, arc: 140 * D }, { dmg: 74, posture: 20, kb: 320, fx: 'phantomslash' }),
+        actions2: [...strike(0.28, 0.22, { shape: 'cone', r: 210, arc: 140 * D }, { dmg: 74, posture: 20, kb: 320, fx: 'phantomslash', status: { id: 'bleed', stacks: 20 } }),
           { do: 'dash', at: 0.4, dir: 'back', dist: 250, dur: 0.24, fx: 'omenbackstep' }, dagger(0.6, { n: 3, spread: 0.16, homing: 1.0 })] },
       // 6. 尾掃：扭身，長尾先掃背後、再隨轉身掃過前方（原作 Tail Swipe 只掃背後；這裡接著轉回正面）
       { id: 'tail_sweep', name: '尾掃', short: '尾掃', tags: ['melee', 'fast', 'defensive'], range: [0, 185], cd: 4.5, cost: 14, track: 9, creep: 0.5, recovery: 0.45,
