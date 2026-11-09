@@ -255,11 +255,12 @@
   const PUFF = { sand: [226, 203, 152], snow: [240, 247, 255], wheat: [240, 205, 110], water: [205, 238, 248], steam: [236, 238, 244], toxic: [150, 215, 90], scarletrot: [145, 62, 49], blood: [165, 20, 32], ink: [24, 14, 44] };
   function drawPuffs(ctx, fx) {
     for (const p of fx.puffs) {
-      const age = 1 - p.life / p.max, r = U.lerp(p.r0, p.r1, Math.sqrt(age)), a = p.al * Math.min(1, age * 8) * Math.pow(1 - age, 1.3);
+      const age = 1 - p.life / p.max, r = U.lerp(p.r0, p.r1, Math.sqrt(age)), a = p.al * Math.min(1, age * 8) * (p.flame ? 1 - age * age * age * age : Math.pow(1 - age, 1.3));
       if (a < 0.01) continue;
       ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.scale(r / 64, r / 64);
+      if (p.flame === 2) ctx.globalCompositeOperation = 'lighter';
       R.blit(ctx, 'puff:' + p.tint, 128, 128, 64, 64, (g) => {
-        const c = PUFF[p.tint].join(','), gr = g.createRadialGradient(0, 0, 0, 0, 0, 64);
+        const c = (PUFF[p.tint] || [1, 3, 5].map((i) => parseInt(p.tint.slice(i, i + 2), 16))).join(','), gr = g.createRadialGradient(0, 0, 0, 0, 0, 64);
         gr.addColorStop(0, `rgba(${c},1)`); gr.addColorStop(0.55, `rgba(${c},0.55)`); gr.addColorStop(1, `rgba(${c},0)`);
         g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 64, 0, U.TAU); g.fill();
       });

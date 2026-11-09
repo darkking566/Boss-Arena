@@ -3,6 +3,7 @@
 (function (G) {
   const BD = G.BD, V = BD.vrng, TAU = Math.PI * 2;
   const WHITE = '#edfaff', ICE = '#a7dce9', BLUE = '#4e9ac1', DARK = '#365b70';
+  const MIST = [WHITE, ICE, '#cfeaf2', 'snow']; // fx.stream 的芯 / 主體 / 外緣 / 貼地白霧
   BD.KIND_EL.rimefog = 'ice';
   function shards(fx, x, y, r, n, speed) {
     for (let i = 0; i < fx.budget(n); i++) {
@@ -25,12 +26,13 @@
     const end = { x: x + Math.cos(a) * (o.shape === 'circle' ? 0 : len * 0.9), y: y + Math.sin(a) * (o.shape === 'circle' ? 0 : len * 0.9) };
     const arc = o.shape === 'rect' ? 0.17 : (o.arc || 0.65);
     fx.glow(m.x, m.y, rr * 0.3, WHITE, 0.18, 0.6, 0.3);
+    if (down) { const D0 = Math.max(60, Math.hypot(x - m.x, y - m.y)); fx.stream(m.x, m.y, Math.atan2(y - m.y, x - m.x), 2 * Math.atan(len * 0.5 / D0), D0 + len * 0.3, MIST, 0.2, 1); }
+    else fx.stream(m.x, m.y, Math.atan2(end.y - m.y, end.x - m.x), arc, Math.hypot(end.x - m.x, end.y - m.y), MIST, 0.2, 1); // 連綿的冰霧流塗滿整個判定
     for (let i = 0; i < 6; i++) fx.after(i * 0.03, () => {
       const u = (i + 1) / 6, an = a + (V() - 0.5) * arc * 0.75;
       let px, py;
       if (down) { const aa = V() * TAU, d = Math.sqrt(V()) * len * 0.85; px = x + Math.cos(aa) * d; py = y + Math.sin(aa) * d; }
       else { px = m.x + (end.x - m.x) * u - Math.sin(an) * (V() - 0.5) * (o.width || len * arc) * u; py = m.y + (end.y - m.y) * u + Math.cos(an) * (V() - 0.5) * (o.width || len * arc) * u; }
-      fx.streak(m.x, m.y, px, py, (down ? 7 : 4) + 3 * u, i % 2 ? ICE : 'rgba(237,250,255,0.65)', 0.24, true);
       mist(fx, px, py, 40 + 95 * u, 0.24);
       fx.ring(px, py, 6, 27 + 43 * u, 0.45, 'rgba(178,227,243,0.3)', 3);
       shards(fx, px, py, 25, 5, 140);

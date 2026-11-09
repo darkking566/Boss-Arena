@@ -7,12 +7,13 @@
 
   BD.defineEffect('breath', {
     name: '噴吐', category: '區域',
-    desc: '廣角錐形噴吐：半透明的扇形刃光鋪開，錐內火花與元素微粒翻湧。適合火焰吐息、毒霧、寒風噴射。',
+    desc: '廣角錐形噴吐：元素色的火舌 / 霧團從口中連綿湧出、一路脹大，塗滿整個扇形，外緣捲起煙，錐內火花與元素微粒翻湧。適合火焰吐息、毒霧、寒風噴射。',
     params: { arc: 1.6 },
     spawn(fx, x, y, o) {
       const E = o.E, k = o.k, r = o.radius || 120;
-      const ang = o.angle || 0, arc = o.arc || 1.6;
-      fx.slash(x, y, ang, arc, r, E.glow, 30 * Math.min(1.5, k), o.heavy ? 0.5 : 0.35, { core: E.core, trail: 1 });
+      const ang = o.angle || 0, arc = o.arc || 1.6, src = o.src, mr = src ? src.r * 0.7 : 0;
+      const fire = /fire|blackfire/.test(o.el || 'fire');
+      fx.stream(x + Math.cos(ang) * mr, y + Math.sin(ang) * mr, ang, arc, r - mr, [E.core, E.glow, E.rim, fire ? '#2e2018' : null], o.heavy ? 0.26 : 0.22, k);
       for (let i = 0; i < 3; i++) {
         const a = ang + (BD.vrng() - 0.5) * arc * 0.7;
         fx.sparkle(x + Math.cos(a) * r * 0.6, y + Math.sin(a) * r * 0.6, E.core, Math.round(5 * k), 260, a, arc * 0.5);

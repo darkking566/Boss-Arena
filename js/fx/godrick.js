@@ -211,6 +211,7 @@
   // ═══ 每個技能組各自的特效 ═══
   const arcPt = (x, y, a, d) => [x + Math.cos(a) * d, y + Math.sin(a) * d];
   const isFire = (E) => E.id === 'fire';
+  const tints = (E) => isFire(E) ? [FLAME_L, FLAME, EMBER, '#2e2018'] : [E.core, E.glow, E.rim, null]; // fx.stream 用
   // 一團翻滾的火：主火 + 亮芯 + 往上飄的火星
   function flameBall(fx, x, y, s, life) {
     fx.glow(x, y, s, V() < 0.5 ? FLAME : EMBER, life, 0.5, 0.35);
@@ -400,11 +401,7 @@
       const E = o.E, k = Math.min(1.5, o.k || 1), r = o.radius || 300, ang = o.angle || 0, arc = o.arc || 1.1, src = o.src, rr = (src && src.r) || 40, fire = isFire(E);
       const mx = x + Math.cos(ang) * rr * 0.9, my = y + Math.sin(ang) * rr * 0.9;
       fx.flashAt(mx, my, 34, fire ? FLAME_L : E.core, 0.1);
-      for (let i = 0; i < 6; i++) fx.after(i * 0.035, () => {
-        const q = (i + 1) / 6, d = r * (0.15 + 0.85 * q);
-        for (let j = 0; j < 2 + (i >> 1); j++) { const a = ang + (V() - 0.5) * arc * 0.8, dd = d * (0.6 + 0.4 * V()), px = x + Math.cos(a) * dd, py = y + Math.sin(a) * dd; if (fire) flameBall(fx, px, py, (24 + 30 * q) * k, 0.45); else fx.glow(px, py, (24 + 30 * q) * k, E.glow, 0.45, 0.45, 0.3); }
-        if (V() < 0.5) fx.smoke(x + Math.cos(ang) * d, y + Math.sin(ang) * d, 'rgba(40,20,10,0.45)', 1, 30);
-      });
+      fx.stream(mx, my, ang, arc, r - rr * 0.9, tints(E), 0.2, k); // 連綿火浪塗滿整個扇形
       const [tx, ty] = arcPt(x, y, ang, r * 0.92);
       fx.after(0.2, () => { fx.glow(tx, ty, 50 * k, fire ? FLAME_L : E.core, 0.28, 0.7, 0.5); fx.decal(tx, ty, r * 0.16, E.decal, 6); });
       fx.decal(x + Math.cos(ang) * r * 0.55, y + Math.sin(ang) * r * 0.55, r * 0.14, 'rgba(40,14,4,0.3)', 5);
@@ -415,22 +412,20 @@
 
   BD.defineEffect('stridingflame', {
     name: '噴火進軍', category: '區域',
-    desc: '邊大步往前走邊從龍口噴出細長的火柱：一道筆直的白芯火束往正前方貫出、兩側翻著橘紅火團與黑煙，火束盡頭濺開火花打在地上；以扇形判定（cone）出現時是收尾那口橫掃——一大片火浪往前翻、終點熱浪環。適合邊移動邊噴火（rect / cone 判定的 fx）。',
+    desc: '邊大步往前走邊從龍口噴出細長的火流：一道窄而連綿的火舌往正前方翻滾湧出、外緣捲起黑煙，火束盡頭濺開火花打在地上；以扇形判定（cone）出現時是收尾那口橫掃——一大片火浪往前翻、終點熱浪環。適合邊移動邊噴火（rect / cone 判定的 fx）。',
     params: { len: 400, width: 96 },
     spawn(fx, x, y, o) {
       const E = o.E, k = Math.min(1.5, o.k || 1), ang = o.angle || 0, fire = isFire(E), c = fire ? FLAME : E.glow, cl = fire ? FLAME_L : E.core;
       if (o.shape === 'cone') { // 收尾：一大口火浪
         const r = o.radius || 330, arc = o.arc || 2.1;
-        for (let i = 0; i < 8; i++) fx.after(i * 0.04, () => { const q = (i + 1) / 8; for (let j = 0; j < 3; j++) { const a = ang + (V() - 0.5) * arc * 0.85, d = r * q * (0.7 + 0.3 * V()); if (fire) flameBall(fx, x + Math.cos(a) * d, y + Math.sin(a) * d, (30 + 30 * q) * k, 0.5); else fx.glow(x + Math.cos(a) * d, y + Math.sin(a) * d, (30 + 30 * q) * k, c, 0.5, 0.45, 0.3); } });
+        fx.stream(x, y, ang, arc, r, tints(E), 0.3, k);
         fx.after(0.3, () => fx.shock(x, y, r * 0.5, r * 1.05, 0.35, c, 5, cl));
         fx.smoke(x + Math.cos(ang) * r * 0.6, y + Math.sin(ang) * r * 0.6, 'rgba(40,20,10,0.45)', fx.budget(8), r * 0.3);
         fx.shake(8); fx.grade('#ff6a1a', 0.12, 0.25);
         return;
       }
       const len = o.len || 400, w = (o.width || 96) * (o.arc ? 0.8 : 1), [tx, ty] = arcPt(x, y, ang, len);
-      fx.beam(x, y, tx, ty, w * 0.35, c, 0.22, cl);
-      fx.beam(x, y, tx, ty, w * 0.1, WHITE, 0.16, WHITE);
-      for (let i = 0; i < 5; i++) { const u = 0.2 + 0.8 * V(), l = (V() - 0.5) * w * 0.8, px = x + Math.cos(ang) * len * u - Math.sin(ang) * l, py = y + Math.sin(ang) * len * u + Math.cos(ang) * l; if (fire) flameBall(fx, px, py, 18 + 16 * u, 0.35); else fx.glow(px, py, 18 + 16 * u, c, 0.35, 0.45, 0.3); }
+      fx.stream(x, y, ang, 2 * Math.atan(w * 0.4 / len), len, tints(E), 0.16, k); // 窄而連綿的火流
       fx.sparkle(tx, ty, cl, fx.budget(6), 260, ang, 1.4);
       fx.smoke(tx, ty, 'rgba(40,20,10,0.4)', fx.budget(2), 30);
       fx.shake(2);

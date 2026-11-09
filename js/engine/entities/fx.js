@@ -164,7 +164,27 @@
     // 斷樹的一半：a0 為切線（刃）方向，side（±1）決定留哪一側，spin 為之後累積的旋轉；繪圖端畫半棵樹並漸隱
     chunk(x, y, vx, vy, a0, vr, side, r, v, life) { this.chunks.push({ x, y, vx, vy, a0, spin: 0, vr, side, r, v, life: life || 1.1, max: life || 1.1 }); }
     // 大型柔軟塵團（沙塵 / 雪沫 / 麥屑）：半徑由 r0 擴到 r1、緩慢飄散；tint 為繪圖端的預烘焙色票（'sand' | 'snow' | 'wheat'）
-    puff(x, y, vx, vy, r0, r1, life, tint, al) { this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al }); if (this.puffs.length > PUFF_CAP) this.puffs.shift(); }
+    // tint 也可以是 '#rrggbb'；flame：1 = 火焰（亮度撐到後段才熄，不像塵團一出生就淡），2 = 火焰且 additive 疊加（火芯）
+    puff(x, y, vx, vy, r0, r1, life, tint, al, flame) { this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al, flame: flame || 0 }); if (this.puffs.length > PUFF_CAP) this.puffs.shift(); }
+    // 連綿噴流（火焰 / 冰霧吐息）：dur 秒內從口 (x,y) 沿 ang±arc/2 不斷推出會脹大的塵團，一路塗滿到 len；
+    //   tints = [芯, 主體, 外焰, 煙(可 null)]；整個扇形都被流動的火舌蓋住，而不是只有前緣一條線
+    stream(x, y, ang, arc, len, tints, dur, k) {
+      const n = Math.max(2, Math.round(dur / 0.035)), half = Math.max(0.06, arc / 2), s = Math.min(1.5, k || 1);
+      const go = (dist, T) => dist * 1.1 / (1 - Math.exp(-1.1 * T)); // 塵團有阻力（update 的 pk）：反推出初速
+      for (let i = 0; i < n; i++) this.after(i * dur / n, () => {
+        for (let j = 0; j < 3; j++) { // 主體：落在整個張角裡，越遠越大，彼此重疊成一片火海
+          const R = (len * Math.tan(half) * 0.6 + 24) * s, d = Math.max(len * 0.6, len - R * 0.35) * (0.94 + 0.1 * V()); // 塵團可見邊緣剛好落在 len
+          const a = ang + (V() - 0.5) * 2 * half * 0.9, T = 0.5 + V() * 0.15, v = go(d, T);
+          this.puff(x, y, Math.cos(a) * v, Math.sin(a) * v, 10 * s, R, T, j ? tints[1] : tints[2], 0.75, 1);
+        }
+        const a = ang + (V() - 0.5) * half, T = 0.32, v = go(len * 0.5, T); // 口前白熱的芯
+        this.puff(x, y, Math.cos(a) * v, Math.sin(a) * v, 8 * s, (len * 0.5 * Math.tan(half) * 0.5 + 22) * s, T, tints[0], 0.5, 2);
+        if (tints[3] && V() < 0.3) { // 外緣捲起的煙
+          const b = ang + (V() - 0.5) * 2 * half, T2 = 0.8, w = go(len * (0.7 + 0.2 * V()), T2);
+          this.puff(x, y, Math.cos(b) * w, Math.sin(b) * w - 20, 14 * s, (len * Math.tan(half) * 0.7 + 34) * s, T2, tints[3], 0.32);
+        }
+      });
+    }
     // 飛濺的長條 / 團塊（麥稈、麥粒、雪塊）：帶高度 z 的拋物線，落地後滑行並漸隱；len 為長度、w 為線寬
     stalk(x, y, vx, vy, vz, rot, vr, len, w, col, life, drop) { if (this.stalks.length >= STALK_CAP) return; this.stalks.push({ x, y, z: 4, vx, vy, vz, rot, vr, len, w, col, life, max: life, drop }); }
     // 腳印：kind 'snow'（深雪、留很久）/ 'desert'（淺、很快被風吹平）

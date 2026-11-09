@@ -9,6 +9,7 @@
   const BD = G.BD, TAU = Math.PI * 2, V = BD.vrng;
   const WHITE = '#fffbe8', CORE = '#ffe9a8', FLAME = '#ff8a1e', FLAME_D = '#e8480e', EMBER = '#ff5a12';
   const ASH = '#4a403a', SMOKE = 'rgba(38,26,20,0.34)', DUST = 'rgba(150,132,110,0.45)', RED = '#ff3b1a';
+  const STREAM = [CORE, FLAME, FLAME_D, '#2e2018']; // fx.stream 的芯 / 主體 / 外焰 / 煙
   const k_ = (o) => Math.min(1.6, o.k || 1);
   // 龍口位置（世界座標）：ang 為噴射方向；src 不存在時（圖鑑）退回特效原點前方
   function mouth(x, y, o, ang) {
@@ -30,19 +31,15 @@
   }
 
   BD.defineEffect('agheelbreath', { name: '亞基爾・龍息', category: '區域', params: { arc: 1.05 },
-    desc: '飛龍拱頸從口中噴出的橘金火浪：口前白熱一團，幾道火舌從口裡沖出，火團沿路翻滾、越遠越寬越暗，前緣捲起黑煙與火星，地上留下焦痕；接力時就是燒過湖面的橫掃龍息。rect 判定時是一道白芯的追蹤火柱，末端炸開火花。',
+    desc: '飛龍拱頸從口中噴出的橘金火浪：口前白熱一團，火舌連綿湧出、一路脹大塗滿整個扇形，越遠越寬越暗，外緣捲起黑煙與火星，地上留下焦痕；接力時就是燒過湖面的橫掃龍息。rect 判定時是一道窄而連綿的追蹤火流，末端炸開火花。',
     spawn(fx, x, y, o) {
       const k = k_(o), ang = o.angle || 0, [mx, my] = mouth(x, y, o, ang), c = Math.cos(ang), s = Math.sin(ang);
       const ox = o.src ? o.src.x : x, oy = o.src ? o.src.y : y;
       fx.flashAt(mx, my, 46 * k, CORE, 0.1);
       fx.glow(mx, my, 34 * k, WHITE, 0.16, 0.8, 0.3);
-      if (o.shape === 'rect') { // 追蹤火柱：從口到判定末端
+      if (o.shape === 'rect') { // 追蹤火柱：從口到判定末端，一道連綿翻滾的火流
         const len = o.len || 520, w = o.width || 110, tx = ox + c * len, ty = oy + s * len, L = Math.max(60, Math.hypot(tx - mx, ty - my));
-        fx.beam(mx, my, tx, ty, w * 0.5, FLAME_D, 0.2, FLAME);
-        fx.beam(mx, my, tx, ty, w * 0.26, FLAME, 0.18, CORE);
-        fx.beam(mx, my, tx, ty, w * 0.08, WHITE, 0.14, WHITE);
-        for (let i = 0; i < 6; i++) { const u = (i + V()) / 6, l = (V() - 0.5) * w * 0.7 * u; flame(fx, mx + c * L * u - s * l, my + s * L * u + c * l, (18 + 30 * u) * k, 0.35); }
-        for (let i = 0; i < 2; i++) { const l = (V() - 0.5) * w * 0.5; fx.streak(mx, my, mx + c * L * 0.7 - s * l, my + s * L * 0.7 + c * l, 9 * k, FLAME, 0.16, true); }
+        fx.stream(mx, my, Math.atan2(ty - my, tx - mx), 2 * Math.atan(w * 0.4 / L), L, STREAM, 0.17, k);
         fx.glow(tx, ty, 50 * k, FLAME, 0.3, 0.6, 0.6);
         fx.sparkle(tx, ty, CORE, fx.budget(6), 300, ang, 1.6);
         fx.embers(tx, ty, EMBER, fx.budget(3), 40, 140);
@@ -50,19 +47,7 @@
         return;
       }
       const r = o.radius || 480, arc = o.arc || 1.05, tx0 = ox + c * r * 0.95, ty0 = oy + s * r * 0.95, L = Math.max(80, Math.hypot(tx0 - mx, ty0 - my));
-      for (let i = 0; i < 3; i++) { // 口中沖出的火舌：細長加亮拖影，往扇形內散開
-        const a = ang + (V() - 0.5) * arc * 0.55, d = L * (0.55 + 0.35 * V());
-        fx.streak(mx, my, mx + Math.cos(a) * d, my + Math.sin(a) * d, (12 + 6 * V()) * k, i ? FLAME : CORE, 0.2, true);
-      }
-      for (let i = 0; i < 7; i++) { // 連續的火舌主體：口前白熱、往外越來越寬越紅
-        const u = (i + 0.5) / 7, px = mx + (tx0 - mx) * u + (V() - 0.5) * 24, py = my + (ty0 - my) * u + (V() - 0.5) * 24;
-        fx.glow(px, py, (22 + 56 * u) * k, u < 0.22 ? CORE : u < 0.6 ? FLAME : FLAME_D, 0.22, 0.6, 0.35);
-      }
-      for (let i = 0; i < 6; i++) fx.after(i * 0.035, () => { // 火團一波波往外翻滾、越遠散得越開
-        const q = (i + 1) / 6, d = L * (0.2 + 0.85 * q);
-        for (let j = 0; j < 3 + (i >> 1); j++) { const a = ang + (V() - 0.5) * arc * (0.35 + 0.6 * q), dd = d * (0.75 + 0.3 * V()); flame(fx, mx + Math.cos(a) * dd, my + Math.sin(a) * dd, (30 + 38 * q) * k, 0.45); }
-        if (V() < 0.4) fx.smoke(mx + c * d, my + s * d, SMOKE, 1, 40);
-      });
+      fx.stream(mx, my, Math.atan2(ty0 - my, tx0 - mx), arc, L, STREAM, 0.2, k); // 連綿的火浪塗滿整個扇形
       fx.embers(tx0, ty0, EMBER, fx.budget(4), 60, 150);
       fx.after(0.2, () => { fx.glow(tx0, ty0, 60 * k, FLAME, 0.3, 0.6, 0.5); fx.decal(tx0, ty0, r * 0.13, 'rgba(30,12,4,0.3)', 6); fx.smoke(tx0, ty0, SMOKE, fx.budget(2), 50); });
       fx.sparkle(mx, my, CORE, fx.budget(6), 520, ang, arc * 0.45);
@@ -70,14 +55,15 @@
     } });
 
   BD.defineEffect('agheelflame', { name: '天降・亞基爾之炎', category: '區域', params: { len: 700, width: 200 },
-    desc: '龍餐祈禱「亞基爾之炎」的放大版：飛龍浮在半空，從口中朝地面斜斜噴下一道道火線，一整條長廊從天而降——每一段先落下白熱的火柱，再在地面炸成翻滾火海，邊緣捲起濃煙與上升的餘燼。',
+    desc: '龍餐祈禱「亞基爾之炎」的放大版：飛龍浮在半空，從口中朝地面斜斜灌下一整片火流，一整條長廊從天而降——每一段先落下白熱的火柱，再在地面炸成翻滾火海，邊緣捲起濃煙與上升的餘燼。',
     spawn(fx, x, y, o) {
       const k = k_(o), ang = o.angle || 0, len = o.len || 700, w = o.width || 200, c = Math.cos(ang), s = Math.sin(ang);
       const src = o.src, h = 150 * ((src && src.r) || 96) / 96, [mx, my0] = mouth(x, y, o, ang), my = my0 - h; // 飛在空中的龍口
       fx.glow(mx, my, 40 * k, CORE, 0.18, 0.8, 0.4);
+      const fx_ = x + c * len * 0.6, fy = y + s * len * 0.6, D0 = Math.hypot(fx_ - mx, fy - my); // 從龍口斜噴到長廊的整片火流
+      fx.stream(mx, my, Math.atan2(fy - my, fx_ - mx), 2 * Math.atan((w * 0.5 + len * 0.25) / D0), D0 * 1.15, STREAM, 0.18, k);
       for (let i = 0; i < 7; i++) fx.after(i * 0.025, () => {
         const u = (i + 0.3 + V() * 0.7) / 7, l = (V() - 0.5) * w * 0.8, px = x + c * len * u - s * l, py = y + s * len * u + c * l;
-        fx.streak(mx, my, px, py, (14 + 8 * V()) * k, i % 2 ? FLAME : CORE, 0.2, true); // 從龍口斜噴到地面的火線
         flame(fx, px, py, (45 + 30 * V()) * k, 0.6);
         if (V() < 0.5) fx.embers(px, py, EMBER, 2, 30, 160);
       });
@@ -92,7 +78,8 @@
       const k = k_(o), r = o.radius || 280, src = o.src, h = 120 * ((src && src.r) || 96) / 96, [mx, my0] = mouth(x, y, o, src ? src.face : 0), my = my0 - h;
       fx.flashAt(x, y, r * 0.5, CORE, 0.12);
       fx.glow(mx, my, 36 * k, CORE, 0.16, 0.8, 0.4);
-      for (let i = 0; i < 4; i++) { const a = V() * TAU, d = r * 0.6 * Math.sqrt(V()); fx.streak(mx, my, x + Math.cos(a) * d, y + Math.sin(a) * d, (12 + 6 * V()) * k, i ? FLAME : CORE, 0.2, true); }
+      const D0 = Math.max(60, Math.hypot(x - mx, y - my)); // 從空中龍口斜灌到落點的整片火流
+      fx.stream(mx, my, Math.atan2(y - my, x - mx), 2 * Math.atan(r * 0.7 / D0), D0 + r * 0.3, STREAM, 0.2, k);
       for (let i = 0; i < 9; i++) { const a = V() * TAU, d = r * Math.sqrt(V()) * 0.9; flame(fx, x + Math.cos(a) * d, y + Math.sin(a) * d, (34 + 26 * V()) * k, 0.55); }
       fx.shock(x, y, r * 0.2, r * 1.05, 0.4, FLAME, 6, CORE);
       fx.smoke(x, y, SMOKE, fx.budget(5), r * 0.7);

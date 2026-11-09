@@ -427,6 +427,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `slash(x, y, ang, arc, r, color, width, life, opts)` | 沿方向與張角掃出的弧形刃光，可設定加亮核心線（`core`）與殘影弧數（`trail`） |
 | `beam(x1, y1, x2, y2, w, color, life, core)` | 連接兩點的筆直能量光束，支援高亮核心線 |
 | `streak(x1, y1, x2, y2, w, color, life, add)` | 兩點間由粗漸細的動態殘跡拖影線，`add=true` 時採加法混合 |
+| `stream(x, y, ang, arc, len, tints, dur, k)` | 連綿噴流：`dur` 秒內從口不斷推出會脹大的火焰塵團，塗滿整個扇形 / 窄長條（`arc` 很小時）。`tints = [芯, 主體, 外焰, 煙或 null]`（`'#rrggbb'` 或 puff 色票名）。**吐息 / 噴火請用它，不要用 streak / beam 畫成細線** |
 | `ink(x1, y1, x2, y2, w, life, color, bend)` | 毛筆一筆（水墨）：落筆粗、收筆尖、邊緣抖動，前 12% 生命（最多 0.14 秒）沿路徑寫出來，帶淡墨暈與收筆飛白；非加法混合（深色墨可見），`bend` 讓筆畫彎成弧（正值往左彎） |
 | `glow(x, y, r, color, life, a, grow, follow)` | 加法混色柔光光暈，可隨時間擴張（`grow`）或跟隨單位座標（`follow`） |
 | `charge(x, y, r, color, life, follow, n)` | 聚力蓄光，光暈由暗漸亮半徑收縮，並有向中心吸聚的光點 |
