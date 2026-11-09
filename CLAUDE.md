@@ -1,7 +1,7 @@
 # Boss鬥技場
 
 俯視角 2D Boss 對決遊戲：純 HTML5 Canvas + 原生 JavaScript，無建置、無相依，雙擊 `index.html` 即可執行。
-架構、操作與測試說明見 `README.md`；新增 Boss 見 `docs/adding-a-boss.md`；特效與元素見 `docs/effects.md`。
+架構、操作與測試說明見 `README.md`；新增 Boss 見 `docs/adding-a-boss.md`；特效與元素見 `docs/effects.md`；新模式 / 系統接戰鬥用 `docs/engine-hooks.md` 的事件與傷害掛勾，不在 world.js 加 `if (this.xxx)`。
 
 ## 工作方式
 - **寫程式一律遵守 ponytail（full 等級）**：以最小而完整的改動解決任務。工作階段開始時若技能可用，先以 `/ponytail` 載入。

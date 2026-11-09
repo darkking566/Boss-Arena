@@ -102,14 +102,14 @@
         this.cds[skill.id] = (skill.cd == null ? 1 : skill.cd) * this.cdMul;
       }
       this.stats.skills++;
-      this.stats.uses[skill.id] = (this.stats.uses[skill.id] || 0) + 1;
+      this.stats.uses[skill.id] = (this.stats.uses[skill.id] || 0) + 1; w.emit('skill', { b: this, skill });
       if (skill.ult) {
         this.ult = 0; this.stats.ults++; this.stats['ultP' + this.phase]++;
         const un = this.ultName();
         w.banner('【' + un + '】', this.name + ' 施放大招！', this.def.color);
         w.slowmo = Math.max(w.slowmo, 0.45); BD.spawnFx(w, 'ultcast', this.x, this.y, { src: this, color: this.def.color });
         w.log(this, '施放大招【' + un + '】', true);
-        w.events.push({ t: w.time, type: 'ult', team: this.team, phase: this.phase });
+        w.events.push({ t: w.time, type: 'ult', team: this.team, phase: this.phase }); w.emit('ult', { b: this });
       } else {
         w.callout(this, skill.name);
         if (!opts.quiet) w.log(this, '使出【' + skill.name + '】');
@@ -181,7 +181,7 @@
       }
       w.banner(this.name + ' — 第二階段', this.def.phase2.line, this.def.color);
       w.log(this, 'HP 降至 50%，進入第二階段！', true);
-      w.events.push({ t: w.time, type: 'phase2', team: this.team });
+      w.events.push({ t: w.time, type: 'phase2', team: this.team }); w.emit('phase2', { b: this });
       w.slowmo = Math.max(w.slowmo, 0.6);
     }
     finishTransition() {

@@ -251,12 +251,12 @@
     const st = w.hunt4 = { boss, hunters, solo, faints: 0, faintsBy: new Map(hunters.map((h) => [h, 0])), aggro: new Map(hunters.map((h) => [h, 0])), dealt: new Map(hunters.map((h) => [h, 0])), switchT: 0, flashes: 0, done: false };
     if (!solo) st.support = { dustUntil: 0, flashUntil: 0, cover: null };
     BD.H4Combat.init(w, st);
-    const step = w.step.bind(w), orig = st.orig = w.damageBoss.bind(w);
-    w.damageBoss = (src, b, p) => { // 獵人（或其投射物）打 Boss → 走狩獵戰鬥管線
+    const orig = st.orig = (src, b, p) => w.hitBoss(src, b, p); // 追加傷害直接走四段管線，不再經過掛勾
+    w.useDamage((src, b, p, next) => { // 獵人（或其投射物）打 Boss → 走狩獵戰鬥管線
       const h = src && (src.isBoss ? src : src.owner);
-      return b === boss && h && h.h4 && !p.dot ? BD.H4Combat.hit(w, st, h, src, b, p, orig) : orig(src, b, p);
-    };
-    w.step = (dt) => { step(dt); tick(w, st, dt); };
+      return b === boss && h && h.h4 && !p.dot ? BD.H4Combat.hit(w, st, h, src, b, p, orig) : next(src, b, p);
+    });
+    w.on('postStep', (dt) => tick(w, st, dt)); // 命中凍結的步也要跑（原本包在 step 外層）
     return st;
   }
 

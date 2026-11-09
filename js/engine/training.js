@@ -359,8 +359,9 @@
   }
 
   BD.setupTraining = function (w, opts) {
-    w.training = new BD.Training(w, opts.training, opts.input);
-    return w.training;
+    const t = w.training = new BD.Training(w, opts.training, opts.input);
+    w.on('preStep', (dt) => t.preStep(dt)).on('postStep', (dt, frozen) => frozen || t.postStep(dt)).on('damage', (e) => t.onDamage(e.b, e.dmg, e.p, e.src));
+    return t;
   };
 
   BD.Training = Training;

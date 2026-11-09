@@ -91,5 +91,6 @@
         H.spawned += c;
       },
     };
+    w.on('think', (dt) => H.step(dt));
   };
 })(typeof window !== 'undefined' ? window : globalThis);

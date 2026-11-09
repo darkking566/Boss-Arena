@@ -39,7 +39,7 @@
       this.paceId = opts.pace || 'light'; this.pace = BD.paceConfig(this.paceId, null);
       this.time = 0; this.intro = opts.intro != null ? opts.intro : 1.8; this.over = false; this.winner = null; this.endT = 0;
       this.telegraphs = []; this.projectiles = []; this.zones = []; this.traps = []; this.minions = []; this.lobs = [];
-      this.scheduled = []; this.logs = []; this.callouts = []; this.banners = []; this.events = [];
+      this.scheduled = []; this.logs = []; this.callouts = []; this.banners = []; this.events = []; this.listeners = {}; this.dmgHooks = [];
       this.enrage = 1; this.enrageAt = opts.enrageAt || (this.pace && this.pace.enrageAt) || 110; this.enrageOn = false;
       this.stats = BD.minionStats(); // 召喚物種類提供的統計欄位（例如紅眼監視者）
       this.hitstop = 0; this.freezeF = 0; this.slowmo = 0; this.acc = 0; this.speed = 1; this.paused = false; this.nextId = 1;
@@ -74,9 +74,9 @@
       if (n >= 16) this.acc = 0;
     }
     step(dt) {
-      if (this.training) this.training.preStep(dt);
+      this.emit('preStep', dt);
       // 沉重模式：命中凍結（固定步數），整個模擬暫停、時間不推進
-      if (this.pace && this.freezeF > 0) { this.freezeF--; this.frozenSteps = (this.frozenSteps || 0) + 1; return; }
+      if (this.pace && this.freezeF > 0) { this.freezeF--; this.frozenSteps = (this.frozenSteps || 0) + 1; this.emit('postStep', dt, true); return; }
       this.time += dt;
       if (this.intro > 0) {
         this.intro -= dt;
@@ -84,7 +84,7 @@
       } else if (!this.over) {
         if (this.teamMode) for (const b of this.bosses) if (b.state !== 'dead') this.retarget(b);
         for (const b of this.bosses) if (b.controller && b.state !== 'dead' && b.enemy.state !== 'dead') b.controller.update(dt);
-        if (this.horde) this.horde.step(dt);
+        this.emit('think', dt);
       }
       for (const b of this.bosses) {
         if (b.enemy.state === 'dead') { b.moveX = b.moveY = 0; }
@@ -113,7 +113,7 @@
         this.enrage = 1 + (this.time - this.enrageAt) * 0.025;
       }
       if (this.winner) { this.endT += dt; if (this.endT > 2.4) this.over = true; }
-      if (this.training) this.training.postStep(dt);
+      this.emit('postStep', dt, false);
     }
     // 對方隊伍的 Boss（1v1 時只有一位，與原本 bosses[1 - team] 相同）
     foes(team) { return this.teamMode ? this.bosses.filter((b) => b.team !== team) : [this.bosses[1 - team]]; }
@@ -188,7 +188,21 @@
       if (u.hp <= 0) BD.killMinion(this, u);
       return 'hit';
     }
-    damageBoss(src, b, p) {
+    // 事件：on(type, fn) 訂閱、emit(type, e, x) 依訂閱順序同步呼叫 fn(e, x, w)；沒人訂閱時什麼都不做。型別與欄位見 docs/engine-hooks.md
+    on(type, fn) { (this.listeners[type] || (this.listeners[type] = [])).push(fn); return this; }
+    emit(type, e, x) { const L = this.listeners[type]; if (L) for (const fn of L) fn(e, x, this); }
+    // 打 Boss 的傷害管線：damageBoss → useDamage 掛勾（依加入順序，可改 p / 換管線 / 擋下，next 交給下一個）→ hitBoss 四段
+    useDamage(fn) { this.dmgHooks.push(fn); return this; }
+    damageBoss(src, b, p) { return this.dmgHooks.length ? this.runDamageHook(0, src, b, p) : this.hitBoss(src, b, p); }
+    runDamageHook(i, src, b, p) { const h = this.dmgHooks[i]; return h ? h(src, b, p, (s, t, q) => this.runDamageHook(i + 1, s, t, q)) : this.hitBoss(src, b, p); }
+    hitBoss(src, b, p) {
+      const g = this.hitGate(src, b, p); if (g) return g;
+      const dmg = this.hitAmount(src, b, p); if (dmg == null) return 'absorbed';
+      this.hitApply(src, b, p, dmg);
+      return this.hitOutcome(src, b, p, dmg);
+    }
+    // 1. 擋下：倒下 / 無效 / 閃避 / 特性攔截，回傳結果字串；通過回傳 null
+    hitGate(src, b, p) {
       if (b.state === 'dead' || BD.getMod(b, 'untargetable') || this.winner) return 'none';
       const fx = this.fx;
       if (BD.getMod(b, 'invuln')) { if (!p.dot) fx.text(b.x, b.y - b.r - 10, '無效', '#bbb', 16); return 'immune'; }
@@ -201,14 +215,23 @@
             if (src && src.def && src.def.learnReset && src._learn) { src._learn = {}; fx.text(src.x, src.y - src.r - 30, '預測被打亂', '#ffb0a0', 20); fx.shock(src.x, src.y, src.r, src.r * 2.6, 0.35, '#9fd8ff', 4, '#ffffff'); fx.sparkle(src.x, src.y, '#cfe8ff', fx.budget(10), 260); } // 千手被超越：學習歸零
           } else fx.text(b.x, b.y - b.r - 10, '閃避', '#ccffdd', 14);
         }
-        return 'dodged';
+        this.emit('dodge', { src, b, p }); return 'dodged';
       }
       for (const tr of b.traits) if (tr.interceptDamage) { const r = tr.interceptDamage(this, b, src, p); if (r) return r; } // 例如見切 / 彈反
-      const pc = this.pace;
+      return null;
+    }
+    // 2. 算傷害（含護盾）；全被護盾吸收回傳 null
+    hitAmount(src, b, p) {
+      const pc = this.pace, fx = this.fx;
       if (pc && src && src.isBoss && src.inst) src.inst.landed = true; // 沉重：本次出招已命中（供空振硬直判定）
       let dmg = BD.scaleMod(b, 'dmgTakenMul', BD.scaleMod(src, 'dmgDealtMul', p.dmg * (src && src.dmgMul || 1)));
       dmg = Math.max(1, Math.round(dmg * this.rng.range(0.92, 1.08)));
-      if (b.statuses.length) { const left = BD.absorbDamage(b, dmg, this); if (left <= 0) { fx.text(b.x, b.y - b.r - 10, '護盾吸收', '#9fd8ff', 14); return 'absorbed'; } dmg = Math.round(left); }
+      if (b.statuses.length) { const left = BD.absorbDamage(b, dmg, this); if (left <= 0) { fx.text(b.x, b.y - b.r - 10, '護盾吸收', '#9fd8ff', 14); return null; } dmg = Math.round(left); }
+      return dmg;
+    }
+    // 3. 套用：扣血、充能、架勢、擊退、附加狀態、命中回饋；最後發 damage 事件
+    hitApply(src, b, p, dmg) {
+      const pc = this.pace, fx = this.fx;
       b.hp -= dmg; b.stats.taken += dmg;
       if (pc) { // 沉重：大招充能依 ultGainMul 縮放（一擊傷害較高，避免大招過於頻繁）
         const ug = pc.ultGainMul;
@@ -255,7 +278,11 @@
       }
       fx.damage(b, dmg, p.dot ? '#c9a0ff' : (dmg >= 150 ? '#ffdd55' : '#ffffff'));
       if (dmg >= 150) this.log(src && src.isBoss ? src : (src && src.owner) || null, '重創 ' + b.name + '（' + dmg + '）');
-      if (this.training) this.training.onDamage(b, dmg, p, src); // 訓練場：統計假人傷害、假人 HP 回滿、Boss 不會倒下
+      this.emit('damage', { src, b, p, dmg }); // 例如訓練場：統計假人傷害、假人 HP 回滿、Boss 不會倒下
+    }
+    // 4. 結果：擊殺 / 進二階段 / 倒地 / 冰凍 / 架勢崩潰
+    hitOutcome(src, b, p, dmg) {
+      const pc = this.pace;
       if (b.hp <= 0) {
         if (b.traits.some((t) => t.onLethal && t.onLethal(this, b))) return 'hit'; // 例如亞當的死立不倒
         b.hp = 0; this.kill(b); return 'kill';
@@ -268,7 +295,7 @@
         if (b.state !== 'transition' && b.state !== 'knockdown' && !BD.hasStatus(b, 'kdGuard') && (dmg >= kd.dmg || (p.kb || 0) >= kd.kb)) {
           BD.applyStatus(b, 'knockdown', { dur: kd.dur }, this);
           downed = true; b.stats.knockdowns = (b.stats.knockdowns || 0) + 1;
-          this.log(b, '被擊倒在地！');
+          this.log(b, '被擊倒在地！'); this.emit('knockdown', { src, b });
         }
       }
       if (p.freeze && b.state !== 'transition' && !downed) BD.applyStatus(b, 'frozen', { dur: p.freeze }, this);
@@ -281,7 +308,7 @@
         b.posture = 0; b.stats.breaks++;
         if (!downed) BD.applyStatus(b, 'stagger', { dur: 1.5 }, this); // 倒地時不再疊加硬直
         this.fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
-        BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b });
+        BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b }); this.emit('postureBreak', { b });
         if (!this.hunt4 || this.hunt4.solo || b !== this.hunt4.boss) this.hitstop = Math.max(this.hitstop, 0.1);
         this.slowmo = Math.max(this.slowmo, 0.4);
         this.log(b, '架勢崩潰，陷入硬直！', true);
@@ -299,7 +326,7 @@
       }
     }
     kill(b) {
-      b.cancelSkill(); b.state = 'dead'; b.stateT = 0; b.alive = false;
+      b.cancelSkill(); b.state = 'dead'; b.stateT = 0; b.alive = false; this.emit('kill', { b, by: b.enemy });
       if (this.teamMode) {
         const by = b.enemy, mates = this.bosses.filter((x) => x.team === b.team && x.state !== 'dead');
         BD.spawnFx(this, 'finale', b.x, b.y, { src: b, color: b.def.color });

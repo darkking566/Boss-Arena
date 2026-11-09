@@ -132,14 +132,14 @@
 全部是普通 `<script>`（IIFE + 全域 `BD`），依 `index.html` 的順序載入；標記 `data-browser` 的檔案才會碰到 DOM / Canvas。
 - `js/core/` — `util.js` 數學、亂數、形狀判定；`registry.js` 註冊表（`registerBoss`、`defineAction`、`defineMinion`、`defineTrait`）
 - `js/data/` — `kit.js` 時間軸小工具；`bosses/<id>.js` 每位 Boss 一個純資料檔；`training/dummy.js` 訓練假人純資料
-- `js/engine/` — `boss.js` Boss 狀態機與技能時間軸、`world.js` 戰場 / 傷害 / 架勢 / 勝負、`ai.js` 魂系 AI、`kit.js` 形狀與預警、
+- `js/engine/` — `boss.js` Boss 狀態機與技能時間軸、`world.js` 戰場 / 傷害管線（四段 + 掛勾）/ 事件 / 架勢 / 勝負、`ai.js` 魂系 AI、`kit.js` 形狀與預警、
   `status.js` 狀態註冊表與輔助函式、`statuses/` 各狀態定義（core / effects）、`traits.js` Boss 特性（見切、影分身）、
   `actions/` 時間軸動作（combat / projectiles / zones / movement / summon）、`entities/` 投射物 / 召喚物 / 特效、`minions/` 各召喚物種類、`training.js` 訓練場模式邏輯與假人控制器
 - `js/fx/` — 特效庫：`elements.js` 元素主題 + 每個分類一個檔案（slash / thrust / impact / shockwave / explosion / movement / projectile / zone / buff / ultimate）
 - `js/render/` — `core.js` 造型註冊表、`styles/<id>.js` 每位 Boss 一個造型檔（含 `styles/dummy.js` 假人造型）、`minions.js` 召喚物造型、`statuses.js` 狀態圖示與 HUD 狀態列、
   `world.js` 戰場繪圖、`hud.js` HUD 與主繪製、`training.js` 訓練場假人 HUD 與傷害統計面板、`cache.js` 精靈 / 漸層快取（離屏 canvas，依繪製倍率分鍵，縮放 / DPR 變更時失效）、`perf.js` F3 效能面板
 - `js/input.js` 輸入與玩家操控、`js/training-ui.js` 訓練場底部面板 DOM 控制、`js/main.js` 選角（由註冊表產生、超過 6 位自動分頁）、遊戲迴圈、結算
-- `docs/adding-a-boss.md` 新增 Boss 的步驟、`docs/effects.md` 特效庫實作與使用手冊
+- `docs/engine-hooks.md` 引擎事件與傷害掛勾（新模式從這裡接，不改 world.js）、`docs/adding-a-boss.md` 新增 Boss 的步驟、`docs/effects.md` 特效庫實作與使用手冊
 
 ## 測試（無相依套件；`npm` 只是執行捷徑）
 - `npm run validate`（`node test/validate.js`）資料驗證

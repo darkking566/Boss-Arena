@@ -312,14 +312,15 @@
         }
         return s.dec[th.key] ? kv(h, s.dec[th.key]) : null;
       },
-      onOffset(h, sk, boss) { // 相殺成功：衝撞＝精準衝撞（保留蓄力）；連消帶打＝Boss 失衡（近期成功越多越短）→ 結束後接追擊十字斬
+      onOffset(h, sk, boss, fresh) { // 相殺成功：衝撞＝精準衝撞（保留蓄力）；連消帶打＝Boss 失衡（近期成功越多越短）→ 結束後接追擊十字斬
         const s = h.h4.drv, w = h.world, G = H4.GS, say = (t, c) => w.fx.text(h.x, h.y - h.r - 30, t, c, 22);
         if (sk.id === 'gs_tackle') { s.pt = true; s.ptT = w.time; s.stat.pt++; say('精準衝撞！', '#ffe27a'); return; }
         const L = +sk.id.slice(-1);
         if (!(L >= 1)) return;
         s.offH = s.offH.filter((t) => w.time - t < 12); const n = s.offH.length; s.offH.push(w.time);
         s.off = true; s.offLv = L; s.offT = w.time; s.stat.off++;
-        if (boss.state !== 'transition' && boss.state !== 'dead') { boss.setState('stagger', (G.offDur + 0.25 * L) / (1 + G.offResist * n)); boss.posture += G.offPost * L; w.checkPostureBreak(boss); }
+        if (boss.state !== 'transition' && boss.state !== 'dead') { const st = w.hunt4; if (st) st.bypass = fresh; boss.setState('stagger', (G.offDur + 0.25 * L) / (1 + G.offResist * n)); if (st) st.bypass = false; // 同一次相殺：換掉通用的 0.6 秒硬直，不被「控制後先出一招」記下
+          boss.posture += G.offPost * L; w.checkPostureBreak(boss); }
         say('連消帶打！', '#fff1a8');
       },
       onGuard(h, p) { h.h4.drv.pg += p.dmg >= H4.CLASH.dmg ? 2 : 1; }, // 精準防禦累積：Boss 重擊算兩次
@@ -776,10 +777,11 @@
       const s = i.skill;
       if (s.evade && !p.undodgeable && i.t <= s.evade.win) { b.h4.D.onEvade(b, s.evade.perfect != null && i.t <= s.evade.perfect); return 'dodged'; } // 弓：墊步 / 飛燕射擊
       if (s.offset && boss && !p.unblockable && i.t >= s.offset[0] && i.t <= s.offset[1]) {
+        let fresh = false;
         b.stats.h4.offsets++; w.hitstop = Math.max(w.hitstop, 0.09); BD.spawnFx(w, 'parry', b.x, b.y, { src: b });
         if (p.dmg >= H4.CLASH.dmg && boss.state === 'skill' && !s.noClash) clash(w, b, boss);
-        else { w.fx.text(b.x, b.y - b.r - 30, '相殺！', '#ffffff', 24); if (boss.state !== 'transition') boss.setState('stagger', 0.6); boss.posture += 40; w.checkPostureBreak(boss); }
-        if (b.h4.D && b.h4.D.onOffset) b.h4.D.onOffset(b, s, boss); // 武器接手：大劍的精準衝撞 / 連消帶打
+        else { const was = boss.state; w.fx.text(b.x, b.y - b.r - 30, '相殺！', '#ffffff', 24); if (boss.state !== 'transition') boss.setState('stagger', 0.6); fresh = was !== 'stagger' && boss.state === 'stagger'; boss.posture += 40; w.checkPostureBreak(boss); }
+        if (b.h4.D && b.h4.D.onOffset) b.h4.D.onOffset(b, s, boss, fresh); // 武器接手：大劍的精準衝撞 / 連消帶打；fresh＝這一下才讓 Boss 硬直
         return 'deflected';
       }
       if (s.guard && !p.unblockable) {
