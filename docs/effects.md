@@ -371,6 +371,7 @@ $$\text{effect.params (特效預設)} \longrightarrow \text{opts (呼叫端傳�
 | `replica` | 神虛視 | `#fff0f4` | `#ff4f7e` | `#ffa0bc` | `#8a2a48` / `#ff6f95` | `runes`（秘紋光點） | 粉紅色的看穿、複製類演出（亞當的神虛視） |
 | `cosmos` | 星海 | `#f3e8ff` | `#9b5cff` | `#d6b8ff` | `#3a2450` / `#b07bff` | `motes`（光點） | 紫黑星空的神威：宙斯阿陀磨須 |
 | `blackfire` | 黑炎 | `#ffffff` | `#b3123c` | `#06020a` | `#0c0408` / `#d81c4a` | `embers`（上升餘燼） | 墨黑火焰配暗紅邊：鼬的天照 |
+| `blackflame` | 神皮黑焰 | `#ffffff` | `#a39fe0` | `#0a0710` | `#3a3040` / `#d6d8ff` | `embers`（上升餘燼） | 黑煙配白色火星與薰紫光暈：神皮雙人組的黑焰 |
 | `dragon` | 龍屬性 | `#ffd9df` | `#d0143c` | `#2a0812` | `#3a1018` / `#ff2a55` | `crackle`（電弧折線） | 暗紅配黑的龍屬性能量與龍雷：恐暴龍的龍息、暴怒 |
 | `ocean` | 大海 | `#f2ffff` | `#35b6ff` | `#a8ecff` | `#2c6a96` / `#8fe6ff` | `bubbles`（氣泡浮起） | 深藍海水與白色浪花：波賽頓的三叉槍、分海、洪水 |
 | `arcane` | 秘法 | `#f6e8ff` | `#c77dff` | `#e0b8ff` | `#6a3a8a` / `#d9a0ff` | `runes`（秘紋光點） | 奧術光束、星體魔法、符印法陣、時空裂隙 |

@@ -53,7 +53,7 @@
       this.controller = null;
     }
     get enemy() { return this.world.teamMode ? this._target || this.world.foeOf(this.team, this) : this.world.bosses[1 - this.team]; } // 團隊戰：World.retarget 維護的目標
-    get name() { return this.def.name; }
+    get name() { return (this.mate && this.def.unitName) || this.def.name; } // 雙人 Boss 展開後各自顯示本名（例如「神皮使徒」）
     available() { return this.skills.filter((s) => (s.phase || 1) <= this.phase && (s.maxPhase || 9) >= this.phase); }
     ultName() { const u = this.ultimate; return this.phase === 2 && u.name2 ? u.name2 : u.name; }
     aimTarget() {

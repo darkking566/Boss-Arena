@@ -52,6 +52,14 @@
         const y = ARENA.h / 2 + (k - (defs.length - 1) / 2) * 260;
         this.bosses.push(new Boss(this, pd(d), team, ARENA.w / 2 + (team ? 350 : -350), y));
       }));
+      // 雙人 Boss（神皮雙人組）：def.partner 是另一位完整 Boss（自己的 AI 與招式），同隊出場、排在最後，bosses[0]/[1] 與玩家索引不變。
+      // 訓練場、獵魂、4v1、小兵潮寫死一邊一位 Boss，不展開（由該 Boss 的 trait 自行退回召喚物版本），單獨出場時生命乘 def.soloHpMul
+      const duo = !(opts.training || opts.hunt || opts.hunt4 || opts.horde);
+      for (const b of this.bosses.slice()) if (b.def.partner) {
+        if (!duo) { b.maxHp = b.hp = b.hpTrail = Math.round(b.maxHp * (b.def.soloHpMul || 1)); continue; }
+        const m = new Boss(this, pd(BD.bossById[b.def.partner]), b.team, b.x, b.y + (b.y > ARENA.h / 2 ? -200 : 200));
+        b.mate = m; m.mate = b; this.bosses.push(m); this.teamMode = true;
+      }
       this.bosses.forEach((b, i) => {
         b.controller = (opts.player === i && BD.PlayerController) ? new BD.PlayerController(b, this, opts.input) : new BD.AIController(b, this);
       });

@@ -9,7 +9,7 @@ for (const pace of ['light', 'heavy']) {
   for (let s = 0; s < ids.length; s += 3) {
     const A = [0, 1, 2].map((k) => ids[(s + k) % ids.length]), B = [3, 4, 5].map((k) => ids[(s + k + 7) % ids.length]);
     const w = new BD.World(A.map((id) => BD.bossById[id]), B.map((id) => BD.bossById[id]), { seed: s + 1, intro: 0.5, pace });
-    assert.strictEqual(w.bosses.length, 6);
+    assert.strictEqual(w.bosses.length, 6 + [...A, ...B].filter((id) => BD.bossById[id].partner).length); // 雙人 Boss 會多帶一位搭檔
     w.simulate(400);
     const tag = `${pace} ${A}/${B}`;
     assert.ok(w.winner, tag + ' 未分出勝負');

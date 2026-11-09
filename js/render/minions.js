@@ -84,6 +84,7 @@
   }
   for (const k in BD.GRUNTS) R.defineMinionStyle(k, grunt);
   R.defineMinionStyle('wolf', () => {});
+  R.defineMinionStyle('noble', () => {}); // 神皮貴人由造型的 over 畫（js/render/styles/godskinduo.js）
   R.defineMinionStyle('watcher', knight, { absolute: true });
   R.defineMinionStyle('rogue', knight, { absolute: true });
 })(typeof window !== 'undefined' ? window : globalThis);

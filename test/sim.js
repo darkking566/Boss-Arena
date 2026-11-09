@@ -40,9 +40,10 @@ function runOne(job) {
   }
   const [A, B] = w.bosses;
   const line = `${a.padEnd(7)} vs ${b.padEnd(7)} s${seed}: ` + (err ? 'ERROR ' + err.stack : ok ? `winner=${w.winner.def.id} t=${w.time.toFixed(1)}s hp=${A.hp}/${B.hp} p2=${A.phase}/${B.phase} ult=${A.stats.ultP1}+${A.stats.ultP2}/${B.stats.ultP1}+${B.stats.ultP2} dodge=${A.stats.dodges}/${B.stats.dodges} perf=${A.stats.perfect}/${B.stats.perfect} brk=${A.stats.breaks}/${B.stats.breaks} ctr=${A.stats.counters}/${B.stats.counters}` : `TIMEOUT hp=${A.hp}/${B.hp}`);
-  const winner = ok && w.winner ? ids.indexOf(w.winner.def.id) : -1;
-  const check = err || !ok || w.winner.enemy.phase !== 2 || (A.stats.ults + B.stats.ults) === 0 ? { fail: true, loserPhase: ok && !err ? w.winner.enemy.phase : null, ults: A.stats.ults + B.stats.ults } : { fail: false };
-  const bosses = w.bosses.map((x) => ({ id: x.def.id, win: w.winner === x, phase: x.phase, stats: Object.assign({}, x.stats) }));
+  const winner = ok && w.winner ? ids.indexOf(w.bosses[w.winner.team].def.id) : -1; // 雙人 Boss：搭檔贏也算選角那位（bosses[0]/[1] 是兩隊的選角 Boss）
+  const ults = w.bosses.reduce((s, x) => s + x.stats.ults, 0); // 雙人 Boss 的搭檔放的大招也算
+  const check = err || !ok || w.winner.enemy.phase !== 2 || ults === 0 ? { fail: true, loserPhase: ok && !err ? w.winner.enemy.phase : null, ults } : { fail: false };
+  const bosses = w.bosses.filter((x) => ids.includes(x.def.id)).map((x) => ({ id: x.def.id, win: !!w.winner && w.winner.team === x.team, phase: x.phase, stats: Object.assign({}, x.stats) }));
   return { line, ok, time: ok ? w.time : null, winner, check, purgeViol, maxAllies, maxRogues, summon, bosses };
 }
 

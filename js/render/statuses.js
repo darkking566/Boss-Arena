@@ -48,6 +48,7 @@
   R.defineStatusIcon('frostbite', { glyph: '冰', color: '#9fe6ff' });
   R.defineStatusIcon('rimebuildup', { glyph: '霜', color: '#b7e8f5' });
   R.defineStatusIcon('rimebite', { glyph: '傷', color: '#a2d5ec' });
+  R.defineStatusIcon('blackflame', { glyph: '黑', color: '#b9b4ff' }); // 神皮雙人組的黑焰
   R.defineStatusIcon('rimeguard', { glyph: '溫', color: '#d3edf1' });
   R.defineStatusIcon('shield', { glyph: '盾', color: '#7fc8ff' });
   R.defineStatusIcon('vulnerable', { glyph: '易', color: '#c07aff' });
