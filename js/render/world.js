@@ -1312,6 +1312,41 @@
       drawCrescent(ctx, s, k, a0, a1, rad, 0.14);
     }
   }
+  // 毛筆一筆（fx.ink）：外圈淡墨暈 → 濃墨筆身（落筆粗、收筆尖、邊緣抖動）→ 收筆段幾道宣紙色細線（飛白）
+  const INK_N = 10;
+  function inkPath(ctx, s, g, wm, jit) {
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, J = s.j;
+    const at = (t, side) => {
+      const press = t < 0.1 ? 0.75 + 2.5 * t : 1 - 0.85 * Math.pow((t - 0.1) / 0.9, 1.5); // 落筆一頓最粗、往收筆漸尖
+      const hw = s.w * 0.5 * wm * press * (1 + 0.14 * Math.sin(t * 9 + J[21] * 12));
+      const b = s.bend * 4 * t * (1 - t), o = b + side * (hw + jit * J[(side > 0 ? 0 : 11) + Math.round(t * INK_N)] * s.w * 0.3);
+      return [s.x1 + dx * t + nx * o, s.y1 + dy * t + ny * o];
+    };
+    ctx.beginPath();
+    for (let i = 0; i <= INK_N; i++) { const p = at(g * i / INK_N, 1); if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }
+    for (let i = INK_N; i >= 0; i--) { const p = at(g * i / INK_N, -1); ctx.lineTo(p[0], p[1]); }
+    ctx.closePath();
+    return at;
+  }
+  function drawInks(ctx, fx) {
+    if (!fx.inks || !fx.inks.length) return;
+    ctx.globalCompositeOperation = 'source-over'; ctx.lineCap = 'round';
+    for (const s of fx.inks) {
+      const k = s.life / s.max, g = Math.min(1, (s.max - s.life) / Math.min(0.14, s.max * 0.12)), a = Math.min(1, k * 4);
+      if (g <= 0.01 || a <= 0) continue;
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = a * 0.18; inkPath(ctx, s, g, 1.5, 1.8); ctx.fill(); // 墨暈
+      ctx.globalAlpha = a * 0.96; const at = inkPath(ctx, s, g, 1, 1); ctx.fill();
+      if (g > 0.6) { // 飛白
+        ctx.strokeStyle = '#efe6d2'; ctx.globalAlpha = a * 0.55; ctx.lineWidth = Math.max(1, s.w * 0.06);
+        for (let i = 0; i < 3; i++) {
+          const f = (s.j[i + 4] * 0.7), t0 = 0.6 + 0.15 * (s.j[i + 8] + 0.5), p0 = at(t0, f), p1 = at(g, f * 0.6);
+          ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
   function drawStreakGeo(ctx, st) {
     // 從細端 (x1,y1) 到粗端 (x2,y2) 的漸細四邊形
     const dx = st.x2 - st.x1, dy = st.y2 - st.y1, L = Math.hypot(dx, dy) || 1;
@@ -1462,6 +1497,7 @@
       ctx.restore();
     }
     drawSlashes(ctx, fx);
+    drawInks(ctx, fx);
     for (const b of fx.beams) {
       const k = b.life / b.max;
       ctx.lineCap = 'round';

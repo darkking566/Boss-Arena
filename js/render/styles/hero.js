@@ -107,6 +107,18 @@
       R.ckRing(ctx, r * 0.62, k >= 1 ? '#fff4d0' : '#cfeaff');
       ctx.restore(); ctx.shadowBlur = 0;
     },
+    // 墨染武士刀：黑漆刀身＋宣紙白刃線、朱紅柄卷與鍔；墨韻越多刀尖越暈出墨氣，寫滿時刃線轉朱紅
+    sumi(ctx, r, t, o) {
+      const d = o && o.h4 && o.h4.drv, k = d ? d.ink / BD.HUNT4.SM.max : 0, L = r * 2.3;
+      if (k >= 1) { ctx.shadowColor = '#e8402e'; ctx.shadowBlur = 10 + 4 * Math.sin(t * 8); }
+      ctx.strokeStyle = '#efe6d2'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(r * 0.35, 0); ctx.quadraticCurveTo(L * 0.6, -r * 0.08, L, -r * 0.2); ctx.stroke();
+      ctx.strokeStyle = '#141012'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(r * 0.35, 0); ctx.quadraticCurveTo(L * 0.6, -r * 0.08, L, -r * 0.2); ctx.stroke();
+      ctx.strokeStyle = k >= 1 ? '#ff6a4a' : '#ffffff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(r * 0.4, -1.5); ctx.quadraticCurveTo(L * 0.6, -r * 0.08 - 1.5, L, -r * 0.2 - 1); ctx.stroke(); // 刃線
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#c8202e'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-r * 0.25, 0); ctx.lineTo(r * 0.3, 0); ctx.stroke(); // 柄卷
+      ctx.fillStyle = '#2a2220'; ctx.fillRect(r * 0.3, -5, 3, 10); // 鍔
+      for (let j = 0; j < Math.round(k * 4); j++) { const p = (t * 0.7 + j / 4) % 1; ctx.fillStyle = `rgba(30,24,22,${0.5 * (1 - p)})`; ctx.beginPath(); ctx.arc(L * (0.6 + 0.4 * p), -r * 0.2 * p + p * r * 0.5, 2 + 4 * p, 0, U.TAU); ctx.fill(); } // 墨氣
+    },
     staff(ctx, r, t) {
       blade(ctx, r * 2.2, 3, '#7a5a3a');
       ctx.fillStyle = `rgba(170,140,255,${0.6 + 0.4 * Math.sin(t * 6)})`; ctx.beginPath(); ctx.arc(r * 2.3, 0, r * 0.38, 0, U.TAU); ctx.fill();

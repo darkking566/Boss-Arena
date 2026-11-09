@@ -6,7 +6,7 @@
 // 高層特效（斬擊、砸地…）定義在 js/fx/，以 BD.spawnFx(w, 'slam', x, y, opts) 產生；本檔只提供「原件」。
 (function (G) {
   const BD = G.BD, U = BD.U, V = BD.vrng;
-  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, GHOST_CAP = 40, PUFF_CAP = 260, STALK_CAP = 1100, PRINT_CAP = 500;
+  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, INK_CAP = 70, GHOST_CAP = 40, PUFF_CAP = 260, STALK_CAP = 1100, PRINT_CAP = 500;
   // 粒子種類（kind）：繪圖端依此分批
   const PK = BD.PK = { SQ: 0, SOFT: 1, DEBRIS: 2, EMBER: 3, SHARD: 4, BUBBLE: 5, WISP: 6, SPARK: 7, MOTE: 8 };
   function newPart() { return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, color: '', size: 0, drag: 0, soft: false, kind: 0, z: 0, vz: 0, g: 0, ay: 0, ph: 0 }; }
@@ -24,7 +24,7 @@
       this.w = w; this.curE = null; this.parts = []; this.rings = []; this.slashes = []; this.beams = []; this.texts = []; this.decals = []; this.pillars = [];
       this.glows = []; this.shocks = []; this.streaks = []; this.ghosts = []; this.veils = []; this.timers = []; this.chunks = [];
       this.scars = []; // 永久戰鬥痕跡（js/fx/scars.js）；不隨 life 消失，只累計 age（餘燼冷卻用）
-      this.puffs = []; this.stalks = []; this.prints = []; this.gusts = [];
+      this.puffs = []; this.stalks = []; this.prints = []; this.gusts = []; this.inks = [];
       this.field = {}; // 麥田被摧毀的格子（格號 → 1）
       this.pool = [];
       this.shakeV = 0; this.shakeDir = null; this.shakeT = 0; this.flashA = 0; this.flashC = '#fff';
@@ -131,6 +131,12 @@
     streak(x1, y1, x2, y2, w, color, life, add) {
       if (this.streaks.length >= STREAK_CAP) return;
       this.streaks.push({ x1, y1, x2, y2, w, color, life: life || 0.25, max: life || 0.25, add: !!add });
+    }
+    // 毛筆一筆（水墨）：(x1,y1) 落筆 → (x2,y2) 收筆，前 12% 生命（最多 0.14 秒）沿路徑「寫出來」；bend＞0 往左彎（弧形筆畫）；邊緣抖動以 vrng 預先決定
+    ink(x1, y1, x2, y2, w, life, color, bend) {
+      if (this.inks.length >= INK_CAP) return;
+      const j = []; for (let i = 0; i < 22; i++) j.push(V() - 0.5);
+      this.inks.push({ x1, y1, x2, y2, w, life, max: life, color: color || '#141012', bend: bend || 0, j });
     }
     // 光暈（additive）：r 半徑、a 不透明度；grow > 0 時半徑隨時間由 r 往 r*(1+grow) 擴張；follow 物件（有 x / y）時跟隨其位置
     glow(x, y, r, color, life, a, grow, follow) {
@@ -243,7 +249,7 @@
         const k = Math.exp(-p.drag * dt); p.vx *= k; p.vy *= k;
       }
       compact(parts, (p) => { if (pool.length < POOL_CAP) { p.color = ''; pool.push(p); } });
-      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks, this.puffs, this.stalks, this.prints, this.gusts];
+      const arrs = [this.rings, this.slashes, this.beams, this.texts, this.decals, this.pillars, this.glows, this.shocks, this.streaks, this.ghosts, this.veils, this.chunks, this.puffs, this.stalks, this.prints, this.gusts, this.inks];
       for (let j = 0; j < arrs.length; j++) { const arr = arrs[j]; for (let i = 0; i < arr.length; i++) arr[i].life -= dt; }
       const pk = Math.exp(-1.1 * dt);
       for (const p of this.puffs) { p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= pk; p.vy *= pk; }

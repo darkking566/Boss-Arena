@@ -67,6 +67,18 @@
         ctx.strokeStyle = "rgba(159,216,255,0.5)"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(x, y); ctx.stroke(); // 星鏈
       }
     }
+    for (const h of st.hunters) { // 墨染武士刀：Boss 身上的墨痕（一道一道毛筆短畫；寫滿時襯朱紅、微微脈動）
+      const s = h.def.weapon === 'sumi' && h.h4.drv;
+      if (!s || !s.ink) continue;
+      const full = s.ink >= H4.SM.max, L = b.r * 0.32;
+      ctx.lineCap = 'round';
+      for (let k = 0; k < s.ink; k++) {
+        const p = H4.smMark(b, k), c = Math.cos(p.a) * L, d = Math.sin(p.a) * L;
+        ctx.strokeStyle = full ? `rgba(232,64,46,${0.55 + 0.35 * Math.sin(t * 6 + k)})` : 'rgba(239,230,210,0.85)'; ctx.lineWidth = 9;
+        ctx.beginPath(); ctx.moveTo(p.x - c, p.y - d); ctx.lineTo(p.x + c, p.y + d); ctx.stroke();
+        ctx.strokeStyle = '#141012'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(p.x - c, p.y - d); ctx.quadraticCurveTo(p.x, p.y + 3, p.x + c, p.y + d); ctx.stroke();
+      }
+    }
     if (!R.aiDebug) return; // F6：獵人大腦最近一次的決定（出手 / 等待＋情境、反應、翻滾方向）
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.font = `bold 14px ${FONT}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
     for (const h of st.hunters) if (h.brain && h.state !== 'dead' && h.brain.last) { const s = h.name + '｜' + h.brain.last; ctx.strokeText(s, h.x, h.y - h.r - 40); ctx.fillStyle = h.def.color; ctx.fillText(s, h.x, h.y - h.r - 40); }

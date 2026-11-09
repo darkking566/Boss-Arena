@@ -93,6 +93,11 @@
     w_iai: { t: 'charge', at: 0.5, lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', side: -1, w: 1.4 } }, // 刀收在腰側，放出時反手一閃
     k_helm: Object.assign({ t: 'rush', air: 1, then: { t: 'hit', kind: 'chop', h: 0.8 } }, red, { airAll: 1 }),
     k_musou: Object.assign({ t: 'spin', turns: 3 }, red),
+    // 墨染武士刀（殘影是 additive，墨色畫不出來，改用宣紙白 / 朱紅）
+    sm_a1: { t: 'hit', side: 1, w: 1.2, trail: '#d8d0bc' }, sm_a2: { t: 'hit', side: -1, w: 1.3, trail: '#d8d0bc' }, sm_a3: { t: 'spin', trail: '#d8d0bc' },
+    sm_iai: { t: 'charge', lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', side: -1, w: 1.5 }, trail: '#ffffff' },
+    sm_rush: { t: 'spin', turns: 2, trail: '#d8d0bc' }, sm_counter: Object.assign({ t: 'rush', holdA: -1.4, then: { t: 'spin', turns: 1 } }, red),
+    sm_ult: Object.assign({ t: 'spin', turns: 4 }, red), h4_focus_sm: { t: 'charge', lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     h4_focus_katana: { t: 'charge', lv: 1, holdA: 2.4, holdReach: -0.2, then: { t: 'hit', kind: 'thrust', len: 0.8 } },
     // 大劍
     // 蓄力 I~III 越高抖動 / 發光越強；真蓄力兩段劈；連消帶打＝反手上撈；十字斬＝衝上去兩段斬；衝撞/防禦＝劍身平擋在身前
@@ -248,8 +253,8 @@
   }
 
   // 武器長度（半徑倍數）：殘影畫在刀尖
-  const LEN = { katana: 2.2, gs: 2.7, greatsword: 2.6, sns: 1.5, db: 1.4, hammer: 2.3, horn: 2.4, lance: 2.8, gunlance: 2.6, switchaxe: 2.3, chargeblade: 2.3, glaive: 2.4, bow: 1.3, lightxbow: 1.4, heavyxbow: 1.7, chakram: 1.7 };
-  const WIDE = { chakram: 6, gs: 11, greatsword: 11, hammer: 10, switchaxe: 9, chargeblade: 9, katana: 5, db: 3, sns: 5 };
+  const LEN = { katana: 2.2, gs: 2.7, greatsword: 2.6, sns: 1.5, db: 1.4, hammer: 2.3, horn: 2.4, lance: 2.8, gunlance: 2.6, switchaxe: 2.3, chargeblade: 2.3, glaive: 2.4, bow: 1.3, lightxbow: 1.4, heavyxbow: 1.7, chakram: 1.7, sumi: 2.3 };
+  const WIDE = { chakram: 6, sumi: 7, gs: 11, greatsword: 11, hammer: 10, switchaxe: 9, chargeblade: 9, katana: 5, db: 3, sns: 5 };
   const GRIP = [0.2, 0.55]; // 握點（身體座標，半徑倍數）：與 hero.js 一致
   // 殘影：取前 0.064 秒內幾個時間點的刀尖連成淡出的帶子（在已套用前傾 / 騰空的身體座標）
   function trail(ctx, o, r, weapon) {
@@ -269,7 +274,7 @@
     ctx.restore();
   }
   // 手：畫在武器座標（hero.js 存下的變換）上；雙手武器第二隻手握在柄上
-  const HANDS = { katana: [0, 0.32], gs: [0, 0.5], greatsword: [0, 0.5], hammer: [0, 0.55], horn: [0, 0.55], switchaxe: [0, 0.5], greataxe: [0, 0.5], staff: [0, 0.5],
+  const HANDS = { katana: [0, 0.32], sumi: [0, 0.32], gs: [0, 0.5], greatsword: [0, 0.5], hammer: [0, 0.55], horn: [0, 0.55], switchaxe: [0, 0.5], greataxe: [0, 0.5], staff: [0, 0.5],
     glaive: [0, 0.6], lightxbow: [0.1, 0.9], heavyxbow: [0.1, 1.0], bow: [1.3], sns: [0], lance: [0], gunlance: [0] };
   function hands(ctx, m, def, o, r) {
     const d = o.h4 && o.h4.drv, w = def.weapon;
