@@ -474,8 +474,9 @@
   // 操蟲棍：精華秒數；紅 = 傷害、白 = 移動、橙 = 減傷
   H4.KINSECT = { dur: 60, order: ['red', 'white', 'orange'] };
   H4.HORN = { range: 600, dur: 45, heal: 0.05, allHeal: 0.03, echoCd: 18 }; // 狩獵笛：演奏範圍、增益秒數、回復旋律 / 全音旋律回復比例、響玉冷卻
-  // 普攻耗體力：原本 cost 0 的近戰招改耗 收招秒數 × perRec（至少 min）；skip＝獎勵 / 資源型招式維持免費（反擊、砲擊吃彈、龍擊砲吃冷卻）
-  H4.BASIC_STA = { perRec: 25, min: 4, skip: ['sns_counter', 'lance_counter', 'gl_shell', 'gl_wf', 'gs_pclash', 'gs_cross1', 'gs_cross2', 'gs_cross3'] };
+  // 沒有免費攻擊：原本 cost 0、會造成傷害的招（近戰 / 射擊，含反擊與彈藥招）改耗 收招秒數 × perRec（至少 min）
+  //   防禦、純墊步、裝填等沒有攻擊動作的招維持免費；also＝攻擊由驅動生成、招式本身沒有動作的（起爆龍彈）
+  H4.BASIC_STA = { perRec: 25, min: 4, also: ['lbg_wyv'] };
   H4.STA_REGEN_MUL = 0.6; // 獵人體力回復倍率（獵魂基礎每秒 34 → 約 20）
   H4.GUARD = { chip: 0.25, staPerDmg: 0.35, kbMul: 0.3 }; // 一般防禦：承受傷害比例、每點傷害耗體力、擊退倍率
   H4.CLASH = { dmg: 120, lock: 1.2, win: 0.55, topple: 2.5 }; // 力量對抗：Boss 單擊傷害門檻、對峙時間、基礎勝率、勝利時 Boss 倒地秒數
