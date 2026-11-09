@@ -16,6 +16,7 @@
   H4.ELEMENTS = { fire: { name: '火', color: '#ff7a3a' }, water: { name: '水', color: '#4ab0ff' }, thunder: { name: '雷', color: '#ffe14a' },
     ice: { name: '冰', color: '#a8ecff' }, dragon: { name: '龍', color: '#c04a6a' } };
   // 各 Boss 覆寫：hz 為部位肉質（淺層合併到預設），weak 為屬性倍率（未列 = 1）
+  // brk：部位破壞耐久覆寫；brkFx：該部位破壞後，列出的招式判定範圍與出招距離 ×mul（note 是破壞時的提示與戰報說明）
   H4.BOSS_PARTS = {
     magmus: { hz: { body: { cut: 0.3, blunt: 0.45, shot: 0.25 } }, weak: { water: 1.6, ice: 1.3, fire: 0.2 } },
     witch: { weak: { fire: 1.5, ice: 0.2 } },
@@ -23,7 +24,9 @@
     thor: { hz: { head: { cut: 0.5, blunt: 0.6, shot: 0.45 } }, weak: { thunder: 0.2, ice: 1.3 } },
     zeus: { weak: { thunder: 0.4, dragon: 1.3 } },
     poseidon: { weak: { thunder: 1.5, water: 0.2 } },
-    deviljho: { hz: { head: { cut: 0.7, blunt: 0.8, shot: 0.6 } }, weak: { dragon: 1.5, thunder: 1.2, fire: 0.7 } },
+    deviljho: { hz: { head: { cut: 0.7, blunt: 0.8, shot: 0.6 } }, weak: { dragon: 1.5, thunder: 1.2, fire: 0.7 },
+      brk: { tail: 0.05 }, brkFx: { tail: { skills: ['tail_spin'], mul: 0.65, note: '尾巴斷了，甩尾旋身範圍縮小' } } },
+    agheel: { brkFx: { head: { skills: ['sweeping_breath', 'tracking_breath'], mul: 0.7, note: '龍角斷了，龍息射程縮短' } } },
     watcher: { weak: { dragon: 1.3, fire: 0.6 } },
     treesentinel: { hz: { body: { cut: 0.32, blunt: 0.4, shot: 0.3 } }, weak: { fire: 1.3, thunder: 1.2 } },
   };

@@ -10,8 +10,8 @@
   function init(w, st) {
     const b = st.boss, ov = H4.BOSS_PARTS[b.def.id] || {};
     st.parts = H4.PARTS.map((P) => ({ id: P.id, name: P.name, front: P.front, el: P.el, hz: Object.assign({}, P.hz, ov.hz && ov.hz[P.id]),
-      brkHp: P.brk * b.maxHp, brkAcc: 0, broken: false, woundAcc: 0, wound: 0, scarUntil: 0 }));
-    st.weak = ov.weak || {};
+      brkHp: (ov.brk && ov.brk[P.id] != null ? ov.brk[P.id] : P.brk) * b.maxHp, brkAcc: 0, broken: false, woundAcc: 0, wound: 0, scarUntil: 0 }));
+    st.weak = ov.weak || {}; st.brkFx = ov.brkFx || {};
     st.flinchAt = H4.FLINCH.at * b.maxHp; st.flinchAcc = 0; st.stunAt = H4.STUN.at * b.maxHp; st.stunAcc = 0;
     st.breaks = b.stats.breaks; st.topples = 0; st.flinches = 0;
     st.ail = {}; for (const k in H4.AILMENTS) st.ail[k] = { acc: 0, at: H4.AILMENTS[k].at, procs: 0 };
@@ -49,6 +49,16 @@
   }
   function flinch(w, st, b, dur) {
     if (b.state !== 'knockdown' && b.state !== 'stun') armored(w, st, b, 'stagger', dur, '怯！', '#ffd0a0', () => st.flinches++);
+  }
+
+  // 部位破壞的招式弱化：複製招式（原物件與 def 共用，不能直接改），判定 r / len 與出招距離上限 ×mul；突進的預告長度跟位移距離綁在一起，不縮
+  function shrink(s, mul) {
+    const dash = new Set(s.actions.concat(s.actions2 || []).filter((a) => a.do === 'dash').map((a) => a.dist));
+    const sc = (acts) => acts && acts.map((a) => (a.do !== 'hit' && a.do !== 'tele' ? a : Object.assign({}, a,
+      a.r ? { r: a.r * mul } : {}, a.len && !dash.has(a.len) ? { len: a.len * mul } : {})));
+    const out = Object.assign({}, s, { actions: sc(s.actions), actions2: sc(s.actions2), range: [s.range[0], Math.max(s.range[0], s.range[1] * mul)], h4broken: true });
+    delete out.v1; delete out.v2; if (!s.actions2) delete out.actions2;
+    return BD.prepSkill(out);
   }
 
   function pop(w, st, h, b, P, orig, coop) { // 集中弱點攻擊打破傷口
@@ -121,7 +131,9 @@
     }
     if (P.brkHp && !P.broken && (P.brkAcc += dealt * BD.H4Gear.mul(h, 'brk')) >= P.brkHp) {
       P.broken = true; h.stats.h4.breaks++; const at = partPos(b, P);
-      w.fx.text(at.x, at.y - 24, `${P.name}部位破壞！`, '#ffe27a', 26); w.log(h, `破壞了 ${b.name} 的${P.name}部`, true);
+      const fx = st.brkFx[P.id];
+      w.fx.text(at.x, at.y - 24, `${P.name}部位破壞！`, '#ffe27a', 26); w.log(h, `破壞了 ${b.name} 的${P.name}部${fx ? '：' + fx.note : ''}`, true);
+      if (fx) { b.skills = b.skills.map((s) => (fx.skills.includes(s.id) ? shrink(s, fx.mul) : s)); w.fx.text(at.x, at.y + 6, fx.note, '#ffe27a', 18); }
       flinch(w, st, b, H4.FLINCH.dur + 0.5);
     }
     if ((st.flinchAcc += dealt) >= st.flinchAt) { st.flinchAcc = 0; st.flinchAt *= H4.FLINCH.grow; flinch(w, st, b, H4.FLINCH.dur); }
@@ -161,5 +173,5 @@
     }
   }
 
-  BD.H4Combat = { init, hit, tick, partPos, sharpBand, locked };
+  BD.H4Combat = { init, hit, tick, partPos, sharpBand, locked, shrink };
 })(typeof window !== 'undefined' ? window : globalThis);

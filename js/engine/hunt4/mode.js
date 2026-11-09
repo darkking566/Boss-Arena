@@ -270,6 +270,14 @@
     BD.H4Brain.install(w, st, (opts && opts.h4save) || BD.H4Brain.newSave()); BD.H4Gear.install(w, st); // 沒給存檔 = 全新的獵人（沒有裝備）
     const retarget = w.retarget.bind(w);
     w.retarget = (b) => (b === boss ? aggroTarget(w, st) : retarget(b));
+    // 部位戰術：有破壞效果的部位還沒壞時，派一位不是 Boss 目標的近戰獵人繞到那一側；壞了或沒有就不指派
+    const aimP = st.parts.find((P) => st.brkFx[P.id]);
+    if (aimP) for (const h of hunters) h.controller.aimAng = () => {
+      if (aimP.broken) return null;
+      const ok = (x) => x.state !== 'dead' && x.h4.spec.dtype !== 'shot' && boss._target !== x;
+      if (!st.breaker || !ok(st.breaker)) st.breaker = hunters.find(ok) || null;
+      return st.breaker === h ? U.angTo(boss, BD.H4Combat.partPos(boss, aimP)) : null;
+    };
   };
   // 獵魂代理（opts.h4solo，主角由 soloHero 建）：只掛戰鬥系統，不放大 Boss、沒有仇恨 / 力竭 / 時限；不學習、不帶狩獵裝備
   // shortcut: 獵人大腦不裝（沒有跨場存檔），出手 / 反應時機用武器驅動的預設；要學習時給獵魂另存一份 H4Brain 存檔

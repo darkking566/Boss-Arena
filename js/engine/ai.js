@@ -537,6 +537,7 @@
         this.duelAng = b.phase === 2 && Math.abs(U.angDiff(at, a2)) < Math.abs(U.angDiff(at, v.ang)) ? a2 : v.ang;
         this.duelArc = Math.abs(U.angDiff(at, this.duelAng)) <= 0.8;
       }
+      if (this.aimAng && this.duelAng == null) this.duelAng = this.aimAng(); // 模式指定的繞行方位（狩獵：繞去打有破壞效果的部位）；只影響繞圈方向
       let chance = p.aggression * 0.2 + Math.min(0.55, (w.time - this.lastAttack) * 0.05 * (1 - p.patience * 0.6));
       if (hunt) chance += SH.execute;
       if (last) chance += 0.5;
