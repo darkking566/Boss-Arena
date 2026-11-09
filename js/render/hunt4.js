@@ -44,6 +44,29 @@
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 5, y - 12); ctx.stroke();
       }
     }
+    for (const h of st.hunters) { // 星軌輪刃：Boss 身上的星痕（滿了連成星座、一閃一閃）、擲出飛行中的輪刃（去 → 在遠端迴旋 → 回）
+      const s = h.def.weapon === 'chakram' && h.h4.drv;
+      if (!s) continue;
+      const n = s.stars, full = n >= H4.CK.max, P = (k) => H4.ckStarPos(b, k);
+      if (full) {
+        ctx.strokeStyle = `rgba(255,233,168,${0.45 + 0.3 * Math.sin(t * 6)})`; ctx.lineWidth = 3; ctx.beginPath();
+        for (let k = 0; k <= n; k++) { const p = P(k % n); if (k) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }
+        ctx.stroke();
+      }
+      for (let k = 0; k < n; k++) {
+        const p = P(k), z = b.r * (full ? 0.22 : 0.16) * (1 + 0.15 * Math.sin(t * 5 + k));
+        ctx.fillStyle = full ? '#ffe9a8' : '#cfeaff'; ctx.beginPath();
+        for (let j = 0; j < 8; j++) { const a = j * Math.PI / 4 + t, rr = j % 2 ? z * 0.35 : z; ctx.lineTo(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr); }
+        ctx.closePath(); ctx.fill();
+      }
+      const i = h.inst;
+      if (i && h.state === 'skill' && i.skill.id === 'ck_throw' && i.t > 0.06 && i.t < 0.62) {
+        const L = 480, f = i.t < 0.24 ? (i.t - 0.06) / 0.18 : i.t < 0.42 ? 1 : 1 - (i.t - 0.42) / 0.2, e = 1 - (1 - f) * (1 - f);
+        const x = h.x + Math.cos(h.face) * L * e, y = h.y + Math.sin(h.face) * L * e;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(t * 24); ctx.shadowColor = '#9fd8ff'; ctx.shadowBlur = 14; R.ckRing(ctx, h.r * 1.3, '#e6f6ff'); ctx.restore();
+        ctx.strokeStyle = "rgba(159,216,255,0.5)"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(x, y); ctx.stroke(); // 星鏈
+      }
+    }
     if (!R.aiDebug) return; // F6：獵人大腦最近一次的決定（出手 / 等待＋情境、反應、翻滾方向）
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.font = `bold 14px ${FONT}`; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
     for (const h of st.hunters) if (h.brain && h.state !== 'dead' && h.brain.last) { const s = h.name + '｜' + h.brain.last; ctx.strokeText(s, h.x, h.y - h.r - 40); ctx.fillStyle = h.def.color; ctx.fillText(s, h.x, h.y - h.r - 40); }

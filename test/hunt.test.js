@@ -172,10 +172,10 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
   console.log(`AI 主角 ${n} 場完整對戰完成（主角勝 ${heroWins}）`);
 }
 
-// ── 6. 代理拿狩獵模式的 14 把武器（opts.h4solo）：掛上狩獵戰鬥系統、Boss 不放大、整場不丟例外、會出招打中 ──
+// ── 6. 代理拿狩獵模式的 15 把武器（opts.h4solo）：掛上狩獵戰鬥系統、Boss 不放大、整場不丟例外、會出招打中 ──
 {
   const s = Hunt.newSave(), ids = Object.keys(BD.HUNT4.WEAPON_SPECS);
-  eq(ids.length, 14, '狩獵武器數量');
+  eq(ids.length, 15, '狩獵武器數量');
   ids.forEach((id, i) => {
     const boss = BD.bosses[i % BD.bosses.length].id;
     const w = new BD.World(BD.Hunt4.soloHero(s, id), BD.bossById[boss], { seed: 200 + i, pace: 'heavy', hunt: true, agent: true, h4solo: true }), h = w.bosses[0];
@@ -184,6 +184,22 @@ console.log(`借用招式 ${borrowed} 個全部可施放；對靜止假人三種
     for (let k = 0; k < 60 * 60 && !w.winner; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); }
     check(h.stats.dealt > 0, `${id} 對 ${boss}：一分鐘內沒打中`);
   });
+}
+
+// ── 7. 星軌輪刃（代理專用的原創武器）：刻星痕、精準流星步 → 星縛、星痕滿 → 星座崩落；幾場代理單挑應幾乎全勝 ──
+{
+  const s = Hunt.newSave(), ids = ['ronin', 'magmus', 'deviljho', 'godrick', 'zeus', 'margit'];
+  let wins = 0; const tot = { stars: 0, perfect: 0, binds: 0, novas: 0 };
+  ids.forEach((boss, i) => {
+    const w = new BD.World(BD.Hunt4.soloHero(s, 'chakram'), BD.bossById[boss], { seed: 700 + i, pace: 'heavy', hunt: true, agent: true, h4solo: true }), h = w.bosses[0];
+    for (let k = 0; k < 240 * 60 && !w.winner; k++) { w.hitstop = 0; w.freezeF = 0; w.step(BD.STEP); }
+    if (w.winner === h) wins++;
+    for (const k in tot) tot[k] += h.h4.drv.stat[k];
+    check(h.h4.drv.stars >= 0 && h.h4.drv.stars <= BD.HUNT4.CK.max, `chakram 對 ${boss}：星痕超出上限`);
+  });
+  check(wins >= ids.length - 1, `星軌輪刃代理勝率太低（${wins}/${ids.length}）`);
+  check(tot.stars > 0 && tot.perfect > 0 && tot.binds === tot.perfect && tot.novas > 0, '星軌輪刃沒有觸發星痕 / 精準閃過 / 星縛 / 星座崩落：' + JSON.stringify(tot));
+  console.log(`星軌輪刃代理 ${wins}/${ids.length} 勝，${JSON.stringify(tot)}`);
 }
 
 console.log(fails ? `HUNT FAIL（${fails} 項）` : 'HUNT PASS');

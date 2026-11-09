@@ -248,8 +248,8 @@
   }
 
   // 武器長度（半徑倍數）：殘影畫在刀尖
-  const LEN = { katana: 2.2, gs: 2.7, greatsword: 2.6, sns: 1.5, db: 1.4, hammer: 2.3, horn: 2.4, lance: 2.8, gunlance: 2.6, switchaxe: 2.3, chargeblade: 2.3, glaive: 2.4, bow: 1.3, lightxbow: 1.4, heavyxbow: 1.7 };
-  const WIDE = { gs: 11, greatsword: 11, hammer: 10, switchaxe: 9, chargeblade: 9, katana: 5, db: 3, sns: 5 };
+  const LEN = { katana: 2.2, gs: 2.7, greatsword: 2.6, sns: 1.5, db: 1.4, hammer: 2.3, horn: 2.4, lance: 2.8, gunlance: 2.6, switchaxe: 2.3, chargeblade: 2.3, glaive: 2.4, bow: 1.3, lightxbow: 1.4, heavyxbow: 1.7, chakram: 1.7 };
+  const WIDE = { chakram: 6, gs: 11, greatsword: 11, hammer: 10, switchaxe: 9, chargeblade: 9, katana: 5, db: 3, sns: 5 };
   const GRIP = [0.2, 0.55]; // 握點（身體座標，半徑倍數）：與 hero.js 一致
   // 殘影：取前 0.064 秒內幾個時間點的刀尖連成淡出的帶子（在已套用前傾 / 騰空的身體座標）
   function trail(ctx, o, r, weapon) {

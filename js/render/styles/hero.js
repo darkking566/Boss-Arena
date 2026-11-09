@@ -13,6 +13,16 @@
     ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = w + 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len, 0); ctx.stroke();
     ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len, 0); ctx.stroke();
   };
+  // 環刃：外圈刃環 + 四片向外彎的刃（中心原點，半徑 rr）；hunt4.js 畫飛行輪刃時共用
+  R.ckRing = function (ctx, rr, color) {
+    ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke();
+    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, rr, 0, U.TAU); ctx.stroke();
+    ctx.fillStyle = color;
+    for (let k = 0; k < 4; k++) {
+      const a = k * U.TAU / 4;
+      ctx.beginPath(); ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); ctx.quadraticCurveTo(Math.cos(a + 0.35) * rr * 1.5, Math.sin(a + 0.35) * rr * 1.5, Math.cos(a + 0.7) * rr, Math.sin(a + 0.7) * rr); ctx.closePath(); ctx.fill();
+    }
+  };
   const WEAPON = {
     bow(ctx, r, t, o, m) { // m：出招姿勢（拉弦深度 pull、搭箭數 arrows）
       ctx.strokeStyle = '#a8794a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(r * 0.2, 0, r * 1.1, -1.15, 1.15); ctx.stroke();
@@ -87,6 +97,15 @@
       const d = o && o.h4 && o.h4.drv;
       blade(ctx, r * 2.4, 7, '#5a626e'); ctx.fillStyle = '#d8dee6'; ctx.beginPath(); ctx.moveTo(r * 2.75, 0); ctx.lineTo(r * 2.35, -r * 0.25); ctx.lineTo(r * 2.35, r * 0.25); ctx.closePath(); ctx.fill();
       if (d && o.world && o.world.time >= d.wfAt) { ctx.fillStyle = `rgba(255,140,60,${0.5 + 0.4 * Math.sin(t * 8)})`; ctx.beginPath(); ctx.arc(r * 2.4, 0, r * 0.18, 0, U.TAU); ctx.fill(); }
+    },
+    // 星軌輪刃：握在手上的環刃（星痕越多越亮；輪刃擲出飛行中手上空著，飛行的輪刃由 render/hunt4.js 畫）
+    chakram(ctx, r, t, o) {
+      const d = o && o.h4 && o.h4.drv, i = o && o.inst, C = BD.HUNT4.CK, k = d ? d.stars / C.max : 0;
+      if (i && o.state === 'skill' && i.skill.id === 'ck_throw' && i.t > 0.06 && i.t < 0.62) return;
+      ctx.save(); ctx.translate(r * 1.1, 0); ctx.rotate(t * 9);
+      if (k > 0) { ctx.shadowColor = k >= 1 ? '#ffe9a8' : '#9fd8ff'; ctx.shadowBlur = 6 + 12 * k; }
+      R.ckRing(ctx, r * 0.62, k >= 1 ? '#fff4d0' : '#cfeaff');
+      ctx.restore(); ctx.shadowBlur = 0;
     },
     staff(ctx, r, t) {
       blade(ctx, r * 2.2, 3, '#7a5a3a');
