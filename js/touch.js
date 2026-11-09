@@ -1,64 +1,91 @@
 'use strict';
-// 觸控操作層（僅瀏覽器、僅觸控裝置）：虛擬搖桿、技能按鈕、暫停／變速／離開；瞄準預設自動鎖定對手，點畫布可手動瞄準
+// Pointer Events allow independent movement, aiming and skills with multiple fingers.
 (function (G) {
   const BD = G.BD, R = BD.Render;
-  const KEYS = ['mouse0', 'mouse2', 'q', 'e', 'r', 'f', 'c', 'v', 'g'];
-  const SPEEDS = ['1', '2', '3', '4']; // 對應 ×1 ×2 ×3 ×0.5（沿用鍵盤 1~4）
-  const fake = { preventDefault() {}, shiftKey: false, code: '' };
-
-  function el(tag, cls, text) { const d = document.createElement(tag); if (cls) d.className = cls; if (text != null) d.textContent = text; return d; }
-
+  function el(tag, cls, text) { const d = document.createElement(tag); d.className = cls || ''; if (text != null) d.textContent = text; return d; }
   function create(app, input, state, view) {
-    if (!(matchMedia('(pointer: coarse)').matches || 'ontouchstart' in G)) return;
-    const root = el('div', 'tc hidden'), stick = el('div', 'tc-stick'), knob = el('div', 'tc-knob'), pad = el('div', 'tc-pad'), bar = el('div', 'tc-bar'), hint = el('div', 'tc-hint', '↻ 請把手機橫放以獲得最佳畫面');
-    stick.appendChild(knob); root.append(stick, pad, bar); app.append(root, hint);
+    if (!matchMedia('(pointer: coarse)').matches && !navigator.maxTouchPoints) return;
     document.body.classList.add('touch');
-
-    let manualAimUntil = 0, built = null, spd = 0, sid = null;
-    const bind = (b, fn) => { b.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(e); }); return b; };
-    const key = (k) => { fake.code = ''; input.onKey && input.onKey(k, fake); };
-
-    // 觀戰／通用按鈕
-    bar.append(
-      bind(el('button', '', '⏸'), () => key('p')),
-      bind(el('button', 'tc-spd', '×1'), (e) => { spd = (spd + 1) % SPEEDS.length; key(SPEEDS[spd]); e.target.textContent = ['×1', '×2', '×3', '×0.5'][spd]; }),
-      bind(el('button', '', '☰'), () => key('Escape')));
-
-    // 搖桿：直接寫入 WASD 按鍵集合
-    function setStick(dx, dy) {
-      const r = 60, l = Math.hypot(dx, dy) || 1, k = Math.min(1, l / r), nx = dx / l * k, ny = dy / l * k;
-      knob.style.transform = `translate(${nx * r}px,${ny * r}px)`;
-      const on = { d: nx > 0.3, a: nx < -0.3, s: ny > 0.3, w: ny < -0.3 };
-      for (const c in on) on[c] ? input.keys.add(c) : input.keys.delete(c);
+    const root = el('div', 'tc hidden'), bar = el('div', 'tc-bar'), stick = el('div', 'tc-stick'), knob = el('div', 'tc-knob'), pad = el('div', 'tc-pad');
+    root.setAttribute('aria-label', '觸控戰鬥操作');
+    stick.setAttribute('aria-label', '移動搖桿'); stick.append(knob);
+    const status = el('div', 'tc-status'), sheet = el('div', 'tc-sheet'); sheet.hidden = true;
+    root.append(bar, status, stick, pad, sheet); app.append(root);
+    let sid = null, built = null, manualAimUntil = 0, menuWorld = null, wasPaused = false, last = 0, buttons = [];
+    function button(parent, label, fn, cls) {
+      const b = el('button', cls, label); b.type = 'button'; b.setAttribute('aria-label', label);
+      b.addEventListener('click', e => { e.preventDefault(); fn(); }); parent.append(b); return b;
     }
-    stick.addEventListener('pointerdown', (e) => { e.preventDefault(); sid = e.pointerId; stick.setPointerCapture(sid); });
-    stick.addEventListener('pointermove', (e) => { if (e.pointerId !== sid) return; const r = stick.getBoundingClientRect(); setStick(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2); });
-    const endStick = (e) => { if (e.pointerId !== sid) return; sid = null; setStick(0, 0); };
-    stick.addEventListener('pointerup', endStick); stick.addEventListener('pointercancel', endStick);
-
-    // 點畫布 = 手動瞄準 1.5 秒，之後回到自動鎖定
-    app.addEventListener('pointerdown', (e) => { if (e.target.id === 'game') { input.moveTo(e); manualAimUntil = performance.now() + 1500; } });
-
-    function build(b, hunt) {
-      pad.textContent = '';
-      const add = (label, k, cls) => pad.appendChild(bind(el('button', cls || '', label), () => input.press(k)));
-      add('翻滾', ' ', 'tc-roll'); add('大招', 'x', 'tc-ult');
-      b.skills.forEach((s, i) => { if (KEYS[i]) add(i === 0 ? '普攻' : (s.name || KEYS[i]).slice(0, 4), KEYS[i]); });
-      if (hunt) { add('❤', '1'); add('✦', '2'); }
+    const key = k => input.onKey && input.onKey(k, { preventDefault() {}, shiftKey: false, code: '' });
+    function reset() { sid = null; input.touchMove = null; knob.style.transform = ''; }
+    function closeMenu() { sheet.hidden = true; if (menuWorld === state.world) menuWorld.paused = wasPaused; menuWorld = null; }
+    const pause = button(bar, '暫停', () => { reset(); state.world.paused = !state.world.paused; });
+    const speed = button(bar, '×1', () => { const w = state.world, speeds = [0.5, 1, 2, 3]; w.speed = speeds[(speeds.indexOf(w.speed) + 1) % speeds.length]; });
+    button(bar, '選單', () => {
+      if (!sheet.hidden) return closeMenu();
+      reset(); menuWorld = state.world; wasPaused = menuWorld.paused; menuWorld.paused = true; sheet.hidden = false;
+    });
+    sheet.append(el('h2', '', '戰鬥選單'), el('p', '', '左手移動 · 右手施放技能。預設自動瞄準，點場地可暫時指定方向。橫放手機可獲得更大視野。'));
+    button(sheet, '繼續戰鬥', closeMenu, 'primary');
+    button(sheet, '切換戰鬥紀錄', () => key('l'));
+    button(sheet, '切換攻擊預警', () => key('t'));
+    button(sheet, '全螢幕', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await app.requestFullscreen(); } catch (_) { status.textContent = '此瀏覽器不支援全螢幕，可使用橫向畫面'; } });
+    button(sheet, '返回選角／據點', () => { closeMenu(); key('Escape'); reset(); });
+    function move(e) {
+      const r = stick.getBoundingClientRect(), dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2;
+      const len = Math.hypot(dx, dy), radius = r.width * .32, strength = Math.min(1, len / radius);
+      input.touchMove = len < 8 ? { x: 0, y: 0 } : { x: dx / len * strength, y: dy / len * strength };
+      knob.style.transform = `translate(${len ? dx / len * strength * radius : 0}px,${len ? dy / len * strength * radius : 0}px)`;
     }
-
-    function tick() {
-      const w = state.world, p = w && state.screen === 'game' && view.player != null ? w.bosses[view.player] : null;
-      root.classList.toggle('hidden', state.screen !== 'game');
-      root.classList.toggle('play', !!p);
-      hint.classList.toggle('on', state.screen === 'game');
-      if (p) {
-        if (built !== p) { built = p; build(p, !!w.hunt); }
-        if (performance.now() > manualAimUntil && p.enemy) { // 自動鎖定：把螢幕座標反推成指向對手
-          const z = R.zoom, m = input.mouse, e = p.enemy;
-          m.sx = z.fx + ((e.x - R.cam.x) * R.cam.z - z.fx) * z.z; m.sy = z.fy + ((e.y - R.cam.y) * R.cam.z - z.fy) * z.z;
+    stick.addEventListener('pointerdown', e => { if (sid !== null) return; e.preventDefault(); sid = e.pointerId; stick.setPointerCapture(sid); move(e); });
+    stick.addEventListener('pointermove', e => { if (sid === e.pointerId) move(e); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => stick.addEventListener(type, e => { if (sid === e.pointerId) reset(); }));
+    window.addEventListener('blur', reset); window.addEventListener('resize', reset);
+    document.addEventListener('visibilitychange', () => { reset(); if (document.hidden && state.world && state.screen === 'game') state.world.paused = true; });
+    app.addEventListener('pointerdown', e => { if (e.target.id === 'game' && state.screen === 'game') { input.moveTo(e); manualAimUntil = performance.now() + 1500; } });
+    function build(b, w) {
+      pad.replaceChildren(); buttons = [];
+      const add = (name, k, skill, cls) => {
+        const btn = button(pad, name, () => {}, cls); btn.replaceChildren(el('span', '', name), el('small', 'tc-cd', ''));
+        btn.addEventListener('pointerdown', e => { e.preventDefault(); if (btn.disabled || w.paused || b.state === 'dead') return; if (w.training && w.training.mode === 'manual' && skill) w.training.cast(skill.ult ? 'ult' : skill.id); else input.press(k); });
+        buttons.push({ btn, skill, name, k });
+      };
+      add('翻滾', ' ', null, 'tc-roll');
+      b.skills.forEach((s, i) => add(s.name, 'skill:' + i, s));
+      add('大招', 'x', b.ultimate, 'tc-ult');
+      if (w.hunt) { add('生命藥水', '1'); add('法力藥水', '2'); }
+    }
+    function tick(now) {
+      const w = state.world, active = w && state.screen === 'game';
+      root.classList.toggle('hidden', !active);
+      const p = active ? (w.training && w.training.mode !== 'ai' ? w.training.boss : view.player != null && w.bosses[view.player].controller.isPlayer ? w.bosses[view.player] : null) : null;
+      root.classList.toggle('play', !!p); root.classList.toggle('manual', !!(w && w.training && w.training.mode === 'manual'));
+      if (!active) { if (built) reset(); built = null; sheet.hidden = true; menuWorld = null; }
+      if (active) {
+        pause.textContent = w.paused ? '繼續' : '暫停'; speed.textContent = `×${w.speed}`; speed.hidden = !!p && !w.training;
+        if (p && built !== p) { reset(); built = p; build(p, w); }
+        if (!p && built) { reset(); built = null; }
+        if (p && performance.now() > manualAimUntil && p.enemy) {
+          const z = R.zoom, e = p.enemy;
+          input.mouse.sx = z.fx + ((e.x - R.cam.x) * R.cam.z - z.fx) * z.z;
+          input.mouse.sy = z.fy + ((e.y - R.cam.y) * R.cam.z - z.fy) * z.z;
         }
-      } else if (built) { built = null; setStick(0, 0); }
+        if (now - last > 100) {
+          last = now;
+          status.textContent = p ? `${p.def.name} · ${p.state === 'dead' ? '已倒下' : performance.now() < manualAimUntil ? '手動瞄準' : '自動瞄準'} · HP ${Math.max(0, Math.ceil(p.hp))}` : '觀戰模式 · 橫放手機享受更大視野';
+          for (const { btn, skill } of p ? buttons : []) {
+            let locked = false, text = '';
+            if (skill) {
+              locked = (skill.phase || 1) > p.phase || (skill.maxPhase || 9) < p.phase;
+              const free = w.training && w.training.freeCast;
+              const cd = p.cds[skill.id] || 0;
+              text = locked ? '階段未開放' : free ? '就緒' : skill.ult ? `${Math.floor(p.ult)}%` : cd > 0 ? `${cd.toFixed(1)}s` : !p.skillReady(skill) ? '資源不足' : '就緒';
+            }
+            btn.disabled = locked || p.state === 'dead'; btn.querySelector('small').textContent = text;
+            btn.classList.toggle('ready', text === '就緒' || text === '100%');
+          }
+        }
+      }
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);

@@ -12,8 +12,11 @@
 
   // ── 畫布縮放 ──
   function resize() {
-    const vw = window.innerWidth, vh = window.innerHeight, s = Math.min(vw / R.W, vh / R.H);
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const rail = matchMedia('(pointer: coarse) and (orientation: landscape)').matches ? Math.min(vw * .28, 250) : 0;
+    const s = Math.min((vw - rail) / R.W, vh / R.H);
+    canvas.style.marginRight = rail + 'px';
+    const dpr = Math.min(matchMedia('(pointer: coarse)').matches ? 1.5 : 2, window.devicePixelRatio || 1);
     canvas.style.width = Math.floor(R.W * s) + 'px'; canvas.style.height = Math.floor(R.H * s) + 'px';
     canvas.width = Math.floor(R.W * s * dpr); canvas.height = Math.floor(R.H * s * dpr);
     const ns = s * dpr;
@@ -42,7 +45,8 @@
       state.page[side] = Math.min(state.page[side], pages - 1);
       const list = BD.bosses.slice(state.page[side] * PER_PAGE, (state.page[side] + 1) * PER_PAGE);
       for (const def of list) {
-        const c = document.createElement('div'); c.className = 'card'; c.dataset.id = def.id;
+        const c = document.createElement('div'); c.className = 'card'; c.dataset.id = def.id; c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', def.name);
+        c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } });
         c.innerHTML = `<canvas width="168" height="168"></canvas><div><div class="nm" style="color:${def.color}">${def.name}</div>
           <div class="tt">${def.title}</div><div class="ar">${def.archetype}</div>
           <div class="tt"><span class="rk rk-${def.rank}">${BD.RANKS[def.rank].name}</span> <span class="st" title="${def.stars} 星">${BD.starText(def.stars)}</span></div></div>`;
@@ -153,6 +157,7 @@
       document.querySelectorAll(sel + ' .card').forEach((c) => {
         const n = state.team[side].indexOf(c.dataset.id) + 1;
         c.classList.toggle('sel', state.mode === 'team' ? n > 0 : c.dataset.id === state.pick[side]);
+        c.setAttribute('aria-pressed', String(c.classList.contains('sel')));
         if (state.mode === 'team' && n) c.dataset.n = n; else delete c.dataset.n;
       });
     });
@@ -286,6 +291,7 @@
 
   function show(name, msg) {
     state.screen = name;
+    input.keys.clear(); input.buffer.length = 0; input.touchMove = null;
     if (name !== 'result' && BD.sfx) BD.sfx.stop(); // 離開 / 重開戰鬥時停掉殘留音效
     $('#select').classList.toggle('hidden', name !== 'select');
     $('#result').classList.toggle('hidden', name !== 'result');
@@ -546,7 +552,7 @@
       ctx.setTransform(state.scale, 0, 0, state.scale, 0, 0);
       const w = state.world;
       if (w) {
-        w.tick(dt);
+        if (!document.hidden) w.tick(dt);
         if (BD.sfx) BD.sfx.tick(w, dt);
         const rt = performance.now();
         R.render(ctx, w, view);
@@ -561,7 +567,7 @@
         ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, R.W, R.H);
         if (R.perf) R.perf.drawNotice(ctx);
       }
-      if (state.screen === 'select' && (portraitT -= dt) <= 0) { portraitT = 1 / 30; for (const [c, d] of portraits) R.portrait(c, d); }
+      if (state.screen === 'select' && (portraitT -= dt) <= 0) { portraitT = 1 / (matchMedia('(pointer: coarse)').matches ? 12 : 30); for (const [c, d] of portraits) R.portrait(c, d); }
     } catch (e) { state.errors.push(String(e && e.stack || e)); console.error(e); }
     requestAnimationFrame(frame);
   }
