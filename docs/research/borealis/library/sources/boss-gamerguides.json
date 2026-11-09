@@ -1,0 +1,26 @@
+{
+  "author": "Gamer Guides",
+  "characters": 60,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "頁面未標完整版本；本輪 2026-11-09 回讀",
+  "id": "boss-gamerguides",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:16.826701+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "b33d57035924f20fffc170c9a96c5727474f8de4de7f14e0c9ef6f74ba997203",
+  "title": "冰龍歷史、招式與獎勵",
+  "units": [
+    {
+      "end": 60,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "The ice dragons were once lords of the mountaintops long ago"
+    }
+  ],
+  "url": "https://www.gamerguides.com/elden-ring/database/bosses/mountaintops-of-the-giants-boss/borealis-the-freezing-fog"
+}

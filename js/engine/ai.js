@@ -136,6 +136,15 @@
       const b = this.b, e = this.e, w = this.w;
       b.wantFace = U.angTo(b, e);
       if (this.model) { this.model.update(dt); this.updateAim(); } // 讀習慣：先吸收本幀資訊
+      // 選用的長吟唱撤招：看懂安全圈後付出已花體力／冷卻，收翼再走入圈內。
+      // 未配置的角色不讀預警、不消耗亂數；升空期間不取消落地動作。
+      if (this.p.safeCancel && b.state === 'skill' && !BD.getMod(b, 'untargetable')) {
+        const t = w.telegraphs.find(t => t.undodgeable && t.team !== b.team && t.shape.kind === 'except' && t.t >= this.p.reaction);
+        if (t && U.dist(b, t.shape) > Math.max(10, t.shape.r - b.r * 0.5 - 12)) {
+          if (this.combo && this.combo.c) this.combo.end('interrupted');
+          b.cutSkill(0.18); this.plan = null; this.evade = null; this.aimOverride = null;
+        }
+      }
       if (this.combo) this.combo.update(dt); // 連段狀態機先於思考
       // 滯空接大招（犽宿 ai.airUlt）：對手滯空、大招滿 → 空檔或收招中直接放（取消收招），不等下一次思考
       if (this.p.airUlt && b.ult >= 100 && !(this.combo && this.combo.c) && (b.state === 'idle' || (b.state === 'skill' && b.skillPhase() === 'recovery' && !b.inst.skill.ult))

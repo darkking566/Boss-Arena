@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://www.mmogah.com/news/elden-ring/elden-ring-all-great-dragons-guide",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://www.techradar.com/how-to/elden-ring-bosses-guide",
+    "status": 200,
+    "title": "Elden Ring bosses: every major fight in The Lands Between | TechRadar",
+    "borealis_mentioned": true
+  },
+  {
+    "url": "https://west-east.blog.jp/archives/33801491.html",
+    "status": 200,
+    "title": "エルデンリング その57 [巨人たちの山嶺] : 西へ東へ",
+    "borealis_mentioned": true
+  },
+  {
+    "url": "https://video-game-guide-walkthrough.supersoluce.com/solution/elden-ring-guide-walkthrough/er-optional-areas/mountaintops-of-the-giants/mountaintops-of-the-giants-optional-bosses/",
+    "status": "failed",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://www.9game.cn/aedfh/11390060.html",
+    "status": 200,
+    "title": "艾尔登法环冰川霸主玻列琉斯全攻略 从逃课到硬核的两种屠龙术_艾尔登法环_九游手机游戏",
+    "borealis_mentioned": true
+  },
+  {
+    "url": "https://www.sportskeeda.com/esports/elden-ring-top-5-dragon-communion-incantations-ranked",
+    "status": "failed",
+    "error": "HTTP Error 405: Not Allowed"
+  },
+  {
+    "url": "https://x.com/BBuradori/status/1530270642943234050",
+    "status": 200,
+    "title": "Seekers_Sanctuary on X: &quot;❄️Borealis The Freezing Fog❄️\n\n#EldenRing\n#virtualphotography&quot; / X",
+    "borealis_mentioned": true
+  },
+  {
+    "url": "https://ameblo.jp/yutorinau/entry-12849677976.html",
+    "status": 200,
+    "title": "『エルデンリング』 プレイ日記 15日目 | あくまで個人の感想です。　-へっぽこゲーマー奮闘記-",
+    "borealis_mentioned": true
+  }
+]

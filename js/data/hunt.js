@@ -109,6 +109,7 @@
   };
   // 每位 Boss：short 套裝簡稱、arch 原型、passive 被動（靈魂解鎖後可裝備）、set2 / set4 套裝獎勵
   const BOSS_META = {
+    borealis: { short: '冰龍', arch: 'bulwark', passive: { name: '冰結湖遺霧', mods: { hp: 70, staRegen: 0.08 } }, set2: { name: '霜白重翼', mods: { sta: 20 } }, set4: { name: '白霧再臨', mods: { dmg: 0.08, cdr: 0.06 } } },
     agheel: { short: '飛龍', arch: 'bulwark', passive: { name: '翼風驅逐', mods: { def: 0.06, hp: 60 } }, set2: { name: '焚灰之翼', mods: { hp: 120 } }, set4: { name: '龍心熾燃', mods: { dmg: 0.1, def: 0.06 } } },
     ekzykes: { short: '腐龍', arch: 'bulwark', passive: { name: '腐軀洩霧', mods: { hp: 90, def: 0.04 } }, set2: { name: '灰白菌絲', mods: { sta: 20 } }, set4: { name: '憎恨未熄', mods: { dmg: 0.08, cdr: 0.06 } } },
     fallingstar: { short: '墜星', arch: 'bulwark', passive: { name: '星核引力', mods: { hp: 70, def: 0.05 } }, set2: { name: '黑岩甲殼', mods: { hp: 110 } }, set4: { name: '重力反轉', mods: { dmg: 0.09, spd: 0.04 } } },

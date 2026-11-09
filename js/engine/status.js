@@ -8,7 +8,7 @@
 
   // 修正值種類：mul = 相乘倍率，and = 全部成立才為真，or = 任一成立即為真
   BD.MOD_KEYS = {
-    speedMul: 'mul', dmgTakenMul: 'mul', dmgDealtMul: 'mul', canAct: 'and', canMove: 'and', canDodge: 'and',
+    speedMul: 'mul', dmgTakenMul: 'mul', dmgDealtMul: 'mul', staminaRegenMul: 'mul', canAct: 'and', canMove: 'and', canDodge: 'and',
     invuln: 'or', iframe: 'or', untargetable: 'or', noCollide: 'or', counter: 'or',
   };
   BD.STATUS_STACKING = ['refresh', 'stack', 'max'];

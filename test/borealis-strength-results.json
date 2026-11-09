@@ -1,0 +1,2594 @@
+[
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 60.22
+  },
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 50.42
+  },
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 50
+  },
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 56.2
+  },
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 57.85
+  },
+  {
+    "pace": "light",
+    "foe": "magmus",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 50.57
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 73.93
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 81.55
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 75.62
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 70.93
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 61.42
+  },
+  {
+    "pace": "light",
+    "foe": "witch",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 68.63
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 57.43
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 57.58
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 60.78
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 45.97
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 50.55
+  },
+  {
+    "pace": "light",
+    "foe": "ronin",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 48.13
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 65.88
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 59.2
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 71.83
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 57.45
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 63.27
+  },
+  {
+    "pace": "light",
+    "foe": "brood",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 58.55
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 52.27
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 48.28
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 62.82
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 46.37
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 72
+  },
+  {
+    "pace": "light",
+    "foe": "watcher",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 48.68
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 46.13
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 61.77
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 50.28
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 59.98
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 44.23
+  },
+  {
+    "pace": "light",
+    "foe": "lubu",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 49.23
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 54.35
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 57.42
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 49.05
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 52.4
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 42.25
+  },
+  {
+    "pace": "light",
+    "foe": "gundyr",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 46.28
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 85.35
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 66.73
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 66.8
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 67.42
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 81.82
+  },
+  {
+    "pace": "light",
+    "foe": "thor",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 88.57
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 56.32
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 55.02
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 57.37
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 57.35
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 57.8
+  },
+  {
+    "pace": "light",
+    "foe": "zed",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 51.53
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 37.98
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 36.78
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 34.17
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 35.93
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 35.9
+  },
+  {
+    "pace": "light",
+    "foe": "fiora",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 41.02
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 61.67
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 54.32
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 65.88
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 58.17
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 50.92
+  },
+  {
+    "pace": "light",
+    "foe": "mihawk",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 45.67
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 50.43
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 62.07
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 44.05
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 57.02
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 53.02
+  },
+  {
+    "pace": "light",
+    "foe": "adam",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 45.02
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 48.5
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 47.37
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 51.98
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 49.93
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 54.67
+  },
+  {
+    "pace": "light",
+    "foe": "zeus",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 53.48
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 54.07
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 62.45
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 48.1
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 60.93
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 60.88
+  },
+  {
+    "pace": "light",
+    "foe": "yujiro",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 57.3
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 28.97
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 29.67
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 28.75
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 50.87
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 34.5
+  },
+  {
+    "pace": "light",
+    "foe": "itachi",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 39.43
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 64.75
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 67.98
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 64.83
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 65.73
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 58.08
+  },
+  {
+    "pace": "light",
+    "foe": "deviljho",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 64.42
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 50.93
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 61.2
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 50.43
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 60.18
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 54.1
+  },
+  {
+    "pace": "light",
+    "foe": "kojiro",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 57.18
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 52.62
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 52.25
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 70.72
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 53.47
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 57.5
+  },
+  {
+    "pace": "light",
+    "foe": "poseidon",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 62.42
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 88.07
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 78.85
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 57.02
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 82.28
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 90.22
+  },
+  {
+    "pace": "light",
+    "foe": "kindred",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 85.1
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 72.02
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 70.85
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 66.9
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 55.28
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 72.93
+  },
+  {
+    "pace": "light",
+    "foe": "yasuo",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 65.2
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 47.7
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 47.08
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 43.38
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 47.25
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 51.63
+  },
+  {
+    "pace": "light",
+    "foe": "treesentinel",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 49.32
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 37.12
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 33.68
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 35.23
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 34.27
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 32.9
+  },
+  {
+    "pace": "light",
+    "foe": "margit",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 33.8
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 47.97
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 45.75
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 49.13
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 59.3
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 50.3
+  },
+  {
+    "pace": "light",
+    "foe": "godrick",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 56.75
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 35.45
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 46.42
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 56.97
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 45.9
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 41.53
+  },
+  {
+    "pace": "light",
+    "foe": "redwolf",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 40.98
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 59.08
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 60.5
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 53.83
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 60.55
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 57.83
+  },
+  {
+    "pace": "light",
+    "foe": "agheel",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 64.6
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 81.55
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 72.97
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 73.58
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 89.2
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 70.98
+  },
+  {
+    "pace": "light",
+    "foe": "ekzykes",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 81.27
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 60.68
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 68.33
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 65.5
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 55.03
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 59
+  },
+  {
+    "pace": "light",
+    "foe": "fallingstar",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 71.12
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 84.47
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 86.68
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 78.53
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 73.73
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 68.28
+  },
+  {
+    "pace": "heavy",
+    "foe": "magmus",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 88.32
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 119.18
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 123.63
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 108
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 118.83
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 112.3
+  },
+  {
+    "pace": "heavy",
+    "foe": "witch",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 132.38
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 86.62
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 81.7
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 84.35
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 89.22
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 78.47
+  },
+  {
+    "pace": "heavy",
+    "foe": "ronin",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 72.7
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 82.25
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 84.08
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 91.9
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 100.05
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 77.02
+  },
+  {
+    "pace": "heavy",
+    "foe": "brood",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 86.03
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 86.35
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 91.05
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 77.93
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 92.05
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 86.93
+  },
+  {
+    "pace": "heavy",
+    "foe": "watcher",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 95.73
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 110.6
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 91.97
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 86.23
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 101.65
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 90.43
+  },
+  {
+    "pace": "heavy",
+    "foe": "lubu",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 113.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 82.88
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 91.38
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 80.88
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 88.92
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 87.12
+  },
+  {
+    "pace": "heavy",
+    "foe": "gundyr",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 88.37
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 143.58
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 112.15
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 110.63
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 130.4
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 112.88
+  },
+  {
+    "pace": "heavy",
+    "foe": "thor",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 85.1
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 81.07
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 105.23
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 84.3
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 84.08
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 83.3
+  },
+  {
+    "pace": "heavy",
+    "foe": "zed",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 93.17
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 61.23
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 68.87
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 65.92
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 65.3
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 64.75
+  },
+  {
+    "pace": "heavy",
+    "foe": "fiora",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 71.53
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 82.5
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 92.33
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 107.92
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 118.33
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 89.08
+  },
+  {
+    "pace": "heavy",
+    "foe": "mihawk",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 100.15
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 92.73
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 96.87
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 70.73
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 83.48
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 62.78
+  },
+  {
+    "pace": "heavy",
+    "foe": "adam",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 78.58
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 90.07
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 94.47
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 96.72
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 117.82
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 100.2
+  },
+  {
+    "pace": "heavy",
+    "foe": "zeus",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 96.18
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 102.93
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 95.28
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 100.63
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 102.93
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 91.42
+  },
+  {
+    "pace": "heavy",
+    "foe": "yujiro",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 110.12
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 76.08
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 75.37
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 63.28
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 62.52
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 66.03
+  },
+  {
+    "pace": "heavy",
+    "foe": "itachi",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 68.43
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 103.6
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 109.58
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 106
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 111.13
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 104.62
+  },
+  {
+    "pace": "heavy",
+    "foe": "deviljho",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 93.22
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 73.5
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 87.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 93.52
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 82.7
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 99.37
+  },
+  {
+    "pace": "heavy",
+    "foe": "kojiro",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 86.57
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 76.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 100.35
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 81.5
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 82.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 87.67
+  },
+  {
+    "pace": "heavy",
+    "foe": "poseidon",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 88.08
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 112.75
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 109.82
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 92.75
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 122.43
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 80.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "kindred",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 78.55
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 99.43
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 93.92
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 85.98
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 85.83
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 80.12
+  },
+  {
+    "pace": "heavy",
+    "foe": "yasuo",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 79.65
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 84.18
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 90.37
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 72.45
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 71.63
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 80.4
+  },
+  {
+    "pace": "heavy",
+    "foe": "treesentinel",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 73.82
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 65.85
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 61.27
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 73.93
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 60.32
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 54.7
+  },
+  {
+    "pace": "heavy",
+    "foe": "margit",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 79.7
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 88.72
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 72.07
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 85.92
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 78.65
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 82.5
+  },
+  {
+    "pace": "heavy",
+    "foe": "godrick",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 80.18
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 95.98
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 81.23
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 72.53
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 96.9
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 94.62
+  },
+  {
+    "pace": "heavy",
+    "foe": "redwolf",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 97.57
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 114.77
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 90.6
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 110.47
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 97.72
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 93.03
+  },
+  {
+    "pace": "heavy",
+    "foe": "agheel",
+    "seed": 71,
+    "flip": true,
+    "win": false,
+    "time": 96.67
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 7,
+    "flip": false,
+    "win": false,
+    "time": 160.25
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 7,
+    "flip": true,
+    "win": true,
+    "time": 144.43
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 31,
+    "flip": false,
+    "win": true,
+    "time": 153.07
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 31,
+    "flip": true,
+    "win": true,
+    "time": 153.85
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 71,
+    "flip": false,
+    "win": true,
+    "time": 177.33
+  },
+  {
+    "pace": "heavy",
+    "foe": "ekzykes",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 168.6
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 7,
+    "flip": false,
+    "win": true,
+    "time": 126.9
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 7,
+    "flip": true,
+    "win": false,
+    "time": 106.73
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 31,
+    "flip": false,
+    "win": false,
+    "time": 113.72
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 31,
+    "flip": true,
+    "win": false,
+    "time": 115.02
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 71,
+    "flip": false,
+    "win": false,
+    "time": 142.35
+  },
+  {
+    "pace": "heavy",
+    "foe": "fallingstar",
+    "seed": 71,
+    "flip": true,
+    "win": true,
+    "time": 131.07
+  }
+]

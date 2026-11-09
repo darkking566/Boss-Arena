@@ -5,7 +5,7 @@
   const A = () => BD.ARENA;
 
   function makeZone(w, owner, x, y, z) {
-    w.zones.push({ team: owner.team, owner, x, y, r: z.r, dur: z.dur, dps: z.dps, slow: !!z.slow, kind: z.kind, delay: z.delay || 0, status: z.status, t: 0, tick: 0, seed: BD.vrng() * 100 });
+    w.zones.push({ team: owner.team, owner, x, y, r: z.r, dur: z.dur, dps: z.dps, slow: !!z.slow, kind: z.kind, damageEl: z.damageEl || (['fire', 'lava', 'blackfire'].includes(z.kind) ? 'fire' : null), delay: z.delay || 0, status: z.status, t: 0, tick: 0, seed: BD.vrng() * 100 });
   }
   BD.makeZone = makeZone;
   // 衝刺 / 繞圈時沿路留下區域（例如火痕）
@@ -74,7 +74,7 @@
         BD.spawnFx(w, 'ambient', z.x, z.y, { el: BD.kindElement(z.kind, BD.fxElementOf(z.owner)), radius: z.r });
         for (const u of w.enemiesOf(z.team)) {
           if (Math.hypot(u.x - z.x, u.y - z.y) < z.r + u.r * 0.4) {
-            w.damageUnit(z.owner, u, { dmg: z.dps * 0.4, posture: 2, dot: true, unblockable: true, slow: z.slow ? 0.6 : 0, status: z.status });
+            w.damageUnit(z.owner, u, { dmg: z.dps * 0.4, posture: 2, dot: true, unblockable: true, damageEl: z.damageEl, slow: z.slow ? 0.6 : 0, status: z.status });
           }
         }
       }

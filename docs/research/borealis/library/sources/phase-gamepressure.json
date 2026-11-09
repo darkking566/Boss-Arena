@@ -1,0 +1,26 @@
+{
+  "author": "Gamepressure 攻略編輯部",
+  "characters": 37,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2024-03-05 更新",
+  "id": "phase-gamepressure",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:17.340623+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "9d3449983610c61cd33483b9f1e81d3845cc45bd0fa91a3df2cf8e4a5eadc3f1",
+  "title": "冰結湖遭遇與單一階段敘述",
+  "units": [
+    {
+      "end": 37,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "The fight only consists of one phase."
+    }
+  ],
+  "url": "https://www.gamepressure.com/elden-ring/borealis-the-frozen-fog/zffcdb"
+}

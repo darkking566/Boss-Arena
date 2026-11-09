@@ -1,0 +1,28 @@
+{
+  "author": "原作：FromSoftware / Bandai Namco；提供頁面：DanielD / EIP Gaming；逐張攝製者未單獨確認",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 base game; capture or icon or photography or concept as individually labelled",
+  "id": "bo-ref-024",
+  "image_sha256": "280c4c621c675143dea4625ad20f90f0c9363c6525f9eb477aed9f02edfb1860",
+  "image_url": "https://eip.gg/wp-content/uploads/2022/05/Borealis-the-Freezing-Fog-Boss-Guide-Elden-Ring-Featured-Image.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex view_image 2026-11-09: contact-04.jpg; full-size images/bo-ref-024.jpg also viewed",
+  "kind": "image",
+  "local_file": "../images/bo-ref-024.jpg",
+  "phase": null,
+  "provenance": "原作：FromSoftware / Bandai Namco；提供頁面：DanielD / EIP Gaming；逐張攝製者未單獨確認",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:13.450193+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "FromSoftware / Bandai Namco and original creators retain rights; local research only; redistribution permission unknown.",
+  "title": "bo-ref-024 玻列琉斯・外觀",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bo-ref-024 玻列琉斯・外觀"
+    }
+  ],
+  "url": "https://eip.gg/elden-ring/guides/how-to-beat-borealis-the-freezing-fog/",
+  "use": "reference-only"
+}

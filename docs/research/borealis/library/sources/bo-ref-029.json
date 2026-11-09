@@ -1,0 +1,28 @@
+{
+  "author": "原作：FromSoftware / Bandai Namco；提供頁面：DanielD / EIP Gaming；逐張攝製者未單獨確認",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 base game; capture or icon or photography or concept as individually labelled",
+  "id": "bo-ref-029",
+  "image_sha256": "2a3f8ae08b17ac5aaff527793dcb64ee170b23869c5b1c35ea8519a540a57008",
+  "image_url": "https://eip.gg/wp-content/uploads/2022/05/Borealis-Stratr-GIF-Elden-RIng.gif",
+  "inspection": "viewed",
+  "inspection_ref": "Codex view_image 2026-11-09: bo-ref-029-motion.jpg (five sampled frames; not frame-complete)",
+  "kind": "image",
+  "local_file": "../images/bo-ref-029.gif",
+  "phase": null,
+  "provenance": "原作：FromSoftware / Bandai Namco；提供頁面：DanielD / EIP Gaming；逐張攝製者未單獨確認",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:13.816290+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "FromSoftware / Bandai Namco and original creators retain rights; local research only; redistribution permission unknown.",
+  "title": "bo-ref-029 玻列琉斯・動作",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bo-ref-029 玻列琉斯・動作"
+    }
+  ],
+  "url": "https://eip.gg/elden-ring/guides/how-to-beat-borealis-the-freezing-fog/",
+  "use": "reference-only"
+}

@@ -590,7 +590,7 @@
       const arming = z.t < z.delay, life = z.dur + z.delay - z.t, fade = U.clamp(life / 0.6, 0, 1) * U.clamp((z.t - z.delay + 0.3) / 0.3, 0.3, 1);
       ctx.save(); ctx.globalAlpha = fade;
       const col = { lava: ['255,110,30', '255,200,80'], blizzard: ['160,220,255', '240,250,255'], poison: ['120,200,60', '200,255,120'],
-        acid: ['170,230,40', '230,255,120'], scarletrot: ['158,65,47', '220,149,111'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
+        acid: ['170,230,40', '230,255,120'], scarletrot: ['158,65,47', '220,149,111'], rimefog: ['117,178,208', '217,241,248'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
       if (arming) {
         ctx.setLineDash([8, 6]); ctx.strokeStyle = `rgba(${col[1]},0.8)`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (z.t / z.delay), 0, U.TAU); ctx.stroke();
@@ -605,7 +605,16 @@
         g.strokeStyle = `rgba(${col[1]},0.4)`; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, z.r, 0, U.TAU); g.stroke();
       });
       ctx.translate(-z.x, -z.y);
-      if (z.kind === 'blizzard') {
+      if (z.kind === 'rimefog') {
+        // 凍傷霧的中心薄、外緣亮；與裝飾白氣分開，壽命仍由上方 fade 控制。
+        ctx.strokeStyle = 'rgba(201,239,255,0.8)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, U.TAU); ctx.stroke();
+        for (let i = 0; i < 8; i++) {
+          const a = i * 2.399 + z.seed, ph = (t * 0.28 + i * 0.13) % 1, d = z.r * (0.4 + 0.43 * ph);
+          const x = z.x + Math.cos(a) * d, y = z.y + Math.sin(a) * d - ph * 12;
+          ctx.fillStyle = `rgba(208,236,245,${0.16 * (1 - ph)})`; ctx.beginPath(); ctx.ellipse(x, y, z.r * 0.3, z.r * 0.13, a, 0, U.TAU); ctx.fill();
+          ctx.strokeStyle = 'rgba(194,228,243,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(z.x + Math.cos(a) * z.r * 0.4, z.y + Math.sin(a) * z.r * 0.4); ctx.lineTo(z.x + Math.cos(a + 0.1) * z.r * 0.85, z.y + Math.sin(a + 0.1) * z.r * 0.85); ctx.stroke();
+        }
+      } else if (z.kind === 'blizzard') {
         ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
         for (let i = 0; i < 5; i++) { const a = t * 2 + i * 1.256; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (0.3 + i * 0.13), a, a + 1.2); ctx.stroke(); }
       } else if (z.kind === 'scarletrot') {
@@ -886,11 +895,17 @@
           ctx.beginPath(); ctx.arc(b.x, b.y, r + 5, -Math.PI / 2, -Math.PI / 2 + U.TAU * k); ctx.stroke();
           break;
         }
+        case 'rimebuildup':
         case 'frostbite': {
           const k = U.clamp(st.stacks / 100, 0, 1);
           ctx.strokeStyle = 'rgba(150,230,255,0.9)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
           ctx.beginPath(); ctx.arc(b.x, b.y, r + 5, -Math.PI / 2, -Math.PI / 2 + U.TAU * k); ctx.stroke();
           break;
+        }
+        case 'rimebite': {
+          ctx.save(); ctx.strokeStyle = 'rgba(174,226,247,0.75)'; ctx.lineWidth = 2;
+          for (let i = 0; i < 12; i++) { const a = i * U.TAU / 12 + t * 0.15, q = r + 10 + Math.sin(t * 3 + i) * 3; ctx.beginPath(); ctx.moveTo(b.x + Math.cos(a) * q, b.y + Math.sin(a) * q); ctx.lineTo(b.x + Math.cos(a + 0.08) * (q + 10), b.y + Math.sin(a + 0.08) * (q + 10)); ctx.stroke(); }
+          ctx.restore(); break;
         }
         case 'vulnerable': {
           ctx.save(); ctx.strokeStyle = 'rgba(192,122,255,0.85)'; ctx.lineWidth = 2; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -t * 20;

@@ -212,7 +212,7 @@
       }
       BD.traitHook(this, 'tick', w, this, dt); // 逐幀特性（例如鏡爪的魔狼在場保證）
       if (this.staDelay <= 0 && this.state !== 'skill' && this.state !== 'dodge') {
-        this.sta = Math.min(this.maxSta, this.sta + this.def.stamina.regen * dt * (this.state === 'idle' ? 1 : 0.5));
+        this.sta = Math.min(this.maxSta, this.sta + this.def.stamina.regen * dt * (this.state === 'idle' ? 1 : 0.5) * BD.getMod(this, 'staminaRegenMul'));
       }
       if (this.maxMana) this.mana = Math.min(this.maxMana, this.mana + this.def.mana.regen * dt);
       if (this.hunt && this.hunt.tick) this.hunt.tick(this, dt); // 獵魂武器的逐幀邏輯（例如太刀的氣刃）

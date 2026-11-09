@@ -184,6 +184,7 @@
       dmg = BD.absorbDamage(u, dmg, this);
       if (p.status) applyHitStatuses(this, src, u, p.status);
       u.hp -= dmg; u.hurt = 0.12;
+      this.emit('minionDamage', { src, b: u, p, dmg }); // 實際扣血；供新狀態讀傷害語意，不改傷害計算
       BD.spawnFx(this, 'projhit', u.x, u.y, { el: 'physical' });
       if (u.hp <= 0) BD.killMinion(this, u);
       return 'hit';

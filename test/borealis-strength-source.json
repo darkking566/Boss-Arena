@@ -1,0 +1,17 @@
+{
+  "sources": [
+    "js/data/bosses/borealis.js",
+    "js/engine/actions/borealis.js",
+    "js/engine/status.js",
+    "js/engine/boss.js",
+    "js/engine/world.js",
+    "js/engine/ai.js",
+    "js/data/pace.js"
+  ],
+  "sha256": "2943ce7da401c7e28dca6e22f8005576aace4613d23777bb09354cb8ce05a0ee",
+  "paceOverride": {
+    "hpMul": 1.2,
+    "dmgMul": 1.15
+  },
+  "speed": 215
+}

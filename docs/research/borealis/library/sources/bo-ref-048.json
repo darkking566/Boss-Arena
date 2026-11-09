@@ -1,0 +1,28 @@
+{
+  "author": "原作美術權利：FromSoftware / Bandai Namco；收錄：Creative Uncut；單張畫師未核實",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring 2022 base game; capture or icon or photography or concept as individually labelled",
+  "id": "bo-ref-048",
+  "image_sha256": "7de48d8dd6a6430e9834f8ae275d7e21af0e55658c521ebc92ee1e621bca47ea",
+  "image_url": "https://www.creativeuncut.com/gallery-43/art/er-borealis-the-freezing-fog.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Codex view_image 2026-11-09: concept-public-page.png, entire rendered artwork",
+  "kind": "image",
+  "local_file": "../concept-public-page.png",
+  "phase": null,
+  "provenance": "原作美術權利：FromSoftware / Bandai Namco；收錄：Creative Uncut；單張畫師未核實",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:16.382819+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Original rights retained; local research only; single-artist credit, book page and redistribution permission unverified.",
+  "title": "bo-ref-048 玻列琉斯・概念圖",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bo-ref-048 玻列琉斯・概念圖"
+    }
+  ],
+  "url": "https://www.creativeuncut.com/gallery-43/er-borealis-the-freezing-fog.html",
+  "use": "reference-only"
+}

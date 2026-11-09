@@ -1,0 +1,26 @@
+{
+  "author": "Taku Bou / SAMURAI GAMERS",
+  "characters": 31,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2022-04-11",
+  "id": "low-hp-samurai",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:17.701218+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "d44110ae48a03418ee7b1f54703f89ada26370ddd95ff232e045e14fd579020d",
+  "title": "低血量咆哮的攻略觀察",
+  "units": [
+    {
+      "end": 31,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "HPが低くなると周囲に大ダメージを与える咆哮を使用してきます。"
+    }
+  ],
+  "url": "https://jp.samurai-gamers.com/eldenring/er-boss116/"
+}

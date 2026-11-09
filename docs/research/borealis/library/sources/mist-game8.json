@@ -1,0 +1,26 @@
+{
+  "author": "Game8 攻略編輯部",
+  "characters": 16,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2025-11-20 更新",
+  "id": "mist-game8",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:17.884604+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "af7ce3ece201dfadbdff90e4b8f7073929afa485e36266742160fa876f6f83a5",
+  "title": "玻列琉斯的冰霧：玩家龍饗祈禱",
+  "units": [
+    {
+      "end": 16,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "上空から、ボレアリスの氷霧を吐く"
+    }
+  ],
+  "url": "https://game8.jp/eldenring/443586"
+}

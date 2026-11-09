@@ -1,0 +1,23 @@
+[
+  {
+    "id": "mist-wikigg",
+    "url": "https://eldenring.wiki.gg/wiki/Borealis%27s_Mist",
+    "method": "normal Chrome; no challenge interaction",
+    "error": "Locator.inner_text: Timeout 2000ms exceeded.\nCall log:\n  - waiting for locator(\"body\")\n"
+  },
+  {
+    "id": "mist-fandom",
+    "url": "https://eldenring.fandom.com/wiki/Borealis%27s_Mist",
+    "method": "normal Chrome; no challenge interaction",
+    "error": "Locator.inner_text: Timeout 2000ms exceeded.\nCall log:\n  - waiting for locator(\"body\")\n"
+  },
+  {
+    "id": "boss-fandom",
+    "url": "https://eldenring.fandom.com/wiki/Borealis_the_Freezing_Fog",
+    "method": "normal Chrome; no challenge interaction",
+    "status": 403,
+    "title": "請稍候...",
+    "lore_found": false,
+    "challenge_or_failure": false
+  }
+]

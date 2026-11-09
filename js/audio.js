@@ -954,6 +954,15 @@
       }
     },
     fx(id, category, o) {
+      if (id.startsWith('borealis')) {
+        if (id === 'borealisroar' || id === 'borealisawaken') { play('roarMid', 0.85); play('windBurst', 0.45); }
+        else if (id === 'borealiscrash' || id === 'borealisstomp') { play('slamHeavy', 0.85); play('ice', 0.6); }
+        else if (id === 'borealisinhale' || id === 'borealisgather') { play('windCharge', 0.6); play('crystalResonate', 0.3); }
+        else if (id === 'borealiswing' || id === 'borealistail' || id === 'borealistakeoff') { play('windBurst', 0.65); play('ice', 0.35); }
+        else if (id === 'borealisbite') { play('beastBite', 0.8); play('fangSnap', 0.45); }
+        else { play('ice', 0.5); play('windAir', 0.3); }
+        return;
+      }
       if (id === 'agheeldive') { play('slamHeavy', 1); play('explodeMid', 0.7); return; }
       if (id.startsWith('fs') && BD.effects[id] && BD.effects[id].name.startsWith('墜星成獸')) {
         if (id === 'fsroll' || id === 'fsslam' || id === 'fsstomp') { play('slamHeavy', 0.9); play('explodeMid', 0.4); }

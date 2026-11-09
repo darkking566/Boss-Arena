@@ -1,0 +1,32 @@
+{
+  "page_url": "https://www.creativeuncut.com/gallery-43/er-borealis-the-freezing-fog.html",
+  "method": "normal local Chrome page load; no custom headers or access-control workarounds",
+  "page_status": 200,
+  "images": [
+    {
+      "src": "https://www.creativeuncut.com/imgs/prev.gif",
+      "width": 1000,
+      "height": 1000,
+      "complete": true
+    },
+    {
+      "src": "https://www.creativeuncut.com/imgs/next.gif",
+      "width": 1000,
+      "height": 1000,
+      "complete": true
+    },
+    {
+      "src": "https://www.creativeuncut.com/gallery-43/art/er-borealis-the-freezing-fog.jpg",
+      "width": 1340,
+      "height": 650,
+      "complete": true
+    },
+    {
+      "src": "https://www.creativeuncut.com/imgs/gallery-navigation-key.png",
+      "width": 360,
+      "height": 70,
+      "complete": true
+    }
+  ],
+  "viewable": true
+}

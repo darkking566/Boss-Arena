@@ -1,0 +1,1 @@
+Applying a Fire/Burning effect to a target that is suffering from Frostbite will remove the Frost debuff.

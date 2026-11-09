@@ -1,0 +1,97 @@
+{
+  "browser": "actual local Chrome file://",
+  "page_errors": [],
+  "match": {
+    "done": true,
+    "time": 105.9333333333286,
+    "winner": "agheel"
+  },
+  "snapshots": [
+    {
+      "view": "02-body",
+      "hidden": false,
+      "zones": 0,
+      "skill": null,
+      "phase": 1,
+      "fx": 0
+    },
+    {
+      "view": "03-bite",
+      "hidden": false,
+      "zones": 0,
+      "skill": "ice_bite",
+      "phase": 1,
+      "fx": 103
+    },
+    {
+      "view": "04-wing",
+      "hidden": false,
+      "zones": 0,
+      "skill": "wing_sweep",
+      "phase": 1,
+      "fx": 139
+    },
+    {
+      "view": "05-breath",
+      "hidden": false,
+      "zones": 2,
+      "skill": "ice_breath",
+      "phase": 1,
+      "fx": 158
+    },
+    {
+      "view": "06-roar",
+      "hidden": false,
+      "zones": 0,
+      "skill": "freezing_roar",
+      "phase": 1,
+      "fx": 76
+    },
+    {
+      "view": "07-aerial",
+      "hidden": false,
+      "zones": 0,
+      "skill": "aerial_breath",
+      "phase": 1,
+      "fx": 129
+    },
+    {
+      "view": "08-flight",
+      "hidden": true,
+      "zones": 0,
+      "skill": "dive_bomb",
+      "phase": 1,
+      "fx": 13
+    },
+    {
+      "view": "09-communion",
+      "hidden": false,
+      "zones": 2,
+      "skill": "borealis_mist",
+      "phase": 2,
+      "fx": 155
+    },
+    {
+      "view": "10-ultimate",
+      "hidden": false,
+      "zones": 3,
+      "skill": "ult",
+      "phase": 2,
+      "fx": 190
+    },
+    {
+      "view": "11-rings",
+      "hidden": false,
+      "zones": 1,
+      "skill": "ult",
+      "phase": 2,
+      "fx": 79
+    }
+  ],
+  "effects": {
+    "effects": 17,
+    "elements": 20
+  },
+  "screenshots": 13,
+  "driver_accepted": false
+}

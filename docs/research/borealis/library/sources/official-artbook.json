@@ -1,0 +1,26 @@
+{
+  "author": "FromSoftware / ELDEN RING 官方網站",
+  "characters": 46,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2022-11-29",
+  "id": "official-artbook",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "canon",
+  "registered_at": "2026-11-09T01:54:18.249235+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "d1a9bb41260bc62c734cb5118b83cc75b2997c7dcaed40d31f173ee1f0ceee37",
+  "title": "官方畫冊卷別與內容範圍",
+  "units": [
+    {
+      "end": 46,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Volume IIには、エネミーや武器のコンセプトアート、アイテムのアートを掲載しています。"
+    }
+  ],
+  "url": "https://www.eldenring.jp/newsdetail/news_detail_221129_1.html"
+}

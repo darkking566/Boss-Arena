@@ -1,0 +1,77 @@
+[
+  {
+    "url": "https://www.creativeuncut.com/gallery-43/er-borealis-the-freezing-fog.html",
+    "status": "readable",
+    "candidate_count": 1
+  },
+  {
+    "url": "https://game8.jp/eldenring/444834",
+    "status": "readable",
+    "candidate_count": 4
+  },
+  {
+    "url": "https://game8.jp/eldenring/443586",
+    "status": "readable",
+    "candidate_count": 3
+  },
+  {
+    "url": "https://gamewith.jp/eldenring/325390",
+    "status": "readable",
+    "candidate_count": 8
+  },
+  {
+    "url": "https://www.gamepressure.com/elden-ring/borealis-the-frozen-fog/zffcdb",
+    "status": "readable",
+    "candidate_count": 9
+  },
+  {
+    "url": "https://jp.samurai-gamers.com/eldenring/er-boss116/",
+    "status": "readable",
+    "candidate_count": 4
+  },
+  {
+    "url": "https://kamigame.jp/eldenring/page/211222806921248218.html",
+    "status": "readable",
+    "candidate_count": 6
+  },
+  {
+    "url": "https://eip.gg/elden-ring/guides/how-to-beat-borealis-the-freezing-fog/",
+    "status": "readable",
+    "candidate_count": 13
+  },
+  {
+    "url": "https://eip.gg/elden-ring/db/borealiss-mist/",
+    "status": "readable",
+    "candidate_count": 2
+  },
+  {
+    "url": "https://game8.co/games/Elden-Ring/archives/372988",
+    "status": "readable",
+    "candidate_count": 5
+  },
+  {
+    "url": "https://www.gamerguides.com/elden-ring/database/bosses/mountaintops-of-the-giants-boss/borealis-the-freezing-fog",
+    "status": "readable",
+    "candidate_count": 4
+  },
+  {
+    "url": "https://www.gamepur.com/guides/how-to-beat-borealis-the-freezing-fog-in-elden-ring",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://video-game-guide-walkthrough.supersoluce.com/solution/elden-ring-guide-walkthrough/er-optional-areas/mountaintops-of-the-giants/mountaintops-of-the-giants-optional-bosses/",
+    "status": "failed",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://eldenring.fandom.com/wiki/Borealis_the_Freezing_Fog",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Borealis%27s_Mist",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

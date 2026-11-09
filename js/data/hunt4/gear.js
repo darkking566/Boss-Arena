@@ -37,6 +37,7 @@
   // 每位 Boss 的裝備主題：屬性（el）或異常（ail），都沒有 = 無屬性（攻擊額外 +6%）；武器特性、防具技能、套裝
   const T = (el, wt, sk, set) => ({ [el && H4.AILMENTS[el] ? 'ail' : 'el']: el, wt, sk, set });
   H4.BOSS_GEAR = {
+    borealis: T('ice', 'siege', 'guard', 'timegap'), // 冰龍；凍傷另走專屬狀態，裝備沿用本模式冰屬性
     agheel: T('fire', 'siege', 'guard', 'berserk'), // 原作龍焰（火）
     ekzykes: T(null, 'siege', 'guard', 'guardian'), // 猩紅腐敗另有狀態規則，不誤標成本模式的綠毒屬性
     fallingstar: T(null, 'siege', 'guard', 'berserk'), // 重力不是本模式的五行屬性；尾刺出血另由狀態處理

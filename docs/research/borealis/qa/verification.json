@@ -1,0 +1,32 @@
+{
+  "integrity": {
+    "selected": 33,
+    "reviewed": 48,
+    "excluded": 15,
+    "animated_sources": 4,
+    "records": 42,
+    "hashes": "all match",
+    "duplicates": "no identical selected bytes"
+  },
+  "driver_accepted": false,
+  "game_implemented": false,
+  "browser": {
+    "name": "actual local Chrome, file://",
+    "all_card_images_loaded": 33,
+    "categories": {
+      "概念圖": 1,
+      "外觀": 10,
+      "動作": 10,
+      "冰霧": 8,
+      "凍傷": 1,
+      "龍饗祈禱": 2,
+      "遊戲攝影": 1
+    },
+    "search": "passed, including empty state",
+    "viewer": "passed, buttons/arrows/Escape",
+    "mobile_width": 390,
+    "horizontal_overflow": false,
+    "page_errors": [],
+    "screenshots": 3
+  }
+}

@@ -88,10 +88,12 @@
     if (spec.sharp && src === h && !p.fixed) { const band = sharpBand(hs), eye = BD.H4Gear.fx(h, 'eye'); mul *= band.mul; bounce = band.i >= S.bounceFrom && hz < S.bounceHz && eye < 3; if (bounce) mul *= 0.6 + 0.13 * eye; } // 心眼
     if (st.asleep && p.dmg >= 20) mul *= H4.AILMENTS.sleep.wakeMul;
     let dmg = p.dmg * mul;
-    if (mod.el && !p.fixed) dmg += mod.elv * BD.H4Gear.elMul(h, mod.el) * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el;
+    const elementDmg = mod.el && !p.fixed ? mod.elv * BD.H4Gear.elMul(h, mod.el) * (st.weak[mod.el] != null ? st.weak[mod.el] : 1) * P.el : 0;
+    if (mod.el && !p.fixed) dmg += elementDmg;
     const kb = (p.dtype || spec.dtype) === 'blunt' && p.kb >= H4.HEAVY_KB ? p.kb : 0;
     const pm = BD.H4Gear.postureMul(h), hp0 = b.hp, r = orig(src, b, Object.assign({}, p, pm === 1 ? { dmg, kb } : { dmg, kb, posture: (p.posture != null ? p.posture : dmg * 0.25) * pm })); // 破城：架勢預設同 world.damageBoss
     const dealt = hp0 - b.hp;
+    if (dealt > 0 && elementDmg > 0 && mod.el === 'fire') w.emit('elementHit', { src, b, p: { damageEl: 'fire' }, dmg: dealt });
     if (dealt <= 0) return r;
     if (st.asleep) { st.asleep = false; if (b.state === 'stun') b.setState('idle', 0); w.fx.text(b.x, b.y - b.r - 34, '驚醒！', '#8fb8ff', 22); }
     if (spec.sharp && src === h) {

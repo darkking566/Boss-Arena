@@ -1,0 +1,26 @@
+{
+  "author": "Creative Uncut；單張畫師未知",
+  "characters": 29,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2026-11-09 正常 Chrome 頁面已顯示原圖",
+  "id": "concept-cu",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "reference",
+  "registered_at": "2026-11-09T01:54:18.067187+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "ef5bdd1a566e629eb5cb8a6ad4308a4c9349d1c404f0bc693c80dcee525b5a76",
+  "title": "玻列琉斯概念圖收錄頁",
+  "units": [
+    {
+      "end": 29,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Borealis the Freezing Fog Art"
+    }
+  ],
+  "url": "https://www.creativeuncut.com/gallery-43/er-borealis-the-freezing-fog.html"
+}

@@ -1,0 +1,26 @@
+{
+  "author": "Bandai Namco Entertainment America",
+  "characters": 105,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2023-07-19",
+  "id": "official-frost",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Readable original page inspected 2026-11-09; short excerpt frozen, own paraphrase in record",
+  "realm": "canon",
+  "registered_at": "2026-11-09T01:54:16.605447+00:00",
+  "retrieved_at": "2026-11-09",
+  "rights": "Only own notes and minimal verification excerpt; original rights retained",
+  "text_sha256": "5778594e69c5334e3bde7fcf95c9dc01df9b525924773a4b530f3f983969edc6",
+  "title": "官方：凍傷的效果與火焰解除",
+  "units": [
+    {
+      "end": 105,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Applying a Fire/Burning effect to a target that is suffering from Frostbite will remove the Frost de"
+    }
+  ],
+  "url": "https://www.bandainamcoent.com/news/elden-ring-introduction-part-1-stats"
+}
