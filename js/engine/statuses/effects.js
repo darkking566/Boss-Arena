@@ -188,6 +188,11 @@
     name: '神中之神', tags: ['buff'], stacking: 'refresh',
     modifiers: { speedMul: 1.06, dmgTakenMul: 0.92, dmgDealtMul: 1.06 },
   });
+  // ── 龍雷灌注（龍裝大樹守衛二階段常駐／大招）：赤雷灌進巨槌與龍爪盾——出手更重、挨得更少、腳步更快 ──
+  BD.defineStatus('draconicsurge', {
+    name: '龍雷灌注', tags: ['buff'], stacking: 'refresh',
+    modifiers: { speedMul: 1.05, dmgTakenMul: 0.93, dmgDealtMul: 1.08 },
+  });
   // ── 龍封（恐暴龍的龍息）：龍屬性能量侵蝕身體——造成的傷害降低 15%（原作：龍封力使武器屬性失效）──
   BD.defineStatus('dragonblight', {
     name: '龍封', tags: ['debuff'], stacking: 'refresh', defaultDur: 6, visual: 'dragonblight',

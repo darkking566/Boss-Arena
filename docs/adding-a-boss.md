@@ -165,6 +165,7 @@ BD.defineStatus('burn', {
 | `tyrantwrath` | 暴君之怒 | buff | 造成傷害 ×1.15、速度 ×1.1，預設 5 秒（波賽頓 trait `tyrant`：每挨 4 下動怒）|
 | `godofgods` | 神中之神 | buff | 移動速度 ×1.06、承受傷害 ×0.92、造成傷害 ×1.06（波賽頓二階段常駐）|
 | `blackflame` | 黑焰 | dot, debuff | 可疊 3 層，每 0.5 秒 3.5 × 層數，預設 4 秒（神皮雙人組：使徒的黑焰彈、黑焰儀式與黑焰龍捲）|
+| `draconicsurge` | 龍雷灌注 | buff | 移動速度 ×1.05、承受傷害 ×0.93、造成傷害 ×1.08（龍裝大樹守衛二階段常駐與大招）|
 
 ### Boss 資料如何使用
 命中類參數（`hit` / `proj` / `zone` / `trap` / `erupt` …）可加 `status`：

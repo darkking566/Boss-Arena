@@ -72,6 +72,7 @@
   R.defineStatusIcon('goldenvow', { glyph: '誓', color: '#ffe27a' });
   R.defineStatusIcon('respite', { glyph: '羊', color: '#eef7ff' });
   R.defineStatusIcon('tyrantwrath', { glyph: '怒', color: '#ffd86a' });
+  R.defineStatusIcon('draconicsurge', { glyph: '雷', color: '#ff4a4a' });
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });
   R.defineStatusIcon('dragonblight', { glyph: '龍', color: '#d0143c' });
   R.defineStatusIcon('tsukuyomi', { glyph: '月', color: '#ff3048' });

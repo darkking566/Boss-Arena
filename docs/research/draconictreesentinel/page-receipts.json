@@ -1,0 +1,182 @@
+[
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Draconic_Tree_Sentinel",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Dragon_Greatclaw",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Dragonclaw_Shield",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Malformed_Dragon_Armor",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.gg/wiki/Tree_Sentinel",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Draconic+Tree+Sentinel",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Dragon+Greatclaw",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Dragonclaw+Shield",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Malformed+Dragon+Set",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://gamesradar.com/elden-ring-draconic-tree-sentinel-boss-fight-how-to-beat",
+    "status": "readable",
+    "candidate_count": 6
+  },
+  {
+    "url": "https://segmentnext.com/elden-ring/bosses/draconic-tree-sentinel",
+    "status": "readable",
+    "candidate_count": 6
+  },
+  {
+    "url": "https://segmentnext.com/elden-ring-draconic-tree-sentinel",
+    "status": "readable",
+    "candidate_count": 6
+  },
+  {
+    "url": "https://game8.co/games/Elden-Ring/archives/369752",
+    "status": "readable",
+    "candidate_count": 15
+  },
+  {
+    "url": "https://screenrant.com/elden-ring-draconic-tree-sentinel-leyndell-fight-guide/",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://pushsquare.com/guides/elden-ring-how-to-beat-draconic-tree-sentinel",
+    "status": "failed",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://rankedboost.com/elden-ring/draconic-tree-sentinel/",
+    "status": "readable",
+    "candidate_count": 3
+  },
+  {
+    "url": "https://www.gamepressure.com/elden-ring/draconic-tree-sentinel/zbfe79",
+    "status": "readable",
+    "candidate_count": 5
+  },
+  {
+    "url": "https://gamertweak.com/beat-draconic-tree-sentinel-elden-ring",
+    "status": "readable",
+    "candidate_count": 2
+  },
+  {
+    "url": "https://gameplay.tips/guides/elden-ring-how-to-fight-draconic-tree-sentinel.html",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://staging2.eip.gg/elden-ring/guides/how-to-beat-the-draconic-tree-sentinel",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://gamerguides.com/elden-ring/database/bosses/leyndell-royal-capital-bosses/draconic-tree-sentinel",
+    "status": "failed",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Capital+Outskirts",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Tree+Sentinel",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://www.thegamer.com/elden-ring-draconic-tree-sentinel-boss-fight-guide/",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://www.dexerto.com/elden-ring/how-to-beat-draconic-tree-sentinel-in-elden-ring-1773469/",
+    "status": "readable",
+    "candidate_count": 7
+  },
+  {
+    "url": "https://gamerant.com/elden-ring-how-to-beat-draconic-tree-sentinel-boss-guide/",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://gamerant.com/elden-ring-draconic-tree-sentinel-manga-fan-art/",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eip.gg/elden-ring/guides/how-to-beat-the-draconic-tree-sentinel-crumbling-farum-azula/",
+    "status": "readable",
+    "candidate_count": 14
+  },
+  {
+    "url": "https://eip.gg/elden-ring/db/malformed-dragon-armor/",
+    "status": "readable",
+    "candidate_count": 3
+  },
+  {
+    "url": "https://www.gamerguides.com/elden-ring/database/armors/chest-armors/malformed-dragon-armor",
+    "status": "readable",
+    "candidate_count": 4
+  },
+  {
+    "url": "https://hardcoregamer.com/elden-ring/malformed-dragon-armor/",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://www.sportskeeda.com/esports/how-get-malformed-dragon-armor-set-elden-ring",
+    "status": "failed",
+    "error": "HTTP Error 405: Not Allowed"
+  },
+  {
+    "url": "https://erdtreeforge.com/armor/malformed-dragon-armor/",
+    "status": "readable",
+    "candidate_count": 5
+  },
+  {
+    "url": "https://vaultgg.app/guides/draconic-tree-sentinel",
+    "status": "readable",
+    "candidate_count": 1
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Draconic_Tree_Sentinel",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  },
+  {
+    "url": "https://eldenring.wiki.fextralife.com/Malformed_Dragon_Set",
+    "status": "failed",
+    "error": "Remote end closed connection without response"
+  }
+]
