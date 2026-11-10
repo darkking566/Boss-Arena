@@ -41,6 +41,7 @@
     godskinduo: T(null, 'sharp', 'evade', 'undying'), // 神皮雙人組；黑焰是持續傷害，不當作本模式的屬性
     agheel: T('fire', 'siege', 'guard', 'berserk'), // 原作龍焰（火）
     ekzykes: T(null, 'siege', 'guard', 'guardian'), // 猩紅腐敗另有狀態規則，不誤標成本模式的綠毒屬性
+    astel: T('arcane', 'siege', 'guard', 'berserk'), // 虛空星屑 / 重力；沿用本模式的秘法屬性
     fallingstar: T(null, 'siege', 'guard', 'berserk'), // 重力不是本模式的五行屬性；尾刺出血另由狀態處理
     redwolf: T(null, 'sharp', 'evade', 'timegap'), // 原作沒有本模式的五行屬性；裝備採機動 / 利刃主題
     magmus: T('fire', 'magma', 'guard', 'berserk'), witch: T('ice', 'sharp', 'evade', 'timegap'), ronin: T('paralysis', 'swallow', 'offguard', 'timegap'),
