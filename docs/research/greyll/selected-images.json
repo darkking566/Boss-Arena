@@ -1,0 +1,332 @@
+[
+  {
+    "id": "gr-ref-001",
+    "file": "images/gr-ref-001.jpg",
+    "category": "設計稿",
+    "note": "官方設定稿（Agheel；Eldenpedia 稱 Greyll 外觀與 Agheel 相同）：側面全身灰黑龍，頭有單角、背脊與翼緣鋸齒羽狀鱗；下方有俯視翼展、站姿、前傾姿勢草圖",
+    "width": 1340,
+    "height": 900,
+    "page_url": "https://www.creativeuncut.com/gallery-43/er-flying-dragon-agheel.html",
+    "image_url": "https://www.creativeuncut.com/gallery-43/art/er-flying-dragon-agheel.jpg"
+  },
+  {
+    "id": "gr-ref-002",
+    "file": "images/gr-ref-002.jpg",
+    "category": "家族參考",
+    "note": "官方畫作：Lansseax（古龍），銀白身軀、金褐羽狀翼膜——只用來對照「龍的翼膜質感」，不是 Greyll",
+    "width": 1550,
+    "height": 770,
+    "page_url": "https://www.creativeuncut.com/gallery-43/er-ancient-dragon-lansseax.html",
+    "image_url": "https://www.creativeuncut.com/gallery-43/art/er-ancient-dragon-lansseax.jpg"
+  },
+  {
+    "id": "gr-ref-003",
+    "file": "images/gr-ref-003.jpg",
+    "category": "家族參考",
+    "note": "官方畫作：Adula（輝石龍），黑身藍晶——龍族系列對照，不是 Greyll",
+    "width": 1340,
+    "height": 730,
+    "page_url": "https://www.creativeuncut.com/gallery-43/er-glintstone-dragon-adula.html",
+    "image_url": "https://www.creativeuncut.com/gallery-43/art/er-glintstone-dragon-adula.jpg"
+  },
+  {
+    "id": "gr-ref-005",
+    "file": "images/gr-ref-005.png",
+    "category": "外觀",
+    "note": "龍頭近照（來源頁標為 Greyoll 圖示）：灰色鱗、紅眼、張口，下方有紅光；是 Greyll 或 Elder Greyoll 未核實，只當龍頭質感",
+    "width": 400,
+    "height": 400,
+    "page_url": "https://gamerguides.com/elden-ring/database/bosses/caelid-bosses/elder-dragon-greyoll",
+    "image_url": "https://gamerguides.com/assets/media/15/682122/elder_dragon_greyoll.png"
+  },
+  {
+    "id": "gr-ref-008",
+    "file": "images/gr-ref-008.png",
+    "category": "外觀",
+    "note": "霧中正面：雙翼向兩側張開、頭有尖角、腳邊有白光點，灰褐近黑的羽鱗",
+    "width": 673,
+    "height": 673,
+    "page_url": "https://gamerguides.com/elden-ring/database/bosses/caelid-bosses/flying-dragon-greyll",
+    "image_url": "https://gamerguides.com/assets/media/15/680992/flying_dragon_greyll2.png"
+  },
+  {
+    "id": "gr-ref-009",
+    "file": "images/gr-ref-009.jpg",
+    "category": "場景",
+    "note": "擊倒後掉落龍心（Dragon Heart），雨天石板橋面，右側有石欄與枯樹",
+    "width": 720,
+    "height": 405,
+    "page_url": "https://gamepressure.com/elden-ring/flying-dragon-greyll/z0fe41",
+    "image_url": "https://gamepressure.com/elden-ring/gfx/word/1117960750.jpg"
+  },
+  {
+    "id": "gr-ref-010",
+    "file": "images/gr-ref-010.jpg",
+    "category": "招式",
+    "note": "貼近看龍腿：粗壯鱗腿與翼緣羽刺佔滿畫面——打腳的角度",
+    "width": 720,
+    "height": 405,
+    "page_url": "https://gamepressure.com/elden-ring/flying-dragon-greyll/z0fe41",
+    "image_url": "https://gamepressure.com/elden-ring/gfx/word/1117960765.jpg"
+  },
+  {
+    "id": "gr-ref-011",
+    "file": "images/gr-ref-011.jpg",
+    "category": "招式",
+    "note": "龍起身展翼、玩家騎馬在前（升空前兆）",
+    "width": 720,
+    "height": 405,
+    "page_url": "https://gamepressure.com/elden-ring/flying-dragon-greyll/z0fe41",
+    "image_url": "https://gamepressure.com/elden-ring/gfx/word/1117960781.jpg"
+  },
+  {
+    "id": "gr-ref-012",
+    "file": "images/gr-ref-012.jpg",
+    "category": "招式",
+    "note": "架勢被打崩：頭低垂貼地，口邊噴出橘色火星",
+    "width": 720,
+    "height": 405,
+    "page_url": "https://gamepressure.com/elden-ring/flying-dragon-greyll/z0fe41",
+    "image_url": "https://gamepressure.com/elden-ring/gfx/word/1117960796.jpg"
+  },
+  {
+    "id": "gr-ref-013",
+    "file": "images/gr-ref-013.jpg",
+    "category": "招式",
+    "note": "轉姿後噴出火焰，火在橋面右側；背後黃金樹",
+    "width": 720,
+    "height": 405,
+    "page_url": "https://gamepressure.com/elden-ring/flying-dragon-greyll/z0fe41",
+    "image_url": "https://gamepressure.com/elden-ring/gfx/word/1117960812.jpg"
+  },
+  {
+    "id": "gr-ref-014",
+    "file": "images/gr-ref-014.jpg",
+    "category": "場景",
+    "note": "橋面遠景：圓形紋章地面、石欄、遠處的 Greyll，背景黃金樹",
+    "width": 1383,
+    "height": 789,
+    "page_url": "https://segmentnext.com/elden-ring-greyll",
+    "image_url": "https://r2.segmentnextimages.com/wp-content/uploads/2023/07/greyll-elden-ring.jpg"
+  },
+  {
+    "id": "gr-ref-016",
+    "file": "images/gr-ref-016.jpg",
+    "category": "外觀",
+    "note": "雙翼平展貼地的龍，面向玩家；翼緣長羽刺狀（SegmentNext 稱六招之一）",
+    "width": 1280,
+    "height": 720,
+    "page_url": "https://segmentnext.com/elden-ring-greyll",
+    "image_url": "https://r2.segmentnextimages.com/cdn-cgi/image/width=1280,format=auto,onerror=redirect/wp-content/uploads/2024/07/image-7-353.jpg"
+  },
+  {
+    "id": "gr-ref-017",
+    "file": "images/gr-ref-017.jpg",
+    "category": "外觀",
+    "note": "側面伏低：長頸、背脊成排刺、翼折在身側，玩家騎馬在腹下",
+    "width": 1280,
+    "height": 720,
+    "page_url": "https://segmentnext.com/elden-ring-greyll",
+    "image_url": "https://r2.segmentnextimages.com/cdn-cgi/image/width=1280,format=auto,onerror=redirect/wp-content/uploads/2024/07/image-7-354.jpg"
+  },
+  {
+    "id": "gr-ref-018",
+    "file": "images/gr-ref-018.jpg",
+    "category": "場景",
+    "note": "橋面騎馬視角，左側有石壇，箭頭指向橋邊枯樹下的位置",
+    "width": 1200,
+    "height": 675,
+    "page_url": "https://segmentnext.com/elden-ring-greyll",
+    "image_url": "https://r2.segmentnextimages.com/cdn-cgi/image/width=1280,format=auto,onerror=redirect/wp-content/uploads/2024/07/image-7-355.jpg"
+  },
+  {
+    "id": "gr-ref-019",
+    "file": "images/gr-ref-019.jpg",
+    "category": "場景",
+    "note": "橋北側岩石與橋面，玩家騎馬接近",
+    "width": 1280,
+    "height": 720,
+    "page_url": "https://segmentnext.com/elden-ring-greyll",
+    "image_url": "https://r2.segmentnextimages.com/cdn-cgi/image/width=1280,format=auto,onerror=redirect/wp-content/uploads/2024/07/image-7-356.jpg"
+  },
+  {
+    "id": "gr-ref-020",
+    "file": "images/gr-ref-020.jpg",
+    "category": "外觀",
+    "note": "龍立起頸子仰頭、頭上長角與捲曲的角，玩家以紫色法術對峙",
+    "width": 1024,
+    "height": 576,
+    "page_url": "https://www.ginx.tv/en/flying-dragon-greyll-elden-ring",
+    "image_url": "https://www.ginx.tv/en/wp-content/uploads/sites/3/2025/12/flying-dragon-greyll-boss-fight-elden-ring.jpg"
+  },
+  {
+    "id": "gr-ref-023",
+    "file": "images/gr-ref-023.png",
+    "category": "外觀",
+    "note": "標題卡：灰霧中的龍正面，雙翼上舉、頭頂尖角",
+    "width": 440,
+    "height": 260,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513645/55dd6099ba8412ca2960e5c4eccb5e8f.png/show"
+  },
+  {
+    "id": "gr-ref-024",
+    "file": "images/gr-ref-024.png",
+    "category": "場景",
+    "note": "橋面長直路，遠處 Greyll 低伏，玩家在近處",
+    "width": 440,
+    "height": 248,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513624/7130bd9f36e54bb7bbc6c36122e1e2f8.png/show"
+  },
+  {
+    "id": "gr-ref-026",
+    "file": "images/gr-ref-026.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Long Tail Sweep.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513710/d11d7c9813e510e32e9dbd60f95e190a.gif/show"
+  },
+  {
+    "id": "gr-ref-027",
+    "file": "images/gr-ref-027.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Tail Sweep.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513692/f64f8e71d656c13b2f9150200023d9e5.gif/show"
+  },
+  {
+    "id": "gr-ref-028",
+    "file": "images/gr-ref-028.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Fire Breath.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513725/3b52948a44932635deb7a50c13479e88.gif/show"
+  },
+  {
+    "id": "gr-ref-029",
+    "file": "images/gr-ref-029.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Sweeping Fire Breath.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513734/6cd714e02c76a2ea94cb1ef756ec2205.gif/show"
+  },
+  {
+    "id": "gr-ref-030",
+    "file": "images/gr-ref-030.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Hovering Fire Breath.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513765/5f30cc7e44fcf37269ced20e7783a119.gif/show"
+  },
+  {
+    "id": "gr-ref-031",
+    "file": "images/gr-ref-031.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Flying Fire Breath.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513764/081838bc0993649750b3cc81a400d12c.gif/show"
+  },
+  {
+    "id": "gr-ref-032",
+    "file": "images/gr-ref-032.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Bite Attack.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513701/5cca8444f04d6b1a70e24a9124c11f0c.gif/show"
+  },
+  {
+    "id": "gr-ref-033",
+    "file": "images/gr-ref-033.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Bite Combo Attack.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513770/87c735949bf50875616e877eefae744f.gif/show"
+  },
+  {
+    "id": "gr-ref-034",
+    "file": "images/gr-ref-034.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Greyll Charge Attack.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513696/db98ebcec2f1e60dc4689cef8b312d6d.gif/show"
+  },
+  {
+    "id": "gr-ref-035",
+    "file": "images/gr-ref-035.gif",
+    "category": "招式",
+    "note": "（GIF 第一格，招式名取自 Game8 標題）Flying Dragon Greyll Stomp Attack.gif",
+    "width": 440,
+    "height": 247,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/373810",
+    "image_url": "https://img.game8.co/3513744/b17edcce8a2279a501182b282e32044e.gif/show"
+  },
+  {
+    "id": "gr-ref-036",
+    "file": "images/gr-ref-036.png",
+    "category": "家族參考",
+    "note": "Elder Dragon Greyoll 標題卡：巨大伏地的龍，背脊刺列",
+    "width": 440,
+    "height": 260,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/376353",
+    "image_url": "https://img.game8.co/3518550/0ca834a4c70b2c29b55530090c25d443.png/original"
+  },
+  {
+    "id": "gr-ref-037",
+    "file": "images/gr-ref-037.png",
+    "category": "家族參考",
+    "note": "Elder Dragon Greyoll 畫面：伏地巨龍側面，長角、嘴部張開，灰褐鱗",
+    "width": 440,
+    "height": 230,
+    "page_url": "https://game8.co/games/Elden-Ring/archives/376353",
+    "image_url": "https://img.game8.co/3518503/f929c62fef07c4b86120130994f0409e.png/show"
+  },
+  {
+    "id": "gr-ref-039",
+    "file": "images/gr-ref-039.png",
+    "category": "招式表",
+    "note": "Agheel 招式流程圖（Idle→各招）：低踏/高踏、折返跳、尾鞭、掃息、翼拍、翼掃、衝撞、俯衝、轉身咬等；文字太小，只當招式清單核對",
+    "width": 3532,
+    "height": 470,
+    "page_url": "https://eldenring.wiki.fextralife.com/Flying+Dragon+Agheel#2",
+    "image_url": "https://static0.fextralifeimages.com/file/eldenring/a/ad/Agheel-combo-chart.png"
+  },
+  {
+    "id": "gr-ref-040",
+    "file": "images/gr-ref-040.png",
+    "category": "外觀",
+    "note": "Agheel 公式風格畫面：側面張口咆哮，翼羽像一叢枯枝，頭有單長角（同模型參考）",
+    "width": 600,
+    "height": 338,
+    "page_url": "https://eldenring.wiki.fextralife.com/Flying+Dragon+Agheel#3",
+    "image_url": "https://static0.fextralifeimages.com/file/eldenring/2/25/Flying_dragon_agheel_2_bosses_elden_ring_wiki_600px.png"
+  },
+  {
+    "id": "gr-ref-041",
+    "file": "images/gr-ref-041.png",
+    "category": "外觀",
+    "note": "Agheel 飛行：翼膜展開，頭有單長角，鋸齒爪（同模型參考）",
+    "width": 600,
+    "height": 338,
+    "page_url": "https://eldenring.wiki.fextralife.com/Flying+Dragon+Agheel#4",
+    "image_url": "https://static0.fextralifeimages.com/file/eldenring/b/b6/Flying_dragon_agheel_bosses_elden_ring_wiki_600px.png"
+  }
+]

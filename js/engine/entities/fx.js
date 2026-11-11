@@ -6,7 +6,7 @@
 // 高層特效（斬擊、砸地…）定義在 js/fx/，以 BD.spawnFx(w, 'slam', x, y, opts) 產生；本檔只提供「原件」。
 (function (G) {
   const BD = G.BD, U = BD.U, V = BD.vrng;
-  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, INK_CAP = 70, GHOST_CAP = 40, PUFF_CAP = 260, STALK_CAP = 1100, PRINT_CAP = 500;
+  const PART_CAP = 900, POOL_CAP = 1000, DECAL_CAP = 70, GLOW_CAP = 80, STREAK_CAP = 120, INK_CAP = 70, GHOST_CAP = 40, PUFF_CAP = 180, STALK_CAP = 1100, PRINT_CAP = 500;
   // 粒子種類（kind）：繪圖端依此分批
   const PK = BD.PK = { SQ: 0, SOFT: 1, DEBRIS: 2, EMBER: 3, SHARD: 4, BUBBLE: 5, WISP: 6, SPARK: 7, MOTE: 8 };
   function newPart() { return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, color: '', size: 0, drag: 0, soft: false, kind: 0, z: 0, vz: 0, g: 0, ay: 0, ph: 0 }; }
@@ -164,8 +164,17 @@
     // 斷樹的一半：a0 為切線（刃）方向，side（±1）決定留哪一側，spin 為之後累積的旋轉；繪圖端畫半棵樹並漸隱
     chunk(x, y, vx, vy, a0, vr, side, r, v, life) { this.chunks.push({ x, y, vx, vy, a0, spin: 0, vr, side, r, v, life: life || 1.1, max: life || 1.1 }); }
     // 大型柔軟塵團（沙塵 / 雪沫 / 麥屑）：半徑由 r0 擴到 r1、緩慢飄散；tint 為繪圖端的預烘焙色票（'sand' | 'snow' | 'wheat'）
+    // 塵團預算：大塵團半透明疊加很吃像素填充，場上越多就按比例略過新的（累加器決定，不耗亂數）
     // tint 也可以是 '#rrggbb'；flame：1 = 火焰（亮度撐到後段才熄，不像塵團一出生就淡），2 = 火焰且 additive 疊加（火芯）
-    puff(x, y, vx, vy, r0, r1, life, tint, al, flame) { this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al, flame: flame || 0 }); if (this.puffs.length > PUFF_CAP) this.puffs.shift(); }
+    puff(x, y, vx, vy, r0, r1, life, tint, al, flame) {
+      if (!flame) { // 火焰塵團的數量已由 stream 的發射頻率限定，不跟地形塵土搶這份預算（沙地上塵土一多火就被略過）
+        const used = this.puffs.length / PUFF_CAP;
+        this.puffAcc = (this.puffAcc || 0) + (used < 0.4 ? 1 : used < 0.7 ? 0.5 : 0.25);
+        if (this.puffAcc < 1) return;
+        this.puffAcc -= 1;
+      }
+      this.puffs.push({ x, y, vx, vy, r0, r1, life, max: life, tint, al, flame: flame || 0 }); if (this.puffs.length > PUFF_CAP) this.puffs.shift();
+    }
     // 連綿噴流（火焰 / 冰霧吐息）：dur 秒內從口 (x,y) 沿 ang±arc/2 不斷推出會脹大的塵團，一路塗滿到 len；
     //   tints = [芯, 主體, 外焰, 煙(可 null)]；整個扇形都被流動的火舌蓋住，而不是只有前緣一條線
     stream(x, y, ang, arc, len, tints, dur, k) {

@@ -27,6 +27,7 @@
     deviljho: { hz: { head: { cut: 0.7, blunt: 0.8, shot: 0.6 } }, weak: { dragon: 1.5, thunder: 1.2, fire: 0.7 },
       brk: { tail: 0.05 }, brkFx: { tail: { skills: ['tail_spin'], mul: 0.65, note: '尾巴斷了，甩尾旋身範圍縮小' } } },
     agheel: { brkFx: { head: { skills: ['sweeping_breath', 'tracking_breath'], mul: 0.7, note: '龍角斷了，龍息射程縮短' } } },
+    greyll: { brkFx: { head: { skills: ['sweeping_breath', 'tracking_breath', 'bridge_inferno'], mul: 0.7, note: '龍角斷了，龍息射程縮短' } } },
     watcher: { weak: { dragon: 1.3, fire: 0.6 } },
     treesentinel: { hz: { body: { cut: 0.32, blunt: 0.4, shot: 0.3 } }, weak: { fire: 1.3, thunder: 1.2 } },
   };

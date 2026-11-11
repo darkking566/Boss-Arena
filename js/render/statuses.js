@@ -23,6 +23,7 @@
 
   // ── 所有狀態的圖示 ──
   R.defineStatusIcon('iframe', { glyph: '閃', color: '#d8fff0' });
+  R.defineStatusIcon('powershred', { glyph: '威', color: '#9fb4c8' }); // 母龍威壓（飛龍桂雷爾）
   R.defineStatusIcon('invuln', { glyph: '無', color: '#ffe680' });
   R.defineStatusIcon('h4fatigue', { glyph: '疲', color: '#cfc8a8' }); // 狩獵模式：Boss 疲勞
   R.defineStatusIcon('h4atk', { glyph: '攻', color: '#ff6a5a' }); // 狩獵笛旋律

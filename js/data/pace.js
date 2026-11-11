@@ -29,6 +29,8 @@
           smartDodge: { n: 12, wThreat: 6, wBig: 3, wZone: 3, wTrap: 2, wProj: 4, wWall: 2.5, wCorner: 2, wPillar: 3, wRange: 0.3, wBehind: 0.6, wLegacy: 0.4, jitter: 0.15 } } },
       // 個別 Boss 覆寫（淺層合併到上面的值；ai 物件另外淺層合併）
       bosses: {
+        adula: { hpMul: 1.3, dmgMul: 1.2 },      // 亞杜拉：血量 4600；對全部對手 × 3 種子 × 交換藍紅（192 場）校準
+        greyll: { hpMul: 1.38 },                 // 桂雷爾：沉重節奏下收招變長、龍息更好吃滿 → 只把沉重倍率血量 1.5 微降到 1.38（見 docs/bosses/greyll.md 強度表）
         astel: { hpMul: 1.4, dmgMul: 1.2 },      // 艾絲緹：光束 / 黑暗波在沉重節奏收招好接，預設倍率偏強；只調新角色耐久／傷害（30 位對手 × 3 種子 × 交換藍紅，180 場：輕快 51.1%、沉重 50.0%）
         borealis: { hpMul: 1.2, dmgMul: 1.15 }, // 玻列琉斯：冰霧續壓在沉重節奏偏強；只調新角色耐久／傷害（每節奏 162 場，輕快 55.6%、沉重 51.2%）。
         magmus: { hpMul: 1.55 },                // 熔岩巨像：幾乎不翻滾；體型放大（r58、招式範圍 ×1.4）後更容易打中對手 → 耐久 1.65 → 1.55

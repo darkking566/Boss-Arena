@@ -143,16 +143,17 @@
     // 龍息：蓄氣（脖子後縮、喉頭與胸口亮起）→ 噴射（跟著每一口的角度轉頭；大角度時連身體一起轉）
     if (I.breath.length) {
       const pre = Math.min(0.85, Math.max(0.4, I.b0 - 0.1));
-      if (T >= I.b0 - pre && T <= I.b1 + 0.25) {
-        const part = I.span > 3.5 ? 1 : I.span > 1.2 ? 0.4 : 0, a = breathAng(I.breath, T);
+      if (T >= I.b0 - pre && T <= I.b1 + 0.6) {
+        const part = I.span > 3.5 ? 1 : I.span > 1.2 ? 0.55 : 0, a = breathAng(I.breath, T);
         if (T < I.b0) {
           const c = ease((T - I.b0 + pre) / pre);
           P.reach = Math.min(P.reach, 1 - 0.22 * c); P.head = Math.max(P.head, 1 + 0.08 * c); P.chest = Math.max(P.chest, c); P.jaw = Math.max(P.jaw, 0.05 + 0.12 * c); P.fire = Math.max(P.fire, 0.5 * c);
           P.spin += a * part * c; P.yaw = a * (1 - part) * c - 0.15 * c * Math.sign(a || 1); P.curl = 0.2 * c;
         } else {
-          const f = T <= I.b1 ? 1 : 1 - (T - I.b1) / 0.25;
+          // 火 0.25 秒熄，頭與身體 0.6 秒緩緩轉回（不瞬間彈回正面）
+          const f = T <= I.b1 ? 1 : Math.max(0, 1 - (T - I.b1) / 0.25), back = T <= I.b1 ? 1 : ease(1 - (T - I.b1) / 0.6);
           P.reach = 1 + 0.12 * f; P.head = 1; P.chest = Math.max(P.chest, 0.8 * f); P.jaw = Math.max(P.jaw, 0.25 * f); P.fire = Math.max(P.fire, f);
-          P.spin += a * part; P.yaw = a * (1 - part) + Math.sin(t * 23) * 0.025; P.curl = 0;
+          P.spin += a * part * back; P.yaw = (a * (1 - part) + Math.sin(t * 23) * 0.025 * f) * back; P.curl = 0;
           if (!air && id !== 'ult') wings(0.42, 0, -0.12);
         }
       }

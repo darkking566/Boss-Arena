@@ -96,12 +96,12 @@
       { id: 'tail_gore', name: '甩尾・回首角擊', short: '甩尾', tags: ['melee', 'aoe'], range: [0, 340], cd: 6.5, cost: 24, track: 4, recovery: 0.75,
         actions: [...strike(0.6, 0.45, { shape: 'circle', r: 300 }, { dmg: 112, posture: 36, kb: 480, ...PHYS, fx: { id: 'agheeltail', scale: 1.2 } }),
           ...strike(1.2, 0.3, { shape: 'cone', r: 270, arc: 120 * D }, { dmg: 98, posture: 30, kb: 380, ...PHYS, fx: { id: 'agheelgore', scale: 1.2 } })] },
-      // 6. 橫掃龍息（原作 Sweeping Breath，順時針）：拱起長頸，從左到右燒過一大片扇形，沿路留下火地
+      // 6. 橫掃龍息（原作 Sweeping Breath，順時針）：拱起長頸，從左到右燒過一大片扇形，沿路留下火地；約 1.4 秒掃完，巨龍轉頸要有重量
       { id: 'sweeping_breath', name: '龍息・焚湖橫掃', short: '橫掃', tags: ['ranged', 'aoe'], range: [120, 600], cd: 9, cost: 30, track: 5, recovery: 0.95,
         actions: [{ do: 'tele', at: 0.1, dur: 0.85, shape: 'cone', r: 560, arc: 190 * D, follow: true, lockBefore: 0.3, chargeFx: 'agheelinhale' },
-          ...sweep(0.95, 8, 0.12, -90, -25.7, 60, 560, 34)],
+          ...sweep(0.95, 8, 0.2, -90, -25.7, 60, 560, 34)],
         actions2: [{ do: 'tele', at: 0.1, dur: 0.8, shape: 'cone', r: 620, arc: 220 * D, follow: true, lockBefore: 0.3, chargeFx: 'agheelinhale' },
-          ...sweep(0.9, 9, 0.11, -105, -26.25, 64, 620, 34, 1.15)] },
+          ...sweep(0.9, 9, 0.18, -105, -26.25, 64, 620, 34, 1.15)] },
       // 7. 追蹤龍息（原作 Tracking Breath）：細長的火柱噴向對手、會慢慢轉頭追過去
       { id: 'tracking_breath', name: '追蹤龍息', short: '追蹤', tags: ['ranged'], range: [150, 620], cd: 7.5, cost: 26, track: 1.6, sweep: true, recovery: 0.8,
         actions: [{ do: 'tele', at: 0.1, dur: 0.65, shape: 'rect', len: 560, w: 110, follow: true, chargeFx: 'agheelinhale' },
@@ -144,14 +144,14 @@
         ...dive(3.4, 2.3, 230, 205, 'ultSpot', 220, 170),
       ],
       actions2: [
-        { do: 'invuln', at: 0, dur: 4.6 },
+        { do: 'invuln', at: 0, dur: 4.6 }, { do: 'invuln', at: 4.4, dur: 1.0 },   // 單段上限 5 秒，分兩段接到火環前
         { do: 'tele', at: 0.15, dur: 0.7, shape: 'circle', r: 300, follow: true, chargeFx: 'agheelroar' },
         { do: 'rain', at: 1.1, n: 18, dur: 1.6, area: 460, flight: 0.75, r: 85, dmg: 44, posture: 12, kb: 150, kind: 'firerock', fx: 'agheelrock', fxEl: 'fire', teleColor: '#ff7a2e', status: BURN },
         ...dive(2.7, 1.7, 220, 190, 'ultSpot', 200, 170),
         { do: 'tele', at: 2.9, dur: 0.5, shape: 'circle', r: 520, follow: true },
-        ...sweep(3.4, 12, 0.08, 165, 30, 40, 520, 30, 1.1),
-        { do: 'tele', at: 4.3, dur: 0.45, shape: 'ring', r0: 160, r: 720 },
-        { do: 'hit', at: 4.75, shape: 'ring', r0: 160, r: 720, dmg: 118, posture: 40, kb: 620, ...FIRE, fx: 'agheelnova' },
+        ...sweep(3.4, 12, 0.15, 165, 30, 40, 520, 30, 1.1),   // 旋身一圈約 1.65 秒，巨龍轉身要有重量
+        { do: 'tele', at: 5.1, dur: 0.45, shape: 'ring', r0: 160, r: 720 },
+        { do: 'hit', at: 5.55, shape: 'ring', r0: 160, r: 720, dmg: 118, posture: 40, kb: 620, ...FIRE, fx: 'agheelnova' },
       ],
       desc: '一階段「焚湖之翼」：昂首怒吼震退對手，振翼升空，火雨落滿湖面，最後三拍俯衝砸下、落地爆出火焰衝擊與翼風。二階段「龍餐・亞基爾之炎」（全程無敵）：高空灑下更密的火雨、俯衝落地，旋身朝四面八方噴出一整圈龍息，最後龍心爆出巨大火環。',
     },

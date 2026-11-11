@@ -148,8 +148,9 @@
   }
   function drawArena(ctx, w, t) {
     const A = BD.ARENA, v = viewRect(ctx);
-    ctx.fillStyle = '#0a110a'; ctx.fillRect(-34, -34, A.w + 68, A.h + 68);
-    ctx.fillStyle = '#1b2a17'; ctx.fillRect(-26, -26, A.w + 52, A.h + 52);
+    // 外框底色只填鏡頭看得到的部分（整張地圖每幀填兩次是白費的像素填充）
+    const frame = (m, c) => { const x0 = Math.max(-m, v.x0), y0 = Math.max(-m, v.y0), x1 = Math.min(A.w + m, v.x1), y1 = Math.min(A.h + m, v.y1); if (x1 > x0 && y1 > y0) { ctx.fillStyle = c; ctx.fillRect(x0, y0, x1 - x0, y1 - y0); } };
+    frame(34, '#0a110a'); frame(26, '#1b2a17');
     const s = R.cache.enabled ? Math.min(1.1, R.renderScale(ctx)) : 1; // 快取關閉：固定 1x 分塊
     const tx0 = Math.max(0, Math.floor(v.x0 / TILE)), tx1 = Math.min(Math.ceil(A.w / TILE) - 1, Math.floor(v.x1 / TILE));
     const ty0 = Math.max(0, Math.floor(v.y0 / TILE)), ty1 = Math.min(Math.ceil(A.h / TILE) - 1, Math.floor(v.y1 / TILE));
