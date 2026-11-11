@@ -6,6 +6,13 @@
   const R = BD.Render = {};
   R.W = 1600; R.H = 1010; R.OX = 50; R.OY = 172;
   R.VW = 1500; R.VH = 820; // 競技場視窗（世界座標單位）；競技場比視窗大，鏡頭 R.cam（視窗左上角的世界座標）跟著戰鬥移動
+  R.LAND = { W: 1600, H: 1010, OX: 50, OY: 172, VW: 1500, VH: 820 }; // 橫向（預設）版面
+  R.vertical = false; // 手機直向版面：畫布改窄長、HUD 在上且字放大、鏡頭放大並自動拉遠；純繪圖，不影響戰鬥
+  R.setLayout = (v) => { // v = null 回橫向；否則 { h, hudH }：寬固定 900，高 h，上方 hudH 給 HUD
+    R.vertical = !!v;
+    if (!v) { Object.assign(R, R.LAND); return; }
+    R.W = 900; R.H = v.h; R.OX = 0; R.OY = v.hudH; R.VW = 900; R.VH = v.h - v.hudH;
+  };
   R.cam = { x: 0, y: 0, z: 1, w: null, t: 0 }; // z：團隊戰拉遠倍率（≤1），可見世界範圍為 VW/z × VH/z
   R.zoom = { z: 1, fx: 0, fy: 0 }; // 本幀的鏡頭縮放（倍率與縮放中心，視窗座標）；純繪圖狀態
   // 視窗座標（滑鼠）→ 世界座標，已扣掉鏡頭位置與縮放

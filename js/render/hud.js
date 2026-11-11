@@ -115,6 +115,41 @@
     // 狀態列（位於技能列下方，仍在競技場上緣 y = R.OY 之上）
     R.drawStatusRow(ctx, b, rtl ? x + PW : x, ky + 26, rtl, PW);
   }
+  // ── 手機直向 HUD：上方一條時間帶 + 兩隊並排各一欄；字放大，縮到手機寬度仍讀得到 ──
+  const VCW = 430, VROW = (rows) => (rows <= 1 ? 138 : 94);
+  const vRows = (w) => Math.max(1, ...[0, 1].map((tm) => w.bosses.filter((b) => b.team === tm && !(w.horde && b.isDummy)).length));
+  R.verticalHudH = (w) => 58 + vRows(w) * VROW(vRows(w)) + 6;
+  function drawHUDVertical(ctx, w, t) {
+    const rows = vRows(w), rh = VROW(rows);
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center';
+    const tm = Math.max(0, w.time), mm = Math.floor(tm / 60), ss = Math.floor(tm % 60);
+    ctx.font = `bold 36px ${FONT}`; ctx.fillStyle = '#fff';
+    ctx.fillText(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, R.W / 2, 42);
+    ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = '#ffd0a0';
+    if (w.speed !== 1) { ctx.textAlign = 'left'; ctx.fillText(`×${w.speed}`, 14, 40); }
+    if (w.horde) { ctx.textAlign = 'right'; ctx.fillText(`擊倒 ${w.horde.kills}`, R.W - 14, 40); }
+    else if (w.enrageOn) { ctx.textAlign = 'right'; ctx.fillStyle = `rgba(255,60,90,${0.7 + 0.3 * Math.sin(t * 6)})`; ctx.fillText(`狂暴 ×${w.enrage.toFixed(2)}`, R.W - 14, 40); }
+    for (const team of [0, 1]) {
+      const rtl = team === 1, x = rtl ? R.W - 12 - VCW : 12, ex = rtl ? x + VCW : x;
+      w.bosses.filter((b) => b.team === team && !(w.horde && b.isDummy)).forEach((b, i) => {
+        const y = 58 + i * rh, dead = b.state === 'dead', pr = b.posture / b.maxPosture;
+        ctx.fillStyle = 'rgba(10,8,14,0.78)'; ctx.fillRect(x - 6, y, VCW + 12, rh - 6);
+        ctx.fillStyle = TEAM[team]; ctx.fillRect(rtl ? x + VCW + 2 : x - 6, y, 4, rh - 6);
+        ctx.globalAlpha = dead ? 0.4 : 1; ctx.textAlign = rtl ? 'right' : 'left';
+        ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = b.def.color; ctx.fillText(b.name, ex, y + 34);
+        const tag = dead ? '倒下' : b.phase === 2 ? '二階段' : '';
+        if (tag) { ctx.font = `bold 24px ${FONT}`; ctx.fillStyle = '#ffd27a'; ctx.textAlign = rtl ? 'left' : 'right'; ctx.fillText(tag, rtl ? x : x + VCW, y + 32); }
+        bar(ctx, x, y + 44, VCW, 32, b.hp / b.maxHp, b.phase === 2 ? b.def.color : TEAM[team], 'rgba(0,0,0,0.65)', rtl, b.hpTrail / b.maxHp);
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.5; ctx.strokeRect(x, y + 44, VCW, 32);
+        ctx.font = `bold 25px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = rtl ? 'right' : 'left';
+        ctx.fillText(String(Math.ceil(b.hp)), rtl ? x + VCW - 8 : x + 8, y + 69);
+        bar(ctx, x, y + 84, VCW / 2 - 6, 10, pr, pr > 0.75 ? '#ff8844' : '#f5c542', null, rtl);
+        bar(ctx, x + VCW / 2 + 6, y + 84, VCW / 2 - 6, 10, b.ult / 100, b.ult >= 100 ? `rgba(255,220,90,${0.6 + 0.4 * Math.sin(t * 8)})` : '#c8a0ff', null, rtl);
+        ctx.globalAlpha = 1;
+        if (!dead && rows <= 1) { ctx.save(); ctx.scale(1.6, 1.6); R.drawStatusRow(ctx, b, ex / 1.6, (y + 100) / 1.6, rtl, VCW / 1.6); ctx.restore(); } // 狀態圖示放大 1.6 倍
+      });
+    }
+  }
   function drawHUD(ctx, w, view, t) {
     const h4 = w.hunt4 && !w.hunt4.solo; // 4v1 才畫隊伍面板 / 力竭；獵魂代理拿狩獵武器時用一般 1v1 面板，部位列兩者都畫
     if (h4) { drawTeamPanel(ctx, w, 0, t); drawPanel(ctx, w.hunt4.boss, w, t); }
@@ -152,7 +187,7 @@
       ctx.font = `bold 56px ${FONT}`; ctx.fillStyle = '#fff';
       if (w.teamMode) {
         const names = (tm) => w.foes(1 - tm).map((b) => b.name).join('・');
-        ctx.font = `bold 34px ${FONT}`; ctx.fillText(`${names(0)}  對  ${names(1)}`, R.VW / 2, R.VH / 2 - 8);
+        const line = `${names(0)}  對  ${names(1)}`; ctx.font = `bold 34px ${FONT}`; const lw = ctx.measureText(line).width; if (lw > R.VW - 40) ctx.font = `bold ${Math.floor(34 * (R.VW - 40) / lw)}px ${FONT}`; ctx.fillText(line, R.VW / 2, R.VH / 2 - 8); // 直向版面較窄，六個名字縮字塞進畫面
       } else ctx.fillText(`${w.bosses[0].name}  對  ${w.bosses[1].name}`, R.VW / 2, R.VH / 2 - 8);
       ctx.font = `20px ${FONT}`; ctx.fillStyle = '#ccc'; ctx.fillText('準備…', R.VW / 2, R.VH / 2 + 38);
     }
@@ -196,7 +231,7 @@
     const A = BD.ARENA, c = R.cam, [a, b] = w.bosses, f = view.focus != null && w.bosses[view.focus];
     let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, tz = 1;
     if (f && f.state !== 'dead') { mx = f.x; my = f.y; } else if (view.focus != null) view.focus = null;
-    else if (w.teamMode) {
+    else if (w.teamMode || R.vertical) {
       const pts = w.bosses.filter((u) => u.state !== 'dead');
       if (pts.length) {
         let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -220,7 +255,7 @@
       const a = g.a * Math.min(1, (g.max - g.life) / 0.15, g.life / (g.max * 0.4));
       if (a <= 0) continue;
       ctx.globalAlpha = a * 0.22; ctx.fillStyle = g.color; ctx.fillRect(0, 0, R.VW, R.VH);
-      ctx.globalAlpha = a; ctx.fillStyle = R.grad(ctx, 'gradevig', (c) => {
+      ctx.globalAlpha = a; ctx.fillStyle = R.grad(ctx, 'gradevig:' + R.VW + ':' + R.VH, (c) => {
         const v = c.createRadialGradient(R.VW / 2, R.VH / 2, R.VH * 0.35, R.VW / 2, R.VH / 2, R.VW * 0.62);
         v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.7)'); return v;
       });
@@ -298,7 +333,7 @@
     drawGrade(ctx, w);
     drawLetterbox(ctx, w, t);
     drawBanners(ctx, w);
-    drawLog(ctx, w, view);
+    if (!R.vertical) drawLog(ctx, w, view); // 直向版面放不下戰鬥紀錄
     if (view.focus != null) {
       const f = w.bosses[view.focus], s = `◎ 聚焦：${f.name}　（Tab 切換 / 回到全體）`;
       ctx.font = `bold 16px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -308,10 +343,10 @@
     ctx.restore();
     // 全螢幕閃光壓低上限（最多 22%），避免整片閃白刺眼
     if (w.fx.flashA > 0) { ctx.globalAlpha = Math.min(0.22, w.fx.flashA * 0.35); ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
-    drawHUD(ctx, w, view, t);
+    if (R.vertical) drawHUDVertical(ctx, w, t); else drawHUD(ctx, w, view, t);
     // 底部提示
     ctx.font = `13px ${FONT}`; ctx.fillStyle = '#777'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-    if (w.training) {
+    if (R.vertical) { /* 直向不畫鍵盤提示 */ } else if (w.training) {
       const tr = w.training;
       const hint = 'F2 切換操控 · Shift+1~9 施放技能 · Shift+0 大招 · 點擊場地放置假人 · 1/2/3/4/5 速度 ×1/×2/×3/×0.5/×0.25 · P 暫停 · T 預警框 · F6 AI · F9 重置 · Esc 選單';
       const player = tr.mode === 'player';

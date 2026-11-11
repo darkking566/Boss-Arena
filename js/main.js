@@ -11,8 +11,22 @@
   G.__BD = state; // 測試掛勾
 
   // ── 畫布縮放 ──
+  // 手機直立 + 實際對戰（非訓練 / 獵魂）→ 直向版面：窄長畫布、放大 HUD、鏡頭放大並自動拉遠；回傳 null 表示維持橫向版面
+  const coarse = matchMedia('(pointer: coarse)');
+  function verticalSpec() {
+    const w = state.world;
+    if (!coarse.matches || window.innerHeight < window.innerWidth * 1.1) return null;
+    if ((state.screen !== 'game' && state.screen !== 'result') || !w || w.training || w.hunt || w.hunt4) return null; // 結算畫面也維持直向，避免背後的畫布突然縮回橫向
+    const p = state.screen === 'game' && view.player != null && w.bosses[view.player] && w.bosses[view.player].controller.isPlayer ? w.bosses[view.player] : null;
+    return { hudH: R.verticalHudH(w), pad: p ? Math.ceil((p.skills.length + 2) / 3) * 55 + 28 : 0 }; // pad：觸控技能鈕區高度（css px）
+  }
   function resize() {
-    const vw = window.innerWidth, vh = window.innerHeight;
+    const vw = window.innerWidth, vh = window.innerHeight, spec = verticalSpec();
+    document.body.classList.toggle('vlayout', !!spec);
+    if (spec) { // 寬佔滿，高 = 視窗 − 上方按鈕列 − 技能鈕區
+      const top = parseFloat(getComputedStyle(canvas).marginTop) || 0;
+      R.setLayout({ hudH: spec.hudH, h: Math.max(900, Math.min(2000, Math.round((vh - top - spec.pad) * 900 / vw))) });
+    } else R.setLayout(null);
     const rail = matchMedia('(pointer: coarse) and (orientation: landscape)').matches ? Math.min(vw * .28, 250) : 0;
     const s = Math.min((vw - rail) / R.W, vh / R.H);
     canvas.style.marginRight = rail + 'px';
@@ -24,6 +38,11 @@
     state.scale = ns;
   }
   window.addEventListener('resize', resize); resize();
+  let layoutSig = '';
+  function syncLayout() { // 開戰 / 返回 / 換玩家時版面需求會變 → 簽章改變才重算
+    const s = verticalSpec(), sig = window.innerWidth + 'x' + window.innerHeight + (s ? ':' + s.hudH + ':' + s.pad : '');
+    if (sig !== layoutSig) { layoutSig = sig; resize(); }
+  }
   // DPR 變更（例如視窗拖到不同縮放比例的螢幕）：重新註冊媒體查詢並重設畫布
   function watchDPR() {
     const mq = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
@@ -549,6 +568,7 @@
     const frameMs = now - last;
     const dt = Math.min(0.05, frameMs / 1000); last = now;
     try {
+      syncLayout();
       ctx.setTransform(state.scale, 0, 0, state.scale, 0, 0);
       const w = state.world;
       if (w) {

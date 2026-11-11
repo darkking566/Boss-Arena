@@ -75,6 +75,9 @@ button:focus-visible, .card:focus-visible, select:focus-visible { outline: 3px s
 }
 @media (pointer: coarse) and (orientation: portrait) {
   body.touch #game { align-self: flex-start; margin-top: max(100px, calc(env(safe-area-inset-top) + 90px)); }
+  /* 直向版面（main.js verticalSpec）：畫布佔滿寬，上方只留暫停 / 速度 / 選單按鈕列；狀態字移到按鈕列左側 */
+  body.vlayout #game { margin-top: max(56px, calc(env(safe-area-inset-top) + 52px)); }
+  body.vlayout .tc-status { top: max(16px, calc(env(safe-area-inset-top) + 14px)); left: 12px; right: auto; max-width: calc(100% - 200px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 @media (pointer: coarse) and (orientation: landscape) {
   .tc.play .tc-pad { width: calc(min(28vw, 250px) - 16px); grid-template-columns: repeat(3, minmax(0, 1fr)); }
