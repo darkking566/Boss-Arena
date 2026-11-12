@@ -113,7 +113,7 @@
         actions: [{ do: 'tele', at: 0.1, dur: 0.65, shape: 'rect', len: 620, w: 120, follow: true, chargeFx: 'agheelinhale' },
           ...stream(0.75, 8, 0.16, 620, 120, 28)] },
       // 8. 三拍俯衝（原作 Dive Bomb）
-      { id: 'dive_bomb', name: '三拍俯衝', short: '俯衝', tags: ['gap', 'aoe'], range: [240, 980], cd: 11, cost: 32, track: 5, recovery: 1.1,
+      { id: 'dive_bomb', name: '三拍俯衝', short: '俯衝', tags: ['gap', 'aoe'], weight: 2, range: [240, 980], cd: 11, cost: 32, track: 5, recovery: 1.1,
         actions: dive(1.55, 1.3, 200, 188, 'diveSpot', 170),
         actions2: [...dive(1.45, 1.2, 215, 196, 'diveSpot', 190, 155),
           { do: 'tele', at: 1.55, dur: 0.45, shape: 'ring', r0: 210, r: 480, anchor: 'mark', mark: 'diveSpot' },
