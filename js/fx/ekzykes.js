@@ -58,6 +58,40 @@
       fx.after(0.06, () => fx.slash(x, y, a - 0.08, arc, r * 0.9, RED, 7, 0.5, { trail: 2 }));
       spores(fx, x, y, r * 0.7, 24); fx.smoke(x, y, 'rgba(139,116,91,0.4)', fx.budget(4), r * 0.5); fx.shake(6);
     } });
+  BD.defineEffect('ekzykesbite', { name: '艾格基斯・腐顎咬合', category: '斬擊', params: {}, desc: '上下兩道灰黑顎痕向咬合點合攏，齒縫擠出赭紅腐霧與白色菌絲碎屑，地上留下一灘暗紅。',
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, r = o.radius || 250, px = x + Math.cos(a) * r * 0.72, py = y + Math.sin(a) * r * 0.72;
+      fx.slash(x, y, a - 0.4, 0.9, r, '#3c3630', 19, 0.22, { core: WHITE });
+      fx.slash(x, y, a + 0.4, 0.9, r, '#3c3630', 19, 0.22, { core: LIGHT });
+      fx.flashAt(px, py, 55, LIGHT, 0.12);
+      for (let i = -3; i <= 3; i++) { const an = a + Math.PI / 2, d = i * 13; fx.streak(px + Math.cos(an) * d - Math.cos(a) * 22, py + Math.sin(an) * d - Math.sin(a) * 22, px + Math.cos(an) * d + Math.cos(a) * 8, py + Math.sin(an) * d + Math.sin(a) * 8, 3, WHITE, 0.2, true); } // 一排利齒
+      fx.smoke(px, py, MIST, fx.budget(4), 40); spores(fx, px, py, 40, 12); fx.decal(px, py, 46, 'rgba(93,26,23,0.35)', 5); fx.shake(5, a);
+    } });
+  BD.defineEffect('ekzykestail', { name: '艾格基斯・腐尾重鞭', category: '斬擊', params: {}, desc: '長尾貼地甩過大半圈：灰黑粗弧、尾尖的鞭痕白線，沿弧線揚起一圈紅塵與菌絲碎片。',
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, r = o.radius || 380, arc = o.arc || 4.6;
+      fx.slash(x, y, a, arc, r * 0.82, '#4a443c', 30, 0.42, { core: '#8d8676', trail: 3 });
+      fx.slash(x, y, a, arc, r, WHITE, 4, 0.3);
+      fx.after(0.07, () => fx.slash(x, y, a - 0.1, arc, r * 0.6, RED, 6, 0.5, { trail: 2 }));
+      for (let i = 0; i < 9; i++) fx.after(i * 0.018, () => { const an = a - arc / 2 + arc * i / 8, px = x + Math.cos(an) * r * 0.85, py = y + Math.sin(an) * r * 0.85; fx.smoke(px, py, 'rgba(139,116,91,0.4)', 1, 30); spores(fx, px, py, 24, 3); });
+      fx.debris(x + Math.cos(a) * r * 0.7, y + Math.sin(a) * r * 0.7, '#9b9180', fx.budget(8), 260, 5, 1.6); fx.shake(8, a);
+    } });
+  BD.defineEffect('ekzykesstomp', { name: '艾格基斯・腐爛重踏', category: '砸地', params: {}, desc: '兩隻翼肢撐起再砸下：左右各一個掌印震波，裂縫滲出暗紅，腐水與孢子貼地向外潑開。',
+    spawn(fx, x, y, o) {
+      const r = o.radius || 195, a = o.angle || 0;
+      for (const s of [-1, 1]) { const px = x + Math.cos(a) * r * 0.42 - Math.sin(a) * s * r * 0.4, py = y + Math.sin(a) * r * 0.42 + Math.cos(a) * s * r * 0.4; fx.shock(px, py, 8, r * 0.5, 0.35, '#8d8676', 7, WHITE); fx.crack(px, py, r * 0.45, '#3c2924', 6, RED, 5); }
+      fx.after(0.06, () => { fx.shock(x, y, r * 0.2, r * 1.05, 0.55, RED, 9, LIGHT); fx.ring(x, y, r * 0.3, r * 1.2, 0.7, MIST, 16); });
+      fx.debris(x, y, '#9b9180', fx.budget(12), 280, 5, TAU); fx.decal(x, y, r * 0.7, 'rgba(93,26,23,0.3)', 6);
+      cloud(fx, x, y, r * 0.8, 4); fx.shake(9); fx.punch(0.02, x, y);
+    } });
+  BD.defineEffect('ekzykescharge', { name: '艾格基斯・低伏突進', category: '位移', params: {}, desc: '龐大龍軀貼地犁過：沿路兩道翼肢刮痕、依序翻起的紅塵團，終點一片腐霧撞散。',
+    spawn(fx, x, y, o) {
+      const a = o.angle == null ? (o.src ? o.src.face : 0) : o.angle, len = o.len || 440, dur = o.dur || 0.5, rr = o.src ? o.src.r : 100, ca = Math.cos(a), sa = Math.sin(a);
+      fx.ring(x, y, rr * 0.4, rr * 1.6, 0.4, 'rgba(206,183,151,0.6)', 6);
+      for (const s of [-1, 1]) fx.streak(x - sa * s * rr * 0.7, y + ca * s * rr * 0.7, x + ca * len - sa * s * rr * 0.7, y + sa * len + ca * s * rr * 0.7, 7, '#5b4a40', dur + 0.5, false);
+      for (let i = 1; i <= 6; i++) fx.after(dur * i / 6, () => { const d = len * i / 6, px = x + ca * d, py = y + sa * d; fx.smoke(px, py, 'rgba(139,116,91,0.45)', fx.budget(3), rr * 0.8); spores(fx, px, py, rr * 0.8, 6); if (i % 2) fx.debris(px, py, '#9b9180', fx.budget(4), 220, 4, TAU); });
+      fx.after(dur, () => { const ex = x + ca * len, ey = y + sa * len; fx.shock(ex, ey, rr * 0.5, rr * 1.9, 0.45, RED, 9, LIGHT); cloud(fx, ex + ca * rr, ey + sa * rr, rr * 1.1, 5); fx.shake(8, a); });
+    } });
   BD.defineEffect('ekzykestakeoff', { name: '艾格基斯・腐翼騰空', category: '位移', params: {}, desc: '灰白翼肢沉重拍地，壓出一圈紅塵，朽絲向兩側飛散。',
     spawn(fx, x, y, o) { const r = o.src ? o.src.r : 100; fx.ring(x, y, r * 0.3, r * 2.5, 0.65, 'rgba(206,183,151,0.6)', 7); cloud(fx, x, y, r * 1.3, 5); spores(fx, x, y, r * 2, 22); fx.shake(5); } });
   BD.defineEffect('ekzykesroar', { name: '艾格基斯・蓄腐低吼', category: '增益', params: {}, desc: '灰白菌絲顫動，暗紅氣流往口腔收縮，長頸抬起後吐出腐霧。',

@@ -40,6 +40,19 @@
       }
       fx.smoke(x, y, 'rgba(145,111,80,0.27)', fx.budget(6), 35);
     } });
+  BD.defineEffect('redwolfpounce', { name: '紅狼・飛撲噬咬', category: '突刺', desc: '紅褐疾風沿撲躍路徑拉成三道爪痕，落點上下兩排獠牙合攏、濺起塵土與少量冷藍星屑。', params: {},
+    spawn(fx, x, y, o) {
+      const a = o.angle == null ? (o.src ? o.src.face : 0) : o.angle, len = Math.min(o.len || 360, 480), dur = o.dur || 0.3, ca = Math.cos(a), sa = Math.sin(a);
+      for (let i = -1; i <= 1; i++) fx.streak(x - sa * i * 14, y + ca * i * 14, x + ca * len - sa * i * 14, y + sa * len + ca * i * 14, i ? 3 : 6, i ? '#a65d37' : GOLD, dur + 0.2, true);
+      fx.smoke(x, y, 'rgba(145,111,80,0.3)', fx.budget(6), 38); fx.ring(x, y, 10, 60, 0.3, '#c9a27a', 3);
+      fx.after(dur, () => {
+        const ex = x + ca * (len + 30), ey = y + sa * (len + 30);
+        fx.slash(ex - ca * 70, ey - sa * 70, a - 0.5, 1.1, 95, '#46261f', 15, 0.2, { core: PALE });
+        fx.slash(ex - ca * 70, ey - sa * 70, a + 0.5, 1.1, 95, '#46261f', 15, 0.2, { core: PALE });
+        fx.flashAt(ex, ey, 50, PALE, 0.12); fx.sparkle(ex, ey, BLUE, fx.budget(8), 190, a, 1.6);
+        fx.debris(ex, ey, '#a48e70', fx.budget(8), 220, 4, TAU); fx.shake(6, a);
+      });
+    } });
   BD.defineEffect('redwolfplunge', { name: '紅狼・騰空裂地', category: '砸地', desc: '橙金劍光斜插大地，放射裂痕與兩層蒼金震環交替展開。', params: {},
     spawn(fx, x, y, o) {
       const r = o.radius || 150;

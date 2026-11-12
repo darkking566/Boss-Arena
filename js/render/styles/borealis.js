@@ -75,6 +75,10 @@
       const q = ease(T / I.roar[0].at); P.reach = 0.82 + q * 0.35; P.yaw = 0; P.jaw = 0.05 + q * 0.36;
       wings(0.4 + q * 0.55, Math.sin(t * 20) * 0.06, -0.15); P.dip = 1 + q * 0.03; P.cold = q;
     }
+    if (I.hide.length && T < I.hide[0].at && !I.land.some(a => a.at <= T)) { wings(0.7, -0.55, -0.2); P.dip = 0.93; P.reach = 0.9; } // 起飛前一蹲
+    for (const h of I.hits) if (h.shape === 'ring' && T >= h.at - 0.3 && T < h.at + 0.3) { // 外擴冰環：雙翼高舉 → 拍下
+      const q = cl((T - h.at + 0.3) / 0.3), d = cl((T - h.at) / 0.3); wings(0.95, T < h.at ? 0.7 * q : -0.7 * (1 - d), 0); P.dip = T < h.at ? 1 + 0.04 * q : 1 - 0.05 * (1 - d); P.jaw = 0.2; P.cold = Math.max(P.cold, 0.6);
+    }
     const landed = I.land.filter(a => T >= a.at && T < a.at + 0.5).pop();
     if (landed) { const q = ease((T - landed.at) / 0.5); wings(1 - q * 0.7, -0.65 * (1 - q), 0.1); P.dip = 0.9 + q * 0.1; P.jaw = 0.2 * (1 - q); P.tuck = 0; }
     return P;

@@ -88,11 +88,11 @@
       // 4. 衝撞（Charge）
       { id: 'charge', name: '怒吼衝撞', short: '衝撞', tags: ['gap', 'melee'], range: [200, 700], cd: 8, cost: 28, track: 6, recovery: 0.9,
         actions: [{ do: 'tele', at: 0.05, dur: 0.75, shape: 'rect', len: 600, w: 170, follow: true, lockBefore: 0.3, chargeFx: 'adulagather' },
-          { do: 'dash', at: 0.8, dist: 470, dur: 0.5, hit: { dmg: 70, posture: 20, kb: 240 }, fx: 'adulatakeoff' },
+          { do: 'dash', at: 0.8, dist: 470, dur: 0.5, hit: { dmg: 70, posture: 20, kb: 240 }, fx: 'adulacharge' },
           ...strike(1.45, 0.2, { shape: 'cone', r: 250, arc: 110 * D }, { dmg: 126, posture: 42, kb: 520, ...PHYS, fx: { id: 'adulabite', scale: 1.7 } })] },
       // 5. 尾鞭＋咬（Tail Whip / Whip & Bite）
       { id: 'tail_gore', name: '甩尾・回首咬', short: '甩尾', tags: ['melee', 'aoe'], range: [0, 340], cd: 6.5, cost: 24, track: 4, recovery: 0.75,
-        actions: [...strike(0.6, 0.45, { shape: 'circle', r: 300 }, { dmg: 110, posture: 36, kb: 480, ...PHYS, fx: { id: 'adulawing', scale: 1.3, arc: 6 } }),
+        actions: [...strike(0.6, 0.45, { shape: 'circle', r: 300 }, { dmg: 110, posture: 36, kb: 480, ...PHYS, fx: { id: 'adulatail', scale: 1.3 } }),
           ...strike(1.2, 0.3, { shape: 'cone', r: 270, arc: 120 * D }, { dmg: 96, posture: 30, kb: 380, ...PHYS, fx: { id: 'adulabite', scale: 1.4 } })] },
       // 6. 橫掃吐息（Sweeping Breath）：輝石魔法，從左掃到右
       { id: 'sweeping_breath', name: '輝石吐息・橫掃', short: '橫掃', tags: ['ranged', 'aoe'], range: [120, 600], cd: 9, cost: 30, track: 5, recovery: 0.95,
@@ -111,13 +111,13 @@
       { id: 'glintstone_stars', name: '輝石之星', short: '星晶', tags: ['ranged', 'aoe'], range: [200, 900], cd: 10, cost: 30, track: 3, recovery: 1.05,
         actions: [{ do: 'tele', at: 0.05, dur: 0.95, shape: 'circle', r: 130, off: 210, follow: true, lockBefore: 0.3, chargeFx: 'adulagather' },
           { do: 'hit', at: 1.0, shape: 'circle', r: 130, off: 210, dmg: 58, posture: 16, kb: 200, ...MAG, fx: { id: 'adulacrystal', scale: 1.2 } },
-          { do: 'proj', at: 1.05, n: 7, spread: 0.2, speed: 540, r: 34, dmg: 54, posture: 12, kb: 160, life: 2.4, homing: 1.4, kind: 'glintshard', fxEl: 'glintstone' },
-          { do: 'proj', at: 1.55, n: 9, radial: true, speed: 400, r: 30, dmg: 48, posture: 10, kb: 140, life: 2.6, homing: 1.1, kind: 'glintshard', fxEl: 'glintstone' }],
+          { do: 'proj', at: 1.05, n: 7, spread: 0.2, speed: 540, r: 34, dmg: 54, posture: 12, kb: 160, life: 2.4, homing: 1.4, kind: 'glintshard', fxEl: 'glintstone', fx: 'adulastars' },
+          { do: 'proj', at: 1.55, n: 9, radial: true, speed: 400, r: 30, dmg: 48, posture: 10, kb: 140, life: 2.6, homing: 1.1, kind: 'glintshard', fxEl: 'glintstone', fx: 'adulastars' }],
         actions2: [{ do: 'tele', at: 0.05, dur: 0.9, shape: 'circle', r: 140, off: 210, follow: true, lockBefore: 0.3, chargeFx: 'adulagather' },
           { do: 'hit', at: 0.95, shape: 'circle', r: 140, off: 210, dmg: 58, posture: 16, kb: 200, ...MAG, fx: { id: 'adulacrystal', scale: 1.3 } },
-          { do: 'proj', at: 1.0, n: 9, spread: 0.18, speed: 560, r: 34, dmg: 54, posture: 12, kb: 160, life: 2.4, homing: 1.5, kind: 'glintshard', fxEl: 'glintstone' },
-          { do: 'proj', at: 1.45, n: 12, radial: true, speed: 420, r: 30, dmg: 48, posture: 10, kb: 140, life: 2.6, homing: 1.2, kind: 'glintshard', fxEl: 'glintstone' },
-          { do: 'proj', at: 1.9, n: 8, radial: true, angOff: 0.2, speed: 380, r: 30, dmg: 46, posture: 10, kb: 130, life: 2.6, homing: 1.2, kind: 'glintshard', fxEl: 'glintstone' }] },
+          { do: 'proj', at: 1.0, n: 9, spread: 0.18, speed: 560, r: 34, dmg: 54, posture: 12, kb: 160, life: 2.4, homing: 1.5, kind: 'glintshard', fxEl: 'glintstone', fx: 'adulastars' },
+          { do: 'proj', at: 1.45, n: 12, radial: true, speed: 420, r: 30, dmg: 48, posture: 10, kb: 140, life: 2.6, homing: 1.2, kind: 'glintshard', fxEl: 'glintstone', fx: 'adulastars' },
+          { do: 'proj', at: 1.9, n: 8, radial: true, angOff: 0.2, speed: 380, r: 30, dmg: 46, posture: 10, kb: 130, life: 2.6, homing: 1.2, kind: 'glintshard', fxEl: 'glintstone', fx: 'adulastars' }] },
       // —— 二階段專屬 ——
       // 10. 側飛掠襲（Strafe）：低空往前掠過，同時朝一側噴出一排輝石吐息
       { id: 'strafe', name: '側飛掠襲', short: '掠襲', phase: 2, tags: ['gap', 'ranged', 'aoe'], range: [180, 760], cd: 10, cost: 30, track: 4, recovery: 0.9,
@@ -132,7 +132,7 @@
           { do: 'hide', at: 0.12, fx: 'adulatakeoff', fxEl: 'glintstone' },
           { do: 'land', at: 1.6, mark: 'adBlade' },
           { do: 'hit', at: 1.6, shape: 'circle', r: 250, anchor: 'mark', mark: 'adBlade', dmg: 150, posture: 55, kb: 520, status: FROST(40), ...MAG, fx: { id: 'adulamoon', scale: 1.3 } },
-          { do: 'proj', at: 1.75, n: 3, spread: 0.55, speed: 680, r: 70, dmg: 80, posture: 18, kb: 200, life: 1.4, pierce: true, status: FROST(25), kind: 'moonwave', fxEl: 'glintstone' }] },
+          { do: 'proj', at: 1.75, n: 3, spread: 0.55, speed: 680, r: 70, dmg: 80, posture: 18, kb: 200, life: 1.4, pierce: true, status: FROST(25), kind: 'moonwave', fxEl: 'glintstone', fx: 'adulamoonwave' }] },
     ],
     // 大招（本遊戲編排）：一階段「輝石星墜」——蓄起魔力、結晶碎片如雨落下，再以環形衝擊推出；
     //   二階段「暗月之誓・月刃星落」——暗月高懸，星墜更密，最後以橫掃的月刃劍波收尾

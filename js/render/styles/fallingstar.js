@@ -88,24 +88,35 @@
     for (let i = 0; i < 3; i++) { g.fillStyle = '#0d0c11'; g.beginPath(); g.arc(r * (0.18 + lift * 0.05), s * r * (0.03 + i * 0.07), r * 0.05, 0, TAU); g.fill(); }
     g.restore();
   }
+  const rayAng = (list, t) => { // 光束目前的角度：相鄰兩段之間內插
+    if (t <= list[0].at) return list[0].angOff || 0;
+    for (let i = 1; i < list.length; i++) if (t < list[i].at) { const a = list[i - 1], b = list[i]; return U.lerp(a.angOff || 0, b.angOff || 0, (t - a.at) / (b.at - a.at)); }
+    return list[list.length - 1].angOff || 0;
+  };
   const GRAVITY = { gravitas: 1, reverse_gravity: 1, gravity_bolt: 1, gravity_ray: 1, ult: 1 };
   // 依技能與時間軸算出姿勢
   function pose(o, t, st) {
     const inst = o.inst, id = inst ? inst.skill.id : '', time = inst ? inst.t : 0, P = { rear: 0, lunge: 0, yaw: Math.sin(t * 0.9) * 0.06, tail: 0, dig: 0, jaw: 0.08 + Math.sin(t * 2.3) * 0.03, glow: 0, orb: 0, curl: 0 };
     if (st === 'transition') { P.rear = 0.7 + Math.sin(t * 6) * 0.1; P.glow = 0.8; P.jaw = 0.35; return P; }
     if (!inst) return P;
-    const a = R.skillPace(inst, { hit: 1, dash: 1, gravpull: 1, proj: 1, erupt: 1, rain: 1 });
+    const a = R.skillPace(inst, { hit: 1, dash: 1, gravpull: 1, proj: 1, erupt: 1, rain: 1 }), acts = inst.v.actions;
+    const first = (k) => { const x = acts.find((q) => q.do === k); return x ? x.at : null; }, win = (t0, t1) => U.clamp((time - t0) / Math.max(0.05, t1 - t0), 0, 1);
     if (GRAVITY[id]) P.glow = 0.35 + 0.4 * a.wind + 0.4 * a.snap;
     if (id === 'head_swing') { P.yaw = (a.i % 2 ? 1 : -1) * (0.5 * a.wind - 0.9 * a.snap); P.jaw = 0.25 + 0.2 * a.wind; P.lunge = a.snap * 0.3; }
-    else if (id === 'tail_sweep') { P.tail = -0.9 * a.wind + 1.6 * a.snap; P.yaw = 0.3 * a.wind; P.spin = a.snap > 0 ? (1 - a.snap) * TAU : 0; }
+    else if (id === 'tail_sweep') { const h = first('hit') || 1, q = win(h - 0.3, h + 0.2), e = q * q * (3 - 2 * q); P.tail = -0.9 * a.wind * (1 - q) + 1.6 * Math.sin(q * Math.PI); P.yaw = 0.3 * a.wind * (1 - q); P.spin = e * TAU; } // 判定前後 0.5 秒內旋身一整圈
     else if (id === 'fore_stomp') { P.rear = a.i === 0 ? a.wind : 0.2 * (1 - a.snap); P.lunge = a.i === 1 ? a.snap * 0.4 : 0; P.jaw = 0.3; }
-    else if (id === 'hind_kick') { P.rear = -0.4 * a.wind; P.tail = Math.sin(time * 9) * 0.3; }
-    else if (id === 'gouge' || id === 'rock_throw') { P.dig = time < (id === 'gouge' ? 1.3 : 0.95) ? Math.min(1, time * 2) : Math.max(0, 1 - (time - 0.95) * 4); P.jaw = 0.05; P.lunge = 0.2 * P.dig; }
-    else if (id === 'bite' || id === 'charge') { P.lunge = 0.35 + 0.25 * a.snap; P.jaw = 0.45 + 0.2 * a.wind - 0.4 * a.snap; P.yaw = 0; }
+    else if (id === 'hind_kick') { P.rear = -0.4 * a.wind * (1 - a.snap); P.lunge = 0.25 * a.wind - 0.5 * a.snap; P.tail = Math.sin(time * 9) * 0.3; P.yaw = 0.25 * a.wind; P.jaw = 0.2; } // 前半身壓低前傾 → 後蹄蹬出、身體後挫
+    else if (id === 'gouge') { const d = acts.find((q) => q.do === 'dash'), end = d ? d.at + d.dur : 1.3; P.dig = time < end ? win(0, Math.min(0.5, d ? d.at : 0.5)) : 1 - win(end, end + 0.25); P.jaw = 0.05; P.lunge = 0.2 * P.dig; if (time >= end) { P.rear = 0.5 * Math.sin(win(end, end + 0.45) * Math.PI); P.jaw = 0.3; } } // 顎插地犁過去 → 收尾猛然挑起
+    else if (id === 'rock_throw') { const pr = first('proj') || 0.95; P.dig = time < pr - 0.12 ? win(0, 0.45) : 1 - win(pr - 0.12, pr + 0.05); P.jaw = time < pr ? 0.05 : 0.4; P.lunge = 0.2 * P.dig; if (time >= pr - 0.12) { P.rear = 0.55 * Math.sin(win(pr - 0.12, pr + 0.45) * Math.PI); P.yaw = 0; } } // 顎掘起岩塊 → 甩頭拋出
+    else if (id === 'bite' || id === 'charge') { const run = inst.dash ? 1 : 0; P.lunge = run ? 0.5 : -0.15 * a.wind; P.jaw = run ? (id === 'bite' ? 0.6 : 0.25) : 0.45 + 0.2 * a.wind - 0.4 * a.snap; P.dig = run || id === 'bite' ? 0 : 0.35 * a.wind; P.yaw = 0; P.tail = run ? 0 : Math.sin(time * 12) * 0.25 * a.wind; } // 預警：低頭、甩尾蹬地；衝刺：整個前傾
     else if (id === 'beast_roll') { P.curl = Math.min(1, time / 0.15); }
-    else if (id === 'gravitas' || id === 'reverse_gravity' || id === 'ult') { const up = time < 1.15 ? time / 1.15 : Math.max(0, 1 - (time - 1.15) * 2); P.rear = Math.max(up, a.snap * 0.6); P.jaw = 0.3 + 0.2 * up; }
-    else if (id === 'gravity_ray') { P.orb = time < 1.5 ? time / 1.5 : 1; P.jaw = 0.4; P.yaw = time > 1.5 ? U.clamp((time - 1.5) / 1.8, 0, 1) * 1.6 - 0.8 : 0; }
-    else if (id === 'gravity_bolt') { P.rear = 0.25 * a.wind; P.jaw = 0.2 + 0.25 * a.wind; }
+    else if (id === 'gravitas' || id === 'reverse_gravity' || id === 'ult') { // 人立蓄力到第一次發動 → 前蹄砸下；之後每一下判定再踏一次
+      const t0 = Math.min(...['gravpull', 'hit', 'rain'].map(first).filter((x) => x != null), 9), up = time < t0 ? win(0, t0 * 0.8) : 1 - win(t0, t0 + 0.4);
+      P.rear = Math.max(up, a.snap * 0.6, time > t0 + 0.4 ? 0.7 * a.wind * (a.wind > 0.5 ? 1 : 0) * (a.a && a.a.do === 'hit' ? 1 : 0) : 0); P.jaw = 0.3 + 0.2 * up;
+      const ray = acts.filter((q) => q.do === 'hit' && q.fx === 'fsray'); if (ray.length && time >= ray[0].at - 0.8) { const r0 = ray[0].at, r1 = ray[ray.length - 1].at; P.orb = win(r0 - 0.8, r0) * (1 - win(r1, r1 + 0.3)); P.rear = 0; P.jaw = 0.4; P.yaw = time > r0 ? U.clamp(rayAng(ray, time), -1, 1) : 0; }
+    }
+    else if (id === 'gravity_ray') { const ray = acts.filter((q) => q.do === 'hit'), r0 = ray.length ? ray[0].at : 1.5, r1 = ray.length ? ray[ray.length - 1].at : 3.3; P.orb = win(0, r0) * (1 - win(r1, r1 + 0.3)); P.jaw = 0.4; P.yaw = time > r0 && ray.length ? U.clamp(rayAng(ray, time), -1, 1) : 0; } // 頭跟著光束實際的角度轉
+    else if (id === 'gravity_bolt') { P.rear = 0.3 * a.wind * (1 - a.snap) ; P.jaw = 0.2 + 0.25 * a.wind; P.lunge = -0.12 * a.snap; P.glow = Math.max(P.glow, 0.5 + 0.5 * a.snap); } // 每一道雷：昂首 → 眼核一閃、頭往下一點
     return P;
   }
   function beast(g, o, t, r, st, P) {

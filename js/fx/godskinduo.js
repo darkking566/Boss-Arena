@@ -1,5 +1,5 @@
 'use strict';
-// 特效庫｜神皮雙人組（gsflamebolt / gsscythe / gssweep / gsthrust / gsbelly / gsslam / gsplunge / gsburst / gstornado / gsritual / gsritualburst /
+// 特效庫｜神皮雙人組（gsflamebolt / gsscythe / gsstab / gshook / gswhirl / gsleap / gssweep / gsthrust / gsbelly / gsslam / gsplunge / gsburst / gstornado / gsritual / gsritualburst /
 // gsgather / gswheel / gscrusher / gsrevive / gsawaken）：黑煙配白色火星的神皮黑焰、使徒的長柄鐮刃、貴人的細劍與腹撞、互相喚醒。
 // 兩人本體的造型在 js/render/styles/godskinduo.js；這裡只負責刀痕、火焰與震波。只呼叫 fx 原件；亂數只用 BD.vrng；不觸碰 DOM。
 (function (G) {
@@ -37,6 +37,58 @@
       fx.slash(x, y, a, (o.arc || 1.7) * 0.8, L * 0.85, '#0a0710', 16, 0.2, { trail: 1 });
       const [sx, sy] = pt(x, y, a, L * 0.7, 0); fx.sparkle(sx, sy, WHITE, fx.budget(8), 220, a, 1.1);
       fx.shake(2.5, a);
+    },
+  });
+
+  BD.defineEffect('gsstab', {
+    name: '神皮・長刃直刺', category: '突刺',
+    desc: '使徒把長柄武器的直刃一端筆直捅出：蒼白細長的刃光外包黑焰，兩側各一道黑色殘影，刃尖炸開白色火星與一圈細環。',
+    params: { len: 300 },
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, L = o.len || o.radius || 300, [tx, ty] = pt(x, y, a, L, 0);
+      fx.streak(x, y, tx, ty, Math.max(14, (o.width || 70) * 0.3), '#0a0710', 0.26, false);
+      fx.beam(x, y, tx, ty, 6, PALE, 0.2, WHITE);
+      for (const s of [-1, 1]) { const [sx, sy] = pt(x, y, a, 20, s * 16), [ex, ey] = pt(x, y, a, L * 0.85, s * 10); fx.streak(sx, sy, ex, ey, 3, '#1a1424', 0.3, false); }
+      fx.after(0.04, () => { fx.ring(tx, ty, 4, 44, 0.26, LAV, 3); fx.sparkle(tx, ty, WHITE, fx.budget(10), 240, a, 1.3); });
+      fx.shake(3, a);
+    },
+  });
+
+  BD.defineEffect('gshook', {
+    name: '神皮・鉤刃回拉', category: '斬擊',
+    desc: '刺出去的鐮刃鉤住對手往回扯：一道由遠而近收攏的蒼白彎鉤、往使徒方向倒抽的黑色拖影與白色火星。',
+    params: { arc: 1.6 },
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, L = o.radius || o.len || 230;
+      fx.slash(x, y, a, o.arc || 1.6, L, PALE, 9, 0.26, { core: WHITE, trail: 2, rim: '#1a1424' });
+      for (let i = -1; i <= 1; i++) { const [sx, sy] = pt(x, y, a + i * 0.3, L, 0), [ex, ey] = pt(x, y, a + i * 0.3, L * 0.35, 0); fx.streak(sx, sy, ex, ey, i ? 3 : 6, i ? '#0a0710' : LAV, 0.28, !i); }
+      fx.ring(x, y, L * 0.9, L * 0.3, 0.3, 'rgba(236,230,246,0.5)', 3);
+      const [px, py] = pt(x, y, a, L * 0.4, 0); fx.sparkle(px, py, WHITE, fx.budget(8), 200, a + Math.PI, 1.2); fx.shake(3, a + Math.PI);
+    },
+  });
+
+  BD.defineEffect('gswhirl', {
+    name: '神皮・旋舞長刃', category: '斬擊',
+    desc: '使徒握著長柄中段旋身：兩端的鐮刃與直刃各拉出半圈蒼白刀光，外圍一圈黑焰火緣與四散的白色火星。',
+    params: { radius: 180 },
+    spawn(fx, x, y, o) {
+      const a = o.angle || 0, r = o.radius || 180;
+      fx.slash(x, y, a, Math.PI * 0.95, r, PALE, 11, 0.26, { core: WHITE, trail: 2, rim: '#1a1424' });
+      fx.slash(x, y, a + Math.PI, Math.PI * 0.95, r * 0.92, PALE, 8, 0.26, { core: WHITE, trail: 2 });
+      fx.ring(x, y, r * 0.75, r * 1.05, 0.3, '#0a0710', 9);
+      fx.sparkle(x, y, WHITE, fx.budget(10), r * 1.6, a, TAU); fx.embers(x, y, LAV, fx.budget(4), r * 0.8, 60); fx.shake(3);
+    },
+  });
+
+  BD.defineEffect('gsleap', {
+    name: '神皮・躍斬', category: '位移',
+    desc: '使徒拖著長袍躍起：起跳處一圈塵環，空中一道黑底白芯的拖影，落點鐮刃由上而下劈出蒼白弧光與黑焰火星。',
+    params: { len: 400 },
+    spawn(fx, x, y, o) {
+      const a = o.angle == null ? (o.src ? o.src.face : 0) : o.angle, L = o.len || 400, dur = o.dur || 0.35, [tx, ty] = pt(x, y, a, L, 0);
+      fx.ring(x, y, 10, 70, 0.3, SKIN, 4); fx.puff(x, y, 0, 0, 24, 70, 0.6, 'sand', 0.4);
+      fx.streak(x, y, tx, ty, 10, '#0a0710', dur + 0.2, false); fx.streak(x, y, tx, ty, 3, PALE, dur + 0.15, true);
+      fx.after(dur, () => { fx.slash(tx, ty, a, 2.2, 150, PALE, 12, 0.26, { core: WHITE, trail: 3, rim: '#1a1424' }); flame(fx, tx, ty, 34, 4); fx.shake(5, a); });
     },
   });
 

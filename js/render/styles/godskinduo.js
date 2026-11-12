@@ -12,16 +12,43 @@
 
   // ── 使徒的動作組（純視覺，只讀招式時間軸）：wa 武器擺角、spin 連續旋轉、th 前刺、st 上身伸展、orb 掌心黑焰、ring 腳下符環、arms 雙臂外展 ──
   const P = {};
+  const angAt = (list, t) => { // 相鄰兩下之間內插角度
+    if (t <= list[0].at) return list[0].angOff || 0;
+    for (let i = 1; i < list.length; i++) if (t < list[i].at) { const a = list[i - 1], b = list[i]; return U.lerp(a.angOff || 0, b.angOff || 0, (t - a.at) / (b.at - a.at)); }
+    return list[list.length - 1].angOff || 0;
+  };
+  // 全讀實際時間軸（沉重節奏會拉長預警，不能寫死秒數）。另有 turn 單圈旋身、len 武器豎起的縮短、hop 躍起
   function pose(o) {
-    const p = Object.assign(P, { wa: 0, spin: 0, th: 0, st: 0, orb: 0, ring: 0, arms: 0 }), inst = o.inst;
+    const p = Object.assign(P, { wa: 0, spin: 0, turn: 0, th: 0, st: 0, orb: 0, ring: 0, arms: 0, len: 1, hop: 0 }), inst = o.inst;
     if (o.state !== 'skill' || !inst || !inst.v) return p;
-    const id = inst.skill.id, T = inst.t, acts = inst.v.actions;
-    if (id === 'spin' || id === 'tornado' || id === 'ult') { p.spin = win(T, 0.2, 0.5) * (1 - win(T, id === 'spin' ? 1.4 : 2.4, id === 'spin' ? 1.6 : 2.7)); p.st = id === 'ult' ? bump(T, 0, 3.6) * 0.4 : 0; return p; }
-    if (id === 'flame') { const pr = acts.find((a) => a.do === 'proj'); p.orb = pr ? win(T, 0, pr.at) * (1 - win(T, pr.at, pr.at + 0.25)) : 0; p.arms = p.orb * 0.5; return p; }
-    if (id === 'ritual') { p.ring = bump(T, 0, 1.4); p.arms = p.ring; return p; }
-    if (id === 'fling' || id === 'flamesweep' || id === 'plunge') p.st = id === 'plunge' ? bump(T, 0.3, 1.1) : bump(T, 0.2, 1.7);
-    const hits = acts.filter((a) => a.do === 'hit'), j = Math.max(0, hits.findIndex((a) => a.at + 0.25 >= T)), h = hits[j] || hits[hits.length - 1];
-    if (h) { const k = ease(win(T, h.at - 0.4, h.at)), after = win(T, h.at, h.at + 0.2); p.wa = (j % 2 ? 1 : -1) * (-1 + 2 * k) * 1.0 * (1 - after * 0.6); p.th = bump(T, h.at - 0.12, h.at + 0.12) * 0.7; }
+    const id = inst.skill.id, T = inst.t, acts = inst.v.actions, hits = acts.filter((a) => a.do === 'hit'), h0 = hits[0], hN = hits[hits.length - 1];
+    if (id === 'spin' || id === 'tornado' || id === 'ult') { // 起手高舉聚焰 → 持續旋舞到最後一下
+      if (!h0) return p;
+      p.spin = win(T, h0.at - 0.3, h0.at) * (1 - win(T, hN.at - (id === 'spin' ? 0 : 0.3), hN.at + 0.2));
+      if (id !== 'spin') { p.orb = win(T, 0, h0.at - 0.3) * (1 - win(T, h0.at - 0.3, h0.at)); p.arms = p.orb + bump(T, hN.at - 0.35, hN.at + 0.3); p.st = id === 'ult' ? bump(T, 0, hN.at + 0.3) * 0.4 : 0; }
+      return p;
+    }
+    if (id === 'flame') { const pr = acts.find((a) => a.do === 'proj'); p.orb = pr ? win(T, 0, pr.at) * (1 - win(T, pr.at, pr.at + 0.25)) : 0; p.arms = p.orb * 0.5; p.th = pr ? bump(T, pr.at - 0.05, pr.at + 0.25) * 0.3 : 0; return p; }
+    if (id === 'ritual') { // 雙臂外展吟唱到引爆；二階段外環再一振
+      p.ring = h0 ? bump(T, 0, h0.at + 0.3) : 0; p.arms = p.ring; p.orb = p.ring * 0.6;
+      if (hN && hN !== h0) { const k = bump(T, hN.at - 0.35, hN.at + 0.25); p.arms = Math.max(p.arms, k); p.ring = Math.max(p.ring, k); }
+      return p;
+    }
+    if (id === 'flamesweep' && h0) { // 伸長上身，鐮刃跟著每一口黑焰的角度掃過去
+      const k = win(T, h0.at - 0.5, h0.at), back = 1 - win(T, hN.at, hN.at + 0.3);
+      p.st = ease(k) * back; p.orb = k * back * 0.6; p.wa = angAt(hits, T) * (T < h0.at ? ease(k) : back); return p;
+    }
+    if (id === 'leapslash' && inst.dash) { const d = acts.find((a) => a.do === 'dash'), k = d ? win(T, d.at, d.at + d.dur) : 0.5; p.hop = Math.sin(k * Math.PI); p.wa = -1.3 + 2.2 * ease(win(k, 0.55, 1)); return p; } // 躍起舉鐮 → 落下劈斬
+    const j = hits.findIndex((a) => a.at + 0.25 >= T), h = hits[j < 0 ? hits.length - 1 : j];
+    if (!h) return p;
+    const k = ease(win(T, h.at - 0.4, h.at)), after = win(T, h.at, h.at + 0.2), far = h.anchor === 'mark';
+    if (id === 'fling' && h === h0) p.st = bump(T, h.at - 0.55, h.at + 0.4); // 皮囊伸展：上身整個甩出去
+    if (id === 'plunge' && h === h0) { p.st = bump(T, h.at - 0.5, h.at + 0.3) * 0.8; p.len = 1 - 0.65 * ease(win(T, h.at - 0.6, h.at - 0.1)) * (1 - win(T, h.at + 0.2, h.at + 0.45)); p.th = 0.5 * bump(T, h.at - 0.1, h.at + 0.3); p.arms = 0.5 * bump(T, h.at - 0.6, h.at); return p; } // 鐮刃豎起 → 倒插
+    if (h.shape === 'rect') p.th = -0.4 * k * (1 - win(T, h.at - 0.1, h.at)) + bump(T, h.at - 0.1, h.at + 0.22) * 0.9; // 直刺：後收 → 刺出
+    else if (h.shape === 'circle' && !far && h.fxEl === 'physical') p.turn = ease(win(T, h.at - 0.28, h.at + 0.12)) * U.TAU; // 旋身一圈
+    else if (h.shape === 'circle' || h.shape === 'ring') { p.arms = bump(T, h.at - 0.35, h.at + 0.25); p.orb = p.arms * 0.5; } // 黑焰爆發：振臂
+    else { p.wa = (j % 2 ? 1 : -1) * (-1 + 2 * k) * (1 - after * 0.6); p.th = bump(T, h.at - 0.12, h.at + 0.12) * 0.5; } // 橫斬
+    if (id === 'stabpull' && hits[1]) p.th -= 0.55 * bump(T, h0.at + 0.15, hits[1].at - 0.05); // 鉤住往回拉
     return p;
   }
 
@@ -62,7 +89,7 @@
   function body(ctx, o, t, { r }) {
     const shade = !!o.shade, p2 = o.phase === 2, p = pose(o), flame = p.orb || p.spin || (o.state === 'skill' ? 0.4 : 0);
     ctx.save();
-    ctx.scale(1 + p.st * 0.7, 1 - p.st * 0.2); // 上身的皮囊往前伸展
+    ctx.scale((1 + p.st * 0.7) * (1 + p.hop * 0.18), (1 - p.st * 0.2) * (1 + p.hop * 0.18)); // 上身的皮囊往前伸展；躍起時整個人放大
     if (shade) { ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0, 0, r * 1.05, 0, U.TAU); ctx.fill(); }
     else {
       if (p.ring > 0.02) { // 腳下的黑焰符環
@@ -73,9 +100,7 @@
       if (p2) { ctx.fillStyle = SKIN; ctx.strokeStyle = SEAM; ctx.lineWidth = 1.2; // 二階段：解開的上身皮片甩在身側
         for (const d of [1, -1]) { const w = Math.sin(t * 3 + d) * 0.12; ctx.beginPath(); ctx.moveTo(0, d * r * 0.6); ctx.quadraticCurveTo(-r * 0.8, d * (r * 1.3 + r * w * 3), -r * 1.8, d * (r * 1.0 + r * w * 5)); ctx.quadraticCurveTo(-r * 1.0, d * r * 0.6, -r * 0.3, d * r * 0.4); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
     }
-    ctx.rotate(p.spin * (t * 16) * 1);
-    weapon(ctx, r, p.wa, p.th, flame, shade);
-    ctx.rotate(-p.spin * (t * 16));
+    ctx.save(); ctx.rotate(p.spin * (t * 16) + p.turn); ctx.scale(p.len, 1); weapon(ctx, r, p.wa, p.th, flame, shade); ctx.restore();
     if (!shade) {
       ctx.strokeStyle = '#c8d0dc'; ctx.lineWidth = r * 0.2; ctx.lineCap = 'round'; // 手臂與手腕護環
       for (const d of [1, -1]) { const ax = r * (0.75 + p.arms * 0.5), ay = d * r * (0.38 + p.arms * 0.6); ctx.beginPath(); ctx.moveTo(r * 0.05, d * r * 0.7); ctx.lineTo(ax, ay); ctx.stroke(); ctx.strokeStyle = '#2a2431'; ctx.lineWidth = r * 0.12; ctx.beginPath(); ctx.moveTo(ax - r * 0.1, ay); ctx.lineTo(ax + r * 0.05, ay); ctx.stroke(); ctx.strokeStyle = '#c8d0dc'; ctx.lineWidth = r * 0.2; }

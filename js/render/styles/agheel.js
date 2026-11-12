@@ -8,7 +8,8 @@
   const BD = G.BD, R = BD.Render, U = BD.U, TAU = U.TAU, V = BD.vrng;
   const SCALE_D = '#221e1d', SCALE_L = '#7a7069', FEATHER = '#5e5550', HORN = '#2b2624', BONE = '#b8ab94';
   const EYE = '#ffd27a', EYE2 = '#ff5a1a', FIRE = '#ff8a1e', CORE = '#fff1b8', RED = '#ff3b1a';
-  const BREATH_FX = { agheelbreath: 1, agheelflame: 1, agheelrain: 1 };
+  const BREATH_FX = { agheelbreath: 1, agheelflame: 1, agheelrain: 1, greyllbridge: 1 };
+  const GUST_FX = { agheelgust: 1, greyllroar: 1 }; // 以雙翼 / 嚎叫震開四周的判定
   const ease = (x) => x * x * (3 - 2 * x), cl = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
   const fxId = (a) => a.fx && (typeof a.fx === 'string' ? a.fx : a.fx.id);
   // 出手節奏：蓄力到 82% 時姿勢到位，最後 18% 揮出（讓揮擊在命中那一刻剛好掃到）
@@ -22,7 +23,7 @@
     const hits = of('hit'), dash = of('dash'), tele = of('tele'), breath = hits.filter((a) => BREATH_FX[fxId(a)]);
     const last = hits.length ? hits[hits.length - 1].at : 0;
     I = { breath, b0: breath.length ? breath[0].at : -9, b1: breath.length ? breath[breath.length - 1].at + 0.18 : -9, span: 0, fly: null,
-      land: of('land'), hide: of('hide'), roar: tele.filter((a) => a.chargeFx === 'agheelroar'), nova: hits.filter((a) => fxId(a) === 'agheelnova'), dash };
+      land: of('land'), hide: of('hide'), roar: tele.filter((a) => a.chargeFx === 'agheelroar'), nova: hits.filter((a) => fxId(a) === 'agheelnova' || fxId(a) === 'greyllnova'), gust: hits.filter((a) => GUST_FX[fxId(a)]), rain: of('rain'), ash: hits.filter((a) => fxId(a) === 'greyllash'), dash };
     if (breath.length) { const g = breath.map((a) => a.angOff || 0); I.span = Math.max(...g) - Math.min(...g); }
     // 離地高度：[開始升空, 到頂, 開始下降, 落地, 高度]
     if (id === 'retreat_flame' && dash[0]) I.fly = [dash[0].at, dash[0].at + 0.4, last + 0.15, last + 0.55, 120];
@@ -86,6 +87,18 @@
     const I = info(inst), T = inst.t;
     // 怒吼（衝撞 / 天降龍炎 / 大招起手的預警）
     for (const a of I.roar) if (T >= a.at && T <= a.at + a.dur) roarPose(ease(cl((T - a.at) / Math.min(0.35, a.dur))), t);
+    // 召來火雨：仰天長嚎、雙翼張開緩緩鼓動
+    for (const a of I.rain) if (!air && T >= a.at - 0.2 && T < a.at + (a.dur || 1)) {
+      const c = ease(cl((T - a.at + 0.2) / 0.3)) * ease(cl((a.at + (a.dur || 1) - T) / 0.3));
+      wings(0.24 + 0.6 * c, Math.sin(t * 5) * 0.45 * c, -0.1 * c); P.reach = 1 - 0.12 * c; P.head = 1 + 0.12 * c; P.jaw = Math.max(P.jaw, 0.26 * c); P.chest = Math.max(P.chest, 0.7 * c); P.fire = Math.max(P.fire, 0.4 * c); P.yaw = 0;
+    }
+    // 翼風 / 嚎叫的判定：雙翼高舉 → 猛然拍下
+    for (const a of I.gust) if (T >= a.at - 0.35 && T < a.at + 0.45) {
+      if (T < a.at) { const c = ease((T - a.at + 0.35) / 0.35); wings(0.5 + 0.5 * c, 0.9 * c, -0.15 * c); P.head = 1 + 0.1 * c; P.jaw = 0.1 + 0.2 * c; P.dip = 1 + 0.04 * c; P.chest = Math.max(P.chest, 0.6 * c); }
+      else { const q = (T - a.at) / 0.45; wings(1, -0.85 * (1 - q), 0.15 * (1 - q)); P.jaw = 0.3 * (1 - q); P.dip = 0.95 + 0.05 * q; P.head = 1.08; }
+    }
+    // 灰燼風暴的收尾：朝落點吐出一口灰燼
+    for (const a of I.ash) if (T >= a.at - 0.4 && T < a.at + 0.4) { const c = T < a.at ? ease((T - a.at + 0.4) / 0.4) : 1 - (T - a.at) / 0.4; wings(0.45, 0, -0.12); P.reach = T < a.at ? 1 - 0.2 * c : 1 + 0.15 * c; P.jaw = 0.08 + 0.2 * c; P.fire = c; P.chest = c; }
     // 落地緩衝
     for (const a of I.land) if (T >= a.at && T < a.at + 0.8) landPose((T - a.at) / 0.8);
     if (id === 'bite') {

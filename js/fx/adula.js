@@ -50,6 +50,32 @@
     for (let i = 0; i < 8; i++) fx.after(i * 0.02, () => { const an = a - arc / 2 + arc * i / 7, [px, py] = at(x, y, an, r * 0.85, 0); motes(fx, px, py, 18, 3, 100); });
     fx.shake(8, a);
   });
+  E('adulatail', '亞杜拉・結晶尾鞭', '斬擊', '長尾貼地甩過一整圈：深藍粗弧、尾尖一道白亮鞭痕，沿弧線迸出碎晶與揚塵。', (fx, x, y, o) => {
+    const a = o.angle || 0, r = o.radius || 300, arc = o.arc || 6;
+    fx.slash(x, y, a, arc, r * 0.8, INK, 30, 0.4, { core: STEEL, trail: 3 }); fx.slash(x, y, a, arc, r, ICE, 4, 0.3);
+    fx.after(0.07, () => fx.slash(x, y, a - 0.1, arc, r * 0.6, DEEP, 7, 0.45, { core: TEAL, trail: 2 }));
+    for (let i = 0; i < 10; i++) fx.after(i * 0.018, () => { const [px, py] = at(x, y, a - arc / 2 + arc * i / 9, r * 0.86, 0); shards(fx, px, py, 14, 3, 160); if (i % 3 === 0) fx.smoke(px, py, 'rgba(60,80,120,0.3)', 1, 26); });
+    fx.shake(8, a);
+  });
+  E('adulacharge', '亞杜拉・怒吼衝撞', '位移', '龍軀貼地衝出：兩道青白氣流線夾著整條路徑，沿途碎晶一段段迸起，終點撞出一圈氣浪。', (fx, x, y, o) => {
+    const a = o.angle == null ? (o.src ? o.src.face : 0) : o.angle, len = o.len || 470, dur = o.dur || 0.5, r = o.src ? o.src.r : 90;
+    fx.shock(x, y, r * 0.4, r * 1.8, 0.4, ICE, 8, CORE);
+    for (const s of [-1, 1]) fx.streak(...at(x, y, a, 0, s * r * 0.75), ...at(x, y, a, len, s * r * 0.75), 6, s > 0 ? TEAL : ICE, dur + 0.25, true);
+    for (let i = 1; i <= 6; i++) fx.after(dur * i / 6, () => { const [px, py] = at(x, y, a, len * i / 6, 0); shards(fx, px, py, r * 0.6, 4, 200); motes(fx, px, py, r * 0.7, 4, 80); fx.smoke(px, py, 'rgba(60,80,120,0.3)', fx.budget(2), r * 0.6); });
+    fx.after(dur, () => { const [ex, ey] = at(x, y, a, len, 0); fx.shock(ex, ey, r * 0.5, r * 2, 0.45, TEAL, 10, CORE); flare(fx, ...at(ex, ey, a, r, 0), r * 0.5, 0.16); fx.shake(8, a); });
+  });
+  E('adulastars', '亞杜拉・星晶齊射', '投射物', '嘴前的晶簇碎成一波追蹤碎片：出手處四芒星閃，每枚碎片一條冰藍射線；放射狀的一波則是整圈星環。', (fx, x, y, o) => {
+    const a = o.angle || 0, r = o.src ? o.src.r : 90, n = o.n || 7, radial = !o.arc && n > 3, [mx, my] = radial ? [x, y] : at(x, y, a, r * 1.9, 0);
+    flare(fx, mx, my, r * 0.5, 0.18); fx.ring(mx, my, r * 0.2, r * (radial ? 1.8 : 0.9), 0.3, TEAL, 3);
+    for (let i = 0; i < n; i++) { const an = radial ? i * TAU / n + a : a + (n > 1 ? (i / (n - 1) - 0.5) * (o.arc || 0) : 0); fx.streak(...at(mx, my, an, r * 0.3, 0), ...at(mx, my, an, r * 0.3 + 150, 0), 3, i % 2 ? CRYS : CORE, 0.22, true); }
+    shards(fx, mx, my, r * 0.3, 10, 260); fx.shake(3);
+  });
+  E('adulamoonwave', '亞杜拉・月刃劍波', '投射物', '月刃橫甩放出的霜寒劍波：出手處一道冰藍寬月牙，每道劍波先拖出一條白亮新月殘影。', (fx, x, y, o) => {
+    const a = o.angle || 0, r = o.src ? o.src.r : 90, n = o.n || 3;
+    fx.slash(x, y, a, Math.max(1.6, (o.arc || 1) + 0.8), r * 3, DEEP, 22, 0.32, { core: MOON, trail: 3 });
+    for (let i = 0; i < n; i++) { const an = a + (n > 1 ? (i / (n - 1) - 0.5) * (o.arc || 0) : 0); fx.after(i * 0.03, () => { fx.slash(...at(x, y, an, r * 1.2, 0), an, 1.5, r * 1.6, ICE, 8, 0.3, { core: CORE }); fx.streak(...at(x, y, an, r * 2, 0), ...at(x, y, an, r * 2 + 260, 0), 4, MOON, 0.25, true); }); }
+    motes(fx, ...at(x, y, a, r * 2, 0), r, 12, 140); fx.grade('#7ad0ff', 0.08, 0.3); fx.shake(5, a);
+  });
   E('adulatakeoff', '亞杜拉・振翼起飛', '位移', '雙翼大力下壓：向外的氣浪環、碎羽與光屑被吹散。', (fx, x, y, o) => {
     const r = o.src ? o.src.r : 90;
     fx.shock(x, y, r * 0.4, r * 2.6, 0.5, ICE, 10, CORE); fx.ring(x, y, r * 2.4, r * 0.3, 0.4, TEAL, 4); motes(fx, x, y, r * 1.4, 14, 140); shards(fx, x, y, r, 6, 200); fx.shake(4);

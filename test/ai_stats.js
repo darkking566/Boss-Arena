@@ -41,7 +41,7 @@ function runOne(job) {
   const w = new BD.World(byId[a], byId[b], { seed, intro: 0.5, pace }); cur = w; hitLog = []; dodgeLog = [];
   while (!w.over && w.time < 400) { w.hitstop = 0; w.slowmo = 0; w.step(BD.STEP); }
   if (!w.over) return { timeout: true };
-  const bosses = w.bosses.map((x, i) => ({ id: x.def.id, win: w.winner === x, phase: x.phase, enemy: 1 - i, ults: x.stats.ults, read: x.stats.read, combo: x.stats.combo }));
+  const bosses = w.bosses.slice(0, 2).map((x, i) => ({ id: x.def.id, win: w.winner === x, phase: x.phase, enemy: 1 - i, ults: x.stats.ults, read: x.stats.read, combo: x.stats.combo }));
   return { time: w.time, hits: hitLog.map((h) => ({ t: h.t, b: h.b, src: h.src })), dodges: dodgeLog.map((d) => ({ t: d.t, b: d.b })), bosses, loserPhase: w.winner.enemy.phase };
 }
 
@@ -57,6 +57,7 @@ function report(results) {
     const hitLog = r.hits, dodgeLog = r.dodges;
     times.push(r.time);
     for (const d of dodgeLog) {
+      if (!r.bosses[d.b]) continue; // 隱藏夥伴（如神皮貴人）排在 bosses 第 3 位起，不列入統計
       const S = P[r.bosses[d.b].id]; S.dodges++;
       if (!hitLog.some((h) => h.b === d.b && h.t >= d.t && h.t <= d.t + 0.8)) S.dsucc++;
       const E = P[r.bosses[r.bosses[d.b].enemy].id]; E.oppDodges++;

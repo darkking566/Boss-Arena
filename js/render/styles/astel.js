@@ -10,7 +10,7 @@
   function info(inst) { // 每個技能的判定時間點：蓄力 = 到第一次判定，收勢 = 最後一次判定之後
     let v = CACHE.get(inst.v); if (v) return v;
     const hits = inst.v.actions.filter(a => a.do === 'hit' || a.do === 'rain' || a.do === 'gravpull').map(a => a.at).sort((a, b) => a - b);
-    v = { first: hits.length ? hits[0] : 1, last: hits.length ? hits[hits.length - 1] : 1, n: hits.length, hide: inst.v.actions.filter(a => a.do === 'hide'), land: inst.v.actions.filter(a => a.do === 'land') };
+    v = { first: hits.length ? hits[0] : 1, last: hits.length ? hits[hits.length - 1] : 1, n: hits.length, at: hits, hide: inst.v.actions.filter(a => a.do === 'hide'), land: inst.v.actions.filter(a => a.do === 'land') };
     CACHE.set(inst.v, v); return v;
   }
   function orb(g, x, y, rad, i, glow) { // 星屑球：實心球帶高光，key 以半徑 / 顏色分桶
@@ -32,15 +32,20 @@
     const inst = o.inst; if (!inst) return P;
     const I = info(inst), T = inst.t, id = inst.skill.id;
     const wind = ease(T / Math.max(0.2, I.first)), after = 1 - ease((T - I.last) / 0.55), live = T <= I.last + 0.3 ? 1 : 0;
+    const p = R.skillPace(inst, { hit: 1 }), w = ease(p.wind / 0.82), s = cl((p.wind - 0.82) / 0.18); // 每一下各自的蓄力 / 出手
+    let beat = 0; for (const h of I.at) beat = Math.max(beat, 1 - Math.abs(T - h) / 0.2); // 判定瞬間的脈衝
     if (id === 'cosmic_burst') { P.jaw = 0.15 + wind * 0.55; P.eye = 0.3 + wind * 0.7; P.spread = 0.5 * wind; P.wingOpen = 0.6 + 0.3 * wind; P.lunge = -0.2 * wind; }
     else if (id === 'dark_waves' || id === 'great_waves') { P.raise = wind * after; P.orb = wind * after; P.wingOpen = 0.55 + 0.3 * wind; P.lunge = -0.1 * wind; P.eye = 0.4 + 0.4 * wind; }
-    else if (id === 'sweeping_nebula') { const q = ease((T - I.first + 0.3) / 0.6); P.sweep = [wind * 0.9 - q * 1.5, -wind * 0.5 + q * 0.9]; P.armPush = 0.5 * live; }
-    else if (id === 'nebula_shove') { P.sweep = [wind * -0.7 + ease((T - I.first + 0.2) / 0.3) * 1.2, 0]; P.armPush = 0.35 * live; P.lunge = 0.25 * ease((T - I.first + 0.2) / 0.3) * after; }
-    else if (id === 'bite' || id === 'crushing_bite') { P.jaw = 0.12 + (id === 'crushing_bite' ? wind : wind * 0.6) * 0.6 * after + 0.2 * live; P.lunge = 0.35 * Math.sin(U.clamp(T / (I.last + 0.4), 0, 1) * Math.PI); P.eye = id === 'crushing_bite' ? 0.35 + wind * 0.65 : P.eye; }
-    else if (id === 'tail_lash') { P.tailUp = ease(T / I.first) * after; P.spread = 0.2; P.eye = 0.45; }
-    else if (id === 'tail_sting') { P.tailUp = 1 * after * Math.min(1, T / 0.6); P.eye = 0.5; }
+    else if (id === 'sweeping_nebula') { const sw = p.snap > 0 ? -0.6 * p.snap : 0.9 * w - 1.5 * s; P.sweep = p.i % 2 ? [-0.3, sw] : [sw, -0.3]; P.armPush = 0.5 * live; P.lunge = 0.12 * (p.snap > 0 ? p.snap : s); } // 左右臂輪流：舉起 → 橫掃
+    else if (id === 'nebula_shove') { const k = p.snap > 0 ? p.snap : s, back = -0.7 * w * (1 - s) + 1.2 * k; P.sweep = [back, back]; P.armPush = k; P.lunge = 0.25 * k - 0.1 * w * (1 - s); } // 雙掌後收 → 連推
+    else if (id === 'bite') { P.jaw = p.snap > 0 ? 0.05 : 0.12 + 0.6 * w * (1 - s); P.lunge = p.snap > 0 ? 0.35 * p.snap : -0.1 * w + 0.45 * s; } // 每一口：張鉗後縮 → 前撲合攏
+    else if (id === 'crushing_bite') { P.jaw = 0.12 + (id === 'crushing_bite' ? wind : wind * 0.6) * 0.6 * after + 0.2 * live; P.lunge = 0.35 * Math.sin(U.clamp(T / (I.last + 0.4), 0, 1) * Math.PI); P.eye = id === 'crushing_bite' ? 0.35 + wind * 0.65 : P.eye; }
+    else if (id === 'tail_lash') { P.tail = (p.i ? -1 : 1) * (p.snap > 0 ? -1.3 * p.snap : 0.9 * w - 2.2 * s); P.tailUp = 0.3 * w * (1 - s); P.spread = 0.2; P.eye = 0.45; } // 尾巴甩向一側蓄力 → 鞭過去
+    else if (id === 'tail_sting') { P.tailUp = (1 - 1.7 * Math.max(0, beat)) * after * Math.min(1, T / Math.max(0.2, I.first * 0.6)); P.eye = 0.5 + 0.4 * Math.max(0, beat); } // 尾巴高翹，每一刺往下戳出
     else if (id === 'flying_nebula') { P.wingOpen = 0.85; P.flap = 0.5; P.spread = 0.6 * live; P.sweep = [wind * 1.1 - live * 0.4, wind * 1.1 - live * 0.4]; }
-    else if (id === 'meteorite' || id === 'star_clones') { P.wingOpen = 0.95; P.flap = 0.4; P.raise = wind * after; P.orb = wind * 0.6; P.eye = 0.5 + wind * 0.5; P.spread = 0.4 * wind; }
+    else if (id === 'meteorite' || id === 'star_clones') { P.wingOpen = 0.95; P.flap = 0.4; P.raise = wind * after; P.orb = wind * 0.6; P.eye = 0.5 + wind * 0.5; P.spread = 0.4 * wind;
+      if (id === 'star_clones' && beat > 0) { P.spread = 0.4 - 0.9 * beat; P.jaw = 0.1 + 0.4 * beat; P.orb = Math.max(P.orb, beat); } } // 每個分身抓下時本體六臂一合
+    else if (id === 'teleport_grab') { const L = I.land[0]; if (L && T >= L.at) { const q = ease((T - L.at) / 0.35); P.spread = 0.9 * (1 - q) - 0.4 * q * after; P.jaw = 0.1 + 0.5 * (1 - q); P.armPush = 1 - q; P.raise = 0.3 * (1 - q); P.eye = 1 - 0.5 * q; } else { P.wingOpen = 0.9; P.flap = 0.5; P.eye = 0.6; } } // 落地：六臂張開 → 抱攏
     else if (id === 'ult') { P.wingOpen = 0.6 + 0.35 * wind; P.raise = wind * 0.9; P.orb = wind; P.eye = 0.5 + wind * 0.5; P.glow = 1; P.jaw = 0.1 + wind * 0.3; }
     return P;
   }

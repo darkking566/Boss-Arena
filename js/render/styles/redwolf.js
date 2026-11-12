@@ -89,13 +89,27 @@
   function wolf(g, o, t, r, st) {
     const inst = o.inst, skill = inst && inst.skill, id = skill ? skill.id : '', moving = st === 'dodge' || (inst && inst.dash) || Math.hypot(o.vx || 0, o.vy || 0) > 25;
     const pace = inst ? R.skillPace(inst, { hit: 1, dash: 1, proj: 1, glintblades: 1 }) : { wind: 0, snap: 0 };
-    const swordSkill = /sword|hunt|ult/.test(id), spin = id === 'sword_spin' && inst ? Math.sin(Math.min(1, inst.t / 1.1) * Math.PI) * TAU : 0;
-    g.save(); g.rotate(spin); g.scale(1 + pace.snap * 0.06, 1 - pace.wind * 0.04);
-    tail(g, r, t, moving);
+    const swordSkill = /sword|hunt|ult/.test(id), T = inst ? inst.t : 0, acts = inst ? inst.v.actions : [], win = (a, b) => U.clamp((T - a) / (b - a), 0, 1);
+    // 以下全讀實際時間軸：圓舞＝在判定前旋身一整圈；凝輝劍＝仰首長嗥；撲躍＝身體拉長；落地＝一沉
+    let spin = 0, cast = 0, sink = 0, biteYaw = 0;
+    for (const a of acts) {
+      if (a.do === 'hit' && a.fx === 'redwolfwhirl' && T > a.at - 0.4 && T < a.at + 0.2) { const q = win(a.at - 0.4, a.at + 0.2); spin = q * q * (3 - 2 * q) * TAU; }
+      if (a.do === 'glintblades') cast = Math.max(cast, T < a.at ? win(a.at - 0.3, a.at) : 1 - win(a.at + 0.1, a.at + 0.45));
+      if (a.do === 'land' && T >= a.at) sink = Math.max(sink, 1 - win(a.at, a.at + 0.35));
+    }
+    const leap = inst && inst.dash ? 1 : 0, crouch = id === 'pounce' && !leap && pace.n === 0 ? pace.wind : 0;
+    if (id === 'bite' && pace.a) biteYaw = (pace.i % 2 ? -1 : 1) * (0.35 * pace.wind - 0.5 * pace.snap);
+    if (cast > 0.02) { // 腳下浮起的輝石符環
+      g.strokeStyle = 'rgba(120,217,255,' + (0.55 * cast).toFixed(3) + ')'; g.lineWidth = 2;
+      g.beginPath(); g.arc(0, 0, r * (1.5 + 0.5 * cast), 0, TAU); g.stroke();
+      for (let i = 0; i < 5; i++) { const a = -t * 1.6 + i * TAU / 5; g.beginPath(); g.arc(0, 0, r * 1.75, a, a + 0.5); g.stroke(); }
+    }
+    g.save(); g.rotate(spin); g.scale(1 + pace.snap * 0.06 + leap * 0.16 - crouch * 0.1 + sink * 0.08, 1 - pace.wind * 0.04 - leap * 0.08 + crouch * 0.06 + sink * 0.1);
+    tail(g, r, t, moving || cast > 0.1);
     // Four legs with different fore/hind joints; long, slender, digitigrade paws.
     for (const s of [-1, 1]) for (const front of [false, true]) {
       const step = moving ? Math.sin(t * 17 + (front ? 0 : Math.PI) + (s < 0 ? Math.PI : 0)) * r * 0.33 : Math.sin(t * 2) * r * 0.02;
-      const x = (front ? 0.65 : -0.95) * r, y = s * r * 0.52;
+      const x = (front ? 0.65 + leap * 0.3 - crouch * 0.12 : -0.95 - leap * 0.25) * r, y = s * r * 0.52;
       g.strokeStyle = DARK; g.lineWidth = r * 0.21; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y); g.lineTo(x - r * 0.2 + step, y + s * r * 0.4); g.lineTo(x + step + r * (front ? 0.28 : -0.12), y + s * r * 0.7); g.stroke();
       g.strokeStyle = '#9e5533'; g.lineWidth = r * 0.12; g.stroke();
       const px = x + step + r * (front ? 0.28 : -0.12), py = y + s * r * 0.7;
@@ -103,7 +117,7 @@
       for (let j = -1; j <= 1; j++) { g.strokeStyle = '#c0ae91'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(px + r * 0.17, py + j * r * 0.07); g.lineTo(px + r * 0.27, py + j * r * 0.075); g.stroke(); }
     }
     torso(g, r);
-    g.save(); g.translate(r * (0.8 + pace.snap * 0.12), 0); g.rotate((id === 'bite' ? pace.snap * 0.25 : 0));
+    g.save(); g.translate(r * (0.8 + pace.snap * 0.12 + leap * 0.14 - cast * 0.16 - crouch * 0.1), 0); g.rotate(biteYaw); if (cast > 0.02) g.scale(1 - cast * 0.14, 1 + cast * 0.08); // 仰首：俯視下吻部縮短
     // Triangular upright ears, cheek ruff, a distinctly long muzzle.
     for (const s of [-1, 1]) {
       tuft(g, 0, s * r * 0.3, s * 1.2 - 0.25, r * 0.73, r * 0.22, '#a15632');
@@ -112,7 +126,7 @@
     }
     g.fillStyle = '#a15733'; g.strokeStyle = '#472a20'; g.lineWidth = 1.4;
     g.beginPath(); g.moveTo(-r * 0.05, -r * 0.39); g.quadraticCurveTo(r * 0.55, -r * 0.32, r * 0.95, -r * 0.14); g.lineTo(r * 1.03, 0); g.lineTo(r * 0.95, r * 0.14); g.quadraticCurveTo(r * 0.55, r * 0.32, -r * 0.05, r * 0.39); g.closePath(); g.fill(); g.stroke();
-    const jaw = id === 'bite' || id === 'pounce' || st === 'transition' ? 0.1 + pace.wind * 0.18 : 0.04;
+    const jaw = Math.max(cast * 0.2, id === 'bite' || id === 'pounce' || st === 'transition' ? 0.1 + pace.wind * 0.18 - (id === 'bite' ? pace.snap * 0.2 : 0) : leap ? 0.14 : 0.04);
     g.fillStyle = '#35151c'; g.beginPath(); g.ellipse(r * 0.7, 0, r * 0.33, r * jaw, 0, 0, TAU); g.fill();
     for (const s of [-1, 1]) {
       tuft(g, r * 0.5, s * r * jaw, -s * Math.PI / 2, r * 0.13, r * 0.035, '#e8d7b2');
@@ -121,6 +135,11 @@
       g.strokeStyle = 'rgba(90,205,255,0.35)'; g.lineWidth = 4; g.stroke();
     }
     g.fillStyle = '#201d20'; g.beginPath(); g.ellipse(r * 1.02, 0, r * 0.12, r * 0.135, 0, 0, TAU); g.fill();
+    if (cast > 0.02) { // 嗥叫時口前聚起的輝石光
+      g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = cast;
+      g.fillStyle = 'rgba(120,217,255,0.45)'; g.beginPath(); g.arc(r * 1.15, 0, r * (0.25 + 0.2 * Math.sin(t * 20) * 0.3 + 0.2 * cast), 0, TAU); g.fill();
+      g.fillStyle = '#eaffff'; g.beginPath(); g.arc(r * 1.15, 0, r * 0.1, 0, TAU); g.fill(); g.restore();
+    }
     if (swordSkill || (st === 'transition')) {
       g.save(); g.translate(r * 0.8, 0);
       const off = id === 'sword_combo' ? (pace.i % 2 ? -1 : 1) * (1.4 - pace.snap * 2.3) : -0.9 + pace.wind * 1.3 - pace.snap * 1.8;
