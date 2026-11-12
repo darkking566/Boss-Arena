@@ -156,6 +156,14 @@
         `<div><h3>小兵潮（生存模式）</h3><div class="d">四面八方湧來的低級雜兵，每 1.5 秒一波，數量隨時間越來越多、沒有上限；${Object.values(BD.GRUNTS).map((g) => g.name).join(' / ')} 會陸續登場。Boss 倒下即結束，成績是撐住的秒數與擊倒數。</div></div>`;
       return;
     }
+    if (state.mode === 'lane') { // 拉鋸戰：說明規則（Boss 在戰鬥中花錢召喚，選角不用選）
+      const UN = BD.LANE_UNITS, E = BD.LANE_ECON, bs = Object.values(UN).filter((g) => g.cost);
+      $('#detail').innerHTML = `<div><h3>🏰 拉鋸戰（Nexus Wars 式）</h3><div class="d">你是藍方指揮官，對手是紅方 AI。你不操控任何單位：只管蓋建築、存錢、召喚 Boss。兵與 Boss 會自己沿兵線推進，先打掉對方核心的一方獲勝。</div>
+        <div class="d">開局 ${E.startGold} 金並送一座兵營；每 ${E.incomeT} 秒發收入（基本 ${E.baseIncome} + 建築），擊殺、拆建築、打倒 Boss 都有賞金。最多 ${E.slots} 座建築，蓋在自家核心前方，會被敵人拆掉。</div>
+        <div class="d">建築：${bs.map((g) => `${g.name} 💰${g.cost}`).join('、')}。蓋召喚祭壇後可花 ${E.bossBase} + 星數×${E.bossPerStar} 金召喚任一位 Boss（同時在場數 = 祭壇數，最多 ${E.maxBosses} 位），由 AI 操控跟著兵推進。</div>
+        <div class="d">鏡頭：A/D 或 ←/→ 捲動、滾輪或 W/S 縮放、拖曳場地、空白鍵回到全覽。</div></div>`;
+      return;
+    }
     if (state.mode === 'hunt4') { // 狩獵：顯示目標 Boss（右側選的）與獵人隊
       $('#detail').innerHTML = detailHtml(BD.bossById[b], 1).replace('紅方：', '目標：') +
         `<div><h3>獵人隊（4 人，AI 操控）· 已累積 ${state.h4save.matches} 場</h3>${BD.HUNT4.HUNTERS.map((h) => h4Line(h, b)).join('')}
@@ -220,6 +228,7 @@
       return;
     }
     if (state.mode === 'hunt4') { startHunt4(state.pick[1], state.map); return; }
+    if (state.mode === 'lane') { startLane({ watch: $('#optLaneWatch').checked, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map }); return; }
     if (state.mode === 'horde') { startHorde(state.pick[0], { player: $('#optPlayer').checked ? 0 : null, speed: +$('#optSpeed').value, pace: $('#optPace').value || BD.DEFAULT_PACE, map: state.map }); return; }
     if (state.mode === 'team' && (!state.team[0].length || !state.team[1].length)) { alert('3v3：兩隊各至少要選 1 位 Boss'); return; }
     start(state.mode === 'team' ? state.team[0].slice() : state.pick[0], state.mode === 'team' ? state.team[1].slice() : state.pick[1], {
@@ -229,11 +238,13 @@
 
   // ── 模式切換（對戰 / 訓練場）──
   function setMode(mode) {
-    state.mode = mode === 'train' || mode === 'team' || mode === 'hunt4' || mode === 'horde' ? mode : 'duel';
+    state.mode = mode === 'train' || mode === 'team' || mode === 'hunt4' || mode === 'horde' || mode === 'lane' ? mode : 'duel';
     const train = state.mode === 'train', team = state.mode === 'team', h4 = state.mode === 'hunt4', hd = state.mode === 'horde';
     $('#select').classList.toggle('training', train);
     $('#select').classList.toggle('hunt4', h4);
     $('#select').classList.toggle('horde', hd);
+    $('#select').classList.toggle('lane', state.mode === 'lane');
+    $('#modeLane').classList.toggle('on', state.mode === 'lane');
     $('#modeHorde').classList.toggle('on', hd);
     $('#modeHunt4').classList.toggle('on', h4);
     $('#modeDuel').classList.toggle('on', state.mode === 'duel');
@@ -242,10 +253,11 @@
     $('#sideA h2').textContent = train || hd ? '選擇 Boss' : team ? '藍方（選 3 位）' : h4 ? '獵人隊' : '藍方';
     $('#sideB h2').textContent = team ? '紅方（選 3 位）' : h4 ? '選擇目標 Boss' : '紅方';
     $('#sideA h2').className = 'blue';
-    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : h4 ? '🐉 出發狩獵' : hd ? '🪲 迎戰小兵潮' : '⚔ 開始對決';
+    $('#btnStart').textContent = train ? '🎯 進入訓練場' : team ? '👥 開始 3v3' : h4 ? '🐉 出發狩獵' : hd ? '🪲 迎戰小兵潮' : state.mode === 'lane' ? '🏰 開始拉鋸戰' : '⚔ 開始對決';
     refreshSelect();
   }
   $('#modeHorde').addEventListener('click', () => setMode('horde'));
+  $('#modeLane').addEventListener('click', () => setMode('lane'));
   $('#modeDuel').addEventListener('click', () => setMode('duel'));
   $('#modeTrain').addEventListener('click', () => setMode('train'));
   $('#modeTeam').addEventListener('click', () => setMode('team'));
@@ -303,7 +315,7 @@
     sel.addEventListener('change', () => setPace(sel.value));
     setPace(BD.DEFAULT_PACE);
   })();
-  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent, state.hunt.arms) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : state.resultKind === 'horde' ? startHorde(state.last.horde, state.last.opts) : start(state.last.a, state.last.b, state.last.opts)));
+  $('#btnRematch').addEventListener('click', () => (state.resultKind === 'hunt' ? startHunt(state.hunt.boss, state.hunt.map, state.hunt.agent, state.hunt.arms) : state.resultKind === 'hunt4' ? startHunt4(state.hunt4.boss, state.hunt4.map) : state.resultKind === 'horde' ? startHorde(state.last.horde, state.last.opts) : state.resultKind === 'lane' ? startLane(state.last.opts) : start(state.last.a, state.last.b, state.last.opts)));
   $('#btnSwap').addEventListener('click', () => start(state.last.b, state.last.a, state.last.opts));
   $('#btnMenu').addEventListener('click', () => show(state.resultKind === 'hunt' ? 'hunt' : 'select'));
   $('#modeHunt').addEventListener('click', () => show('hunt'));
@@ -317,6 +329,7 @@
     $('#result').classList.toggle('hunt4-result', name === 'result' && state.resultKind === 'hunt4');
     $('#resGrowth').hidden = name !== 'result' || state.resultKind !== 'hunt4';
     if (name !== 'game' && BD.TrainingUI) BD.TrainingUI.hide();
+    if (BD.LaneUI) BD.LaneUI.hide();
     if (BD.HuntUI) { if (name === 'hunt') BD.HuntUI.open(msg); else BD.HuntUI.hide(); }
     if (name === 'select' || name === 'hunt') state.world = null;
     if (name === 'select') refreshSelect();
@@ -348,6 +361,20 @@
     return w;
   }
   state.startHorde = startHorde;
+
+  // 拉鋸戰：玩家是藍方指揮官（只管經濟與建築），紅方 AI；watch = 雙方都交給 AI（js/engine/lane.js）
+  function startLane(opts) {
+    opts = Object.assign({ watch: false, speed: 1, pace: BD.DEFAULT_PACE, map: state.map }, opts || {});
+    state.last = { lane: true, opts };
+    const w = new BD.World(BD.bossById.dummy, BD.bossById.dummy, { seed: opts.seed, pace: opts.pace, map: opts.map, intro: 0, lane: true, laneAI: [opts.watch, true] });
+    w.speed = opts.speed;
+    state.world = w; state.resultShown = false;
+    view.player = null; view.focus = null; view.showLog = false; // 戰鬥紀錄會被底部建築面板擋住，預設關（L 可開）
+    show('game');
+    if (BD.LaneUI) BD.LaneUI.show(w);
+    return w;
+  }
+  state.startLane = startLane;
 
   // 訓練場世界：Boss 對訓練假人（不計勝負、不會結束）
   function startTraining(a, opts) {
@@ -465,6 +492,21 @@
     state.screen = 'result';
   }
 
+  function showLaneResult(w) {
+    state.resultShown = true; state.resultKind = 'lane';
+    const L = w.lane, win = w.winner.team, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
+    $('#btnRematch').textContent = '🔁 再打一場'; $('#btnSwap').style.display = 'none'; $('#btnMenu').textContent = '↩ 回選單';
+    $('#resTitle').innerHTML = `<span style="color:${R.TEAM[win]}">${win ? '紅方' : '藍方'}</span> 獲勝！` + (L.ai[0] ? '' : win ? '　你的核心被摧毀了' : '　你摧毀了對方核心');
+    $('#resSub').textContent = `戰鬥時間 ${mm} 分 ${ss} 秒`;
+    const bs = (t) => L.summoned.filter((b) => b.team === t);
+    const rows = [['蓋過的建築', (t) => L.built[t]], ['擊殺', (t) => L.kills[t]], ['召喚 Boss', (t) => bs(t).length],
+      ['召喚過的 Boss', (t) => bs(t).map((b) => `<span style="color:${b.def.color}">${b.name}</span>`).join('、') || '—'], ['剩餘金錢', (t) => Math.floor(L.gold[t])], ['核心剩餘', (t) => (L.cores[t].alive ? Math.ceil(L.cores[t].hp) : 0)]];
+    $('#resStats').innerHTML = `<tr><th></th><th style="color:${R.TEAM[0]}">藍方${L.ai[0] ? '' : '（你）'}</th><th style="color:${R.TEAM[1]}">紅方</th></tr>` +
+      rows.map(([n, f]) => `<tr><td>${n}</td><td>${f(0)}</td><td>${f(1)}</td></tr>`).join('');
+    show('result');
+    state.screen = 'result';
+  }
+
   function showHordeResult(w) {
     state.resultShown = true; state.resultKind = 'horde';
     const H = w.horde, b = H.hero, mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
@@ -530,7 +572,7 @@
     }
     const w = state.world;
     if (!w || state.screen !== 'game') return;
-    if (k === 'Tab' && !w.training && !w.hunt && !w.horde) { // 聚焦模式：全體 → 每位存活 Boss → 全體
+    if (k === 'Tab' && !w.training && !w.hunt && !w.horde && !w.lane) { // 聚焦模式：全體 → 每位存活 Boss → 全體
       const order = [null, ...w.bosses.map((b, i) => (b.state !== 'dead' ? i : -1)).filter((i) => i >= 0)];
       view.focus = order[(order.indexOf(view.focus) + 1) % order.length];
       return;
@@ -581,7 +623,8 @@
           view.player = w.training.mode === 'player' ? 0 : null;
           if (BD.TrainingUI) BD.TrainingUI.update(w);
         }
-        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : w.hunt4 ? showHunt4Result : w.horde ? showHordeResult : showResult)(w);
+        if (w.lane && BD.LaneUI) BD.LaneUI.update(w, dt);
+        if (w.over && !state.resultShown) (w.hunt ? showHuntResult : w.hunt4 ? showHunt4Result : w.horde ? showHordeResult : w.lane ? showLaneResult : showResult)(w);
       } else {
         if (R.perf) R.perf.push(frameMs, 0);
         ctx.fillStyle = '#050407'; ctx.fillRect(0, 0, R.W, R.H);
@@ -593,6 +636,7 @@
   }
   if (BD.Touch) BD.Touch.create($('#app'), input, state, view);
   if (BD.TrainingUI) BD.TrainingUI.create($('#app'), canvas);
+  if (BD.LaneUI) BD.LaneUI.create($('#app'), canvas, input);
   BD.HuntUI.create($('#app'), { onStart: startHunt, onBack: () => show('select') });
   setMode(state.mode);
   buildSelect();

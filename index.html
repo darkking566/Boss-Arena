@@ -16,7 +16,7 @@
     <div class="sel-wrap">
       <h1>Boss<span>鬥技場</span></h1>
       <p class="sub">俯視角 Boss 對決 —— 選出兩位 Boss，觀看具有魂系 AI 的牠們一決勝負</p>
-      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button><button id="modeHunt4" class="mode">🐉 狩獵</button><button id="modeHorde" class="mode">🪲 小兵潮</button></div>
+      <div class="modes"><button id="modeDuel" class="mode on">⚔ 對戰</button><button id="modeTeam" class="mode">👥 3v3</button><button id="modeTrain" class="mode">🎯 訓練場</button><button id="modeHunt" class="mode">🗡 獵魂</button><button id="modeHunt4" class="mode">🐉 狩獵</button><button id="modeHorde" class="mode">🪲 小兵潮</button><button id="modeLane" class="mode">🏰 拉鋸戰</button></div>
       <div class="cols">
         <div class="side" id="sideA"><h2 class="blue">藍方</h2><div class="cards"></div><div class="roster4 hunt4-only" id="roster4"></div></div>
         <div class="vs">VS</div>
@@ -35,7 +35,8 @@
       </div>
       <div class="opts">
         <label class="chk duel-only horde-ok"><input type="checkbox" id="optPlayer"> 由我親自操控藍方 Boss（預設為 AI 對 AI 觀戰；小兵潮模式則是 AI 自己撐）</label>
-        <label class="duel-only horde-ok">觀戰速度
+        <label class="chk lane-only"><input type="checkbox" id="optLaneWatch"> 雙方都交給 AI 指揮官（觀戰）</label>
+        <label class="duel-only horde-ok lane-ok">觀戰速度
           <select id="optSpeed"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select>
         </label>
         <label class="chk"><input type="checkbox" id="optTele" checked> 顯示攻擊落點預警框</label>
@@ -258,8 +259,10 @@
 <script src="js/render/training.js" data-browser></script>
 <script src="js/render/hunt.js" data-browser></script>
 <script src="js/render/hunt4.js" data-browser></script>
+<script src="js/render/lane.js" data-browser></script>
 <script src="js/render/hud.js" data-browser></script>
 <script src="js/training-ui.js" data-browser></script>
+<script src="js/lane-ui.js" data-browser></script>
 <script src="js/hunt-ui.js" data-browser></script>
 <script src="js/touch.js" data-browser></script>
 <script src="js/main.js" data-browser></script>

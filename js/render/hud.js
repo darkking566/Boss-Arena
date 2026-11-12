@@ -151,6 +151,7 @@
     }
   }
   function drawHUD(ctx, w, view, t) {
+    if (w.lane && R.drawLaneHUD) { R.drawLaneHUD(ctx, w, view, t); return; }
     const h4 = w.hunt4 && !w.hunt4.solo; // 4v1 才畫隊伍面板 / 力竭；獵魂代理拿狩獵武器時用一般 1v1 面板，部位列兩者都畫
     if (h4) { drawTeamPanel(ctx, w, 0, t); drawPanel(ctx, w.hunt4.boss, w, t); }
     else if (w.teamMode) {
@@ -228,6 +229,7 @@
   // 團隊戰：框住所有存活 Boss 的範圍，太散時鏡頭拉遠（c.z < 1，最遠 0.4 倍）讓每個人都在畫面內
   // 聚焦模式（view.focus，Tab 切換）：鏡頭只跟那一位，正常倍率；他倒下就回到全體視角
   function followCamera(w, t, view) {
+    if (w.lane && R.laneCam) return R.laneCam(w, t, R.cam); // 拉鋸戰：玩家自己捲動 / 縮放（js/render/lane.js）
     const A = BD.ARENA, c = R.cam, [a, b] = w.bosses, f = view.focus != null && w.bosses[view.focus];
     let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, tz = 1;
     if (f && f.state !== 'dead') { mx = f.x; my = f.y; } else if (view.focus != null) view.focus = null;
@@ -299,6 +301,7 @@
     drawVeil(ctx, w, 0, 0, BD.ARENA.w, BD.ARENA.h);
     if (!R.hideTele) drawTelegraphs(ctx, w, t);
     drawPillars(ctx);
+    if (w.lane && R.drawLaneGround) R.drawLaneGround(ctx, w, t);
     drawMinions(ctx, w, t);
     // 沉重打擊的凍結幀：Boss 位置做極短抖動（純視覺，不動世界狀態）
     const frz = w.freezeF > 0;
@@ -320,6 +323,7 @@
     // F6 AI 偵錯覆蓋層：在震動位移內以競技場座標繪製
     if (R.aiDebug && R.drawAIDebug) R.drawAIDebug(ctx, w, t);
     if (w.hunt4 && R.drawHunt4World) R.drawHunt4World(ctx, w, t);
+    if (w.lane && R.drawLaneWorld) R.drawLaneWorld(ctx, w, t);
     drawTexts(ctx, w);
     if (view.focus != null) {
       const f = w.bosses[view.focus]; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * 30;
@@ -353,7 +357,8 @@
       ctx.font = `${player ? 12 : 13}px ${FONT}`;
       ctx.fillText((player ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F C V G 技能 · X 大招 · 空白鍵 翻滾 · ' + hint : hint), R.W - 50, R.H - 6);
     } else {
-      ctx.fillText(w.hunt ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F 技能 · X 大招 · 空白鍵 翻滾 · 1 生命藥水 · 2 法力藥水 · P 暫停 · Esc 回據點'
+      ctx.fillText(w.lane ? 'A/D 或 ←/→ 捲動 · 滾輪 / W S 縮放 · 拖曳場地捲動 · 空白鍵 全覽 · 1/2/3/4 速度 · P 暫停 · L 戰鬥紀錄 · Esc 回選單'
+        : w.hunt ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F 技能 · X 大招 · 空白鍵 翻滾 · 1 生命藥水 · 2 法力藥水 · P 暫停 · Esc 回據點'
         : view.player != null
         ? 'WASD 移動 · 滑鼠瞄準 · 左/右鍵 Q E R F C V G 技能 · X 大招 · 空白鍵 翻滾 · P 暫停 · Esc 選單'
         : '1/2/3/4 切換速度 ×1/×2/×3/×0.5 · Tab 聚焦 · P 暫停 · L 戰鬥紀錄 · Esc 回選單 · F3 效能 · F4 快取 · F6 AI', R.W - 50, R.H - 6);
