@@ -592,12 +592,13 @@
       const arming = z.t < z.delay, life = z.dur + z.delay - z.t, fade = U.clamp(life / 0.6, 0, 1) * U.clamp((z.t - z.delay + 0.3) / 0.3, 0.3, 1);
       ctx.save(); ctx.globalAlpha = fade;
       const col = { lava: ['255,110,30', '255,200,80'], blizzard: ['160,220,255', '240,250,255'], poison: ['120,200,60', '200,255,120'],
-        acid: ['170,230,40', '230,255,120'], scarletrot: ['158,65,47', '220,149,111'], rimefog: ['117,178,208', '217,241,248'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'] }[z.kind] || ['255,255,255', '255,255,255'];
+        acid: ['170,230,40', '230,255,120'], scarletrot: ['158,65,47', '220,149,111'], rimefog: ['117,178,208', '217,241,248'], caltrops: ['120,120,130', '200,200,210'], fire: ['255,80,20', '255,200,80'], blackfire: ['216,28,74', '14,2,18'], bloodflame: ['200,16,40', '255,120,100'] }[z.kind] || ['255,255,255', '255,255,255'];
       if (arming) {
         ctx.setLineDash([8, 6]); ctx.strokeStyle = `rgba(${col[1]},0.8)`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(z.x, z.y, z.r * (z.t / z.delay), 0, U.TAU); ctx.stroke();
         ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, U.TAU); ctx.stroke(); ctx.restore(); continue;
       }
+      if (R.zoneStyles && R.zoneStyles[z.kind]) { R.zoneStyles[z.kind](ctx, z, t); ctx.restore(); continue; } // 造型檔自帶的區域外觀（例如蒙格的血焰池）
       // 底盤（徑向漸層 + 外框）為靜態精靈；淡出用的 globalAlpha 照舊套用
       ctx.translate(z.x, z.y);
       R.blit(ctx, 'zone:' + z.kind + ':' + z.r, z.r * 2 + 8, z.r * 2 + 8, z.r + 4, z.r + 4, (g) => {
@@ -1437,7 +1438,7 @@
     ctx.globalAlpha = 1;
   }
   // 純黑場地：技能的光源（光暈、光柱、光束、火 / 雷 / 毒區域）在地面上投出柔和的加亮光池；只畫視覺，不影響戰鬥
-  const ZONE_LIGHT = { lava: '#ff6e1e', fire: '#ff5014', blackfire: '#d81c4a', blizzard: '#a0dcff', poison: '#78c83c', acid: '#aae628' };
+  const ZONE_LIGHT = { lava: '#ff6e1e', fire: '#ff5014', blackfire: '#d81c4a', bloodflame: '#e0142e', blizzard: '#a0dcff', poison: '#78c83c', acid: '#aae628' };
   function drawLights(ctx, w) {
     if (BD.ARENA.biomes[0].id !== 'dark') return;
     const fx = w.fx;

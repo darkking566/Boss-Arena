@@ -74,6 +74,8 @@
   R.defineStatusIcon('respite', { glyph: '羊', color: '#eef7ff' });
   R.defineStatusIcon('tyrantwrath', { glyph: '怒', color: '#ffd86a' });
   R.defineStatusIcon('draconicsurge', { glyph: '雷', color: '#ff4a4a' });
+  R.defineStatusIcon('bloodcurse', { glyph: '咒', color: '#ff2a40' }); // 鮮血君王蒙格的血之咒印（Trēs／Duo／Ūnus）
+  R.defineStatusIcon('bloodboon', { glyph: '恩', color: '#ff6a5a' }); // 蒙格被動「血之恩寵」
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });
   R.defineStatusIcon('dragonblight', { glyph: '龍', color: '#d0143c' });
   R.defineStatusIcon('tsukuyomi', { glyph: '月', color: '#ff3048' });

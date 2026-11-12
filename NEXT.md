@@ -1,3 +1,13 @@
+# 鮮血君王蒙格：已完成，待試玩
+
+更新：2026-11-12。使用者要求先大量考據並收集至少 30 張參考圖（最好有概念圖／設計稿），再新增《艾爾登法環》鮮血君王蒙格，技能、演出、特效越華麗越好。
+
+- 考據：`docs/bosses/mohg.md`；圖鑑 `docs/research/mohg/gallery.html`，逐圖來源 `IMAGE-INDEX.md`，範圍與缺口 `RESEARCH-LOG.md`。119 張候選全看過，採用 78 張，含 **2 張蒙格官方設定稿**（一階段正背面、二階段展翼＋三叉戟，Creative Uncut）與 1 張官方畫作；排除 41 張（含 Miklix 站 12 張 AI 風格插圖）。wiki.gg 的概念圖檔回 403，沒有繞過。
+- 角色：13 招＋兩階段大招；被動「血之恩寵」（任一方出血爆發 → 10 秒傷害 ×1.15）、咒印倒數（88%／74%／60% 念 Trēs／Duo／Ūnus 套無法閃避的咒印）、半血轉階段三度「Nihil」依咒印吸血回復並展開黑羽。新狀態 `bloodcurse`、`bloodboon`；新動作 `bloodpools`、`curse`、`nihil`；23 種專屬特效、新元素 `bloodflame`；血焰池用新的通用繪圖掛勾 `R.zoneStyles`（`js/render/world.js`，純繪圖）。
+- 強度：HP 3,400、速度 215、`sizeMul` 1.3、4 星；33 位對手 × 3 種子 × 交換藍紅（每節奏 198 場）：輕快 50.0%、沉重 51.5%。沉重節奏沒有個別倍率。
+- 驗證：輕快／沉重歷史指紋各 3174/3174 `FINGERPRINT IDENTICAL`；`npm test` 除 `test/sim.js` 的「全技能都用過」一項外全部通過——失敗的是**桂雷爾的 `dive_bomb` 從未被使用**，未加蒙格的分支上一樣失敗（既有問題，未處理，避免改到桂雷爾行為與指紋）。另補上漏掉的 `draconictreesentinel` 獵魂套裝資料（`js/data/hunt.js`），原本讓 `hunt.test` 失敗；`npm run test:mohg`（咒印、Nihil、血之恩寵、二階段招式、puff 色票、特效不影響戰鬥）；`node test/mohg_browser.js`（真實 Chromium、file://）：20 張定格畫面、AI 對戰正常結算、圖鑑 78 張全載入、23 特效 × 23 元素、頁面例外 0（畫面 `screenshots/mohg/`）。
+- 尚待使用者試玩並確認外觀（俯視的捲角頭冠、肩甲、羽翼像不像）、招式節奏與兩段大招；`driver-accepted = false`。
+
 # 飛龍桂雷爾：已完成，待試玩
 
 更新：2026-11-11。使用者要求先大量考據並收集至少 30 張參考圖（最好有概念圖／設計稿），再新增《艾爾登法環》飛龍桂雷爾，演出越華麗越好。
