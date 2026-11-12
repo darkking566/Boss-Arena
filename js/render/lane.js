@@ -3,20 +3,23 @@
 (function (G) {
   const BD = G.BD, R = BD.Render, U = BD.U, FONT = R.FONT, hexA = R.hexA;
   const SIDE = ['藍方', '紅方'];
-  const LV = R.laneView = { w: null, x: 0, z: 0.38, tx: 0, tz: 0.38 };
-  R.LANE_ZOOM = [0.34, 1];
+  // padY：底部面板疊在畫布上時（桌機）鏡頭往下偏多少；觸控版面板在畫布外，lane-ui.js 設成 0
+  const LV = R.laneView = { w: null, x: 0, z: 0.38, tx: 0, tz: 0.38, padY: 40 };
+  // 全覽倍率：整條兵線（含兩端基地約 4000）塞進視窗寬；手機直向畫布只有 900 寬，所以會比桌機的 0.38 更遠
+  R.laneFitZ = () => U.clamp(R.VW / 4000, 0.18, 0.38);
+  R.laneOverview = (w) => { const L = w.lane; LV.tx = (L.home[0].x + L.home[1].x) / 2; LV.tz = R.laneFitZ(); };
 
   // 鏡頭：只沿兵線左右移動與縮放，y 固定在兵線中央；換場時回到全覽
   R.laneCam = function (w, t, c) {
     const A = BD.ARENA, L = w.lane;
-    if (LV.w !== w) { LV.w = w; LV.x = LV.tx = (L.home[0].x + L.home[1].x) / 2; LV.z = LV.tz = 0.38; }
-    LV.tz = U.clamp(LV.tz, R.LANE_ZOOM[0], R.LANE_ZOOM[1]);
+    if (LV.w !== w) { LV.w = w; R.laneOverview(w); LV.x = LV.tx; LV.z = LV.tz; }
+    LV.tz = U.clamp(LV.tz, R.laneFitZ() * 0.9, 1);
     LV.tx = U.clamp(LV.tx, L.home[0].x - 300, L.home[1].x + 300);
     const k = c.w !== w ? 1 : Math.min(1, Math.max(0, t - c.t) * 10);
     LV.x += (LV.tx - LV.x) * k; LV.z += (LV.tz - LV.z) * k;
     c.w = w; c.t = t; c.z = LV.z;
     const vw = R.VW / c.z, vh = R.VH / c.z;
-    c.x = U.clamp(LV.x - vw / 2, 0, A.w - vw); c.y = U.clamp(L.home[0].y - vh / 2 + 40 / c.z, 0, A.h - vh); // 稍微往下偏，讓底部建築面板不擋兵線
+    c.x = U.clamp(LV.x - vw / 2, 0, A.w - vw); c.y = U.clamp(L.home[0].y - vh / 2 + LV.padY / c.z, 0, A.h - vh); // 稍微往下偏，讓底部建築面板不擋兵線
     return c;
   };
 
@@ -63,7 +66,34 @@
   };
 
   // 頂部 HUD：雙方金錢 / 收入 / 下次發錢、核心血量、建築數、在場 Boss；中央計時
+  // 手機直向（R.vertical，畫布 900 寬）：雙欄大字版，計時在兩欄下方；高度 R.LANE_VHUD_H（main.js 版面用）
+  R.LANE_VHUD_H = 262;
+  function drawVertical(ctx, w) {
+    const L = w.lane, pw = (R.W - 30) / 2, pct = (b) => Math.ceil(b.hp / b.maxHp * 100);
+    for (const team of [0, 1]) {
+      const x0 = 10 + team * (pw + 10), col = R.TEAM[team], core = L.cores[team];
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x0, 8, pw, 200);
+      ctx.strokeStyle = hexA(col, 0.75); ctx.lineWidth = 3; ctx.strokeRect(x0, 8, pw, 200);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.font = `bold 32px ${FONT}`; ctx.fillStyle = col; ctx.fillText(SIDE[team] + (L.ai[team] ? ' AI' : ' 你'), x0 + 14, 48);
+      ctx.textAlign = 'right'; ctx.font = `bold 38px ${FONT}`; ctx.fillStyle = '#ffd36a'; ctx.fillText(`💰${Math.floor(L.gold[team])}`, x0 + pw - 12, 50);
+      bar(ctx, x0 + pw / 2, 64, pw - 28, 20, core.hp / core.maxHp, col);
+      ctx.textAlign = 'left'; ctx.font = `24px ${FONT}`; ctx.fillStyle = '#ddd';
+      ctx.fillText(`收入 +${BD.laneIncome(w, team)} · 下次 ${Math.ceil(L.payIn)} 秒`, x0 + 14, 118);
+      const built = L.slots[team].filter(Boolean), alt = built.filter((m) => m.kind === 'lb_altar').length;
+      ctx.fillStyle = '#bbb'; ctx.fillText(`建築 ${built.length} · 祭壇 ${alt} · 擊殺 ${L.kills[team]}`, x0 + 14, 152);
+      const bs = L.summoned.filter((b) => b.team === team && b.state !== 'dead');
+      ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = bs.length ? col : '#777';
+      ctx.fillText(bs.length ? bs.map((b) => `${b.name} ${pct(b)}%`).join('、') : 'Boss：無', x0 + 14, 190, pw - 28);
+    }
+    const mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
+    const s = `拉鋸 ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')} · ×${w.speed}`;
+    ctx.textAlign = 'center'; ctx.font = `bold 28px ${FONT}`; const tw = ctx.measureText(s).width + 32;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(R.W / 2 - tw / 2, 214, tw, 40); // 計時壓在場地邊框上，要有底色才讀得到
+    ctx.fillStyle = '#ddd'; ctx.fillText(s, R.W / 2, 245);
+  }
   R.drawLaneHUD = function (ctx, w, view, t) {
+    if (R.vertical) { drawVertical(ctx, w); return; }
     const L = w.lane, E = BD.LANE_ECON, pw = 640;
     for (const team of [0, 1]) {
       const x0 = team ? R.W - 20 - pw : 20, col = R.TEAM[team], core = L.cores[team];

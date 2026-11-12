@@ -118,7 +118,7 @@
   // ── 手機直向 HUD：上方一條時間帶 + 兩隊並排各一欄；字放大，縮到手機寬度仍讀得到 ──
   const VCW = 430, VROW = (rows) => (rows <= 1 ? 138 : 94);
   const vRows = (w) => Math.max(1, ...[0, 1].map((tm) => w.bosses.filter((b) => b.team === tm && !(w.horde && b.isDummy)).length));
-  R.verticalHudH = (w) => 58 + vRows(w) * VROW(vRows(w)) + 6;
+  R.verticalHudH = (w) => (w.lane && R.LANE_VHUD_H) || 58 + vRows(w) * VROW(vRows(w)) + 6; // 拉鋸戰自己的雙欄 HUD（js/render/lane.js）
   function drawHUDVertical(ctx, w, t) {
     const rows = vRows(w), rh = VROW(rows);
     ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center';
@@ -347,7 +347,7 @@
     ctx.restore();
     // 全螢幕閃光壓低上限（最多 22%），避免整片閃白刺眼
     if (w.fx.flashA > 0) { ctx.globalAlpha = Math.min(0.22, w.fx.flashA * 0.35); ctx.fillStyle = w.fx.flashC; ctx.fillRect(0, 0, R.W, R.H); ctx.globalAlpha = 1; }
-    if (R.vertical) drawHUDVertical(ctx, w, t); else drawHUD(ctx, w, view, t);
+    if (w.lane && R.drawLaneHUD) R.drawLaneHUD(ctx, w, view, t); else if (R.vertical) drawHUDVertical(ctx, w, t); else drawHUD(ctx, w, view, t);
     // 底部提示
     ctx.font = `13px ${FONT}`; ctx.fillStyle = '#777'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
     if (R.vertical) { /* 直向不畫鍵盤提示 */ } else if (w.training) {

@@ -68,10 +68,19 @@ button:focus-visible, .card:focus-visible, select:focus-visible { outline: 3px s
   .tc-sheet h2 { margin: 0; font-size: 22px; color: #ffd27a; }
   .tc-sheet p { color: #bbb2c7; font-size: 13px; line-height: 1.7; }
   .tc-sheet button { display: block; width: 100%; min-height: 44px; border-radius: 10px; margin-top: 8px; }
-  body.touch .tp:not(.hidden) { display: flex; left: 8px !important; top: max(86px, calc(env(safe-area-inset-top) + 80px)) !important; width: min(340px, calc(100% - 16px)); height: auto; max-height: 24dvh; overflow: auto; transform: none !important; padding: 8px; border-radius: 12px; z-index: 9; touch-action: pan-y; }
+  body.touch .tp:not(.hidden):not(.lp) { display: flex; left: 8px !important; top: max(86px, calc(env(safe-area-inset-top) + 80px)) !important; width: min(340px, calc(100% - 16px)); height: auto; max-height: 24dvh; overflow: auto; transform: none !important; padding: 8px; border-radius: 12px; z-index: 9; touch-action: pan-y; }
   body.touch .tp .tp-skills { display: none; }
   body.touch .tp button { min-height: 36px; }
   body.touch .tp .hint { display: none; }
+  /* 拉鋸戰面板（js/lane-ui.js）：不疊在畫布上；直向固定在畫布下方（main.js verticalSpec 預留 182px），橫向放進右欄 */
+  body.touch .tp.lp:not(.hidden) { position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: auto; height: auto; transform: none; display: flex; flex-direction: column; gap: 6px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); z-index: 9; touch-action: manipulation; }
+  body.touch .tp.lp .tp-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  body.touch .tp.lp .tp-row + .tp-row { grid-template-columns: minmax(0, 1fr) auto; }
+  body.touch .tp.lp button.lb { min-width: 0; min-height: 48px; font-size: 15px; }
+  body.touch .tp.lp button.summon { min-width: 0; padding: 4px 10px; }
+  body.touch .tp.lp .bsel { min-height: 44px; max-width: none; width: 100%; font-size: 15px; }
+  body.touch .tp.lp .grp { display: none; }
+  body.touch .tp.lp .hint { display: block; grid-column: 1 / -1; font-size: 12px; line-height: 1.3; }
 }
 @media (pointer: coarse) and (orientation: portrait) {
   body.touch #game { align-self: flex-start; margin-top: max(100px, calc(env(safe-area-inset-top) + 90px)); }
@@ -85,6 +94,10 @@ button:focus-visible, .card:focus-visible, select:focus-visible { outline: 3px s
   .tc-status { top: auto; bottom: 8px; left: 145px; right: auto; }
   .cols { flex-direction: row; }
   .side { flex: 1; }
-  body.touch .tp:not(.hidden) { max-height: 32dvh; width: min(270px, 38vw); }
+  body.touch .tp:not(.hidden):not(.lp) { max-height: 32dvh; width: min(270px, 38vw); }
+  body.touch .tp.lp:not(.hidden) { left: auto; top: max(60px, calc(env(safe-area-inset-top) + 56px)); width: min(28vw, 250px); overflow-y: auto; border-top: 0; border-left: 2px solid #c89a5a; }
+  body.touch .tp.lp .tp-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body.touch .tp.lp .tp-row + .tp-row { grid-template-columns: 1fr; }
+  body.touch .tp.lp button.lb { min-height: 44px; font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }

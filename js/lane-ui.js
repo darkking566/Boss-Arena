@@ -14,9 +14,11 @@
     if (!panel || !canvas) return;
     const r = canvas.getBoundingClientRect(), ar = app.getBoundingClientRect();
     if (!r.width) return;
-    const s = r.width / R.W, key = [r.left - ar.left, r.top - ar.top, r.width].join(':');
+    const touch = document.body.classList.contains('touch'), s = r.width / R.W, key = [r.left - ar.left, r.top - ar.top, r.width, touch].join(':');
     if (key === lastLayout) return;
     lastLayout = key;
+    R.laneView.padY = touch ? 0 : 40;
+    if (touch) { panel.style.left = panel.style.top = panel.style.transform = ''; return; } // 觸控：面板在畫布外（直向在下方、橫向在右欄），由 mobile.css 定位
     panel.style.left = (r.left - ar.left + R.OX * s) + 'px';
     panel.style.top = (r.top - ar.top + (R.OY + R.VH - 104) * s) + 'px';
     panel.style.transform = `scale(${s})`;
@@ -96,16 +98,29 @@
     build();
     window.addEventListener('resize', layout);
     canvas.addEventListener('wheel', (e) => { if (!cur) return; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
-    canvas.addEventListener('mousedown', (e) => { if (cur && e.button === 0) drag = { x: e.clientX, tx: R.laneView.tx }; });
-    window.addEventListener('mousemove', (e) => {
-      if (!drag || !cur) return;
-      const r = canvas.getBoundingClientRect(); if (!r.width) return;
-      R.laneView.tx = drag.tx - (e.clientX - drag.x) / r.width * R.W / R.laneView.z;
+    // 指標（滑鼠 / 手指）：一指拖曳捲動、兩指捏合縮放、快速點兩下回全覽
+    const pts = new Map(); let lastTap = 0;
+    const span = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!cur || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) {
+        drag = { x: e.clientX, tx: R.laneView.tx };
+        const now = performance.now(); if (now - lastTap < 300) R.laneOverview(cur); lastTap = now;
+      } else if (pts.size === 2) drag = { pinch: span(), tz: R.laneView.tz };
     });
-    window.addEventListener('mouseup', () => { drag = null; });
+    window.addEventListener('pointermove', (e) => {
+      if (!cur || !pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const r = canvas.getBoundingClientRect(); if (!r.width || !drag) return;
+      if (drag.pinch && pts.size >= 2) R.laneView.tz = drag.tz * span() / drag.pinch;
+      else if (!drag.pinch) R.laneView.tx = drag.tx - (e.clientX - drag.x) / r.width * R.W / R.laneView.z;
+    });
+    const up = (e) => { pts.delete(e.pointerId); drag = null; const p = [...pts.values()][0]; if (p) drag = { x: p.x, tx: R.laneView.tx }; }; // 放開一指後剩下那指接著拖
+    window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
     window.addEventListener('keydown', (e) => {
       if (!cur || e.key !== ' ') return;
-      e.preventDefault(); const L = cur.lane; R.laneView.tx = (L.home[0].x + L.home[1].x) / 2; R.laneView.tz = 0.38;
+      e.preventDefault(); R.laneOverview(cur);
     });
     return api;
   }

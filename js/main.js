@@ -18,7 +18,8 @@
     if (!coarse.matches || window.innerHeight < window.innerWidth * 1.1) return null;
     if ((state.screen !== 'game' && state.screen !== 'result') || !w || w.training || w.hunt || w.hunt4) return null; // 結算畫面也維持直向，避免背後的畫布突然縮回橫向
     const p = state.screen === 'game' && view.player != null && w.bosses[view.player] && w.bosses[view.player].controller.isPlayer ? w.bosses[view.player] : null;
-    return { hudH: R.verticalHudH(w), pad: p ? Math.ceil((p.skills.length + 2) / 3) * 55 + 28 : 0 }; // pad：觸控技能鈕區高度（css px）
+    const lanePad = w.lane && !w.lane.ai[0] && state.screen === 'game' ? 200 : 0; // 拉鋸戰建築面板（js/lane-ui.js，mobile.css 的 .lp）
+    return { hudH: R.verticalHudH(w), pad: p ? Math.ceil((p.skills.length + 2) / 3) * 55 + 28 : lanePad }; // pad：觸控技能鈕區高度（css px）
   }
   function resize() {
     const vw = window.innerWidth, vh = window.innerHeight, spec = verticalSpec();

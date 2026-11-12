@@ -72,7 +72,7 @@
         }
         if (now - last > 100) {
           last = now;
-          status.textContent = p ? `${p.def.name} · ${p.state === 'dead' ? '已倒下' : performance.now() < manualAimUntil ? '手動瞄準' : '自動瞄準'} · HP ${Math.max(0, Math.ceil(p.hp))}` : '觀戰模式 · 橫放手機享受更大視野';
+          status.textContent = p ? `${p.def.name} · ${p.state === 'dead' ? '已倒下' : performance.now() < manualAimUntil ? '手動瞄準' : '自動瞄準'} · HP ${Math.max(0, Math.ceil(p.hp))}` : w.lane ? '拉鋸戰 · 拖曳捲動 · 兩指縮放 · 點兩下全覽' : '觀戰模式 · 橫放手機享受更大視野';
           for (const { btn, skill } of p ? buttons : []) {
             let locked = false, text = '';
             if (skill) {
