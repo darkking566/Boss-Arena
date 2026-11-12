@@ -72,8 +72,8 @@
   // ── 鏡爪：魔狼的水墨身軀拖得很長、而且要壓在沙塵之上，整隻由造型的 over 畫（js/render/styles/kindred.js）──
   // ── 小兵潮雜兵（BD.GRUNTS，js/engine/minions/horde.js）：依 shape 畫小造型 ──
   function grunt(ctx, m, t) {
-    const g = BD.GRUNTS[m.kind], r = m.r;
-    ctx.rotate(m.face || 0); ctx.fillStyle = g.color; ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 1.5;
+    const g = BD.GRUNTS[m.kind] || BD.LANE_UNITS[m.kind], r = m.r;
+    ctx.rotate(m.face || 0); ctx.fillStyle = m.laneUnit ? (m.team ? '#e8625a' : '#5a9cf0') : g.color; // 拉鋸戰兵線單位依隊伍上色 ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 1.5;
     ctx.beginPath();
     if (g.shape === 'tri') { ctx.moveTo(r * 1.2, 0); ctx.lineTo(-r, r * 0.9); ctx.lineTo(-r * 0.6, 0); ctx.lineTo(-r, -r * 0.9); ctx.closePath(); }
     else if (g.shape === 'armor') ctx.rect(-r, -r, r * 2, r * 2);
@@ -83,6 +83,7 @@
     ctx.fillStyle = g.shape === 'bomb' ? '#fff' : '#ffeaa0'; ctx.beginPath(); ctx.arc(r * 0.45, -r * 0.3, 1.8, 0, U.TAU); ctx.arc(r * 0.45, r * 0.3, 1.8, 0, U.TAU); ctx.fill();
   }
   for (const k in BD.GRUNTS) R.defineMinionStyle(k, grunt);
+  for (const k in BD.LANE_UNITS) R.defineMinionStyle(k, grunt); // 拉鋸戰原型（js/engine/lane.js）
   R.defineMinionStyle('wolf', () => {});
   R.defineMinionStyle('noble', () => {}); // 神皮貴人由造型的 over 畫（js/render/styles/godskinduo.js）
   R.defineMinionStyle('watcher', knight, { absolute: true });

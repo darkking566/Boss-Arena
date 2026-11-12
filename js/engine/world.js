@@ -68,6 +68,7 @@
       if (opts.hunt && opts.h4solo && BD.setupHunt4Solo) BD.setupHunt4Solo(this);
       if (opts.hunt4 && BD.setupHunt4) BD.setupHunt4(this, opts);
       if (opts.horde && BD.setupHorde) BD.setupHorde(this);
+      if (opts.lane && BD.setupLane) BD.setupLane(this, opts);
     }
     tick(realDt) {
       if (this.paused) return;
