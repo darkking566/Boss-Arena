@@ -41,7 +41,7 @@
       this.ult = 15; if (def.mana) { this.maxMana = def.mana.max; this.mana = this.maxMana; } // 獵魂模式主角的法力
       this.state = 'idle'; this.stateT = 0; this.stateDur = 0; this.inst = null;
       this.cds = {}; this.statuses = [];
-      this.dmgMul = 1; this.speedMul = 1; this.cdMul = 1;
+      this.dmgMul = def.dmgMul || 1; this.speedMul = 1; this.cdMul = 1;
       this.moveX = 0; this.moveY = 0;
       this.flash = 0; this.hurtFlash = 0; this.lastDodgeStart = -9; this.dodgeAng = 0; this.lastSkillEnd = -9;
       this.trail = [];
