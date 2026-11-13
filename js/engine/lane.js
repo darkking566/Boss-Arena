@@ -29,7 +29,7 @@
     blastWave: { laneheavy: 3, lanemelee: 4 } }; // 反擊後免費送出的兵 // 加時：otAt 秒起雙方核心每秒掉 otDrain × 加時秒數（約 110 秒內必分勝負，血少的先倒），兵的傷害每 otDmg 秒 +100%
   const BUILDS = Object.keys(UNITS).filter((k) => UNITS[k].cost);
   const LEN = 1800, AGGRO = 260, BOSS_AGGRO = 700;
-  const cell = (v) => Math.floor(v / 40);
+  const cell = (v) => Math.floor(v / 40), scell = (v) => Math.floor(v / 160); // 建築格用大格：最大半徑 60（核心）+ 兵 15 < 160
   const R_TEAM = ['#5a9cf0', '#e8625a']; // 戰鬥紀錄用的隊伍色（引擎不讀 render）
   BD.laneBossCost = (def) => ECON.bossBase + Math.round((def.stars || 3) * ECON.bossPerStar);
 
@@ -58,15 +58,26 @@
     const sp = d > g.reach * 0.8 ? g.speed : 0, k = Math.min(1, 5 * dt);
     m.vx += (Math.cos(a) * sp - m.vx) * k; m.vy += (Math.sin(a) * sp - m.vy) * k;
     if (e && d < g.reach && m.cd <= 0) { m.cd = g.cd; w.damageUnit(m, e, { dmg: g.dmg * L.otMul, posture: 3, kb: 20, kbAng: a }); }
-    const cx = cell(m.x), cy = cell(m.y);
-    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { // 同隊互推（同小兵潮的格子雜湊）
+    // 推擠量先從原位置加總、最後一次套用：邊推邊移會讓擠成一團的兵依格子處理順序往 −x 飄（右邊那隊被推向前線，左邊那隊佔便宜）
+    const cx = cell(m.x), cy = cell(m.y); let px = 0, py = 0;
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { // 兵互推（同小兵潮的格子雜湊）
       const list = L.grid.get((cx + i) * 4096 + cy + j);
       if (list) for (const o of list) {
         if (o === m || !o.alive) continue;
         const dx = m.x - o.x, dy = m.y - o.y, dd = Math.hypot(dx, dy) || 0.01, s = m.r + o.r;
-        if (dd < s) { m.x += dx / dd * (s - dd) * 0.5; m.y += dy / dd * (s - dd) * 0.5; }
+        if (dd < s) { px += dx / dd * (s - dd) * 0.5; py += dy / dd * (s - dd) * 0.5; }
       }
     }
+    const sx = scell(m.x), sy = scell(m.y);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { // 建築 / 核心是實心的：整段推出去，再往兵線中央滑，免得正面卡在建築後面
+      const list = L.sgrid.get((sx + i) * 4096 + sy + j);
+      if (list) for (const o of list) {
+        if (!o.alive) continue;
+        const dx = m.x - o.x, dy = m.y - o.y, dd = Math.hypot(dx, dy) || 0.01, s = m.r + o.r;
+        if (dd < s) { px += dx / dd * (s - dd); py += dy / dd * (s - dd) + Math.sign(L.home[0].y - m.y) * (s - dd) * 0.5; }
+      }
+    }
+    m.x += px; m.y += py;
   }
   // 建築格位：核心前方每排 5 格，排數不設上限，由兵線兩側往外長（避開兵線正中央 y）
   // shortcut: 約 130 座以後會疊在場地上下邊緣，真有人蓋到那麼多再改成往後排
@@ -233,7 +244,7 @@
     const ai = (opts && opts.laneAI) || [false, true];
     const pool = BD.bosses.map((d) => d.id);
     const L = w.lane = {
-      anchors, summoned: [], kills: [0, 0], spawned: 0, grid: new Map(), home: [{ x: cx - LEN, y: cy }, { x: cx + LEN, y: cy }], cores: [],
+      anchors, summoned: [], kills: [0, 0], spawned: 0, grid: new Map(), sgrid: new Map(), home: [{ x: cx - LEN, y: cy }, { x: cx + LEN, y: cy }], cores: [],
       gold: [ECON.startGold, ECON.startGold], built: [0, 0], slots: [[], []],
       waves: 0, ot: 0, otMul: 1, crisis: [0, 0], ai, cmd: [0, 1].map(() => ({ goal: null, pool })), spawnSlot: 0, spawnFrom: null,
     };
@@ -264,9 +275,12 @@
     let wave = 1, think = 0; L.payIn = ECON.incomeT;
     w.on('think', (dt) => {
       if (w.winner) return;
-      L.grid.clear();
-      for (const m of w.minions) if (m.alive && m.laneUnit && !UNITS[m.kind].static) {
-        const k = cell(m.x) * 4096 + cell(m.y), l = L.grid.get(k); if (l) l.push(m); else L.grid.set(k, [m]);
+      // 同一幀先更新的先出手、打死的對手來不及還手：每幀用 w.rng 洗牌更新順序，沒有固定先手（否則先生兵的一方贏第一次交鋒後一路滾雪球；單純反轉會被冷卻的奇偶幀抵銷）
+      const ms = w.minions; for (let i = ms.length - 1; i > 0; i--) { const j = w.rng.int(0, i), t = ms[i]; ms[i] = ms[j]; ms[j] = t; }
+      L.grid.clear(); L.sgrid.clear();
+      for (const m of w.minions) if (m.alive && m.laneUnit) {
+        const st = UNITS[m.kind].static, G = st ? L.sgrid : L.grid, k = st ? scell(m.x) * 4096 + scell(m.y) : cell(m.x) * 4096 + cell(m.y);
+        const l = G.get(k); if (l) l.push(m); else G.set(k, [m]);
       }
       for (const b of L.summoned) if (b.state !== 'dead') { // 代理假人移到 Boss 眼前最近的敵方單位（沒有就是對方核心）
         let best = L.cores[1 - b.team], bd = Infinity;

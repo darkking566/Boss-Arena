@@ -125,6 +125,34 @@ assert.ok(duel >= Math.ceil(ids.length / 2) * 0.8, `雙方 Boss 互打的場次�
   c.hp = c.maxHp * 0.2; run(w, 0.1);
   assert.strictEqual(L.crisis[0], 3, '一下掉過兩檔就連爆兩次');
 }
+// 3f. 建築碰撞：兵被推出建築 / 核心；擋在建築正後方的兵會繞過去，不會卡住
+{
+  const w = mk(8), L = w.lane, bld = L.slots[0].find(Boolean);
+  L.spawnFrom = bld; const m = BD.spawnMinion(w, L.anchors[0], 'lanemelee', 0, 1); L.spawnFrom = null;
+  m.x = bld.x + 3; m.y = bld.y; run(w, 0.2);
+  assert.ok(U_dist(m, bld) >= m.r + bld.r - 1, '兵要被推出建築');
+  L.spawnFrom = bld; const b2 = BD.spawnMinion(w, L.anchors[0], 'lanemelee', 0, 1); L.spawnFrom = null;
+  b2.x = bld.x - bld.r - b2.r - 2; b2.y = bld.y; // 建築擋在它往敵方核心的正前方
+  const x0 = b2.x; run(w, 4);
+  assert.ok(b2.alive && b2.x > bld.x + bld.r, `兵卡在建築後面（${Math.round(x0)} → ${Math.round(b2.x)}）`);
+}
+// 3g. 左右對稱：同一場對打左右鏡像後，結果要逐一相同（推擠若邊推邊移，會依格子處理順序往 −x 飄，讓左邊那隊佔便宜）
+let symRes = [];
+for (const seed of [1, 2, 3]) {
+  const res = [false, true].map((mir) => {
+    const w = mk(seed), L = w.lane, mid = (L.home[0].x + L.home[1].x) / 2, y = L.home[0].y;
+    for (const m of L.slots.flat()) if (m) BD.killMinion(w, m);
+    if (mir) { L.home.reverse(); for (const c of L.cores) c.x = 2 * mid - c.x; }
+    for (let i = 0; i < 6; i++) for (const t of [0, 1]) for (const k of ['lanemelee', 'lanerange']) {
+      const side = (t ? 1 : -1) * (mir ? -1 : 1); L.spawnFrom = { x: mid + side * 300, y }; BD.spawnMinion(w, L.anchors[t], k, i, 6).x = mid + side * 250;
+    }
+    L.spawnFrom = null;
+    for (let f = 0; f < 20 * 60; f++) { w.step(1 / 60); for (const m of w.minions) if (m.alive && m.kind === 'lanemelee' && m.t < 0.02 && U_dist(m, L.cores[m.team]) < 200) m.alive = false; } // 不讓核心新生的兵加入
+    return [0, 1].map((t) => w.minions.filter((m) => m.alive && m.team === t && !UN[m.kind].static).length).join(':');
+  });
+  assert.strictEqual(res[1], res[0], `seed ${seed}：左右鏡像後結果不同（${res[0]} vs ${res[1]}）`);
+  symRes.push(res[0]);
+}
 // 4. AI 指揮官對打：雙方都會蓋建築、叫 Boss，不丟錯
 const games = [];
 for (const seed of [1, 2]) {
@@ -140,4 +168,4 @@ assert.strictEqual(wl.lane.built[0], 0, '玩家方不該自動蓋'); assert.ok(w
 // 6. 不開時沒有兵線單位
 const off = new BD.World(BD.bossById[ids[0]], BD.bossById[ids[1]], { seed: 1, intro: 0.5 }); off.simulate(20);
 assert.strictEqual(off.minions.filter((m) => m.laneUnit).length, 0, '未開拉鋸戰卻出現兵線單位');
-console.log(`lane.test: 規則 OK；${ids.length} 位 Boss 都打到小兵、${coreHit} 位打到核心；互打 ${duel} 場；AI 對打 ${games.join(' / ')}`);
+console.log(`lane.test: 規則 OK；左右鏡像一致 ${symRes.join(' ')}；${ids.length} 位 Boss 都打到小兵、${coreHit} 位打到核心；互打 ${duel} 場；AI 對打 ${games.join(' / ')}`);
