@@ -23,7 +23,10 @@
   };
   const OPENING = ['lb_archery', 'lb_bank', 'lb_barracks']; // AI 開局固定先補產能，避免隨機開局一步落後就被滾雪球
   const ECON = BD.LANE_ECON = { startGold: 250, baseIncome: 40, incomeT: 15, wave: 6, cols: 5, maxLv: 3, upMul: [0, 1, 1.5], sellBack: 0.5, bossBase: 200, bossPerStar: 100, bossBounty: 120,
-    otAt: 300, otDrain: 6.3, otDmg: 60 }; // 加時：otAt 秒起雙方核心每秒掉 otDrain × 加時秒數（約 110 秒內必分勝負，血少的先倒），兵的傷害每 otDmg 秒 +100%
+    otAt: 300, otDrain: 6.3, otDmg: 60,
+    catchUp: 0.6, // 落後補助：建築總投入落後的一方收入加成 = 落後比例，最多 +60%
+    crisis: [0.75, 0.5, 0.25], blastR: 750, blastMinion: 3000, blastBoss: 0.15, // 核心危機反擊：掉到這些血量比例各爆一次，清敵兵、Boss 扣最大生命 15%
+    blastWave: { laneheavy: 3, lanemelee: 4 } }; // 反擊後免費送出的兵 // 加時：otAt 秒起雙方核心每秒掉 otDrain × 加時秒數（約 110 秒內必分勝負，血少的先倒），兵的傷害每 otDmg 秒 +100%
   const BUILDS = Object.keys(UNITS).filter((k) => UNITS[k].cost);
   const LEN = 1800, AGGRO = 260, BOSS_AGGRO = 700;
   const cell = (v) => Math.floor(v / 40);
@@ -172,8 +175,11 @@
     BD.laneSummon(w, team, BD.bossById[id]);
     return r;
   };
-  const income = (L, team) => ECON.baseIncome + L.slots[team].reduce((s, m) => s + (m ? (UNITS[m.kind].income || 0) * m.lv : 0), 0);
+    const worth = (L, team) => L.slots[team].reduce((s, m) => s + (m ? m.spent : 0), 0);
+  const catchUp = (L, team) => { const me = worth(L, team), op = worth(L, 1 - team); return op > me ? Math.min(ECON.catchUp, (op - me) / op) : 0; };
+  const income = (L, team) => Math.round((ECON.baseIncome + L.slots[team].reduce((s, m) => s + (m ? (UNITS[m.kind].income || 0) * m.lv : 0), 0)) * (1 + catchUp(L, team)));
   BD.laneIncome = (w, team) => income(w.lane, team);
+  BD.laneCatchUp = (w, team) => catchUp(w.lane, team);
 
   // 敵方的兵 / Boss 已經逼近自家核心（900 內）
   const pressed = (w, team) => w.enemiesOf(team).some((u) => !(u.laneUnit && UNITS[u.kind].static) && U.dist(u, w.lane.home[team]) < 900);
@@ -229,7 +235,7 @@
     const L = w.lane = {
       anchors, summoned: [], kills: [0, 0], spawned: 0, grid: new Map(), home: [{ x: cx - LEN, y: cy }, { x: cx + LEN, y: cy }], cores: [],
       gold: [ECON.startGold, ECON.startGold], built: [0, 0], slots: [[], []],
-      waves: 0, ot: 0, otMul: 1, ai, cmd: [0, 1].map(() => ({ goal: null, pool })), spawnSlot: 0, spawnFrom: null,
+      waves: 0, ot: 0, otMul: 1, crisis: [0, 0], ai, cmd: [0, 1].map(() => ({ goal: null, pool })), spawnSlot: 0, spawnFrom: null,
     };
     L.cores = [0, 1].map((t) => BD.spawnMinion(w, anchors[t], 'lanecore', 0, 1));
     for (const t of [0, 1]) { L.gold[t] += UNITS.lb_barracks.cost; BD.laneBuild(w, t, 'lb_barracks'); L.built[t] = 0; } // 開局各送一座兵營
@@ -242,6 +248,19 @@
     };
     w.on('kill', (e) => { if (e.b.laneProxy) { L.gold[1 - e.b.team] += ECON.bossBounty; L.fixKill = e.b; } });
     const spawn = (t, from, kind, i, n) => { L.spawnFrom = from; BD.spawnMinion(w, anchors[t], kind, i, n); L.spawned++; };
+    const coreBlast = (t) => {
+      const c = L.cores[t], R = ECON.blastR;
+      for (const u of w.enemiesOf(t)) {
+        if (u.isDummy || U.dist(u, c) - u.r > R) continue;
+        if (u.isBoss) w.damageUnit(c, u, { dmg: u.maxHp * ECON.blastBoss, posture: 60, kb: 260, kbAng: U.angTo(c, u), unblockable: true, noPerfect: true, ignoreIframe: true });
+        else if (u.laneUnit && !UNITS[u.kind].static) w.damageUnit(c, u, { dmg: ECON.blastMinion, posture: 0 });
+      }
+      BD.spawnFx(w, 'nova', c.x, c.y, { el: 'holy', radius: R, heavy: true, scale: 2 });
+      w.banner((t ? '紅方' : '藍方') + '核心反擊！', `核心剩 ${Math.round(ECON.crisis[L.crisis[t] - 1] * 100)}%：震退周圍敵人、送出援軍`, R_TEAM[t], 2);
+      const sp = ECON.blastWave;
+      for (const k in sp) for (let i = 0; i < sp[k]; i++) spawn(t, c, k, i, sp[k]);
+      L.spawnFrom = null;
+    };
     let wave = 1, think = 0; L.payIn = ECON.incomeT;
     w.on('think', (dt) => {
       if (w.winner) return;
@@ -258,6 +277,10 @@
         if (!L.ot) w.banner('加時賽', '雙方核心開始崩落，兵的傷害逐漸提高', '#ffd36a', 3);
         L.ot = w.time - ECON.otAt; L.otMul = 1 + L.ot / ECON.otDmg;
         for (const c of L.cores.slice().sort((a, b) => a.hp - b.hp)) if (c.alive && !w.winner) { c.hp -= ECON.otDrain * L.ot * dt; if (c.hp <= 0) BD.killMinion(w, c); } // 血少的先結算
+      }
+      for (const t of [0, 1]) { // 核心危機反擊：每個門檻只觸發一次（一下掉過兩檔就連爆兩次）
+        const c = L.cores[t];
+        while (!w.winner && c.alive && L.crisis[t] < ECON.crisis.length && c.hp <= c.maxHp * ECON.crisis[L.crisis[t]]) { L.crisis[t]++; coreBlast(t); }
       }
       if ((L.payIn -= dt) <= 0) { L.payIn = ECON.incomeT; for (const t of [0, 1]) L.gold[t] += income(L, t); }
       if ((think -= dt) <= 0) { think = 1; for (const t of [0, 1]) if (L.ai[t]) commander(w, t); }

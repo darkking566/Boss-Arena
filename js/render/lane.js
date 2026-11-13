@@ -81,9 +81,10 @@
       ctx.textAlign = 'right'; ctx.font = `bold 38px ${FONT}`; ctx.fillStyle = '#ffd36a'; ctx.fillText(`💰${Math.floor(L.gold[team])}`, x0 + pw - 12, 50);
       bar(ctx, x0 + pw / 2, 64, pw - 28, 20, core.hp / core.maxHp, col);
       ctx.textAlign = 'left'; ctx.font = `24px ${FONT}`; ctx.fillStyle = '#ddd';
-      ctx.fillText(`收入 +${BD.laneIncome(w, team)} · 下次 ${Math.ceil(L.payIn)} 秒`, x0 + 14, 118);
+      const cu = Math.round(BD.laneCatchUp(w, team) * 100);
+      ctx.fillText(`收入 +${BD.laneIncome(w, team)}${cu ? `（補助 +${cu}%）` : ''} · 下次 ${Math.ceil(L.payIn)} 秒`, x0 + 14, 118, pw - 28);
       const built = L.slots[team].filter(Boolean), alt = built.filter((m) => m.kind === 'lb_altar').length;
-      ctx.fillStyle = '#bbb'; ctx.fillText(`建築 ${built.length} · 祭壇 ${alt} · 擊殺 ${L.kills[team]}`, x0 + 14, 152);
+      ctx.fillStyle = '#bbb'; ctx.fillText(`建築 ${built.length} · 祭壇 ${alt} · 擊殺 ${L.kills[team]} · 反擊 ${BD.LANE_ECON.crisis.length - L.crisis[team]}`, x0 + 14, 152, pw - 28);
       const bs = L.summoned.filter((b) => b.team === team && b.state !== 'dead');
       ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = bs.length ? col : '#777';
       ctx.fillText(bs.length ? bs.map((b) => `${b.name} ${pct(b)}%`).join('、') : 'Boss：無', x0 + 14, 190, pw - 28);
@@ -107,12 +108,14 @@
       ctx.font = `bold 30px ${FONT}`; ctx.fillStyle = '#ffd36a';
       ctx.fillText(`💰 ${Math.floor(L.gold[team])}`, x0 + 200, 42);
       ctx.font = `15px ${FONT}`; ctx.fillStyle = '#ddd';
+      const cu = Math.round(BD.laneCatchUp(w, team) * 100);
       ctx.fillText(`收入 +${BD.laneIncome(w, team)}／${E.incomeT} 秒　下次 ${Math.ceil(L.payIn)} 秒`, x0 + 380, 38);
+      if (cu) { ctx.fillStyle = '#9fe08a'; ctx.fillText(`落後補助 +${cu}%`, x0 + 380, 58); ctx.fillStyle = '#ddd'; }
       ctx.fillText(`核心 ${Math.ceil(core.hp)} / ${core.maxHp}`, x0 + 16, 70);
       bar(ctx, x0 + 16 + (pw - 32) / 2, 78, pw - 32, 14, core.hp / core.maxHp, col);
       const built = L.slots[team].filter(Boolean), alt = built.filter((m) => m.kind === 'lb_altar').length;
       ctx.fillStyle = '#bbb'; ctx.font = `14px ${FONT}`;
-      ctx.fillText(`建築 ${built.length}　祭壇 ${alt}　擊殺 ${L.kills[team]}`, x0 + 16, 114);
+      ctx.fillText(`建築 ${built.length}　祭壇 ${alt}　擊殺 ${L.kills[team]}　核心反擊剩 ${E.crisis.length - L.crisis[team]} 次`, x0 + 16, 114);
       const bs = L.summoned.filter((b) => b.team === team && b.state !== 'dead');
       ctx.fillText('Boss：', x0 + 16, 142);
       if (!bs.length) { ctx.fillStyle = '#777'; ctx.fillText('（無）', x0 + 64, 142); }

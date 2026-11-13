@@ -5,6 +5,7 @@ const assert = require('assert');
 const { load } = require('./lib/load');
 const { BD } = load({ noFx: true });
 const ids = BD.bosses.map((b) => b.id), E = BD.LANE_ECON, UN = BD.LANE_UNITS;
+const U_dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const mk = (seed, ai, pace) => new BD.World(BD.bossById.dummy, BD.bossById.dummy, { seed, intro: 0, pace: pace || 'heavy', lane: true, laneAI: ai || [false, false] });
 const run = (w, sec) => { for (let t = 0; t < sec * 60 && !w.over; t++) w.step(1 / 60); };
 
@@ -46,7 +47,7 @@ const run = (w, sec) => { for (let t = 0; t < sec * 60 && !w.over; t++) w.step(1
   assert.ok(BD.laneSell(w, 1, bank).ok && !bank.alive && L.gold[1] === g2 + back && L.gold[0] === enemyGold, '拆除退錢、不給賞金');
   assert.ok(BD.laneBuild(w, 1, 'lb_tower').ok && L.slots[1][slot] && L.slots[1][slot].kind === 'lb_tower', '拆掉的空格會先被補上');
   const g0 = L.gold[0], inc = BD.laneIncome(w, 0);
-  assert.strictEqual(inc, E.baseIncome + UN.lb_barracks.income + UN.lb_bank.income);
+  assert.strictEqual(inc, Math.round((E.baseIncome + UN.lb_barracks.income + UN.lb_bank.income) * (1 + BD.laneCatchUp(w, 0))), "收入（含落後補助）");
   run(w, E.incomeT + 0.1);
   assert.ok(L.gold[0] >= g0 + inc, `每 ${E.incomeT} 秒發收入（${g0} → ${L.gold[0]}，收入 ${inc}）`);
 }
@@ -96,6 +97,33 @@ assert.ok(duel >= Math.ceil(ids.length / 2) * 0.8, `雙方 Boss 互打的場次�
   assert.ok(w.winner && w.winner.team === 0, '加時要分出勝負，血少的紅方先倒');
   assert.ok(w.time < E.otAt + 200, `加時太久才結束：${Math.round(w.time)}s`);
   assert.ok(L.otMul > 1, '兵傷害倍率要上升');
+}
+// 3d. 落後補助：建築總投入落後的一方收入加成（最多 catchUp）；領先方沒有
+{
+  const w = mk(6), L = w.lane;
+  assert.strictEqual(BD.laneCatchUp(w, 0), 0, '開局雙方相同沒有補助');
+  L.gold[1] = 1e5; for (let i = 0; i < 9; i++) BD.laneBuild(w, 1, 'lb_barracks'); // 紅方 10 座、藍方 1 座
+  assert.strictEqual(BD.laneCatchUp(w, 1), 0, '領先方沒有補助');
+  assert.ok(Math.abs(BD.laneCatchUp(w, 0) - E.catchUp) < 1e-9, '落後很多時補助到上限');
+  assert.strictEqual(BD.laneIncome(w, 0), Math.round((E.baseIncome + UN.lb_barracks.income) * (1 + E.catchUp)));
+}
+// 3e. 核心危機反擊：掉過門檻各爆一次，清掉附近敵兵、Boss 扣血、送出援軍；同一門檻不重複
+{
+  const w = mk(7), L = w.lane, c = L.cores[0];
+  run(w, 1);
+  const foe = BD.laneSummon(w, 1, BD.bossById[ids[0]]); foe.x = c.x + 300; foe.y = c.y;
+  for (let i = 0; i < 6; i++) BD.spawnMinion(w, L.anchors[1], 'laneheavy', i, 6);
+  for (const m of w.minions) if (m.alive && m.team === 1 && m.kind === 'laneheavy') { m.x = c.x + 200; m.y = c.y + (m.y % 60); }
+  const hp0 = foe.hp, mine0 = w.minions.filter((m) => m.alive && m.team === 0 && m.kind === 'laneheavy').length;
+  c.hp = c.maxHp * 0.6; // 一次掉過 75%：只到第 1 檔（50% 還沒到）
+  run(w, 0.1);
+  assert.strictEqual(L.crisis[0], 1, '掉過 75% 觸發一次');
+  assert.ok(!w.minions.some((m) => m.alive && m.team === 1 && m.kind === 'laneheavy' && U_dist(m, c) < E.blastR - 50), '附近敵兵被清掉');
+  assert.ok(foe.hp < hp0, '附近敵方 Boss 要扣血');
+  assert.strictEqual(w.minions.filter((m) => m.alive && m.team === 0 && m.kind === 'laneheavy').length, mine0 + E.blastWave.laneheavy, '送出援軍');
+  run(w, 1); assert.strictEqual(L.crisis[0], 1, '同一門檻不重複');
+  c.hp = c.maxHp * 0.2; run(w, 0.1);
+  assert.strictEqual(L.crisis[0], 3, '一下掉過兩檔就連爆兩次');
 }
 // 4. AI 指揮官對打：雙方都會蓋建築、叫 Boss，不丟錯
 const games = [];
