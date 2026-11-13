@@ -80,6 +80,7 @@ button:focus-visible, .card:focus-visible, select:focus-visible { outline: 3px s
   body.touch .tp.lp button.summon { min-width: 0; padding: 4px 10px; }
   body.touch .tp.lp .bsel { min-height: 44px; max-width: none; width: 100%; font-size: 15px; }
   body.touch .tp.lp .grp { display: none; }
+  body.touch .tp.lp .selbox:not(.hidden) { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; padding: 0; border: 0; }
   body.touch .tp.lp .hint { display: block; grid-column: 1 / -1; font-size: 12px; line-height: 1.3; }
 }
 @media (pointer: coarse) and (orientation: portrait) {

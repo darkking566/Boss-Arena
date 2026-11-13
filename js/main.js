@@ -160,9 +160,9 @@
     if (state.mode === 'lane') { // 拉鋸戰：說明規則（Boss 在戰鬥中花錢召喚，選角不用選）
       const UN = BD.LANE_UNITS, E = BD.LANE_ECON, bs = Object.values(UN).filter((g) => g.cost);
       $('#detail').innerHTML = `<div><h3>🏰 拉鋸戰（Nexus Wars 式）</h3><div class="d">你是藍方指揮官，對手是紅方 AI。你不操控任何單位：只管蓋建築、存錢、召喚 Boss。兵與 Boss 會自己沿兵線推進，先打掉對方核心的一方獲勝。</div>
-        <div class="d">開局 ${E.startGold} 金並送一座兵營；每 ${E.incomeT} 秒發收入（基本 ${E.baseIncome} + 建築），擊殺、拆建築、打倒 Boss 都有賞金。最多 ${E.slots} 座建築，蓋在自家核心前方，會被敵人拆掉。</div>
-        <div class="d">建築：${bs.map((g) => `${g.name} 💰${g.cost}`).join('、')}。蓋召喚祭壇後可花 ${E.bossBase} + 星數×${E.bossPerStar} 金召喚任一位 Boss（同時在場數 = 祭壇數，最多 ${E.maxBosses} 位），由 AI 操控跟著兵推進。</div>
-        <div class="d">鏡頭：A/D 或 ←/→ 捲動、滾輪或 W/S 縮放、拖曳場地、空白鍵回到全覽。</div></div>`;
+        <div class="d">開局 ${E.startGold} 金並送一座兵營；每 ${E.incomeT} 秒發收入（基本 ${E.baseIncome} + 建築），擊殺、拆建築、打倒 Boss 都有賞金。建築數量不限，蓋在自家核心前方，會被敵人拆掉；點自己的建築可升級（最多 Lv${E.maxLv}，產出 × 等級）或拆除（退回一半投入）。</div>
+        <div class="d">建築：${bs.map((g) => `${g.name} 💰${g.cost}`).join('、')}。蓋召喚祭壇後可花 ${E.bossBase} + 星數×${E.bossPerStar} 金召喚任一位 Boss（數量不限），由 AI 操控跟著兵推進。</div>
+        <div class="d">鏡頭：A/D 或 ←/→ 捲動、滾輪或 W/S 縮放、拖曳場地、空白鍵回到全覽；點自己的建築選取。</div></div>`;
       return;
     }
     if (state.mode === 'hunt4') { // 狩獵：顯示目標 Boss（右側選的）與獵人隊

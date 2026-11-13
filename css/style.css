@@ -108,6 +108,11 @@ table.stats td:first-child { color: #aaa; text-align: left; }
 .tp.lp button.lb .cost { font-size: 12px; color: #ffd36a; }
 .tp.lp button.lb.off { opacity: 0.45; }
 .tp.lp button.summon { flex-direction: row; min-width: 150px; background: #3a2350; border-color: #b07ae0; }
+.tp.lp .selbox { margin-left: 14px; padding-left: 12px; border-left: 1px solid #555; }
+.tp.lp .selbox.hidden { display: none; }
+.tp.lp .selbox .grp { color: #ffe08a; font-size: 14px; }
+.tp.lp button.sell { flex-direction: row; background: #3a1d1d; border-color: #a05050; }
+.tp.lp button.up { flex-direction: row; }
 .tp.lp .bsel { font-size: 14px; padding: 4px; background: #1d1a24; color: #ddd; border: 1px solid #555; border-radius: 6px; max-width: 320px; }
 .tp .tp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .tp .grp-wrap { display: flex; align-items: center; gap: 4px; }

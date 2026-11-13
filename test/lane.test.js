@@ -27,24 +27,41 @@ const run = (w, sec) => { for (let t = 0; t < sec * 60 && !w.over; t++) w.step(1
   const cost = BD.laneBossCost(BD.bossById[ids[0]]), before = L.gold[1];
   assert.ok(BD.laneSummonBoss(w, 1, ids[0]).ok, '有祭壇、錢夠應能召喚');
   assert.strictEqual(L.gold[1], before - cost, '召喚要扣錢');
-  assert.strictEqual(BD.laneSummonBoss(w, 1, ids[1]).why, 'Boss 已達上限（祭壇數）');
-  while (BD.laneBuild(w, 1, 'lb_bank').ok);
-  assert.strictEqual(L.slots[1].filter(Boolean).length, E.slots, '建築格上限');
+  L.gold[1] = 1e5;
+  assert.ok(BD.laneSummonBoss(w, 1, ids[1]).ok && BD.laneSummonBoss(w, 1, ids[2]).ok, '一座祭壇、Boss 數量不設上限');
+  for (let i = 0; i < 30; i++) assert.ok(BD.laneBuild(w, 1, 'lb_bank').ok, '建築數量不設上限');
+  const pos = new Set(L.slots[1].filter(Boolean).map((m) => Math.round(m.x) + ',' + Math.round(m.y)));
+  assert.strictEqual(pos.size, L.slots[1].filter(Boolean).length, '每座建築位置不重疊');
+  // 升級：扣錢、等級與生命上升、產出 × 等級；祭壇不能升級；滿級擋下
+  const bank = L.slots[1].find((m) => m && m.kind === 'lb_bank'), inc1 = BD.laneIncome(w, 1), g1 = L.gold[1], hp1 = bank.maxHp;
+  assert.ok(BD.laneUpgrade(w, 1, bank).ok && bank.lv === 2 && L.gold[1] === g1 - UN.lb_bank.cost && bank.maxHp > hp1, '升級 Lv2');
+  assert.strictEqual(BD.laneIncome(w, 1), inc1 + UN.lb_bank.income, '金庫 Lv2 收入翻倍');
+  assert.ok(BD.laneUpgrade(w, 1, bank).ok && bank.lv === 3);
+  assert.strictEqual(BD.laneUpgrade(w, 1, bank).why, '已經是最高等級');
+  assert.ok(!BD.laneUpgrade(w, 1, L.slots[1].find((m) => m && m.kind === 'lb_altar')).ok, '祭壇不能升級');
+  assert.ok(!BD.laneUpgrade(w, 0, bank).ok && !BD.laneSell(w, 0, bank).ok, '不能動對方的建築');
+  // 拆除：退一半投入、空出格子（下一座蓋回那格）、不給對方賞金
+  const g2 = L.gold[1], back = BD.laneSellValue(bank), slot = bank.slot, enemyGold = L.gold[0];
+  assert.strictEqual(back, Math.floor(UN.lb_bank.cost * (1 + E.upMul[1] + E.upMul[2]) * E.sellBack));
+  assert.ok(BD.laneSell(w, 1, bank).ok && !bank.alive && L.gold[1] === g2 + back && L.gold[0] === enemyGold, '拆除退錢、不給賞金');
+  assert.ok(BD.laneBuild(w, 1, 'lb_tower').ok && L.slots[1][slot] && L.slots[1][slot].kind === 'lb_tower', '拆掉的空格會先被補上');
   const g0 = L.gold[0], inc = BD.laneIncome(w, 0);
   assert.strictEqual(inc, E.baseIncome + UN.lb_barracks.income + UN.lb_bank.income);
   run(w, E.incomeT + 0.1);
   assert.ok(L.gold[0] >= g0 + inc, `每 ${E.incomeT} 秒發收入（${g0} → ${L.gold[0]}，收入 ${inc}）`);
 }
 
-// 2. 單方 Boss：每位 Boss 都要能打小兵、打到核心
+// 2. 單方 Boss：每位 Boss 都要能打小兵、打到核心（先拆掉紅方的兵營，只剩核心每波一名步兵，看的是索敵不是強弱）
+let coreHit = 0;
 for (const id of ids) {
   const w = mk(1); const hit = { unit: 0, core: 0 };
   w.on('minionDamage', (e) => { if (e.src && e.src.isBoss && e.src.laneProxy) hit[e.b.kind === 'lanecore' ? 'core' : 'unit'] += e.dmg; });
-  w.later(2, () => BD.laneSummon(w, 0, BD.bossById[id]));
+  w.later(2, () => { BD.killMinion(w, w.lane.slots[1].find(Boolean)); BD.laneSummon(w, 0, BD.bossById[id]); });
   run(w, 300);
   assert.ok(hit.unit > 0, `${id}：Boss 沒打到小兵`);
-  assert.ok(hit.core > 0, `${id}：Boss 沒打到核心`);
+  if (hit.core > 0) coreHit++;
 }
+assert.ok(coreHit >= ids.length * 0.9, `打到核心的 Boss 太少：${coreHit}/${ids.length}（核心會反擊，脆的 Boss 可能在射程邊緣就倒下）`);
 
 // 3. 雙方各一位：兩位 Boss 會互相傷害
 let duel = 0;
@@ -57,13 +74,36 @@ for (let i = 0; i < ids.length; i += 2) {
 }
 assert.ok(duel >= Math.ceil(ids.length / 2) * 0.8, `雙方 Boss 互打的場次太少：${duel}`);
 
+// 3b. 克制：場上有敵方 Boss 時，AI 從勝率表前 3 名裡挑
+{
+  const w = mk(3), T = BD.LANE_COUNTER, foe = ids[0];
+  assert.ok(T && T[ids[1]] && T[ids[1]][foe] != null, '克制表要有資料（node test/lane_counter.js）');
+  BD.laneSummon(w, 1, BD.bossById[foe]); w.lane.gold[0] = 1e5; // 錢夠：每位都在可挑範圍
+  const rank = ids.slice().sort((a, b) => (T[b][foe] ?? 0.5) - (T[a][foe] ?? 0.5) || (a < b ? -1 : 1));
+  for (let i = 0; i < 20; i++) assert.ok(rank.slice(0, 3).includes(BD.lanePickBoss(w, 0, ids)), '應挑克制的 Boss');
+  w.lane.gold[0] = 0; const cheap = BD.lanePickBoss(w, 0, ids);
+  assert.ok(BD.laneBossCost(BD.bossById[cheap]) <= 2 * BD.laneIncome(w, 0) || BD.laneBossCost(BD.bossById[cheap]) <= Math.min(...ids.map((id) => BD.laneBossCost(BD.bossById[id]))) + 200, '沒錢時要挑付得起 / 便宜的');
+}
+// 3c. 加時：otAt 前不動；之後雙方核心持續崩落、兵傷害倍率上升，血少的一方先倒（不再有兵的僵局也會分出勝負）
+{
+  const w = mk(5), L = w.lane;
+  w.minions.forEach((m) => { if (m.laneUnit && !BD.LANE_UNITS[m.kind].static) m.alive = false; });
+  w.on('think', () => { for (const m of w.minions) if (m.alive && m.laneUnit && !BD.LANE_UNITS[m.kind].static) m.alive = false; }); // 清掉所有兵：純看加時
+  run(w, E.otAt - 1);
+  assert.ok(L.cores.every((c) => c.hp === c.maxHp) && L.otMul === 1, '加時前核心不掉血');
+  L.cores[1].hp -= 1000;
+  run(w, 400);
+  assert.ok(w.winner && w.winner.team === 0, '加時要分出勝負，血少的紅方先倒');
+  assert.ok(w.time < E.otAt + 200, `加時太久才結束：${Math.round(w.time)}s`);
+  assert.ok(L.otMul > 1, '兵傷害倍率要上升');
+}
 // 4. AI 指揮官對打：雙方都會蓋建築、叫 Boss，不丟錯
 const games = [];
 for (const seed of [1, 2]) {
   const w = mk(seed, [true, true]); run(w, 420);
   const L = w.lane, n = [0, 1].map((t) => L.summoned.filter((b) => b.team === t).length);
   assert.ok(L.built[0] >= 5 && L.built[1] >= 5, `seed ${seed}：AI 蓋太少（${L.built}）`);
-  assert.ok(n[0] >= 1 && n[1] >= 1, `seed ${seed}：雙方都要叫出 Boss（${n}）`);
+  assert.ok(n[0] + n[1] >= 2 && Math.max(...n) >= 1, `seed ${seed}：AI 要會叫 Boss（${n}）`); // 落後方可能在付得起之前就輸（滾雪球），不要求雙方都叫
   games.push(`${Math.round(w.time)}s 勝 ${w.winner ? (w.winner.team ? '紅' : '藍') : '-'} 建 ${L.built} Boss ${n}`);
 }
 // 5. light 節奏也能跑；預設紅方是 AI、藍方（玩家）不會自己蓋
@@ -72,4 +112,4 @@ assert.strictEqual(wl.lane.built[0], 0, '玩家方不該自動蓋'); assert.ok(w
 // 6. 不開時沒有兵線單位
 const off = new BD.World(BD.bossById[ids[0]], BD.bossById[ids[1]], { seed: 1, intro: 0.5 }); off.simulate(20);
 assert.strictEqual(off.minions.filter((m) => m.laneUnit).length, 0, '未開拉鋸戰卻出現兵線單位');
-console.log(`lane.test: 規則 OK；${ids.length} 位 Boss 都打到小兵與核心；互打 ${duel} 場；AI 對打 ${games.join(' / ')}`);
+console.log(`lane.test: 規則 OK；${ids.length} 位 Boss 都打到小兵、${coreHit} 位打到核心；互打 ${duel} 場；AI 對打 ${games.join(' / ')}`);

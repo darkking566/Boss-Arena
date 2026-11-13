@@ -30,12 +30,13 @@
     ctx.strokeStyle = 'rgba(255,240,200,0.12)'; ctx.lineWidth = 3; ctx.setLineDash([30, 24]);
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]);
     for (const team of [0, 1]) {
-      const h = L.home[team], dir = team ? -1 : 1;
+      const h = L.home[team], dir = team ? -1 : 1, n = L.slots[team].length;
+      let hy = 370; for (let i = 0; i <= n; i++) hy = Math.max(hy, Math.abs(BD.laneSlotPos(L, team, i)[1] - h.y) + 80); // 基地範圍跟著建築往外長
       ctx.fillStyle = hexA(R.TEAM[team], 0.08);
-      ctx.fillRect(Math.min(h.x - dir * 120, h.x + dir * 450), h.y - 370, 570, 740);
-      if (L.ai[team]) continue; // 只替玩家方畫空格
+      ctx.fillRect(Math.min(h.x - dir * 120, h.x + dir * 680), h.y - hy, 800, hy * 2);
+      if (L.ai[team]) continue; // 只替玩家方畫：拆掉留下的空格 + 下一座會蓋在哪
       ctx.strokeStyle = hexA(R.TEAM[team], 0.35); ctx.lineWidth = 2; ctx.setLineDash([8, 6]);
-      L.slots[team].forEach((m, i) => { if (m) return; const [x, y] = BD.laneSlotPos(L, team, i); ctx.strokeRect(x - 28, y - 28, 56, 56); });
+      for (let i = 0; i <= n; i++) { if (L.slots[team][i]) continue; const [x, y] = BD.laneSlotPos(L, team, i); ctx.strokeRect(x - 28, y - 28, 56, 56); if (i === L.slots[team].indexOf(null) || i === n) break; }
       ctx.setLineDash([]);
     }
   };
@@ -53,9 +54,10 @@
       const g = UN[m.kind];
       if (!g.static) { if (m.hp < m.maxHp) bar(ctx, m.x, m.y - m.r - 6 * s, m.r * 2, 3 * s, m.hp / m.maxHp, R.TEAM[m.team]); continue; }
       const core = m.kind === 'lanecore', wd = core ? 160 : 70;
+      if (m === LV.sel) { ctx.strokeStyle = '#ffe08a'; ctx.lineWidth = 3 * s; ctx.beginPath(); ctx.arc(m.x, m.y, m.r + 10, 0, Math.PI * 2); ctx.stroke(); } // lane-ui.js 選取的建築
       bar(ctx, m.x, m.y - m.r - 12 * s, wd, (core ? 9 : 5) * s, m.hp / m.maxHp, R.TEAM[m.team]);
       ctx.font = `bold ${Math.round((core ? 16 : 12) * s)}px ${FONT}`; ctx.fillStyle = '#fff';
-      ctx.fillText(core ? `${SIDE[m.team]}核心` : g.name, m.x, m.y - m.r - 15 * s);
+      ctx.fillText(core ? `${SIDE[m.team]}核心` : m.lv > 1 ? `${g.name} Lv${m.lv}` : g.name, m.x, m.y - m.r - 15 * s);
     }
     for (const b of L.summoned) {
       if (b.state === 'dead') continue;
@@ -87,7 +89,7 @@
       ctx.fillText(bs.length ? bs.map((b) => `${b.name} ${pct(b)}%`).join('、') : 'Boss：無', x0 + 14, 190, pw - 28);
     }
     const mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
-    const s = `拉鋸 ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')} · ×${w.speed}`;
+    const s = `拉鋸 ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')} · ×${w.speed}` + (L.ot ? ` · 加時 ×${L.otMul.toFixed(1)}` : '');
     ctx.textAlign = 'center'; ctx.font = `bold 28px ${FONT}`; const tw = ctx.measureText(s).width + 32;
     ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(R.W / 2 - tw / 2, 214, tw, 40); // 計時壓在場地邊框上，要有底色才讀得到
     ctx.fillStyle = '#ddd'; ctx.fillText(s, R.W / 2, 245);
@@ -110,12 +112,13 @@
       bar(ctx, x0 + 16 + (pw - 32) / 2, 78, pw - 32, 14, core.hp / core.maxHp, col);
       const built = L.slots[team].filter(Boolean), alt = built.filter((m) => m.kind === 'lb_altar').length;
       ctx.fillStyle = '#bbb'; ctx.font = `14px ${FONT}`;
-      ctx.fillText(`建築 ${built.length}/${E.slots}　祭壇 ${alt}　擊殺 ${L.kills[team]}`, x0 + 16, 114);
+      ctx.fillText(`建築 ${built.length}　祭壇 ${alt}　擊殺 ${L.kills[team]}`, x0 + 16, 114);
       const bs = L.summoned.filter((b) => b.team === team && b.state !== 'dead');
       ctx.fillText('Boss：', x0 + 16, 142);
       if (!bs.length) { ctx.fillStyle = '#777'; ctx.fillText('（無）', x0 + 64, 142); }
-      bs.forEach((b, i) => {
-        const bx = x0 + 64 + i * 280;
+      if (bs.length > 2) { ctx.fillStyle = '#bbb'; ctx.fillText(`+${bs.length - 2}`, x0 + pw - 40, 142); } // 數量不限：只列前兩位
+      bs.slice(0, 2).forEach((b, i) => {
+        const bx = x0 + 64 + i * 270;
         ctx.fillStyle = b.def.color; ctx.font = `bold 14px ${FONT}`; ctx.fillText(b.name, bx, 142);
         bar(ctx, bx + 190, 133, 80, 8, b.hp / b.maxHp, col);
       });
@@ -124,5 +127,7 @@
     const mm = Math.floor(w.time / 60), ss = Math.floor(w.time % 60);
     ctx.font = `bold 22px ${FONT}`; ctx.fillStyle = '#ddd'; ctx.fillText(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, R.W / 2, 92);
     ctx.font = `14px ${FONT}`; ctx.fillStyle = '#aaa'; ctx.fillText(`速度 ×${w.speed}`, R.W / 2, 118);
+    const E2 = BD.LANE_ECON, ot = L.ot ? `加時 · 兵傷害 ×${L.otMul.toFixed(1)}` : `加時倒數 ${Math.max(0, Math.ceil(E2.otAt - w.time))} 秒`;
+    ctx.font = `bold 14px ${FONT}`; ctx.fillStyle = L.ot ? '#ffd36a' : '#888'; ctx.fillText(ot, R.W / 2, 142);
   };
 })(typeof window !== 'undefined' ? window : globalThis);
