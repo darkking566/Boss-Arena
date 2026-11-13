@@ -18,7 +18,8 @@
   - 操作：底部面板點建築 / 選 Boss 召喚；點場上自己的建築選取，面板出現升級 / 拆除，點空地取消；A/D 或 ←/→ 捲動、滾輪或 W/S 縮放、拖曳場地、空白鍵回全覽；1~4 速度。
   - 架構：`new BD.World(dummy, dummy, { lane: true, laneAI: [藍, 紅] })` → `BD.setupLane`（`js/engine/lane.js`，數值在 `BD.LANE_UNITS` / `BD.LANE_ECON`）。Boss AI 只會打 Boss，所以每位召喚 Boss 配一個 hidden 代理假人移到最近的敵方單位上，附近 700 內有敵方 Boss 就改打它。玩家與 AI 指揮官共用 `BD.laneBuild` / `BD.laneSummonBoss` / `BD.laneUpgrade` / `BD.laneSell`（先用 `laneCanBuild` / `laneCanSummon` / `laneCanUpgrade` 檢查）。AI 叫 Boss 時查 `BD.LANE_COUNTER`（`js/data/lane-counter.js`，34 位兩兩 heavy 1v1 各 6 場的勝率表，由 `node test/lane_counter.js` 產生；新增或重調 Boss 後重跑）：場上有敵方 Boss 就從約 2 次收入內付得起的人選裡，挑平均勝率前 3 名之一。繪圖 `js/render/lane.js`、面板與鏡頭 `js/lane-ui.js`。其他模式指紋不變。測試：`npm run test:lane`。
   - 碰撞與公平性：建築與核心是實心的，兵會被推出去並往兵線中央繞過；兵的推擠量先加總再一次套用、更新順序每幀以戰鬥亂數洗牌，左右兩隊沒有固定優勢（`lane.test` 以左右鏡像結果相同做回歸測試）。
-  - 尚未做：AI 不會拆建築。
+  - AI 拆建築：AI 方的建築生命低於 25%、旁邊 300 內還有敵兵或 Boss 時，AI 會自己拆掉（退一半投入、對方拿不到賞金）；AI 對打對照 16 局中，因此翻盤的 3 局都是會拆的一方贏。數值 `BD.LANE_ECON.salvageAt`。
+  - 尚未做：Boss 會穿過建築（只有兵有建築碰撞）。
 
 ## Boss 一覽
 - 飛龍桂雷爾（法魯姆大橋的灰母之裔，《艾爾登法環》選配 Boss）：原作與飛龍亞基爾同模型同招式、場地是窄橋、血量約三倍多，所以龍體借用亞基爾造型、招式沿用 11 招並加「長橋龍息」；改編的母龍主題：被動「母龍餘威」（定時咆哮、施加新狀態「母龍威壓」：攻擊 −15%／承傷 +10%）、半血「灰母血脈」與「母龍之嚎」「灰燼風暴」、兩階段大招；5 種專屬特效。考據 33 張參考圖（含 Agheel 官方設定稿，無桂雷爾專屬設計稿）見 `docs/bosses/greyll.md`

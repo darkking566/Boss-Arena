@@ -23,10 +23,11 @@
   };
   const OPENING = ['lb_archery', 'lb_bank', 'lb_barracks']; // AI 開局固定先補產能，避免隨機開局一步落後就被滾雪球
   const ECON = BD.LANE_ECON = { startGold: 250, baseIncome: 40, incomeT: 15, wave: 6, cols: 5, maxLv: 3, upMul: [0, 1, 1.5], sellBack: 0.5, bossBase: 200, bossPerStar: 100, bossBounty: 120,
-    otAt: 300, otDrain: 6.3, otDmg: 60,
+    otAt: 300, otDrain: 6.3, otDmg: 60, // 加時：otAt 秒起雙方核心每秒掉 otDrain × 加時秒數（約 110 秒內必分勝負，血少的先倒），兵的傷害每 otDmg 秒 +100%
     catchUp: 0.6, // 落後補助：建築總投入落後的一方收入加成 = 落後比例，最多 +60%
     crisis: [0.75, 0.5, 0.25], blastR: 750, blastMinion: 3000, blastBoss: 0.15, // 核心危機反擊：掉到這些血量比例各爆一次，清敵兵、Boss 扣最大生命 15%
-    blastWave: { laneheavy: 3, lanemelee: 4 } }; // 反擊後免費送出的兵 // 加時：otAt 秒起雙方核心每秒掉 otDrain × 加時秒數（約 110 秒內必分勝負，血少的先倒），兵的傷害每 otDmg 秒 +100%
+    blastWave: { laneheavy: 3, lanemelee: 4 }, // 反擊後免費送出的兵
+    salvageAt: 0.25 }; // AI 拆除：建築生命低於這個比例、旁邊還有敵人時自己拆掉，退一半投入、不讓對方拿賞金
   const BUILDS = Object.keys(UNITS).filter((k) => UNITS[k].cost);
   const LEN = 1800, AGGRO = 260, BOSS_AGGRO = 700;
   const cell = (v) => Math.floor(v / 40), scell = (v) => Math.floor(v / 160); // 建築格用大格：最大半徑 60（核心）+ 兵 15 < 160
@@ -195,6 +196,11 @@
   // 敵方的兵 / Boss 已經逼近自家核心（900 內）
   const pressed = (w, team) => w.enemiesOf(team).some((u) => !(u.laneUnit && UNITS[u.kind].static) && U.dist(u, w.lane.home[team]) < 900);
   // AI 指揮官：每秒想一次；先選目標（蓋什麼 / 叫誰），存到錢才執行，再選下一個。只用 w.rng（只在拉鋸戰裡影響戰鬥）
+  // AI 救回快被拆掉的建築：每幀檢查（快死的建築撐不到下一次 commander）；C.salvage = false 可關掉（對照實驗用）
+  function salvage(w, team) {
+    const L = w.lane; if (L.cmd[team].salvage === false) return;
+    for (const m of L.slots[team]) if (m && m.alive && m.hp < m.maxHp * ECON.salvageAt && w.enemiesOf(team).some((u) => !(u.laneUnit && UNITS[u.kind].static) && !u.isDummy && U.dist(u, m) - u.r - m.r < 300)) BD.laneSell(w, team, m);
+  }
   function commander(w, team) {
     const L = w.lane, C = L.cmd[team];
     if (!C.goal && L.built[team] < OPENING.length) C.goal = { build: OPENING[L.built[team]] };
@@ -297,6 +303,7 @@
         while (!w.winner && c.alive && L.crisis[t] < ECON.crisis.length && c.hp <= c.maxHp * ECON.crisis[L.crisis[t]]) { L.crisis[t]++; coreBlast(t); }
       }
       if ((L.payIn -= dt) <= 0) { L.payIn = ECON.incomeT; for (const t of [0, 1]) L.gold[t] += income(L, t); }
+      for (const t of [0, 1]) if (L.ai[t]) salvage(w, t);
       if ((think -= dt) <= 0) { think = 1; for (const t of [0, 1]) if (L.ai[t]) commander(w, t); }
       if ((wave -= dt) > 0) return;
       wave = ECON.wave;

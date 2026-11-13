@@ -153,6 +153,22 @@ for (const seed of [1, 2, 3]) {
   assert.strictEqual(res[1], res[0], `seed ${seed}：左右鏡像後結果不同（${res[0]} vs ${res[1]}）`);
   symRes.push(res[0]);
 }
+// 3h. AI 拆除：自家建築快被拆、旁邊有敵人時自己拆掉（退一半、對方沒賞金）；沒有敵人不拆；玩家方不會自動拆
+{
+  const w = mk(9, [true, true]), L = w.lane;
+  L.cmd[0].goal = L.cmd[1].goal = { build: 'lb_bank' }; L.gold = [0, 0]; // 讓 AI 這段時間不花錢，方便對帳
+  const bld = L.slots[1].find(Boolean); bld.hp = bld.maxHp * 0.1;
+  run(w, 0.1);
+  assert.ok(bld.alive, '旁邊沒敵人時不拆');
+  L.spawnFrom = { x: bld.x - 60, y: bld.y }; BD.spawnMinion(w, L.anchors[0], 'lanemelee', 0, 1); L.spawnFrom = null;
+  const g0 = L.gold.slice(), back = BD.laneSellValue(bld);
+  run(w, 2 / 60);
+  assert.ok(!bld.alive && L.gold[1] >= g0[1] + back && L.gold[0] === g0[0], 'AI 拆掉快死的建築：退錢、藍方沒拿到賞金');
+  const w2 = mk(9, [false, true]), mine = w2.lane.slots[0].find(Boolean); mine.hp = mine.maxHp * 0.1;
+  w2.lane.spawnFrom = { x: mine.x + 60, y: mine.y }; BD.spawnMinion(w2, w2.lane.anchors[1], 'lanemelee', 0, 1); w2.lane.spawnFrom = null;
+  run(w2, 2 / 60);
+  assert.ok(mine.alive, '玩家方的建築不會被自動拆');
+}
 // 4. AI 指揮官對打：雙方都會蓋建築、叫 Boss，不丟錯
 const games = [];
 for (const seed of [1, 2]) {
