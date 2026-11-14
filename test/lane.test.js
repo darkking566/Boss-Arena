@@ -80,7 +80,7 @@ assert.ok(duel >= Math.ceil(ids.length / 2) * 0.8, `雙方 Boss 互打的場次�
   const w = mk(3), T = BD.LANE_COUNTER, foe = ids[0];
   assert.ok(T && T[ids[1]] && T[ids[1]][foe] != null, '克制表要有資料（node test/lane_counter.js）');
   BD.laneSummon(w, 1, BD.bossById[foe]); w.lane.gold[0] = 1e5; // 錢夠：每位都在可挑範圍
-  const rank = ids.slice().sort((a, b) => (T[b][foe] ?? 0.5) - (T[a][foe] ?? 0.5) || (a < b ? -1 : 1));
+  const rank = ids.slice().sort((a, b) => ((T[b] && T[b][foe] != null ? T[b][foe] : 0.5) - (T[a] && T[a][foe] != null ? T[a][foe] : 0.5)) || (a < b ? -1 : 1));
   for (let i = 0; i < 20; i++) assert.ok(rank.slice(0, 3).includes(BD.lanePickBoss(w, 0, ids)), '應挑克制的 Boss');
   w.lane.gold[0] = 0; const cheap = BD.lanePickBoss(w, 0, ids);
   assert.ok(BD.laneBossCost(BD.bossById[cheap]) <= 2 * BD.laneIncome(w, 0) || BD.laneBossCost(BD.bossById[cheap]) <= Math.min(...ids.map((id) => BD.laneBossCost(BD.bossById[id]))) + 200, '沒錢時要挑付得起 / 便宜的');

@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-029",
+  "image_sha256": "b80a3fa631eb4e07c1b3c1d1b2268015097bad84676de83120469cc391a1724c",
+  "image_url": "https://i.ytimg.com/vi/CY6QCSN3V1o/maxresdefault.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-03.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-029.jpg",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:03:06.167912+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-029 黑刀刺客・身法與體術",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-029 黑刀刺客・身法與體術"
+    }
+  ],
+  "url": "https://www.youtube.com/watch?v=CY6QCSN3V1o",
+  "use": "reference-only"
+}

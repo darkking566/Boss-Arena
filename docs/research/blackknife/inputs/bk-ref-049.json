@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-049",
+  "kind": "image",
+  "title": "bk-ref-049 黑刀刺客・實戰對決",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://www.youtube.com/watch?v=iFc2bcN9D8o",
+  "image_url": "https://i.ytimg.com/vi/iFc2bcN9D8o/maxresdefault.jpg",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-05.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-049.jpg",
+  "image_sha256": "5354f03cf26ce4237c115a3a63c0556b53af3285cafffd5ed683ddd27b69afd1"
+}

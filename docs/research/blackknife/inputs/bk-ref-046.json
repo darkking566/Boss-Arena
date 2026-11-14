@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-046",
+  "kind": "image",
+  "title": "bk-ref-046 黑刀刺客・隱身暗殺",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://www.youtube.com/watch?v=UkARVwgW-gU",
+  "image_url": "https://i.ytimg.com/vi/UkARVwgW-gU/maxresdefault.jpg",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-04.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-046.jpg",
+  "image_sha256": "55d0badac7ad0ce26a88a3bed5d01cf947eae8c8af9329354fa910ddddf5ccf0"
+}

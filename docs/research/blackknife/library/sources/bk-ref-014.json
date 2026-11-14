@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-014",
+  "image_sha256": "5bc7fa8fa2151aea4004b076c8a94d72d07d46362d0eb32398f86cbf2271fd71",
+  "image_url": "https://static0.fextralifeimages.com/file/eldenring/thumb/3/31/Illusory-wall-2-sage-cave.png/600px-Illusory-wall-2-sage-cave.png",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-014.png",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:02:47.079406+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-014 黑刀刺客・場景與隱密",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-014 黑刀刺客・場景與隱密"
+    }
+  ],
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin",
+  "use": "reference-only"
+}

@@ -228,3 +228,362 @@
 | soulCharge | respawn_anchor_charge.ogg | Block\Block\Respawn anchor charge1.ogg |
 | sculkPulse | sculk_charge.ogg | Block\Block\Sculk charge1.ogg |
 | sculkShriek | sculk_shriek.ogg | Block\Block\Sculk shrieker shriek1.ogg |
+| dragonFlameLong | dragon_flamethrow_long1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw long1.ogg |
+| dragonFlameLong | dragon_flamethrow_long2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw long2.ogg |
+| dragonFlameShort | dragon_flamethrow_short1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw short1.ogg |
+| dragonFlameShort | dragon_flamethrow_short2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw short2.ogg |
+| dragonFlameShort | dragon_flamethrow_short3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw short3.ogg |
+| dragonFlameShort | dragon_flamethrow_short4.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Flame throw short4.ogg |
+| fireballWhoosh | fireball_whoosh1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball whoosh1.ogg |
+| fireballWhoosh | fireball_whoosh2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball whoosh2.ogg |
+| fireballWhoosh | fireball_whoosh3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball whoosh3.ogg |
+| dragonRoarLong | dragon_roar_long1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Long roar1.ogg |
+| dragonRoarLong | dragon_roar_long2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Long roar2.ogg |
+| dragonRoarLong | dragon_roar_pitched.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Long roar pitched.ogg |
+| dragonRoarShort | dragon_roar_short1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Short roar1.ogg |
+| dragonRoarShort | dragon_roar_short2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Short roar2.ogg |
+| dragonRoarShort | dragon_roar_short3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Short roar3.ogg |
+| wardenImpact | warden_impact1.ogg | Mob\Mob\Warden attack impact1.ogg |
+| wardenImpact | warden_impact2.ogg | Mob\Mob\Warden attack impact2.ogg |
+| breezeJump | breeze_jump1.ogg | Mob\Mob\Breeze jump1 JE2 BE2.ogg |
+| breezeJump | breeze_jump2.ogg | Mob\Mob\Breeze jump2 JE2 BE2.ogg |
+| breezeLand | breeze_land1.ogg | Mob\Mob\Breeze land1 JE1 BE1.ogg |
+| breezeLand | breeze_land2.ogg | Mob\Mob\Breeze land2 JE1 BE1.ogg |
+| golemBellow | golem_bellow1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prison Golem Bellow1.ogg |
+| golemBellow | golem_bellow2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prison Golem Bellow12.ogg |
+| dragonFlap | dragon_flap1.ogg | Mob\Mob\Ender dragon flap1.ogg |
+| dragonFlap | dragon_flap2.ogg | Mob\Mob\Ender dragon flap2.ogg |
+| dragonFlap | dragon_flap3.ogg | Mob\Mob\Ender dragon flap3.ogg |
+| dragonFlap | dragon_flap4.ogg | Mob\Mob\Ender dragon flap4.ogg |
+| dragonFlap | dragon_flap5.ogg | Mob\Mob\Ender dragon flap5.ogg |
+| dragonFlap | dragon_flap6.ogg | Mob\Mob\Ender dragon flap6.ogg |
+| dragonBite | dragon_bite1.ogg | Mob\Mob\Ravager bite1.ogg |
+| dragonBite | dragon_bite2.ogg | Mob\Mob\Ravager bite2.ogg |
+| dragonBite | dragon_bite3.ogg | Mob\Mob\Ravager bite3.ogg |
+| dragonBite | dragon_bite4.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Bite1.ogg |
+| dragonStomp | dragon_stomp1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prismarine Guard Rock stomp1.ogg |
+| dragonStomp | dragon_stomp2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prismarine Guard Rock stomp2.ogg |
+| dragonStomp | dragon_stomp3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prismarine Guard Stomp1.ogg |
+| dragonStomp | dragon_stomp4.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Prismarine Guard Stomp3.ogg |
+| earthCrack | earth_crack.ogg | Ambient\Ambient\Earth Crack.ogg |
+| fireballImpact | fireball_impact1.ogg | Event server\Fireball impact1.ogg |
+| fireballImpact | fireball_impact2.ogg | Event server\Fireball impact2.ogg |
+| fireballImpact | fireball_impact3.ogg | Event server\Fireball impact3.ogg |
+| trialOmen | trial_omen.ogg | Miscellaneous\Miscellaneous\Trial omen.ogg |
+| trialOmen | bad_omen.ogg | Miscellaneous\Miscellaneous\Bad omen.ogg |
+| trialOmen | raid_omen.ogg | Miscellaneous\Miscellaneous\Raid omen.ogg |
+| omenCurse | omen_curse.ogg | Mob\Mob\Curse.ogg |
+| bellResonate | bell_resonate.ogg | Block\Bell resonate.ogg |
+| crystalResonate | amethyst_resonate3.ogg | Block\Block\Amethyst resonate3.ogg |
+| crystalResonate | amethyst_resonate4.ogg | Block\Block\Amethyst resonate4.ogg |
+| woodBreak | nether_wood_break1.ogg | Block\Block\Nether wood break1.ogg |
+| woodBreak | nether_wood_break2.ogg | Block\Block\Nether wood break2.ogg |
+| woodBreak | nether_wood_break3.ogg | Block\Block\Nether wood break3.ogg |
+| woodBreak | nether_wood_break4.ogg | Block\Block\Nether wood break4.ogg |
+| woodAttack | spear_wood_attack1.ogg | Item\Item\Spear wood attack1.ogg |
+| woodAttack | spear_wood_attack2.ogg | Item\Item\Spear wood attack2.ogg |
+| woodAttack | spear_wood_attack3.ogg | Item\Item\Spear wood attack3.ogg |
+| woodHit | spear_wood_hit1.ogg | Item\Item\Spear wood hit1.ogg |
+| woodHit | spear_wood_hit2.ogg | Item\Item\Spear wood hit2.ogg |
+| woodHit | spear_wood_hit3.ogg | Item\Item\Spear wood hit3.ogg |
+| spearLunge | spear_lunge1.ogg | Item\Item\Spear lunge1.ogg |
+| spearLunge | spear_lunge2.ogg | Item\Item\Spear lunge2.ogg |
+| spearLunge | spear_lunge3.ogg | Item\Item\Spear lunge3.ogg |
+| tridentGround | trident_ground_impact1.ogg | Item\Item\Trident ground impact1.ogg |
+| tridentGround | trident_ground_impact2.ogg | Item\Item\Trident ground impact2.ogg |
+| tridentGround | trident_ground_impact3.ogg | Item\Item\Trident ground impact3.ogg |
+| tridentGround | trident_ground_impact4.ogg | Item\Item\Trident ground impact4.ogg |
+| heavySmash | heavy_core_break1.ogg | Block\Block\Heavy Core break1.ogg |
+| heavySmash | heavy_core_break2.ogg | Block\Block\Heavy Core break2.ogg |
+| heavySmash | heavy_core_break3.ogg | Block\Block\Heavy Core break3.ogg |
+| heavySmash | heavy_core_break4.ogg | Block\Block\Heavy Core break4.ogg |
+| tuffBreak | tuff_break1.ogg | Block\Block\Tuff break1.ogg |
+| tuffBreak | tuff_break2.ogg | Block\Block\Tuff break2.ogg |
+| dripstoneLand | dripstone_land1.ogg | Block\Block\Pointed Dripstone land1.ogg |
+| dripstoneLand | dripstone_land2.ogg | Block\Block\Pointed Dripstone land2.ogg |
+| clothRip | cloth_rip1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Rip block1.ogg |
+| clothRip | cloth_rip2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Rip block2.ogg |
+| heavyWhoosh | heavy_whoosh1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Ribbone whoosh1.ogg |
+| heavyWhoosh | heavy_whoosh2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Ribbone whoosh2.ogg |
+| battleaxeSwipe | battleaxe_swipe1.ogg | Event server\Battle axe swipe1.ogg |
+| battleaxeSwipe | battleaxe_swipe2.ogg | Event server\Battle axe swipe2.ogg |
+| battleaxeSwipe | battleaxe_swipe3.ogg | Event server\Battle axe swipe3.ogg |
+| battleaxeSwipe | battleaxe_swipe4.ogg | Event server\Battle axe swipe4.ogg |
+| bloodSplash | water_heavy_splash.ogg | Mob\Mob\Water heavy splash.ogg |
+| fireballLaunch | fireball_launch1.ogg | Event server\Fireball launch1.ogg |
+| fireballLaunch | fireball_launch2.ogg | Event server\Fireball launch2.ogg |
+| fireballLaunch | fireball_launch3.ogg | Event server\Fireball launch3.ogg |
+| fireballLaunch | fireball_launch4.ogg | Event server\Fireball launch4.ogg |
+| fireballImpact | fireball_impact1.ogg | Event server\Fireball impact1.ogg |
+| fireballImpact | fireball_impact2.ogg | Event server\Fireball impact2.ogg |
+| fireballImpact | fireball_impact3.ogg | Event server\Fireball impact3.ogg |
+| sonicCharge | sonic_charge1.ogg | Mob\Mob\Sonic charge1.ogg |
+| sonicCharge | sonic_charge2.ogg | Mob\Mob\Sonic charge2.ogg |
+| witherSpawn | wither_spawn.ogg | Mob\Mob\Wither spawn.ogg |
+| ghastCharge | ghast_charge.ogg | Mob\Mob\Ghast charge.ogg |
+| ironGolemThrow | iron_golem_throw.ogg | Mob\Mob\Iron golem throw.ogg |
+| horseArmor | horse_armor.ogg | Mob\Mob\Horse armor.ogg |
+| horseBreathe | horse_breathe1.ogg | Mob\Mob\Horse breathe1.ogg |
+| horseBreathe | horse_breathe2.ogg | Mob\Mob\Horse breathe2.ogg |
+| horseBreathe | horse_breathe3.ogg | Mob\Mob\Horse breathe3.ogg |
+| horseJump | horse_jump.ogg | Mob\Mob\Horse jump.ogg |
+| horseLand | horse_land.ogg | Mob\Mob\Horse land.ogg |
+| sporeBurst | spore_burst1.ogg | Block\Block\Spore Blossom break1.ogg |
+| sporeBurst | spore_burst2.ogg | Block\Block\Spore Blossom break2.ogg |
+| sporeBurst | spore_burst3.ogg | Block\Block\Spore Blossom break3.ogg |
+| sporeBurst | spore_burst4.ogg | Block\Block\Spore Blossom break4.ogg |
+| sporeBurst | spore_burst5.ogg | Block\Block\Spore Blossom break5.ogg |
+| creakingHit | creaking_hit1.ogg | Block\Block\Creaking heart hit1.ogg |
+| creakingHit | creaking_hit2.ogg | Block\Block\Creaking heart hit2.ogg |
+| creakingHit | creaking_hit3.ogg | Block\Block\Creaking heart hit3.ogg |
+| creakingHit | creaking_break.ogg | Block\Block\Creaking heart break.ogg |
+| giantBite | giant_bite1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Bite1.ogg |
+| giantBite | giant_bite2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Bite2.ogg |
+| giantBite | giant_bite3.ogg | Mob\Mob\Ravager bite1.ogg |
+| giantBite | giant_bite4.ogg | Mob\Mob\Ravager bite2.ogg |
+| witherSnarl | wither_snarl1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Snarl short1.ogg |
+| witherSnarl | wither_snarl2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Snarl short2.ogg |
+| witherSnarl | wither_snarl3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Snarl short3.ogg |
+| witherSnarl | wither_snarl_long1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Snarl long1.ogg |
+| witherGrowl | wither_growl1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Growl beastly1.ogg |
+| witherGrowl | wither_growl2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Growl beastly2.ogg |
+| witherGrowl | wither_growl3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\Wither Storm Growl beastly3.ogg |
+| rotGurgle | rot_gurgle1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Gurgle growl1.ogg |
+| rotGurgle | rot_gurgle2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Gurgle growl2.ogg |
+| rotGurgle | rot_gurgle3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Giant Magma Golem Gurgle growl3.ogg |
+| rotGurgle | dragon_breath_hiss1.ogg | Item\Item\Bottle fill dragon breath1.ogg |
+| rotGurgle | dragon_breath_hiss2.ogg | Item\Item\Bottle fill dragon breath2.ogg |
+| rotSquish | muddy_break1.ogg | Block\Block\Muddy mangrove roots break1.ogg |
+| rotSquish | muddy_break2.ogg | Block\Block\Muddy mangrove roots break2.ogg |
+| rotSquish | mud_break1.ogg | Block\Block\Mud break1.ogg |
+| rotSquish | slime_attack1.ogg | Mob\Mob\Slime attack1.ogg |
+| rotSquish | slime_attack2.ogg | Mob\Mob\Slime attack2.ogg |
+| dragonHurt | ender_dragon_hurt1.ogg | Mob\Mob\Ender dragon hurt1.ogg |
+| dragonHurt | ender_dragon_hurt2.ogg | Mob\Mob\Ender dragon hurt2.ogg |
+| dragonHurt | ender_dragon_hurt3.ogg | Mob\Mob\Ender dragon hurt3.ogg |
+| wolfStep | wolf_step1.ogg | Mob\Mob\Wolf step1.ogg |
+| wolfStep | wolf_step2.ogg | Mob\Mob\Wolf step2.ogg |
+| wolfStep | wolf_step3.ogg | Mob\Mob\Wolf step3.ogg |
+| wolfStep | wolf_step4.ogg | Mob\Mob\Wolf step4.ogg |
+| wolfStep | wolf_step5.ogg | Mob\Mob\Wolf step5.ogg |
+| wolfBark | wolf_bark1.ogg | Minecraft Earth\Minecraft Earth\Skeleton wolf bark1.ogg |
+| wolfBark | wolf_bark2.ogg | Minecraft Earth\Minecraft Earth\Skeleton wolf bark2.ogg |
+| wolfBark | wolf_bark3.ogg | Minecraft Earth\Minecraft Earth\Skeleton wolf bark3.ogg |
+| foxAggro | fox_aggro1.ogg | Mob\Mob\Fox aggro1.ogg |
+| foxAggro | fox_aggro2.ogg | Mob\Mob\Fox aggro2.ogg |
+| foxAggro | fox_aggro3.ogg | Mob\Mob\Fox aggro3.ogg |
+| foxScreech | fox_screech1.ogg | Mob\Mob\Fox screech1.ogg |
+| foxScreech | fox_screech2.ogg | Mob\Mob\Fox screech2.ogg |
+| crystalBreak | amethyst_break1.ogg | Block\Block\Amethyst break1.ogg |
+| crystalBreak | amethyst_break2.ogg | Block\Block\Amethyst break2.ogg |
+| crystalBreak | amethyst_break3.ogg | Block\Block\Amethyst break3.ogg |
+| illusionWarp | illusion_warp1.ogg | Mob\Mob\Illusioner mirror move1.ogg |
+| illusionWarp | illusion_warp2.ogg | Mob\Mob\Illusioner mirror move2.ogg |
+
+| borealisBreath | borealis_breath1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath1.ogg |
+| borealisBreath | borealis_breath2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath2.ogg |
+| borealisBreath | borealis_breath3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath3.ogg |
+| borealisRoarEpic | borealis_roar_epic.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Angry growl1.ogg |
+| borealisRoar | borealis_roar_deep1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Bellow1.ogg |
+| borealisRoar | borealis_roar_deep2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Bellow2.ogg |
+| borealisRoar | borealis_roar_short1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Roar1.ogg |
+| borealisRoar | borealis_roar_short2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Roar2.ogg |
+| borealisRoar | borealis_roar_short3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Roar3.ogg |
+| borealisSlam | borealis_slam1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Attack1.ogg |
+| borealisSlam | borealis_slam2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Attack2.ogg |
+| borealisStomp | borealis_stomp1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Step1.ogg |
+| borealisStomp | borealis_stomp2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Step2.ogg |
+| borealisStomp | borealis_stomp3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Step3.ogg |
+| borealisGrowl | borealis_growl.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Low growl1.ogg |
+| borealisFreezeMagic | borealis_freeze_magic.ogg | Event server\Event server\MCC freeze bow hit.ogg |
+| borealisIceCast | borealis_ice_cast1.ogg | Event server\Event server\MCC freeze bow fire1.ogg |
+| borealisIceCast | borealis_ice_cast2.ogg | Event server\Event server\MCC freeze bow fire2.ogg |
+| borealisSnarl | borealis_snarl1.ogg | Mob\Mob\Polar bear roar1.ogg |
+| borealisSnarl | borealis_snarl2.ogg | Mob\Mob\Polar bear roar2.ogg |
+| borealisSnarl | borealis_snarl3.ogg | Mob\Mob\Polar bear roar3.ogg |
+| borealisBite | borealis_bite1.ogg | Mob\Mob\Ravager bite1.ogg |
+| borealisBite | borealis_bite2.ogg | Mob\Mob\Ravager bite2.ogg |
+| borealisBite | borealis_bite3.ogg | Mob\Mob\Ravager bite3.ogg |
+| borealisFrostCreak | borealis_frost_creak1.ogg | Mob\Mob\Creaking freeze1.ogg |
+| borealisFrostCreak | borealis_frost_creak2.ogg | Mob\Mob\Creaking freeze2.ogg |
+| borealisFrostCreak | borealis_frost_creak3.ogg | Mob\Mob\Creaking freeze3.ogg |
+| borealisFrostCreak | borealis_frost_creak4.ogg | Mob\Mob\Creaking freeze4.ogg |
+| borealisIceCrack | borealis_ice_crack1.ogg | Block\Block\Brittle Ice crack1.ogg |
+| borealisIceCrack | borealis_ice_crack2.ogg | Block\Block\Brittle Ice crack2.ogg |
+| borealisIceCrack | borealis_ice_crack3.ogg | Block\Block\Brittle Ice crack3.ogg |
+| borealisIceCrack | borealis_ice_crack4.ogg | Block\Block\Brittle Ice crack4.ogg |
+| borealisIceCrack | borealis_ice_crack5.ogg | Block\Block\Brittle Ice crack5.ogg |
+| borealisIceBreak | borealis_ice_break1.ogg | Block\Block\Packed Ice break1.ogg |
+| borealisIceBreak | borealis_ice_break2.ogg | Block\Block\Packed Ice break2.ogg |
+| borealisIceBreak | borealis_ice_break3.ogg | Block\Block\Packed Ice break3.ogg |
+| borealisFrostbite | borealis_frostbite1.ogg | Mob\Mob\Player hurt freeze1.ogg |
+| borealisFrostbite | borealis_frostbite2.ogg | Mob\Mob\Player hurt freeze2.ogg |
+
+| horseStep | horse_step1.ogg | Mob\Mob\Horse step1.ogg |
+| horseStep | horse_step2.ogg | Mob\Mob\Horse step2.ogg |
+| horseStep | horse_step3.ogg | Mob\Mob\Horse step3.ogg |
+| horseStep | horse_step4.ogg | Mob\Mob\Horse step4.ogg |
+| horseStep | horse_step5.ogg | Mob\Mob\Horse step5.ogg |
+| horseStep | horse_step6.ogg | Mob\Mob\Horse step6.ogg |
+| horseBreathe | horse_breathe1.ogg | Mob\Mob\Horse breathe1.ogg |
+| horseBreathe | horse_breathe2.ogg | Mob\Mob\Horse breathe2.ogg |
+| horseBreathe | horse_breathe3.ogg | Mob\Mob\Horse breathe3.ogg |
+| horseJump | horse_jump.ogg | Mob\Mob\Horse jump.ogg |
+| horseLand | horse_land.ogg | Mob\Mob\Horse land.ogg |
+| horseArmor | horse_armor.ogg | Mob\Mob\Horse armor.ogg |
+| spearAttack | spear_attack1.ogg | Item\Item\Spear attack1.ogg |
+| spearAttack | spear_attack2.ogg | Item\Item\Spear attack2.ogg |
+| spearAttack | spear_attack3.ogg | Item\Item\Spear attack3.ogg |
+| heavyKnockback | battle_axe_knockback1.ogg | Item\Item\Battle axe knockback1.ogg |
+| heavyKnockback | battle_axe_knockback2.ogg | Item\Item\Battle axe knockback2.ogg |
+| heavyKnockback | battle_axe_knockback3.ogg | Item\Item\Battle axe knockback3.ogg |
+| heavyKnockback | battle_axe_knockback4.ogg | Item\Item\Battle axe knockback4.ogg |
+| conduitActivate | conduit_activate.ogg | Block\Conduit activate.ogg |
+| conduitAttack | conduit_attack1.ogg | Block\Block\Conduit attack1.ogg |
+| conduitAttack | conduit_attack2.ogg | Block\Block\Conduit attack2.ogg |
+| conduitAttack | conduit_attack3.ogg | Block\Block\Conduit attack3.ogg |
+| beaconPower | beacon_power1.ogg | Block\Block\Beacon power1.ogg |
+| beaconPower | beacon_power2.ogg | Block\Block\Beacon power2.ogg |
+| earthCrack | earth_crack.ogg | Ambient\Ambient\Earth Crack.ogg |
+| heavyCoreBreak | heavy_core_break1.ogg | Block\Block\Heavy core break1.ogg |
+| heavyCoreBreak | heavy_core_break2.ogg | Block\Block\Heavy core break2.ogg |
+| heavyCoreBreak | heavy_core_break3.ogg | Block\Block\Heavy core break3.ogg |
+| heavyCoreBreak | heavy_core_break4.ogg | Block\Block\Heavy core break4.ogg |
+| witherShoot | wither_shoot.ogg | Mob\Mob\Wither shoot.ogg |
+| bloodDrain | respawn_anchor_deplete1.ogg | Block\Block\Respawn anchor deplete1.ogg |
+| bloodDrain | respawn_anchor_deplete2.ogg | Block\Block\Respawn anchor deplete2.ogg |
+| evokerPrepare | evoker_prepare_summon.ogg | Mob\Mob\Evoker prepare summon.ogg |
+| evokerPrepare | evoker_prepare_attack1.ogg | Mob\Mob\Evoker prepare attack1.ogg |
+| dripLava | drip_lava1.ogg | Block\Block\Pointed Dripstone drip lava1.ogg |
+| dripLava | drip_lava2.ogg | Block\Block\Pointed Dripstone drip lava2.ogg |
+| crimsonVoom | crimson_voom1.ogg | Ambient\Ambient\Crimson forest voom1.ogg |
+| crimsonVoom | crimson_voom2.ogg | Ambient\Ambient\Crimson forest voom2.ogg |
+| soulsandVoices | soulsand_voices1.ogg | Ambient\Ambient\Soulsand valley voices1.ogg |
+
+| sculkClick | sculk_click1.ogg | Block\Block\Sculk Sensor sculk clicking1.ogg |
+| sculkClick | sculk_click2.ogg | Block\Block\Sculk Sensor sculk clicking2.ogg |
+| sculkClick | sculk_click3.ogg | Block\Block\Sculk Sensor sculk clicking3.ogg |
+| amethystClusterBreak | amethyst_cluster_break1.ogg | Block\Block\Amethyst Cluster break1.ogg |
+| amethystClusterBreak | amethyst_cluster_break2.ogg | Block\Block\Amethyst Cluster break2.ogg |
+| amethystClusterBreak | amethyst_cluster_break3.ogg | Block\Block\Amethyst Cluster break3.ogg |
+| amethystClusterBreak | amethyst_cluster_break4.ogg | Block\Block\Amethyst Cluster break4.ogg |
+| respawnAnchorAmbient | respawn_anchor_ambient1.ogg | Block\Block\Respawn anchor ambient1.ogg |
+| respawnAnchorAmbient | respawn_anchor_ambient2.ogg | Block\Block\Respawn anchor ambient2.ogg |
+| respawnAnchorAmbient | respawn_anchor_ambient3.ogg | Block\Block\Respawn anchor ambient3.ogg |
+| respawnAnchorSet | respawn_anchor_set1.ogg | Block\Block\Respawn anchor set spawn1.ogg |
+| respawnAnchorSet | respawn_anchor_set2.ogg | Block\Block\Respawn anchor set spawn2.ogg |
+| conduitShort | conduit_short1.ogg | Block\Block\Conduit short1.ogg |
+| conduitShort | conduit_short2.ogg | Block\Block\Conduit short2.ogg |
+| conduitShort | conduit_short3.ogg | Block\Block\Conduit short3.ogg |
+| conduitAmbient | conduit_ambient.ogg | Block\Block\Conduit ambient.ogg |
+| shulkerHit | shulker_hit1.ogg | Mob\Mob\Shulker bullet hit1.ogg |
+| shulkerHit | shulker_hit2.ogg | Mob\Mob\Shulker bullet hit2.ogg |
+| shulkerHit | shulker_hit3.ogg | Mob\Mob\Shulker bullet hit3.ogg |
+| shulkerHit | shulker_hit4.ogg | Mob\Mob\Shulker bullet hit4.ogg |
+| portalAppear | portal_appear.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Mega Enderman Portal Appear.ogg |
+| portalDisappear | portal_disappear.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Mega Enderman Portal Disappear.ogg |
+| tractorBeam | tractor_beam_activate.ogg | Minecraft_ Story Mode\MCSM Wither Storm Tractor Beam Activation.ogg |
+| tractorPull | tractor_beam_pull.ogg | Minecraft_ Story Mode\MCSM Wither Storm Tractor Beam Pulling.ogg |
+| fireworkBlast | firework_blast.ogg | Entity\Entity\Firework blast.ogg |
+| fireworkBlast | firework_large_blast.ogg | Entity\Entity\Firework large blast.ogg |
+| fireworkTwinkle | firework_twinkle.ogg | Entity\Entity\Firework twinkle.ogg |
+| basaltPlode | basalt_plode1.ogg | Ambient\Ambient\Basalt deltas plode1.ogg |
+| basaltPlode | basalt_plode2.ogg | Ambient\Ambient\Basalt deltas plode2.ogg |
+| basaltPlode | basalt_plode3.ogg | Ambient\Ambient\Basalt deltas plode3.ogg |
+| endPortal | end_portal_activation.ogg | Block\End portal activation.ogg |
+| enderDragonDeath | ender_dragon_death.ogg | Mob\Mob\Ender dragon death.ogg |
+| crystalSword | crystal_sword_craft.ogg | Minecraft_ Story Mode\MCSM sfx craftSword crystal.ogg |
+| glintBreath | ice_breath1.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath1.ogg |
+| glintBreath | ice_breath2.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath2.ogg |
+| glintBreath | ice_breath3.ogg | Minecraft_ Story Mode\Minecraft_ Story Mode\MCSM Icy Golem Boss Breath3.ogg |
+| iceCrystalBreak | ice_crystal_break1.ogg | Block\Block\Ice Crystal break1.ogg |
+| iceCrystalBreak | ice_crystal_break2.ogg | Block\Block\Ice Crystal break2.ogg |
+| iceCrystalBreak | ice_crystal_break3.ogg | Block\Block\Ice Crystal break3.ogg |
+| iceCrystalBreak | ice_crystal_break4.ogg | Block\Block\Ice Crystal break4.ogg |
+| iceCrystalBreak | ice_crystal_break5.ogg | Block\Block\Ice Crystal break5.ogg |
+| iceCrack | ice_crack1.ogg | Block\Block\Brittle Ice crack1.ogg |
+| iceCrack | ice_crack2.ogg | Block\Block\Brittle Ice crack2.ogg |
+| iceCrack | ice_crack3.ogg | Block\Block\Brittle Ice crack3.ogg |
+| shulkerShoot | shulker_shoot1.ogg | Mob\Mob\Shulker shoot1.ogg |
+| shulkerShoot | shulker_shoot2.ogg | Mob\Mob\Shulker shoot2.ogg |
+| shulkerShoot | shulker_shoot3.ogg | Mob\Mob\Shulker shoot3.ogg |
+| shulkerShoot | shulker_shoot4.ogg | Mob\Mob\Shulker shoot4.ogg |
+| amethystClusterBreak | amethyst_cluster_break1.ogg | Block\Block\Amethyst Cluster break1.ogg |
+| amethystClusterBreak | amethyst_cluster_break2.ogg | Block\Block\Amethyst Cluster break2.ogg |
+| amethystClusterBreak | amethyst_cluster_break3.ogg | Block\Block\Amethyst Cluster break3.ogg |
+| amethystClusterBreak | amethyst_cluster_break4.ogg | Block\Block\Amethyst Cluster break4.ogg |
+| iceChime | ice_chime.ogg | Block\Block\Note block icechime.ogg |
+
+
+### 墜星成獸（Fallingstar Beast）音效組
+| SFX Group | Target File | Source Path in audio/mc |
+|---|---|---|
+| gravityTractor | wither_storm_tractor_beam_activation.ogg | Minecraft_ Story Mode\MCSM Wither Storm Tractor Beam Activation.ogg |
+| gravityPull | wither_storm_tractor_beam_pulling.ogg | Minecraft_ Story Mode\MCSM Wither Storm Tractor Beam Pulling.ogg |
+| gravitySuck | wither_storm_suck_whoosh1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Suck Whoosh1.ogg |
+| gravitySuck | wither_storm_suck_whoosh2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Suck Whoosh2.ogg |
+| gravitySuck | wither_storm_suck_whoosh3.ogg | Minecraft_ Story Mode\MCSM Wither Storm Suck Whoosh3.ogg |
+| cosmicRoar | wither_storm_roar_beastly1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Roar Beastly1.ogg |
+| cosmicRoar | wither_storm_roar_beastly2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Roar Beastly2.ogg |
+| cosmicSnarl | wither_storm_snarl_short1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Snarl Short1.ogg |
+| cosmicSnarl | wither_storm_snarl_short2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Snarl Short2.ogg |
+| cosmicSnarl | wither_storm_snarl_short3.ogg | Minecraft_ Story Mode\MCSM Wither Storm Snarl Short3.ogg |
+| cosmicGrowl | wither_storm_growl_beastly1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Growl Beastly1.ogg |
+| cosmicGrowl | wither_storm_growl_beastly2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Growl Beastly2.ogg |
+| cataclysmLand | wither_storm_fall_hit_large_low1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Fall Hit Large Low1.ogg |
+| cataclysmLand | wither_storm_fall_hit_large_low2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Fall Hit Large Low2.ogg |
+| cosmicWhoosh | wither_storm_metalic_whoosh1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Metalic Whoosh1.ogg |
+| cosmicWhoosh | wither_storm_metalic_whoosh2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Metalic Whoosh2.ogg |
+| beastChomp | wither_storm_chomp.ogg | Minecraft_ Story Mode\MCSM Wither Storm Chomp.ogg |
+| beastChomp | wither_storm_bite1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Bite1.ogg |
+| ripBlock | wither_storm_rip_block1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Rip Block1.ogg |
+| ripBlock | wither_storm_rip_block2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Rip Block2.ogg |
+| wardenDig | warden_dig.ogg | Mob\Mob\Warden dig.ogg |
+| wardenEmerge | warden_emerge.ogg | Mob\Mob\Warden emerge.ogg |
+| guardianBeam | guardian_attack_loop.ogg | Mob\Mob\Guardian attack loop.ogg |
+| basaltPlode | basalt_deltas_plode1.ogg | Ambient\Ambient\Basalt deltas plode1.ogg |
+| basaltPlode | basalt_deltas_plode2.ogg | Ambient\Ambient\Basalt deltas plode2.ogg |
+| basaltTwist | basalt_deltas_twist1.ogg | Ambient\Ambient\Basalt deltas twist1.ogg |
+| basaltTwist | basalt_deltas_twist2.ogg | Ambient\Ambient\Basalt deltas twist2.ogg |
+| basaltDebris | basalt_deltas_long_debris1.ogg | Ambient\Ambient\Basalt deltas long debris1.ogg |
+| deepslateBreak | deepslate_break1.ogg | Block\Block\Deepslate break1.ogg |
+| deepslateBreak | deepslate_break2.ogg | Block\Block\Deepslate break2.ogg |
+| ancientDebrisDig | ancient_debris_dig1.ogg | Block\Block\Ancient Debris dig1.ogg |
+| ancientDebrisDig | ancient_debris_dig2.ogg | Block\Block\Ancient Debris dig2.ogg |
+| endPortalActivate | end_portal_activation.ogg | Block\Block\End portal activation.ogg |
+| hoglinAngry | hoglin_angry1.ogg | Mob\Mob\Hoglin angry1.ogg |
+| hoglinAngry | hoglin_angry2.ogg | Mob\Mob\Hoglin angry2.ogg |
+| hoglinAttack | hoglin_attack1.ogg | Mob\Mob\Hoglin attack1.ogg |
+| hoglinAttack | hoglin_attack2.ogg | Mob\Mob\Hoglin attack2.ogg |
+| beastStep | ravager_step1.ogg | Mob\Mob\Ravager step1.ogg |
+| beastStep | ravager_step2.ogg | Mob\Mob\Ravager step2.ogg |
+| beastStep | ravager_step3.ogg | Mob\Mob\Ravager step3.ogg |
+| sonicCharge | sonic_charge1.ogg | Mob\Mob\Warden sonic charge1.ogg |
+| sonicCharge | sonic_charge2.ogg | Mob\Mob\Warden sonic charge2.ogg |
+| heavySmash | heavy_core_break1.ogg | Block\Block\Heavy core break1.ogg |
+| heavySmash | heavy_core_break2.ogg | Block\Block\Heavy core break2.ogg |
+| heavySmash | heavy_core_break3.ogg | Block\Block\Heavy core break3.ogg |
+| heavySmash | heavy_core_break4.ogg | Block\Block\Heavy core break4.ogg |
+| earthCrack | earth_crack.ogg | Ambient\Ambient\Earth Crack.ogg |
+| dripstoneLand | dripstone_land1.ogg | Block\Block\Pointed Dripstone land1.ogg |
+| dripstoneLand | dripstone_land2.ogg | Block\Block\Pointed Dripstone land2.ogg |
+| conduitAttack | conduit_attack1.ogg | Block\Block\Conduit attack1.ogg |
+| conduitAttack | conduit_attack2.ogg | Block\Block\Conduit attack2.ogg |
+| conduitAttack | conduit_attack3.ogg | Block\Block\Conduit attack3.ogg |
+| dragonRoarBeastly | wither_storm_roar_beastly1.ogg | Minecraft_ Story Mode\MCSM Wither Storm Roar Beastly 1.ogg |
+| dragonRoarBeastly | wither_storm_roar_beastly2.ogg | Minecraft_ Story Mode\MCSM Wither Storm Roar Beastly 2.ogg |
+| dragonHurt | ender_dragon_hurt1.ogg | Mob\Mob\Ender dragon hurt1.ogg |
+| dragonHurt | ender_dragon_hurt2.ogg | Mob\Mob\Ender dragon hurt2.ogg |
+| dragonHurt | ender_dragon_hurt3.ogg | Mob\Mob\Ender dragon hurt3.ogg |
+| dragonDeath | ender_dragon_death.ogg | Mob\Mob\Ender dragon death.ogg |
+| fireballLaunch | fireball_launch1.ogg | Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball Launch1.ogg |
+| fireballLaunch | fireball_launch2.ogg | Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball Launch2.ogg |
+| fireballLaunch | fireball_launch3.ogg | Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball Launch3.ogg |
+| fireballLaunch | fireball_launch4.ogg | Minecraft_ Story Mode\MCSM Giant Magma Golem Fireball Launch4.ogg |
+| trialOmen | trial_omen.ogg | Item\Item\Trial omen.ogg |
+| tuffBreak | tuff_break1.ogg | Block\Block\Tuff break1.ogg |
+| tuffBreak | tuff_break2.ogg | Block\Block\Tuff break2.ogg |
+| campfire | campfire_crackle1.ogg | Block\Campfire crackle1.ogg |
+| campfire | campfire_crackle2.ogg | Block\Campfire crackle2.ogg |
+| campfire | campfire_crackle3.ogg | Block\Campfire crackle3.ogg |
+| campfire | campfire_crackle4.ogg | Block\Campfire crackle4.ogg |

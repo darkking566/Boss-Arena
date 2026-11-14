@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-006",
+  "image_sha256": "3ec41198e6020f08360465f58a9c2a147a678f1b671188e00f1edb69a6492460",
+  "image_url": "https://static0.fextralifeimages.com/file/eldenring/6/64/Alecto-combo-chart.png",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-01.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-006.png",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:02:38.920694+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-006 黑刀刺客・招式圖解",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-006 黑刀刺客・招式圖解"
+    }
+  ],
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin",
+  "use": "reference-only"
+}

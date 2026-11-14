@@ -110,3 +110,24 @@
 HP 2050、移速 215、質量 1.9、架勢 190；沉重節奏耐久倍率 1.35（`js/data/pace.js`，全體預設 1.5）。全 Boss 對戰模擬（種子 1~6）非鏡像勝率：light 約 61%、heavy 約 55%（4 星）。
 
 連段（沉重）：分支距離已算進前一招的擊退（拐杖第三下 / 大槌會把人打飛到 350~450 外）；往後滾會改接躍刺 / 大槌躍擊，滾到身側或身後改接尾掃，被拉開改接躍刺；一階段另有「雙擲躍刺・短刀追擊」。每場接到第二段的次數 1.0 → 2.3。
+
+## 8. 音效設計（SFX，`js/audio.js`）
+
+瑪爾基特所有招式、幻影武器、被動投擲、轉場、尾掃與二階段真身蒙葛特大招之音效補全（瀏覽器端 `BD.sfx`，取自 `audio/mc` 並映射至 `audio/mc_set`）：
+
+- **二階段轉場（幻影武器成形）**：HP 50% 進入轉場，畫面慢動作、台詞「哼，你的身手還算過得去。」；先響起惡兆王深沉低鳴號角（`trialOmen`）與聖光暴漲清鳴（`crystalResonate` + `buff`），400ms 後黃金聖鐘悠遠共鳴（`bellResonate`）伴隨巨型幻影大槌劃破長空之風壓（`maceAir`），800ms 後聖光光柱直沖天際（`beaconBeam`）並伴隨低頻震波擴散（`shockwave` + `slamHeavy`）。
+- **拐杖連擊（cane_combo）**：起手沉重木杖破空（`woodAttack` + `heavyWhoosh`）；前兩記橫掃（`caneswing`）帶焦黑樹根撕裂空氣之粗糙鈍器呼嘯（`woodAttack` + `heavyWhoosh` + `woodHit`）；刻意慢半拍的第三下下砸（`canesmash`）引爆暴烈焦木碎裂與重錘地裂（`woodBreak` + `heavySmash` + `slamHeavy` + `tuffBreak`）。
+- **延遲重砸（delayed_slam）**：雙手高舉拐杖蓄力時枯木緊繃微鳴、壓抑沉重的惡兆殺氣低鳴蓄勢（`woodBreak` + `trialOmen` + `heavyWhoosh`）；重砸落地（`omenslam`）爆發千鈞巨力怒砸地面（`heavySmash` + `slamHeavy` + `woodBreak` + `slamThud` + `shockwave`）；外環（`omenring`）推開厚重碎石塵浪（`tuffBreak` + `stepSand` + `shockwave`）。
+- **黃金短刀・雙擲（dagger_toss）**：起手左手凝出黃金短刀清脆聖音（`crystalResonate` + `throwWhoosh`）；成形特效（`daggerform`）光芒凝聚（`crystalResonate` + `throwWhoosh`）；短刀離手（`holydagger`）帶聖光微鳴破空飛射（`crystalResonate` + `throwWhoosh` + `spearLunge`）。一階段接躍刺、二階段接大槌躍擊。
+- **幻影短刀斬（dagger_slash）**：左手短刀快斬刀光微鳴（`crystalResonate` + `swordWhoosh`）；揮斬（`phantomslash`）帶極速金光刀刃掠空與聖光刀芒嗡鳴（`swordWhoosh` + `crystalResonate` + `hitMid`）。二階段第三下直刺（`phantomthrust`）金色光束急速貫穿（`spearLunge` + `windPierce` + `crystalResonate`）。
+- **後撤擲刀（dagger_retreat）**：揮刀後撤跳，斗篷布條翻飛（`clothRip` + `dash` + `throwWhoosh`）；後撤躍步（`omenbackstep`）帶向後蹬地急滑與雙腳拖地沙塵（`clothRip` + `dash` + `stepSand`）；空中甩出短刀（`holydagger`）。
+- **尾掃（tail_sweep）**：粗重長尾猛烈扭身甩出（`heavyWhoosh` + `stepSand`）；掃擊（`tailwhip`）橫掃千軍破空重擊、沿途翻起塵浪碎石與斗篷下襬抽擊（`heavyWhoosh` + `battleaxeSwipe` + `stepSand` + `clothRip`）。
+- **躍起下刺（leaping_stab）**：身軀暴起躍空（`omenleap` / `dash` + `heavyWhoosh` + `crystalResonate`）；下刺落點十字聖光炸開（`omenstab` / `tridentGround` + `slamHeavy` + `bellResonate` + `crystalResonate`）。
+- **黃金大槌・躍擊（hammer_leap）**：巨槌拔地而起凌空破風（`dash` + `maceAir` + `crystalResonate`）；巨型發光槌影崩天砸下（`goldhammer` / `heavySmash` + `slamHeavy` + `slamThud` + `bellResonate` + `shockwave` + `ultCast`）；外圈聖光震環悠遠回響（`omenring` / `bellResonate` + `shockwave` + `crystalResonate`）。
+- **拐杖・大槌連擊（cane_hammer）**：拐杖一揮木杖破空（`woodAttack` + `maceAir`）；大槌從肩後掄過重砸地面（`hammerslam` / `slamHeavy` + `heavySmash` + `bellResonate` + `maceAir`）。
+- **聖劍五連迴旋（sword_spin）**：起手召出聖劍清鳴（`bellResonate` + `windSpin`）；前四轉連續高速推進迴旋（`swordwhirl` / `windSpin` + `swordWhoosh` + `crystalResonate`）；第五轉巨型劍環終極爆發音爆（`shockwave` + `battleaxeSwipe` + `bellResonate` + `slamHeavy`）。
+- **聖劍三連（sword_combo）**：聖劍橫斬與回斬（`swordcleave` / `battleaxeSwipe` + `swordWhoosh` + `crystalResonate` + `bellResonate`）；第三下聖劍貫地（`phantomthrust` / `tridentGround` + `bellResonate` + `slamHeavy` + `heavySmash`）。
+- **大招一階段「惡兆妖鬼・熄滅之火」**：威壓宣告（`ultCast` + `trialOmen` + `crystalResonate`）；雙輪扇形短刀飛射；躍起下刺；最後黃金聖劍巨型大十字斬震盪全場（`swordcleave` / `shockwave` + `battleaxeSwipe` + `maceAir` + `slamHeavy`）。
+- **大招二階段「揭開面紗・惡兆王蒙葛特」**：全身斗篷徹底撕裂破碎飛散（`omenreveal` / `clothRip` + `omenCurse` + `trialOmen` + `shockwave`）；蒙葛特咒血爆發、濃稠血浪大爆炸（`cursedblood` / `bloodSplash` + `explodeBig` + `hitBeast` + `omenCurse` + `poison`）；天降十六柄黃金聖劍劍雨呼嘯刺入地面（`swordfall` / `dripstoneLand` + `tridentGround` + `crystalResonate`）；最後黃金大槌崩天重擊收場（`goldhammer`）。
+- **被動「黃金幻影」（phantomarms）**：每挨 3 下受擊，身旁凝出黃金短刀自動擲出（`holydagger` / `crystalResonate` + `throwWhoosh` + `spearLunge`）。
+

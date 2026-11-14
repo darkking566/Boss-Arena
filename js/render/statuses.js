@@ -50,6 +50,8 @@
   R.defineStatusIcon('rimebuildup', { glyph: '霜', color: '#b7e8f5' });
   R.defineStatusIcon('rimebite', { glyph: '傷', color: '#a2d5ec' });
   R.defineStatusIcon('blackflame', { glyph: '黑', color: '#b9b4ff' }); // 神皮雙人組的黑焰
+  R.defineStatusIcon('destineddeath', { glyph: '死', color: '#ff2233' }); // 黑刀刺客的命定之死
+  R.defineStatusIcon('blackveil', { glyph: '紗', color: '#9aa8d8' }); // 黑刀刺客的黑夜面紗
   R.defineStatusIcon('rimeguard', { glyph: '溫', color: '#d3edf1' });
   R.defineStatusIcon('shield', { glyph: '盾', color: '#7fc8ff' });
   R.defineStatusIcon('vulnerable', { glyph: '易', color: '#c07aff' });

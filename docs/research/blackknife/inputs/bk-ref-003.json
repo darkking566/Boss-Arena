@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-003",
+  "kind": "image",
+  "title": "bk-ref-003 黑刀刺客・招式圖解",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin",
+  "image_url": "https://static0.fextralifeimages.com/file/eldenring/0/07/Black-knife-assassin-standard-combo-chart.png",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-003.png",
+  "image_sha256": "7fb60415b6867aa42cf1c8fda10a91749d075a64d9d52fb950f7cf7f6c17551f"
+}

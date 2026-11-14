@@ -1,7 +1,7 @@
 # 黑暗棄子・艾絲緹（《艾爾登法環》）
 
 考據圖鑑：[40 張本機參考圖](../research/astel/gallery.html) · [逐圖來源](../research/astel/IMAGE-INDEX.md) · [研究範圍與缺口](../research/astel/RESEARCH-LOG.md)
-資料：`js/data/bosses/astel.js`；被動：`js/engine/actions/astel.js`；特效：`js/fx/astel.js`（20 種）；造型：`js/render/styles/astel.js`；測試：`npm run test:astel`。
+資料：`js/data/bosses/astel.js`；被動：`js/engine/actions/astel.js`；特效：`js/fx/astel.js`（20 種）；造型：`js/render/styles/astel.js`；音效：`js/audio.js`（20 種專屬技能與演出 SFX，以 Minecraft 宇宙／虛空／晶體音效接入）；測試：`npm run test:astel`。
 
 > 角色名「黑暗棄子・艾絲緹」是使用者給的繁中名；本輪沒有核對官方繁中版用字。英文原名 Astel, Naturalborn of the Void（1.00 版曾叫 Misbegotten of the Void）。
 
@@ -59,6 +59,33 @@
 - 強度（30 位對手 × 3 種子 × 交換藍紅，每節奏 180 場）：輕快 51.1%（92 勝）、沉重 50.0%（90 勝）。沉重倍率：血量 ×1.4、傷害 ×1.2（`js/data/pace.js`）。
 - 自動檢查證明的是「能出招、能命中、平衡在合理範圍」，不證明手感；`driver-accepted = false`。
 
-## 6. 已知缺口
+## 6. 音效配置（SFX 考據與選材）
+
+音效邏輯位於 `js/audio.js`（`mc_set` 模式），使用 Minecraft 宇宙、虛空、幽匿、重力與紫晶音效，忠實還原《艾爾登法環》黑暗棄子艾絲緹的神祕宇宙空靈感與重力壓制力道：
+
+| 特效 ID | 招式／動作 | 聲音分層與聲響表現 | 主要選用音效來源（Minecraft） |
+|---|---|---|---|
+| `astelbite` | 彎鉗連咬 | 幽匿顎骨脆響＋利齒咬合＋骨骼夾擊 | `sculk_click1~3.ogg`、`evoker_fangs.ogg`、`iron_golem_hurt.ogg` |
+| `astelswipe` | 星雲橫掃 | 細長骨臂破空大揮＋星雲紫霧渦流＋星塵微鳴 | `heavy_whoosh1~2.ogg`、`breeze_whirl.ogg`、`amethyst_shimmer.ogg` |
+| `astelshove` | 星雲推掌 | 掌前衝擊波氣浪＋空爆呼嘯＋紫霧星點消散 | `sonic_boom.ogg`、`mace_smash_air.ogg`、`amethyst_resonate.ogg` |
+| `asteltail` | 星屑尾鞭 | 彩色蠍尾長空甩擊＋越過頭頂之破空＋星鏈共振 | `riptide.ogg`、`mace_smash_air.ogg`、`amethyst_shimmer.ogg` |
+| `astelstab` | 星尾連刺 | 尾尖紫晶硬刺扎入地面＋地表岩層刺裂＋地裂聲 | `amethyst_cluster_break1~4.ogg`、`heavy_core_break.ogg`、`earth_crack.ogg` |
+| `astelvanish` | 化球瞬移 | 身形向內坍縮＋虛空消散微鳴＋破空位移 | `portal_disappear.ogg`、`amethyst_shimmer.ogg`、`breeze_slide.ogg` |
+| `astelgather` | 蓄能聚流 | 藍眼亮起、虛空粒子急聚＋信標充能共鳴 | `sonic_charge1~2.ogg`、`beacon_power1~2.ogg`、`amethyst_shimmer.ogg` |
+| `astelbeam` | 宇宙光束 | 紫白毀滅光柱音爆＋虛空牽引光束＋信標聚焦光束 | `sonic_boom.ogg`、`tractor_beam_activate.ogg`、`beacon_activate.ogg` |
+| `astelorbs` | 臂端聚球 | 六臂末端旋轉能量球＋幽匿暗能量脈動越轉越急 | `respawn_anchor_ambient1~3.ogg`、`sculk_charge.ogg`、`amethyst_resonate.ogg` |
+| `astelwave` | 黑暗波 | 貼地環形衝擊震波＋地層龜裂崩解＋暗能量脈動 | `sonic_boom.ogg`、`earth_crack.ogg`、`sculk_charge.ogg`、`mace_smash_ground.ogg` |
+| `astelgravity` | 重力氣泡 | 懸浮氣泡升起敵身＋靈魂充能微鳴＋星塵盤旋 | `shulker_hit1~4.ogg`、`respawn_anchor_charge.ogg`、`amethyst_shimmer.ogg` |
+| `astelcrush` | 重力壓碎 | 氣泡驟縮向下狂暴碾碎＋監守者重衝擊＋地表同心裂 | `mace_smash_ground.ogg`、`warden_impact1~2.ogg`、`heavy_core_break.ogg` |
+| `astelgrab` | 俯衝擒抱 | 自天而降合鉗重砸地面＋雙鉗暴力閉合＋雙層地裂衝擊 | `warden_impact1~2.ogg`、`mace_smash_ground.ogg`、`evoker_fangs.ogg` |
+| `astelclone` | 星影分身 | 四散分身虛空浮現＋暗影步＋虛影鉗擊合攏 | `illusion_warp1~2.ogg`、`shadow_teleport.ogg`、`evoker_fangs.ogg` |
+| `astelstarburst` | 星屑爆散 | 飛退遺留星球依序炸開＋晶屑破片四散＋短促潮湧聲 | `firework_blast.ogg`、`amethyst_cluster_break.ogg`、`conduit_short.ogg` |
+| `astelportal` | 星空傳送門 | 面前撕開深邃終界傳送門＋異維度錨定音＋信標充能 | `end_portal_activation.ogg`、`respawn_anchor_set1~2.ogg`、`beacon_power.ogg` |
+| `astelmeteor` | 隕星墜落 | 天外彩色隕石轟擊爆破＋玄武岩碎裂＋地表撞擊坑 | `explosion.ogg`、`basalt_plode1~3.ogg`、`heavy_core_break.ogg` |
+| `astelpull` | 星空吸引 | 全場黑洞級引力牽引＋逆向狂風收束＋核心吸力震盪 | `tractor_beam_pull.ogg`、`breeze_charge.ogg`、`breeze_whirl.ogg` |
+| `astelawaken` | 天外流星（半血／大招演出） | 終界龍死滅之天際長嘯＋凋靈降臨虛空雷鳴＋深淵咆哮 | `ender_dragon_death.ogg`、`wither_spawn.ogg`、`warden_roar.ogg` |
+| `astelstardust` | 星屑流散（被動） | 腳邊升起旋轉彩色星屑晶體＋潮湧微光環境音 | `amethyst_shimmer.ogg`、`conduit_ambient.ogg`、`shulker_hit.ogg` |
+
+## 7. 已知缺口
 
 見 [RESEARCH-LOG.md](../research/astel/RESEARCH-LOG.md)：沒有找到官方概念草圖／三視圖（只有一張官方畫作）、GIF 只看過第一格、招式秒數與傷害不是原作資料、繁中用字未核對官方。

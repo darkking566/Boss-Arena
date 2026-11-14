@@ -1,0 +1,26 @@
+{
+  "author": "Fextralife Team",
+  "characters": 99,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2022-2024 Base Game Guide",
+  "id": "fextralife-blackknife",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Official wiki & artbook archives; exact textual excerpt verified.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:03:31.783974+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Reference excerpt only; no full reprint.",
+  "text_sha256": "a8db2e48c3d784c6754d75081054dcbbfd066bc6fdea73e4a5506450c79b9062",
+  "title": "Elden Ring Wiki (Fextralife) — Black Knife Assassin",
+  "units": [
+    {
+      "end": 99,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "The Black Knife Assassins are agile, hooded killers who took part in the Night of the Black Knives."
+    }
+  ],
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin"
+}

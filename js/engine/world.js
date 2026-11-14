@@ -317,9 +317,7 @@
         b.posture = 0; b.stats.breaks++;
         if (!downed) BD.applyStatus(b, 'stagger', { dur: 1.5 }, this); // 倒地時不再疊加硬直
         this.fx.text(b.x, b.y - b.r - 34, '架勢崩潰！', '#ffcc33', 24);
-        BD.spawnFx(this, 'posturebreak', b.x, b.y, { src: b }); this.emit('postureBreak', { b });
-        if (!this.hunt4 || this.hunt4.solo || b !== this.hunt4.boss) this.hitstop = Math.max(this.hitstop, 0.1);
-        this.slowmo = Math.max(this.slowmo, 0.4);
+        this.emit('postureBreak', { b });
         this.log(b, '架勢崩潰，陷入硬直！', true);
       }
     }

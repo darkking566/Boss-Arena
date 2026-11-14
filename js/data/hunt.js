@@ -116,6 +116,7 @@
     adula: { short: '輝石', arch: 'arcane', passive: { name: '輝石結晶', mods: { mana: 30, manaRegen: 0.08 } }, set2: { name: '食術之軀', mods: { hp: 80 } }, set4: { name: '暗月之誓', mods: { dmg: 0.08, cdr: 0.06 } } },
     astel: { short: '墮星', arch: 'arcane', passive: { name: '星屑流散', mods: { mana: 30, manaRegen: 0.08 } }, set2: { name: '虛空星屑', mods: { hp: 80 } }, set4: { name: '奪天之星', mods: { dmg: 0.08, cdr: 0.06 } } },
     mohg: { short: '血王', arch: 'fury', passive: { name: '血之恩寵', mods: { dmg: 0.06, lifesteal: 0.015 } }, set2: { name: '王朝聖袍', mods: { hp: 100 } }, set4: { name: '虛無血祭', mods: { dmg: 0.1, lifesteal: 0.02 } } },
+    blackknife: { short: '刺客', arch: 'swift', passive: { name: '黑刀身法', mods: { spd: 0.05, cdr: 0.05 } }, set2: { name: '黑夜面紗', mods: { spd: 0.04, sta: 15 } }, set4: { name: '命定之死', mods: { dmg: 0.1, spd: 0.06 } } },
     greyll: { short: '桂雷', arch: 'bulwark', passive: { name: '母龍餘威', mods: { def: 0.06, hp: 70 } }, set2: { name: '灰母之裔', mods: { hp: 130 } }, set4: { name: '焚橋之焰', mods: { dmg: 0.1, def: 0.06 } } },
     fallingstar: { short: '墜星', arch: 'bulwark', passive: { name: '星核引力', mods: { hp: 70, def: 0.05 } }, set2: { name: '黑岩甲殼', mods: { hp: 110 } }, set4: { name: '重力反轉', mods: { dmg: 0.09, spd: 0.04 } } },
     redwolf: { short: '紅狼', arch: 'swift', passive: { name: '獵步留輝', mods: { spd: 0.04, cdr: 0.05 } }, set2: { name: '紅鬃金飾', mods: { sta: 15 } }, set4: { name: '輝劍獵場', mods: { cdr: 0.08, spd: 0.05 } } },
@@ -143,6 +144,7 @@
     kindred: { short: '雙生', arch: 'vital', passive: { name: '鏡爪印記', mods: { dmg: 0.05, cdr: 0.04 } }, set2: { name: '神羊銀弓', mods: { mana: 20 } }, set4: { name: '永恆獵手', mods: { dmg: 0.08, spd: 0.03 } } },
     margit: { short: '惡兆', arch: 'fury', passive: { name: '黃金幻影', mods: { dmg: 0.05, cdr: 0.05 } }, set2: { name: '惡兆妖鬼斗篷', mods: { hp: 100 } }, set4: { name: '隱密之王', mods: { dmg: 0.08, def: 0.05 } } },
     godrick: { short: '接肢', arch: 'fury', passive: { name: '接肢', mods: { dmg: 0.06, hp: 80 } }, set2: { name: '葛瑞克的斧頭', mods: { dmg: 0.04 } }, set4: { name: '黃金之王', mods: { dmg: 0.08, def: 0.05 } } },
+    blackknife: { short: '黑刀', arch: 'swift', passive: { name: '黑刀身法', mods: { spd: 0.05, cdr: 0.05 } }, set2: { name: '稀人鎖甲', mods: { spd: 0.04 } }, set4: { name: '命定之死', mods: { dmg: 0.1, spd: 0.05 } } },
   };
 
   // 基礎數值強化：每級 +per；花費 = base + 級數 × step 顆靈魂（可用任一 Boss 的靈魂支付）

@@ -1,0 +1,26 @@
+{
+  "author": "Fextralife Team",
+  "characters": 90,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "2022-2024 Armor Guide",
+  "id": "fextralife-armor",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Official wiki & artbook archives; exact textual excerpt verified.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:03:34.259719+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Reference excerpt only; no full reprint.",
+  "text_sha256": "464d1f8902490880f08a271a43158a683bfb373a7f4077a93aac06a1f51db04c",
+  "title": "Elden Ring Wiki (Fextralife) — Black Knife Set",
+  "units": [
+    {
+      "end": 90,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Scale armor used by the Black Knife Assassins. Muffles all footsteps and hides the wearer."
+    }
+  ],
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Set"
+}

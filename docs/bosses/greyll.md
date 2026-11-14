@@ -68,3 +68,29 @@
 - 沒有為桂雷爾畫新龍（原作同模型，不是缺漏）；顏色也沒有與亞基爾拉開（只靠體型、霧環與二階段火星區分），若要更鮮明，下一步可為 `agheel` 造型加調色參數。
 - 完整動作分析沒有做：11 張招式 GIF 只看第一格，招式時序是依文字描述與亞基爾既有時間軸改寫。
 - 「母龍之嚎」只取祈禱的效果，沒有做變身成龍的演出。
+
+## 8. 音效配置（SFX）
+
+桂雷爾作為法魯姆大橋的灰母之裔，音效圍繞「巨龍喉音、長橋烈焰、灰母咆哮、風暴砸地」四層聽覺意象，由 `js/audio.js` 在瀏覽器端（`data-browser`）渲染：
+
+| 觸發時機 / 招式 | 聽覺表現與設計考量 | 對應音效分組與 MC 音檔來源 |
+|---|---|---|
+| **撕咬・反向回咬** (`bite`) | 起手喉音低吼與振翅，命中巨顎咬合；二階段第 3 口附帶爆裂火息 | `dragonRoarShort` + `dragonFlap`；命中 `dragonBite` + `fangSnap`；二階附帶 `dragonFlameShort` + `fire` |
+| **踏地・突進重踏** (`stomp`) | 前兩踏爪踏石橋，第 3 踏暴烈衝撞重砸引發衝擊震地 | 前踏 `dragonStomp` + `tuffBreak`；突進重踏 `dragonStomp` + `wardenImpact` + `earthCrack` + `heavySmash` |
+| **翼擊・貼地翼掃** (`wing_slam`) | 展翼拍擊揚起狂風，貼地橫掃割裂空氣 | 起手 `dragonFlap` + `heavyWhoosh`；拍地 `slamHeavy`；橫掃 `windSpin` + `metalWhoosh` |
+| **怒吼衝撞** (`charge`) | 昂首怒吼狂奔刨橋，收尾雙角猛烈挑擊 | 起手 `dragonRoarShort` + `golemBellow` + `dragonStomp`；收尾 `hitHeavy` + `wardenImpact` |
+| **甩尾・回首角擊** (`tail_gore`) | 壓低身軀一整圈大旋尾，回頭角撞沉重衝擊 | `heavyWhoosh` + `dragonFlap` + `windSpin` + `metalWhoosh` + `wardenImpact` |
+| **龍息・焚橋橫掃** (`sweeping_breath`) | 長頸後縮吸氣聚火，扇形吐息焚燒石橋 | 起手 `windCharge` + `fireballWhoosh` + `dragonRoarShort`；噴射 `dragonFlameLong` + `fire` |
+| **追蹤龍息** (`tracking_breath`) | 喉腔凝神聚束吸氣，高壓追蹤火柱噴射 | `windCharge` + `fireballWhoosh` + `dragonFlameShort` + `fire` |
+| **三拍俯衝** (`dive_bomb`) | 振翼拔地騰空、空中經典三拍展翅、極速砸地爆炎 | 升空 `breezeJump` + `dragonFlap`；空中 3 拍 `dragonFlap`；砸地 `slamHeavy` + `wardenImpact` + `earthCrack` + `explodeBig` + `fire` |
+| **後躍・滯空噴焰** (`retreat_flame`) | 拍翼後跳拉開身位，對地面潑灑火雨 | `dragonFlap` + `heavyWhoosh` + `dash` + `fireballLaunch` + `fireballImpact` + `fire` |
+| **側翼掠襲** (`strafe`) | 低空振翅疾掠橋面，一側連續火浪掃射 | `dragonFlap` + `heavyWhoosh` + `fireballWhoosh` + `dragonFlameShort` + `fire` |
+| **長橋龍息** (`bridge_inferno`) | 昂首長嘯宣告，沿橋貫穿火牆，橋面地刺火柱連鎖噴發 | `dragonRoarLong` + `golemBellow` + `dragonFlameLong` + `campfire`（焦灼餘燼）+ `fireballImpact` + `earthCrack` |
+| **母龍之嚎** (`greyoll_roar`) | 心跳預警、原初母龍雙層氣浪轟鳴（神威詛咒），隨後天降灰燼火雨 | `heartbeat` + `trialOmen` + `dragonRoarLong` + `dragonRoarBeastly` + `omenCurse` + `dripstoneLand` |
+| **灰燼風暴** (`ash_storm`) | 灰燼黑雲風暴呼嘯，火球天降轟炸，中心沖天火柱 | `windWhirl` + `heavyWhoosh` + `fireballImpact` + `dripstoneLand` + `explodeBig` + `earthCrack` |
+| **大招** (`ult`) | 一階段母龍威壓俯衝；二階段全程無敵：火雨、俯衝、360度旋身噴息、終焉火環「灰母之焰」 | 起手 `ultCast` + `dragonRoarLong` + `dragonRoarBeastly`；終焉 `explodeBig` + `dragonFlameLong` + `shockwave` + `earthCrack` |
+| **被動「母龍餘威」** (`greyoll`) | 每 15 秒（二階 11 秒）低沉惡兆預警，隨後氣浪炸開 | 預警 `trialOmen`；氣浪 `greyllroar`（`dragonRoarLong` + `dragonRoarBeastly` + `omenCurse`） |
+| **換階段「灰母血脈」** (`greyllheart`) | 胸口黑紅暗流聚氣心跳，1.7 秒狂暴長吼震碎石橋 | 前奏 `heartbeat` + `soulCharge` + `trialOmen`；長吼 `dragonRoarLong` + `dragonRoarBeastly` + `shockwave` + `earthCrack` |
+| **受擊反饋** (`impact`) | 承受單次大於等於 75 點重擊傷害時，觸發龍族悲鳴與重肉碎響 | `dragonHurt` (`ender_dragon_hurt1..3`) + `hitBeast` (`ravager_hurt1..3`) |
+| **死亡演出** (Death) | 血量歸零崩解，觸發終界龍經典爆裂巨響與石碎烈焰 | `dragonDeath` (`ender_dragon_death`) + `dragonRoarBeastly` + `earthCrack` + `explodeBig` |
+| **橋面行走** (Stride) | 於橋面上邁步前移時，龍爪發出沉重石地踏步聲 | `dragonStomp`（間隔 stride 70px，音量 0.4） |

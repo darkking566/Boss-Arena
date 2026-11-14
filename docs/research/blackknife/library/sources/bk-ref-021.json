@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-021",
+  "image_sha256": "dcdb7002af037462de9a21936614cd6f57a855468755d7c6a8bd0337849ff94a",
+  "image_url": "https://i.ytimg.com/vi/D0fwFBUX9YQ/maxresdefault.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-021.jpg",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:02:55.175625+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-021 黑刀刺客・命定之死演出",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-021 黑刀刺客・命定之死演出"
+    }
+  ],
+  "url": "https://www.youtube.com/watch?v=D0fwFBUX9YQ",
+  "use": "reference-only"
+}

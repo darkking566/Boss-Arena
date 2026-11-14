@@ -1,5 +1,7 @@
 'use strict';
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { load } = require('./lib/load');
 const { BD } = load({ noFx: true });
 const def = BD.bossById.astel;
@@ -36,6 +38,38 @@ for (const [id, st] of [['crushing_bite', 'airborne'], ['teleport_grab', 'root']
     const w = new full.World(full.bossById.astel, full.bossById.dummy, { seed: 3, intro: 0 }), b = w.bosses[0];
     full.spawnFx(w, id, b.x, b.y, { src: b, angle: 0, radius: 200, len: 600, width: 150, arc: 2 });
     for (let i = 0; i < 90; i++) { w.fx.update(full.STEP); for (const p of w.fx.puffs) assert.ok(ok(p.tint), id + ' 的 puff 色票不合法：' + p.tint); }
+  }
+}
+// 音效：驗證艾絲緹 20 種專屬技能與演出特效在 js/audio.js 中均有對應處理，且其參照的音效檔案皆存在於 audio/mc_set/。
+{
+  const audioSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'audio.js'), 'utf8');
+  const astelFxIds = [
+    'astelbite', 'astelswipe', 'astelshove', 'asteltail', 'astelstab',
+    'astelvanish', 'astelgather', 'astelbeam', 'astelorbs', 'astelwave',
+    'astelgravity', 'astelcrush', 'astelgrab', 'astelclone', 'astelstarburst',
+    'astelportal', 'astelmeteor', 'astelpull', 'astelawaken', 'astelstardust'
+  ];
+  for (const id of astelFxIds) {
+    assert.ok(audioSrc.includes("id === '" + id + "'"), 'js/audio.js 必須包含 ' + id + ' 的音效分支');
+  }
+  const setDir = path.join(__dirname, '..', 'audio', 'mc_set');
+  const setFiles = new Set(fs.readdirSync(setDir));
+  const expectedAudio = [
+    'sculk_click1.ogg', 'sculk_click2.ogg', 'sculk_click3.ogg',
+    'heavy_whoosh1.ogg', 'heavy_whoosh2.ogg',
+    'amethyst_cluster_break1.ogg', 'amethyst_cluster_break2.ogg',
+    'heavy_core_break1.ogg', 'earth_crack.ogg',
+    'portal_disappear.ogg', 'portal_appear.ogg',
+    'sonic_charge1.ogg', 'beacon_power1.ogg',
+    'tractor_beam_activate.ogg', 'tractor_beam_pull.ogg',
+    'respawn_anchor_ambient1.ogg', 'respawn_anchor_set1.ogg',
+    'shulker_hit1.ogg', 'warden_impact1.ogg',
+    'illusion_warp1.ogg', 'firework_blast.ogg',
+    'end_portal_activation.ogg', 'basalt_plode1.ogg',
+    'ender_dragon_death.ogg', 'wither_spawn.ogg'
+  ];
+  for (const f of expectedAudio) {
+    assert.ok(setFiles.has(f), 'audio/mc_set 必須存在 ' + f);
   }
 }
 console.log('ASTEL TEST PASS');

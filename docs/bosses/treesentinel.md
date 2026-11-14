@@ -108,3 +108,48 @@ Fandom 回應 402 被擋、Bilibili Wiki 回應 404，兩者沒有取用。
 ## 7. 平衡
 
 HP 2450、移速 225、質量 2.2、架勢 210。全 Boss 對戰模擬（種子 1、2、3）勝率：light 約 50%、heavy 約 49%。
+
+
+## 8. 音效設計（SFX）
+
+本專案自 udio/mc（約 6,800+ Minecraft 音效庫）篩選並複製 36 個專屬音效至 udio/mc_set，結合原有的 4 個戰馬音檔，共配置 40 個專屬音效檔，在 js/audio.js 中實現分層疊加與動態反應：
+
+### 8.1 音效理念與層次
+1. **重裝戰馬沉重質感**：
+   - 常駐步聲改為戰馬鐵蹄踏地聲（horseStep），替代普通人型步聲。
+   - 衝鋒、急停、甩尾與起跳加入鼻息（horseBreathe）、躍起（horseJump）、著地（horseLand）與馬鎧摩擦（horseArmor）。
+2. **黃金戟的銳利與破空**：
+   - 橫掃採用斧刃破空與厚重刀光（attleaxeSwipe + slashHeavy + metalWhoosh）。
+   - 直刺採用矛刺突進與貫穿氣流（spearLunge + spearAttack + windPierce）。
+3. **黃金樹大盾與聖能神聖感**：
+   - 神聖能量採用潮湧核心激發（conduitActivate）、潮湧光束射擊（conduitAttack）與信標共振（eaconPower）。
+   - 盾擊與砸地結合重核崩裂（heavyCoreBreak）、鐵砧鈍擊（nvilLand）與大地深層碎裂（earthCrack）。
+
+### 8.2 招式與音效詳細配置表
+
+| 觸發時機 / 招式 | 動作 / 特效 ID | 觸發位置 | 組合音效（SFX） | 聽感意圖 |
+|---|---|---|---|---|
+| **常駐移動** | 移動走路 | 	ick | horseStep | 戰馬沉重的鐵蹄踏地聲，凸顯重裝騎兵壓迫感 |
+| **人立起手** | 
+earing_slam 前搖 | 	ick (curInst) | horseBreathe + horseArmor | 戰馬人立時的噴鼻息與厚重馬鎧金屬撞擊摩擦 |
+| **突刺起手** | halberd_stab 前搖 | 	ick (curInst) | horseBreathe | 戰馬前蹄拔起準備直刺前的鼻息蓄勢 |
+| **衝鋒起跑** | cavalry_charge 前搖 | 	ick (curInst) | horseGallop + horseBreathe | 戰馬四蹄狂奔與粗重呼吸，營造騎兵衝臉驚悚感 |
+| **誓言起手** | golden_vow 前搖 | 	ick (curInst) | conduitActivate + eaconPower | 聖光從戟尖與全身湧現的能量凝聚共鳴 |
+| **二階轉場** | HP 50% 換階 | 	ick (transition) | horseNeigh + conduitActivate + eaconPower + ell + uff | 戰馬人立長嘶 + 神聖能量全開與祈禱聖鐘 |
+| **側揮連斬** | goldcleave | x | attleaxeSwipe + slashHeavy + metalWhoosh | 黃金長戟重型刃面的銳利破空與金屬呼嘯 |
+| **人立突刺** | lancethrust | x | spearLunge + windPierce + spearAttack + crystalResonate + shockwave | 槍尖突破音障的撕裂風聲與貫穿黃金聖芒 |
+| **人立重砸** | lanceslam | x | earthCrack + 	ridentGround + slamHeavy + ell + shockwave | 戟尖如雷射釘入地表、大地崩裂與厚重鐘鳴震波 |
+| **外環震波** | goldring | x | conduitAttack + shockwave + crystalResonate | 人立重砸與大盾砸地後擴散的神聖光環震盪 |
+| **馬蹄踐踏** | hoofstomp | x | heavySmash + horseLand + horseArmor + slamThud + shockwave | 鐵蹄重踏貼身目標，混合蹄踏碎石與馬甲撞擊 |
+| **側身衝撞** | horsebash | x | heavyKnockback + horseArmor + dash + slamThud | 戰馬甩身衝撞，金屬重鎧擊退與肉體鈍擊撞擊聲 |
+| **騎兵衝鋒** | goldcharge | x | horseGallop + horseBreathe + dash + metalWhoosh | 掠地衝鋒的疾風破空與鐵蹄轟鳴 |
+| **躍馬斬** | goldleap | x | horseJump + horseArmor + windBurst + eaconPower | 躍起騰空瞬間的烈風呼嘯、馬鎧鏘鳴與聖光灌注 |
+| **迴旋大掃** | 	wirlsweep | x | attleaxeSwipe + metalWhoosh + slashHeavy + windWhirl + ell + shockwave | 270° 大範圍旋風斬，三重旋風呼嘯與鐘聲餘韻 |
+| **黃金誓言** | goldvow | x | conduitActivate + eaconPower + ell + uff + shockwave | 召喚光之黃金樹時的宏大聖歌光芒爆發與庇佑鐘聲 |
+| **黃金壁壘** | goldshield | x | windShield + eaconPower + lock | 舉起黃金樹大盾化為風牆時的護盾能量展開聲 |
+| **盾擋減傷** | shieldguard | x | lock + mikiriClang + methystResonate + ell | 黃金樹大盾被動觸發時的清脆彈刀清響與聖木共鳴 |
+| **黃金的返報** | goldretaliate / goldbeam | x & proj | conduitAttack + 	ridentThrow + eaconBeam + shockwave | 吸收敵方飛行道具後，大盾射出黃金激光的爆發破空聲 |
+| **黃金樹大盾・盾擊** | erdbash | x | heavySmash + heavyKnockback + lock + slamHeavy + shockwave | 巨大圓盾正面重撞，超強架勢打擊的巨力重響 |
+| **大盾碾壓** | shieldcrush | x | earthCrack + slamHeavy + nvilLand + conduitAttack + shockwave + crystalResonate | 人馬自天而降大盾拍地，大地破裂與重鐵砧金屬轟鳴 |
+| **大招「黃金樹的活壁壘」** | erdtreeblast | x | ultCast + conduitActivate + earthCrack + explodeBig + slamHeavy + ell + shockwave | 終極大招，拔起巨大光之黃金樹的神聖大爆炸與震撼鐘鳴 |
+| **聖戟天罰** | holylance | x | conduitAttack + spearLunge + shockwave | 二階段大招落地後，自地面依序破土噴發的 8 根聖戟光柱 |

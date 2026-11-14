@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-012",
+  "image_sha256": "671bf7bc46f46e4a8b1e31a85b5a7978bd685b3b7199ef07bb052cdf7a8e6c24",
+  "image_url": "https://static0.fextralifeimages.com/file/eldenring/8/84/Black_knife_armor_female_altered_armor_pieces_comparison_elden_ring_sote_wiki_quide_300px.png",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-01.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-012.png",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:02:45.020882+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-012 黑刀刺客・模型與裝備",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-012 黑刀刺客・模型與裝備"
+    }
+  ],
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin",
+  "use": "reference-only"
+}

@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-048",
+  "image_sha256": "f09428bde1c88b81af8e09459e2386bb8e85e17762868f7f609435881a1ed679",
+  "image_url": "https://i.ytimg.com/vi/BcXYNnugn1U/maxresdefault.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-04.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-048.jpg",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:03:26.581509+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-048 黑刀刺客・實戰對決",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-048 黑刀刺客・實戰對決"
+    }
+  ],
+  "url": "https://www.youtube.com/watch?v=BcXYNnugn1U",
+  "use": "reference-only"
+}

@@ -1,0 +1,27 @@
+{
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "id": "bk-ref-023",
+  "image_sha256": "833ab3100bfc7f6a60c2ab6ffe351dc01ca6cbb9bb3cbaad7927adf4a0753c02",
+  "image_url": "https://i.ytimg.com/vi/1s2Q0tyx5gM/maxresdefault.jpg",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-02.jpg",
+  "kind": "image",
+  "local_file": "../images/bk-ref-023.jpg",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:02:57.899413+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "title": "bk-ref-023 黑刀刺客・隱身暗殺",
+  "units": [
+    {
+      "entry": 1,
+      "id": "u000001",
+      "title": "bk-ref-023 黑刀刺客・隱身暗殺"
+    }
+  ],
+  "url": "https://www.youtube.com/watch?v=1s2Q0tyx5gM",
+  "use": "reference-only"
+}

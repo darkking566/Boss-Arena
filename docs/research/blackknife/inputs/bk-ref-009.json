@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-009",
+  "kind": "image",
+  "title": "bk-ref-009 黑刀刺客・模型與裝備",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://eldenring.wiki.fextralife.com/Black+Knife+Assassin",
+  "image_url": "https://static0.fextralifeimages.com/file/eldenring/f/f8/Black_knife_dagger_weapon_elden_ring_wiki_guide_200px.png",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-01.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-009.png",
+  "image_sha256": "354f913e94563b00730dd6c383769393808622940e14424149dedb0a33c0280b"
+}

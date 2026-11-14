@@ -1,0 +1,26 @@
+{
+  "author": "FromSoftware / Kadokawa / Creative Uncut",
+  "characters": 61,
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Official Art Book Vol II Reference",
+  "id": "creativeuncut-concept",
+  "kind": "web-text",
+  "phase": null,
+  "provenance": "Official wiki & artbook archives; exact textual excerpt verified.",
+  "realm": "reference",
+  "registered_at": "2026-11-13T10:03:34.925690+00:00",
+  "retrieved_at": "2026-11-13",
+  "rights": "Reference excerpt only; no full reprint.",
+  "text_sha256": "380f7e4014b2563eff525feaa54b4196d592bd34efd061a34ce2b1069d9497c4",
+  "title": "Creative Uncut — Lesser Black Knife Assassin Art",
+  "units": [
+    {
+      "end": 61,
+      "entry": 1,
+      "id": "u000001",
+      "start": 0,
+      "title": "Lesser Black Knife Assassin official character design sketch."
+    }
+  ],
+  "url": "https://www.creativeuncut.com/gallery-43/er-lesser-black-knife-assassin.html"
+}

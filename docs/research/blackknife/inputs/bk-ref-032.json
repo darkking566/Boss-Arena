@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-032",
+  "kind": "image",
+  "title": "bk-ref-032 黑刀刺客・身法與體術",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://www.youtube.com/watch?v=5GqCcfSdSek",
+  "image_url": "https://i.ytimg.com/vi/5GqCcfSdSek/maxresdefault.jpg",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-03.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-032.jpg",
+  "image_sha256": "d1cfeb4ed91ac8029f08f226747f68cecfcbe6dd8878c0f7229cdf776fc02b97"
+}

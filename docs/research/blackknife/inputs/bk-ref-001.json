@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-001",
+  "kind": "image",
+  "title": "bk-ref-001 黑刀刺客・官方概念圖",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "Official concept art published in Elden Ring Art Book Vol II (via Creative Uncut archive)",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://www.creativeuncut.com/gallery-43/er-lesser-black-knife-assassin.html",
+  "image_url": "https://www.creativeuncut.com/gallery-43/art/er-lesser-black-knife-assassin.jpg",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-01.jpg; full-size 950x1300 concept inspected",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-001.jpg",
+  "image_sha256": "6077f6e77f7f957a929ab7bb057170ad35a949acc3b7ed14d9971c54da8df89b"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "bk-ref-039",
+  "kind": "image",
+  "title": "bk-ref-039 黑刀刺客・命定之死演出",
+  "realm": "reference",
+  "continuity": "elden-ring-2022-base-game",
+  "edition": "Elden Ring official concept / in-game high-res capture",
+  "phase": null,
+  "provenance": "In-game fight frame capture and official wiki render; visually inspected.",
+  "rights": "Copyright remains with FromSoftware / Bandai Namco and original owner; redistribution not granted",
+  "url": "https://www.youtube.com/watch?v=kPrEcuMy664",
+  "image_url": "https://i.ytimg.com/vi/kPrEcuMy664/maxresdefault.jpg",
+  "retrieved_at": "2026-11-13",
+  "inspection": "viewed",
+  "inspection_ref": "Antigravity visual review 2026-11-13: contact-04.jpg",
+  "use": "reference-only",
+  "local_file": "../images/bk-ref-039.jpg",
+  "image_sha256": "361bf1e9b7cd70fea8d9967cb0a08220bba5837f5cdf123442b8045cf91f8032"
+}
