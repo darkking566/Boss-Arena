@@ -292,8 +292,11 @@
   const TERRAIN = { treecut: 'wood', treesmash: 'wood', treehit: 'wood', wheatburst: 'grass', splash: 'splash', lakesplash: 'splash' };
   const ROAR = ['roar', 'bloodroar', 'awaken', 'dragonrage'];
   const MAX_VOICES = 12; // 同時發聲上限；同名音效最短間隔見 GAP（預設 0.04 秒）
-  let muted = false, voices = 0;
-  try { muted = G.localStorage.getItem('bd.mute') === '1'; } catch (e) { /* 無儲存空間也能玩 */ }
+  let muted = false, voices = 0, master = 1; // master：主音量 0~1，存 bd.vol
+  try {
+    muted = G.localStorage.getItem('bd.mute') === '1';
+    const v = parseFloat(G.localStorage.getItem('bd.vol')); if (v >= 0 && v <= 1) master = v;
+  } catch (e) { /* 無儲存空間也能玩 */ }
   const seen = new WeakSet(), last = {}, cache = {}, live = new Set();
 
   function play(group, vol, rate) {
@@ -304,7 +307,7 @@
     const names = FILES[group]; if (!names) return; // 該音效組沒有這類音效
     const n = names[Math.floor(V() * names.length)];
     const a = (cache[n] || (cache[n] = new Audio(DIR + n + EXT))).cloneNode();
-    a.volume = Math.max(0, Math.min(1, vol));
+    a.volume = Math.max(0, Math.min(1, vol * master));
     a.playbackRate = (rate || 1) * (0.92 + V() * 0.16); // 微幅變速避免重複感
     const h = { a, t: 0 };
     const end = () => { if (live.delete(h)) { voices--; clearInterval(h.t); a.pause(); } };
@@ -4337,9 +4340,21 @@
     },
   };
   G.document.addEventListener('click', e => { if (e.target.closest && e.target.closest('button, .card, .mapcard')) play('click', 0.4); });
-  G.addEventListener('keydown', e => {
-    if (e.key !== 'm' && e.key !== 'M') return;
-    muted = !muted;
-    try { G.localStorage.setItem('bd.mute', muted ? '1' : '0'); } catch (err) { /* 同上 */ }
-  });
+  // 音量控制：右上角 🔊 鈕（點擊靜音）＋滑桿；M 鍵同樣切換靜音
+  const box = G.document.createElement('div'), btn = G.document.createElement('button'), sld = G.document.createElement('input');
+  box.id = 'volBox'; btn.type = 'button'; btn.title = '靜音 (M)';
+  Object.assign(sld, { type: 'range', min: 0, max: 100, step: 5, value: Math.round(master * 100), title: '音量' });
+  box.append(btn, sld); G.document.body.append(box);
+  const save = (k, v) => { try { G.localStorage.setItem(k, v); } catch (err) { /* 同上 */ } };
+  const sync = () => { btn.textContent = muted || !master ? '🔇' : master < 0.5 ? '🔉' : '🔊'; sld.value = Math.round(master * 100); };
+  const toggle = () => { muted = !muted; save('bd.mute', muted ? '1' : '0'); sync(); };
+  btn.onclick = () => { toggle(); btn.blur(); };
+  sld.oninput = () => {
+    master = sld.value / 100; save('bd.vol', master);
+    if (muted && master) { muted = false; save('bd.mute', '0'); } // 拉動滑桿時自動取消靜音
+    sync();
+  };
+  sld.onchange = () => { sld.blur(); play('click', 0.4); }; // 放開後回饋一聲，並把焦點還給遊戲
+  sync();
+  G.addEventListener('keydown', e => { if (e.key === 'm' || e.key === 'M') toggle(); });
 })(window);

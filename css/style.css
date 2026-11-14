@@ -222,3 +222,8 @@ body.touch .tp { display: none; }
 .roster4 .h4 .nm { font-size: 19px; font-weight: bold; }
 .roster4 .h4 select { float: right; font-size: 14px; background: #1a1620; color: #eee; border: 1px solid #555; border-radius: 4px; padding: 2px 4px; }
 .roster4 .h4 .tt { font-size: 13px; color: #aaa; }
+
+/* 音量控制（js/audio.js 注入） */
+#volBox { position: fixed; top: 8px; right: 8px; z-index: 50; display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; border-radius: 999px; background: rgba(0,0,0,0.55); }
+#volBox button { font-size: 16px; padding: 2px 8px; border: 0; background: none; }
+#volBox input { width: 90px; accent-color: #d9772a; cursor: pointer; }
