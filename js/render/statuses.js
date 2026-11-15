@@ -78,6 +78,8 @@
   R.defineStatusIcon('draconicsurge', { glyph: '雷', color: '#ff4a4a' });
   R.defineStatusIcon('bloodcurse', { glyph: '咒', color: '#ff2a40' }); // 鮮血君王蒙格的血之咒印（Trēs／Duo／Ūnus）
   R.defineStatusIcon('bloodboon', { glyph: '恩', color: '#ff6a5a' }); // 蒙格被動「血之恩寵」
+  R.defineStatusIcon('ambershield', { glyph: '珀', color: '#ffd86a' }); // 滿月女王蕾娜菈的琥珀卵金障
+  R.defineStatusIcon('moonbane', { glyph: '朔', color: '#8fd8ff' }); // 滿月女王蕾娜菈的滿月魔力蝕弱
   R.defineStatusIcon('godofgods', { glyph: '神', color: '#5ac8ff' });
   R.defineStatusIcon('dragonblight', { glyph: '龍', color: '#d0143c' });
   R.defineStatusIcon('tsukuyomi', { glyph: '月', color: '#ff3048' });

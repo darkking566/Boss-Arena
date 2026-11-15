@@ -1,0 +1,170 @@
+{
+  "browser": "actual local Chrome file://",
+  "page_errors": [],
+  "match": {
+    "done": true,
+    "time": 73.49999999999712,
+    "winner": "rennala"
+  },
+  "gallery_cards": 69,
+  "effects": {
+    "effects": 31,
+    "elements": 25
+  },
+  "snapshots": [
+    {
+      "view": "02-body-p1-amber",
+      "skill": null,
+      "phase": 1,
+      "fx": 62,
+      "zones": 0,
+      "projs": 2
+    },
+    {
+      "view": "03-glintstone-volley",
+      "skill": "glintstone_volley",
+      "phase": 1,
+      "fx": 146,
+      "zones": 0,
+      "projs": 7
+    },
+    {
+      "view": "04-spinning-scepter",
+      "skill": "spinning_scepter",
+      "phase": 1,
+      "fx": 31,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "05-scholar-books",
+      "skill": "scholar_books",
+      "phase": 1,
+      "fx": 46,
+      "zones": 1,
+      "projs": 0
+    },
+    {
+      "view": "06-gravestone-drop",
+      "skill": "gravestone_drop",
+      "phase": 1,
+      "fx": 206,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "07-chandelier-fall",
+      "skill": "chandelier_fall",
+      "phase": 1,
+      "fx": 132,
+      "zones": 2,
+      "projs": 0
+    },
+    {
+      "view": "08-amber-gravity",
+      "skill": "amber_gravity",
+      "phase": 1,
+      "fx": 54,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "09-carian-phalanx",
+      "skill": "carian_phalanx",
+      "phase": 1,
+      "fx": 104,
+      "zones": 0,
+      "projs": 2
+    },
+    {
+      "view": "10-shattering-crystal",
+      "skill": "shattering_crystal",
+      "phase": 1,
+      "fx": 138,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "11-transition-phase2",
+      "skill": null,
+      "phase": 1,
+      "fx": 55,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "12-body-p2-watermirror",
+      "skill": null,
+      "phase": 2,
+      "fx": 0,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "13-summon-wolves-bloodhound",
+      "skill": "summon_wolves_bloodhound",
+      "phase": 2,
+      "fx": 250,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "14-summon-troll-dragon",
+      "skill": "summon_troll_dragon",
+      "phase": 2,
+      "fx": 117,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "15-comet-azur",
+      "skill": "comet_azur",
+      "phase": 2,
+      "fx": 64,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "16-full-moon-orb",
+      "skill": "rennalas_full_moon",
+      "phase": 2,
+      "fx": 48,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "17-full-moon-blast",
+      "skill": "rennalas_full_moon",
+      "phase": 2,
+      "fx": 168,
+      "zones": 1,
+      "projs": 0
+    },
+    {
+      "view": "18-ult-p1-amber-reincarnation",
+      "skill": "ult",
+      "phase": 1,
+      "fx": 261,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "19-ult-p2-spirits-comet",
+      "skill": "ult",
+      "phase": 2,
+      "fx": 345,
+      "zones": 0,
+      "projs": 0
+    },
+    {
+      "view": "20-ult-p2-fullmoon-cataclysm",
+      "skill": "ult",
+      "phase": 2,
+      "fx": 260,
+      "zones": 0,
+      "projs": 16
+    }
+  ],
+  "screenshots": 23,
+  "driver_accepted": false
+}

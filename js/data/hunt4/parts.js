@@ -30,6 +30,7 @@
     greyll: { brkFx: { head: { skills: ['sweeping_breath', 'tracking_breath', 'bridge_inferno'], mul: 0.7, note: '龍角斷了，龍息射程縮短' } } },
     watcher: { weak: { dragon: 1.3, fire: 0.6 } },
     treesentinel: { hz: { body: { cut: 0.32, blunt: 0.4, shot: 0.3 } }, weak: { fire: 1.3, thunder: 1.2 } },
+    rennala: { hz: { head: { cut: 0.72, blunt: 0.78, shot: 0.65 }, body: { cut: 0.56, blunt: 0.58, shot: 0.52 } }, weak: { fire: 1.25, thunder: 1.2, ice: 0.6 } },
   };
 
   // 傷口：部位累積傷害達最大生命 at 比例就開傷口，life 秒後自然閉合；集中弱點攻擊打破 → 額外傷害 + 必定怯、該部位 scar 秒內不再開

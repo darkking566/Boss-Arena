@@ -55,6 +55,8 @@
     deviljho: T('dragon', 'gorge', 'adversity', 'berserk'), kojiro: T(null, 'swallow', 'evade', 'timegap'), poseidon: T('water', 'leech', 'guard', 'guardian'),
     kindred: T('dragon', 'exploit', 'weakex', 'undying'), yasuo: T(null, 'sharp', 'evade', 'storm'), treesentinel: T('sleep', 'siege', 'guard', 'guardian'),
     margit: T('thunder', 'exploit', 'offguard', 'undying'), godrick: T('fire', 'gorge', 'adversity', 'berserk'),
+    blackknife: T(null, 'sharp', 'evade', 'timegap'),
+    rennala: T('sleep', 'exploit', 'challenger', 'timegap'), // 琥珀卵甜美搖籃／滿月星夜（狩獵模式對應睡眠異常與挑戰者二階段加成）
   };
   H4.SLOTS = { head: '頭', body: '身', legs: '腳' };
   // 製作 / 強化花費（該 Boss 的素材，數字為到達該等級的花費）；武器 1~3 級、防具 1~2 級

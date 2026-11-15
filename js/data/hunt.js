@@ -145,6 +145,7 @@
     margit: { short: '惡兆', arch: 'fury', passive: { name: '黃金幻影', mods: { dmg: 0.05, cdr: 0.05 } }, set2: { name: '惡兆妖鬼斗篷', mods: { hp: 100 } }, set4: { name: '隱密之王', mods: { dmg: 0.08, def: 0.05 } } },
     godrick: { short: '接肢', arch: 'fury', passive: { name: '接肢', mods: { dmg: 0.06, hp: 80 } }, set2: { name: '葛瑞克的斧頭', mods: { dmg: 0.04 } }, set4: { name: '黃金之王', mods: { dmg: 0.08, def: 0.05 } } },
     blackknife: { short: '黑刀', arch: 'swift', passive: { name: '黑刀身法', mods: { spd: 0.05, cdr: 0.05 } }, set2: { name: '稀人鎖甲', mods: { spd: 0.04 } }, set4: { name: '命定之死', mods: { dmg: 0.1, spd: 0.05 } } },
+    rennala: { short: '滿月', arch: 'arcane', passive: { name: '琥珀與滿月', mods: { mana: 35, cdr: 0.06 } }, set2: { name: '女王彎月冠', mods: { mana: 40, manaRegen: 0.15 } }, set4: { name: '卡利亞王室權杖', mods: { dmg: 0.1, cdr: 0.08 } } },
   };
 
   // 基礎數值強化：每級 +per；花費 = base + 級數 × step 顆靈魂（可用任一 Boss 的靈魂支付）
